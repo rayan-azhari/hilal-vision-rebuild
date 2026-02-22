@@ -5,6 +5,7 @@ import { getMoonPhaseInfo, gregorianToHijri, formatTime, HIJRI_MONTHS } from "@/
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { MoonArcVisual, VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const features = [
   {
@@ -64,18 +65,20 @@ function MoonSVG({ phase }: { phase: number }) {
   const cy = 60;
 
   // Illuminated fraction and direction
-  const isWaxing = phase < 0.5;
-  const normalizedPhase = phase <= 0.5 ? phase * 2 : (phase - 0.5) * 2;
-  const k = isWaxing ? normalizedPhase : 1 - normalizedPhase;
-
-  // Ellipse x-radius for terminator
+  const isWaxing = phase <= 0.5;
+  const k = phase * 2;
   const rx = Math.abs(r * Math.cos(Math.PI * k));
-  const sweep = isWaxing ? 1 : 0;
+  const baseSweep = isWaxing ? 1 : 0;
+  let termSweep;
+  if (phase <= 0.25) termSweep = 0;
+  else if (phase <= 0.5) termSweep = 1;
+  else if (phase <= 0.75) termSweep = 0;
+  else termSweep = 1;
 
   const d = `
     M ${cx} ${cy - r}
-    A ${r} ${r} 0 0 1 ${cx} ${cy + r}
-    A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r}
+    A ${r} ${r} 0 0 ${baseSweep} ${cx} ${cy + r}
+    A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r}
     Z
   `;
 
@@ -143,19 +146,13 @@ export default function Home() {
             </div>
 
             <h1
-              className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
-              style={{
-                fontFamily: "Cinzel, serif",
-                background: "linear-gradient(135deg, oklch(0.93 0.01 80) 0%, var(--gold) 50%, oklch(0.93 0.01 80) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
+              className="text-5xl md:text-7xl font-light tracking-tight mb-6 leading-tight"
+              style={{ color: "var(--foreground)" }}
             >
               Hilal<br />Vision
             </h1>
 
-            <p className="text-lg md:text-xl mb-8 max-w-xl leading-relaxed" style={{ color: "oklch(0.70 0.01 80)" }}>
+            <p className="text-lg md:text-xl mb-8 max-w-xl leading-relaxed font-light mt-4" style={{ color: "var(--muted-foreground)" }}>
               A precision astronomical platform for predicting and visualising Islamic crescent moon sightings worldwide — powered by Yallop & Odeh criteria.
             </p>
 
@@ -265,7 +262,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col text-center md:text-left">
-                <h3 className="text-2xl font-light mb-1 text-white">{moonInfo.phaseName}</h3>
+                <h3 className="text-2xl font-light mb-1">{moonInfo.phaseName}</h3>
                 <p className="text-sm max-w-sm" style={{ color: "var(--muted-foreground)" }}>
                   The moon is currently {moonInfo.illumination}% illuminated and {moonInfo.age.toFixed(1)} days old.
                 </p>
@@ -282,6 +279,36 @@ export default function Home() {
               primaryValue="C"
               statusLabel="Optical Aid Required (Demo)"
               className="animate-breezy-enter"
+              expandableContent={
+                <div className="flex flex-col gap-6 p-2">
+                  <h3 className="text-2xl font-light">The Yallop Criterion (q-value)</h3>
+                  <p className="text-sm" style={{ color: "var(--muted-foreground)", lineHeight: "1.6" }}>
+                    The `q-value` is a scientific measure designed by astronomer B. D. Yallop in 1997. It evaluates the likelihood of seeing the thin lunar crescent by measuring the <strong style={{ color: "var(--foreground)" }}>Arc of Vision (ARCV)</strong> and the <strong style={{ color: "var(--foreground)" }}>Crescent Width (W)</strong> at the exact moment of sunset. The equation is computed computationally based on observer coordinates and local topology.
+                  </p>
+
+                  <div className="relative h-64 w-full mt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={[
+                        { name: "Sunset", q: -0.30 },
+                        { name: "Maghrib", q: -0.16 },
+                        { name: "Dusk", q: 0.10 },
+                        { name: "Midnight", q: 0.40 },
+                        { name: "Fajr", q: 0.15 },
+                        { name: "Sunrise", q: -0.20 }
+                      ]}>
+                        <XAxis dataKey="name" fontSize={11} stroke="var(--muted-foreground)" />
+                        <YAxis hide domain={[-0.4, 0.5]} />
+                        <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px" }} />
+                        <Area type="monotone" dataKey="q" stroke="var(--foreground)" fillOpacity={0.1} fill="var(--foreground)" strokeWidth={2} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                    <div className="w-3 h-3 rounded-full" style={{ background: "var(--zone-c)" }} />
+                    Zone C: May need optical aid (q &ge; -0.160)
+                  </div>
+                </div>
+              }
             />
             <BreezyDetailCard
               title="Illumination"
@@ -292,7 +319,29 @@ export default function Home() {
               primaryUnit="%"
               statusLabel={moonInfo.phaseName}
               className="animate-breezy-enter"
-              accentColour="var(--zone-a)"
+              accentColour="var(--foreground)"
+              expandableContent={
+                <div className="flex flex-col gap-6 p-2">
+                  <h3 className="text-2xl font-light">Lunar Illumination Cycle</h3>
+                  <p className="text-sm" style={{ color: "var(--muted-foreground)", lineHeight: "1.6" }}>
+                    The moon's phase and illumination percentage are entirely derived from the <strong style={{ color: "var(--foreground)" }}>Phase Angle</strong> between the Sun, the Earth, and the Moon. As the moon progresses through its roughly 29.53-day synodic cycle, the fraction of the sunlit half visible from Earth oscillates.
+                  </p>
+
+                  <div className="relative h-64 w-full mt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={Array.from({ length: 30 }, (_, i) => ({
+                        day: i,
+                        illum: Math.round((Math.sin(Math.PI * (i / 15 - 0.5)) + 1) * 50)
+                      }))}>
+                        <XAxis dataKey="day" fontSize={11} stroke="var(--muted-foreground)" />
+                        <YAxis hide domain={[0, 100]} />
+                        <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px" }} />
+                        <Area type="natural" dataKey="illum" stroke="var(--foreground)" fillOpacity={0.1} fill="var(--foreground)" strokeWidth={2} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              }
             />
           </div>
         </div>
@@ -301,7 +350,7 @@ export default function Home() {
       {/* Feature Cards Navigation */}
       <section className="py-12 border-t mt-4" style={{ borderColor: 'var(--border)' }}>
         <div className="container">
-          <h3 className="text-xl font-medium mb-6" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
+          <h3 className="text-xl font-medium mb-6" style={{ color: "var(--foreground)" }}>
             Explore Features
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -337,7 +386,7 @@ export default function Home() {
       <section className="py-16 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 8%, transparent)" }}>
         <div className="container">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
+            <h2 className="text-2xl font-medium mb-2" style={{ color: "var(--foreground)" }}>
               Visibility Criteria
             </h2>
             <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>

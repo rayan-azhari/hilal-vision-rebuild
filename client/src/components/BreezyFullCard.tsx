@@ -15,12 +15,15 @@ interface BreezyFullCardProps {
     onTabChange?: (value: string) => void;
     children: ReactNode;
     className?: string;
+    expandableContent?: ReactNode;
 }
 
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+
 export function BreezyFullCard({
-    icon, title, titleAr, tabs, activeTab, onTabChange, children, className,
+    icon, title, titleAr, tabs, activeTab, onTabChange, children, className, expandableContent,
 }: BreezyFullCardProps) {
-    return (
+    const cardContent = (
         <div className={`breezy-card-full ${className ?? ""}`}>
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
@@ -64,4 +67,22 @@ export function BreezyFullCard({
             </div>
         </div>
     );
+
+    if (expandableContent) {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <div className="cursor-pointer group">{cardContent}</div>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{
+                    background: "var(--card)",
+                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                }}>
+                    {expandableContent}
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    return cardContent;
 }

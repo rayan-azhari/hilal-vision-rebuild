@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home } from "lucide-react";
+import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SightingReportForm } from "./SightingReportForm";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -16,6 +19,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,14 +107,49 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               })}
             </nav>
 
-            {/* Mobile menu toggle */}
-            <button
-              className="lg:hidden p-2 rounded-lg"
-              style={{ color: "var(--gold)" }}
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {/* Mobile menu and Theme toggle */}
+            <div className="flex items-center gap-2">
+              <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+                <DialogTrigger asChild>
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                    style={{
+                      background: "color-mix(in oklch, var(--gold) 15%, transparent)",
+                      color: "var(--gold)",
+                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)"
+                    }}
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span className="hidden sm:inline">Report Sighting</span>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Submit Crescent Sighting</DialogTitle>
+                    <DialogDescription>
+                      Share your live observation. Environmental conditions will be fetched automatically.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <SightingReportForm onSuccess={() => setReportOpen(false)} />
+                </DialogContent>
+              </Dialog>
+
+              <button
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: "var(--foreground)" }}
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button
+                className="lg:hidden p-2 rounded-lg"
+                style={{ color: "var(--gold)" }}
+                onClick={() => setMobileOpen(!mobileOpen)}
+              >
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
 

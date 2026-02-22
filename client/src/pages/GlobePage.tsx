@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import { Globe2, Play, Pause, ChevronDown } from "lucide-react";
 import {
   computeSunMoonAtSunset,
@@ -8,6 +9,7 @@ import {
   VISIBILITY_LABELS,
   type VisibilityZone,
 } from "@/lib/astronomy";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // Visibility zone colours as [r, g, b]
 const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
@@ -34,8 +36,9 @@ const ZONE_HEX: Record<VisibilityZone, string> = {
  * Returns a data URL.
  */
 function buildVisibilityTexture(date: Date): string {
-  const W = 512;
-  const H = 256;
+  // Lower resolution for substantially faster rendering
+  const W = 128;
+  const H = 64;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -75,6 +78,7 @@ export default function GlobePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showVisibility, setShowVisibility] = useState(true);
   const hijri = gregorianToHijri(date);
+  const { theme } = useTheme();
 
   // Initialize globe once
   useEffect(() => {
@@ -89,7 +93,7 @@ export default function GlobePage() {
         .width(globeRef.current.clientWidth)
         .height(globeRef.current.clientHeight)
         .backgroundColor("rgba(0,0,0,0)")
-        .globeImageUrl("https://unpkg.com/three-globe/example/img/earth-dark.jpg")
+        .globeImageUrl(theme === "light" ? "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg" : "https://unpkg.com/three-globe/example/img/earth-dark.jpg")
         .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
         .atmosphereColor("#c8a040")
         .atmosphereAltitude(0.12)
@@ -124,15 +128,22 @@ export default function GlobePage() {
     const id = setTimeout(() => {
       if (showVisibility) {
         const textureUrl = buildVisibilityTexture(date);
+
+        // Render texture on a slightly larger sphere
+        const r = globe.getGlobeRadius();
+        const geometry = new THREE.SphereGeometry(r * 1.002, 72, 72);
+        const material = new THREE.MeshBasicMaterial({
+          map: new THREE.TextureLoader().load(textureUrl),
+          transparent: true,
+          opacity: 1,
+          depthWrite: false, // Prevents z-fighting
+        });
+        const overlayMesh = new THREE.Mesh(geometry, material);
+
         globe.customLayerData([{}])
-          .customThreeObject(() => {
-            // We use the globe's built-in overlayImageUrl instead
-            return null;
-          });
-        // Use overlayImageUrl — the cleanest globe.gl API for image overlays
-        globe.overlayImageUrl(textureUrl);
+          .customThreeObject(() => overlayMesh);
       } else {
-        globe.overlayImageUrl("");
+        globe.customLayerData([]);
       }
 
       // City label
@@ -159,6 +170,17 @@ export default function GlobePage() {
     globe.controls().autoRotate = isAutoRotate;
     globe.controls().autoRotateSpeed = 0.3;
   }, [isAutoRotate]);
+
+  // Sync theme changes to globe
+  useEffect(() => {
+    if (globeInstanceRef.current) {
+      globeInstanceRef.current.globeImageUrl(
+        theme === "light"
+          ? "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+          : "https://unpkg.com/three-globe/example/img/earth-dark.jpg"
+      );
+    }
+  }, [theme]);
 
   // Handle resize
   useEffect(() => {

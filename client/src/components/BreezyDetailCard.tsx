@@ -12,14 +12,18 @@ interface BreezyDetailCardProps {
     detailsHref?: string;
     className?: string;
     accentColour?: string;
+    expandableContent?: ReactNode;
 }
+
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export function BreezyDetailCard({
     icon, title, titleAr, decorativeVisual,
     primaryValue, primaryUnit, statusLabel, statusColour,
     detailsHref, className, accentColour = "var(--gold)",
+    expandableContent,
 }: BreezyDetailCardProps) {
-    return (
+    const cardContent = (
         <div
             className={`breezy-card flex flex-col gap-3 ${className ?? ""}`}
             onMouseEnter={e => {
@@ -83,4 +87,22 @@ export function BreezyDetailCard({
             </div>
         </div>
     );
+
+    if (expandableContent) {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <div className="cursor-pointer group">{cardContent}</div>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" style={{
+                    background: "var(--card)",
+                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                }}>
+                    {expandableContent}
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    return cardContent;
 }

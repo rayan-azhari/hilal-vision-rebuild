@@ -8,7 +8,7 @@ import {
   formatTime,
   type SunMoonData,
 } from "@/lib/astronomy";
-import SunCalc from "suncalc";
+import * as SunCalc from "suncalc";
 
 function drawHorizon(
   canvas: HTMLCanvasElement,
@@ -171,15 +171,20 @@ function drawHorizon(
     const illum = SunCalc.getMoonIllumination(date);
     const phase = illum.phase;
     const isWaxing = phase <= 0.5;
-    const k = isWaxing ? phase * 2 : 1 - (phase - 0.5) * 2;
+    const k = phase * 2;
     const rx = Math.abs(mr * Math.cos(Math.PI * k));
-    const sweep = isWaxing ? 1 : 0;
+    const baseSweep = isWaxing ? 1 : 0;
+    let termSweep;
+    if (phase <= 0.25) termSweep = 0;
+    else if (phase <= 0.5) termSweep = 1;
+    else if (phase <= 0.75) termSweep = 0;
+    else termSweep = 1;
 
     ctx.fillStyle = "rgba(220,200,120,0.9)";
     ctx.beginPath();
     ctx.moveTo(moonX, moonY - mr);
     ctx.arc(moonX, moonY, mr, -Math.PI / 2, Math.PI / 2, false);
-    ctx.ellipse(moonX, moonY, rx < 0.5 ? 0.5 : rx, mr, 0, Math.PI / 2, -Math.PI / 2, sweep === 0);
+    ctx.ellipse(moonX, moonY, rx < 0.5 ? 0.5 : rx, mr, 0, Math.PI / 2, -Math.PI / 2, termSweep === 0);
     ctx.closePath();
     ctx.fill();
 

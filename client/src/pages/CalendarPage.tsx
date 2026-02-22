@@ -83,14 +83,20 @@ export default function CalendarPage() {
   function MiniMoon({ phase }: { phase: number }) {
     const r = 5; const cx = 6; const cy = 6;
     const isWaxing = phase <= 0.5;
-    const k = isWaxing ? phase * 2 : 1 - (phase - 0.5) * 2;
+    const k = phase * 2;
     const rx = Math.abs(r * Math.cos(Math.PI * k));
-    const sweep = isWaxing ? 1 : 0;
-    const d = `M ${cx} ${cy - r} A ${r} ${r} 0 0 1 ${cx} ${cy + r} A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r} Z`;
+    const baseSweep = isWaxing ? 1 : 0;
+    let termSweep;
+    if (phase <= 0.25) termSweep = 0;
+    else if (phase <= 0.5) termSweep = 1;
+    else if (phase <= 0.75) termSweep = 0;
+    else termSweep = 1;
+
+    const litPath = `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${baseSweep} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r} Z`;
     return (
       <svg viewBox="0 0 12 12" width={10} height={10} className="inline-block">
         <circle cx={cx} cy={cy} r={r} fill="oklch(0.14 0.022 265)" />
-        <path d={d} fill="oklch(0.78 0.15 75)" opacity="0.8" />
+        <path d={litPath} fill="oklch(0.78 0.15 75)" opacity="0.8" />
       </svg>
     );
   }

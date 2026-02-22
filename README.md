@@ -22,8 +22,9 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 
 ## Recent Architecture Upgrades
 
-1. **Breezy UI Conversion (Phase 1)**: Complete UI overhaul using modern design tokens, interactive `<BreezyDetailCard />` components, SVG visuals, and staggered `@keyframes` entrance animations.
-2. **Telemetry Pipeline (Phase 2)**: Database infrastructure built via Drizzle ORM (`observation_reports`) and tRPC routers to aggregate ground-truth visual sightings, meteorological conditions (cloud fraction, PM2.5, pressure), and eventual ML models. Proxies are set up for Topographical (DEM) and Atmospheric (AOD) data ingestion.
+1. **Classy Scientific Redesign (Phase 3)**: Complete UI overhaul replacing the cinematic "Breezy" tokens with a purely academic, high-contrast, black/gold/white monochromatic theme using `Inter`. Implemented deep-dive interactive `recharts` data plots inside Shadcn `<Dialog>` expandable cards.
+2. **Telemetry Pipeline & Open-Meteo (Phase 2)**: Database infrastructure built via Drizzle ORM (`observation_reports`) and tRPC routers to aggregate ground-truth visual sightings. Open-Meteo API integration planned for retrieving real-time Digital Elevation Models (DEM) and Aerosol Optical Depth (AOD) data to validate public moon sighting submissions.
+3. **Optimized Globe.gl Visualization**: Transitioned from generic `overlayImageUrl` to a native `THREE.MeshBasicMaterial` mapping, reducing texture generation resolution for a 16x calculation speedup, and integrated dynamic Light/Dark mode satellite basemaps.
 
 ## Getting Started
 
@@ -77,6 +78,7 @@ Verify the robustness of the astronomical engine and type definitions:
 Comprehensive project documentation detailing the underlying math, the Yallop & Odeh criteria, ML integration plans, and UI specifications can be found within the `docs/` folder:
 
 - `HILAL_VISION_DOCUMENTATION.md`: Core mechanics and algorithms.
+- `USER_GUIDE.md`: Comprehensive walkthrough of application features and how to log telemetry.
 - `Islamic Calendar Astronomical Dashboard.md`: Broad overview of the problem space and validation data (ICOP).
 - `The Hilal Dashboard Revised Architecture.md`: Telemetry, Hub & Spoke model, DEM/AOD architecture.
 - `BREEZY_DESIGN_REPORT.md` & `BREEZY_CONVERSION_GUIDE.md`: Design system principles.

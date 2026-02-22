@@ -7,6 +7,8 @@ import {
   VISIBILITY_LABELS,
   type VisibilityZone,
 } from "@/lib/astronomy";
+import { useTheme } from "@/contexts/ThemeContext";
+import { trpc } from "@/lib/trpc";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
   A: "#4ade80",
@@ -47,6 +49,11 @@ export default function MapPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
+  const pinsGroupRef = useRef<any>(null);
+  const tileLayerRef = useRef<any>(null);
+
+  const { theme } = useTheme();
+  const { data: observations } = trpc.telemetry.getObservations.useQuery();
 
   const [date, setDate] = useState(() => new Date());
   const [hourOffset, setHourOffset] = useState(0);
@@ -84,9 +91,11 @@ export default function MapPage() {
         attributionControl: false,
       });
 
-      // Dark tile layer
-      L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      // Dark or Light tile layer
+      tileLayerRef.current = L.tileLayer(
+        theme === "light"
+          ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         { subdomains: "abcd", maxZoom: 20 }
       ).addTo(map);
 
@@ -96,6 +105,7 @@ export default function MapPage() {
         .addTo(map);
 
       layerGroupRef.current = L.layerGroup().addTo(map);
+      pinsGroupRef.current = L.layerGroup().addTo(map);
       leafletRef.current = map;
     });
 
@@ -107,6 +117,17 @@ export default function MapPage() {
       }
     };
   }, []);
+
+  // Update tile layer when theme changes
+  useEffect(() => {
+    if (tileLayerRef.current) {
+      tileLayerRef.current.setUrl(
+        theme === "light"
+          ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+      );
+    }
+  }, [theme]);
 
   // Draw visibility grid
   const drawGrid = useCallback(async () => {
@@ -143,6 +164,54 @@ export default function MapPage() {
     const timeout = setTimeout(drawGrid, 200);
     return () => clearTimeout(timeout);
   }, [drawGrid]);
+
+  // Draw observation pins
+  useEffect(() => {
+    if (!leafletRef.current || !pinsGroupRef.current || !observations) return;
+    import("leaflet").then((L) => {
+      pinsGroupRef.current.clearLayers();
+
+      observations.forEach(obs => {
+        let color = "#9ca3af"; // grey for not_seen
+        if (obs.visualSuccess === "naked_eye") color = "#4ade80"; // green
+        else if (obs.visualSuccess === "optical_aid") color = "#60a5fa"; // blue
+
+        const markerHtml = `
+          <div style="
+            width: 12px; height: 12px; 
+            background: ${color}; 
+            border: 2px solid ${theme === 'light' ? '#ffffff' : '#000000'};
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+          "></div>
+        `;
+
+        const icon = L.divIcon({
+          html: markerHtml,
+          className: "",
+          iconSize: [12, 12],
+          iconAnchor: [6, 6]
+        });
+
+        const popup = `
+          <div class="text-xs space-y-1">
+            <div class="font-bold flex items-center gap-1.5 mb-1" style="color: ${color}">
+              <div class="w-2 h-2 rounded-full" style="background: ${color}"></div>
+              ${obs.visualSuccess.replace("_", " ").toUpperCase()}
+            </div>
+            <div class="text-[10px] opacity-70">${new Date(obs.observationTime).toLocaleString()}</div>
+            ${obs.cloudFraction ? `<div>Clouds: ${obs.cloudFraction}%</div>` : ''}
+            ${obs.pm25 ? `<div>AOD/PM2.5: ${obs.pm25}</div>` : ''}
+            ${obs.notes ? `<div class="italic border-t border-white/10 pt-1 mt-1">${obs.notes}</div>` : ''}
+          </div>
+        `;
+
+        L.marker([parseFloat(obs.lat), parseFloat(obs.lng)], { icon })
+          .bindPopup(popup)
+          .addTo(pinsGroupRef.current);
+      });
+    });
+  }, [observations, theme]);
 
   const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
@@ -341,6 +410,28 @@ export default function MapPage() {
               {effectiveDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} local
             </div>
           </div>
+
+          {/* Sighting Legend */}
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
+            <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
+              Crowdsourced Sightings
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#4ade80" }} />
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Naked Eye</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#60a5fa" }} />
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Optical Aid</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#9ca3af" }} />
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Attempted, Not Seen</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Moon, Sun, ArrowRight, Clock, Eye } from "lucide-react";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
-import SunCalc from "suncalc";
+import * as SunCalc from "suncalc";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
+import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
 
 function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number }) {
   const r = size / 2 - 4;
@@ -12,15 +13,20 @@ function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number 
   const cy = size / 2;
 
   const isWaxing = phase <= 0.5;
-  const normalizedPhase = phase <= 0.5 ? phase * 2 : (phase - 0.5) * 2;
-  const k = isWaxing ? normalizedPhase : 1 - normalizedPhase;
+  const k = phase * 2;
   const rx = Math.abs(r * Math.cos(Math.PI * k));
-  const sweep = isWaxing ? 1 : 0;
+  const baseSweep = isWaxing ? 1 : 0;
+
+  let termSweep;
+  if (phase <= 0.25) termSweep = 0;
+  else if (phase <= 0.5) termSweep = 1;
+  else if (phase <= 0.75) termSweep = 0;
+  else termSweep = 1;
 
   const litPath = `
     M ${cx} ${cy - r}
-    A ${r} ${r} 0 0 1 ${cx} ${cy + r}
-    A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r}
+    A ${r} ${r} 0 0 ${baseSweep} ${cx} ${cy + r}
+    A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r}
     Z
   `;
 
@@ -103,10 +109,15 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
         const cx = 14;
         const cy = 14;
         const isWaxing = phase <= 0.5;
-        const k = isWaxing ? phase * 2 : 1 - (phase - 0.5) * 2;
+        const k = phase * 2;
         const rx = Math.abs(r * Math.cos(Math.PI * k));
-        const sweep = isWaxing ? 1 : 0;
-        const litPath = `M ${cx} ${cy - r} A ${r} ${r} 0 0 1 ${cx} ${cy + r} A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r} Z`;
+        const baseSweep = isWaxing ? 1 : 0;
+        let termSweep;
+        if (phase <= 0.25) termSweep = 0;
+        else if (phase <= 0.5) termSweep = 1;
+        else if (phase <= 0.75) termSweep = 0;
+        else termSweep = 1;
+        const litPath = `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${baseSweep} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r} Z`;
 
         return (
           <div
@@ -324,6 +335,17 @@ export default function MoonPage() {
                     <div className="text-sm font-mono font-semibold" style={{ color: "var(--foreground)" }}>{value}</div>
                   </div>
                 ))}
+              </div>
+            </BreezyFullCard>
+
+            {/* Sun & Moon Altitude Chart */}
+            <BreezyFullCard
+              title="Sun & Moon Altitude Tracker"
+              icon={<Clock className="w-4 h-4" />}
+              className="col-span-1 sm:col-span-2 md:col-span-3 animate-breezy-enter"
+            >
+              <div className="p-2 mt-4">
+                <SunMoonAltitudeChart date={date} location={location} />
               </div>
             </BreezyFullCard>
           </div>
