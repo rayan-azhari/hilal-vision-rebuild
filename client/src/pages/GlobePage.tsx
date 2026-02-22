@@ -52,7 +52,7 @@ function buildVisibilityTexture(date: Date): string {
       const night = !isDaylight(lat, lng, date);
       const alpha = result.visibility === "F" ? 40 : night ? 100 : 180;
       const idx = (py * W + px) * 4;
-      data[idx]     = r;
+      data[idx] = r;
       data[idx + 1] = g;
       data[idx + 2] = b;
       data[idx + 3] = alpha;
@@ -261,7 +261,7 @@ export default function GlobePage() {
         >
           <div className="p-5 space-y-5">
             {/* Date */}
-            <div>
+            <div className="breezy-card p-4 animate-breezy-enter">
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>
                 Date
               </label>
@@ -280,7 +280,7 @@ export default function GlobePage() {
             </div>
 
             {/* City selector */}
-            <div>
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>
                 Location
               </label>
@@ -315,13 +315,7 @@ export default function GlobePage() {
             </div>
 
             {/* Moon data */}
-            <div
-              className="rounded-xl p-4 space-y-3"
-              style={{
-                background: "var(--space-light)",
-                border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)",
-              }}
-            >
+            <div className="breezy-card space-y-3 p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Visibility</span>
                 <span
@@ -337,15 +331,15 @@ export default function GlobePage() {
               </div>
 
               {[
-                { label: "Moon Altitude",  value: `${moonData.moonAlt.toFixed(2)}°` },
-                { label: "Moon Azimuth",   value: `${moonData.moonAz.toFixed(1)}°` },
-                { label: "Elongation",     value: `${moonData.elongation.toFixed(2)}°` },
-                { label: "Arc of Vision",  value: `${moonData.arcv.toFixed(2)}°` },
+                { label: "Moon Altitude", value: `${moonData.moonAlt.toFixed(2)}°` },
+                { label: "Moon Azimuth", value: `${moonData.moonAz.toFixed(1)}°` },
+                { label: "Elongation", value: `${moonData.elongation.toFixed(2)}°` },
+                { label: "Arc of Vision", value: `${moonData.arcv.toFixed(2)}°` },
                 { label: "Crescent Width", value: `${moonData.crescent.w.toFixed(3)}'` },
-                { label: "Yallop q",       value: moonData.qValue.toFixed(4) },
-                { label: "Illumination",   value: `${(moonData.illumination * 100).toFixed(1)}%` },
-                { label: "Sunset",         value: moonData.sunset ? moonData.sunset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—" },
-                { label: "Moonset",        value: moonData.moonset ? moonData.moonset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—" },
+                { label: "Yallop q", value: moonData.qValue.toFixed(4) },
+                { label: "Illumination", value: `${(moonData.illumination * 100).toFixed(1)}%` },
+                { label: "Sunset", value: moonData.sunset ? moonData.sunset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—" },
+                { label: "Moonset", value: moonData.moonset ? moonData.moonset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between items-center">
                   <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{label}</span>
@@ -355,7 +349,7 @@ export default function GlobePage() {
             </div>
 
             {/* Legend */}
-            <div>
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
               <div className="text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Legend</div>
               <div className="space-y-1.5">
                 {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (

@@ -2,6 +2,9 @@ import { Link } from "wouter";
 import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getMoonPhaseInfo, gregorianToHijri, formatTime, HIJRI_MONTHS } from "@/lib/astronomy";
+import { BreezyDetailCard } from "@/components/BreezyDetailCard";
+import { BreezyFullCard } from "@/components/BreezyFullCard";
+import { MoonArcVisual, VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
 
 const features = [
   {
@@ -196,103 +199,133 @@ export default function Home() {
       </section>
 
       {/* Live Status Bar */}
-      <section className="py-6 border-y" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)", background: "var(--space-mid)" }}>
+      <section className="py-6 relative z-10 -mt-8">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Current time */}
-            <div className="text-center">
+            <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.1s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>UTC Time</div>
               <div className="text-lg font-mono font-semibold" style={{ color: "var(--gold)" }}>
                 {time.toUTCString().slice(17, 25)}
               </div>
             </div>
             {/* Moon phase */}
-            <div className="text-center">
+            <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.2s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Phase</div>
               <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                 {moonInfo.phaseName}
               </div>
-              <div className="text-xs" style={{ color: "var(--gold-dim)" }}>{moonInfo.illumination}% illuminated</div>
+              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>{moonInfo.illumination}% illuminated</div>
             </div>
             {/* Hijri date */}
-            <div className="text-center">
+            <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.3s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Hijri Date</div>
               <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
-                {hijri.day} {hijri.monthName} {hijri.year} AH
+                {hijri.day} {hijri.monthName}
               </div>
-              <div className="text-xs font-arabic" style={{ color: "var(--gold-dim)" }}>
-                {hijri.day} {hijri.monthNameArabic}
+              <div className="text-[10px] font-arabic" style={{ color: "var(--gold-dim)" }}>
+                {hijri.day} {hijri.monthNameArabic} {hijri.year} AH
               </div>
             </div>
             {/* Moon age */}
-            <div className="text-center">
+            <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.4s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Lunar Age</div>
               <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                 {moonInfo.age.toFixed(1)} days
               </div>
-              <div className="text-xs" style={{ color: "var(--gold-dim)" }}>
-                Next new moon: {formatTime(moonInfo.nextNewMoon)}
+              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>
+                New: {formatTime(moonInfo.nextNewMoon)}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature Cards */}
-      <section className="py-20">
-        <div className="container">
-          <div className="text-center mb-14">
-            <div className="text-xs tracking-widest mb-3 font-arabic" style={{ color: "var(--gold-dim)" }}>
-              الميزات
+      {/* Tonight's Sky & Details Grid */}
+      <section className="py-8">
+        <div className="container flex flex-col gap-5">
+          <BreezyFullCard
+            title="Tonight's Sky (Equator)"
+            titleAr="سماء الليلة"
+            icon={<Star />}
+            className="animate-breezy-enter"
+            tabs={[
+              { value: 'now', label: 'Now', labelAr: 'الآن' },
+              { value: 'forecast', label: 'Forecast', labelAr: 'توقعات' }
+            ]}
+            activeTab="now"
+          >
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12 py-6">
+              <div className="w-full max-w-[200px]">
+                <MoonArcVisual
+                  riseTime={null}
+                  setTime={null}
+                  currentTime={time}
+                  altitude={30}
+                />
+              </div>
+              <div className="flex flex-col text-center md:text-left">
+                <h3 className="text-2xl font-light mb-1 text-white">{moonInfo.phaseName}</h3>
+                <p className="text-sm max-w-sm" style={{ color: "var(--muted-foreground)" }}>
+                  The moon is currently {moonInfo.illumination}% illuminated and {moonInfo.age.toFixed(1)} days old.
+                </p>
+              </div>
             </div>
-            <h2
-              className="text-3xl md:text-4xl font-bold mb-4"
-              style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}
-            >
-              Features
-            </h2>
-            <p className="text-sm max-w-xl mx-auto" style={{ color: "var(--muted-foreground)" }}>
-              A complete toolkit for Islamic crescent moon visibility — from global heatmaps to local horizon simulations.
-            </p>
-          </div>
+          </BreezyFullCard>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map(({ href, icon: Icon, title, titleAr, desc, color }) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <BreezyDetailCard
+              title="Visibility Zone"
+              titleAr="منطقة الرؤية"
+              icon={<Map />}
+              decorativeVisual={<VisibilityDotScale zone="C" />}
+              primaryValue="C"
+              statusLabel="Optical Aid Required (Demo)"
+              className="animate-breezy-enter"
+            />
+            <BreezyDetailCard
+              title="Illumination"
+              titleAr="الإضاءة"
+              icon={<Moon />}
+              decorativeVisual={<IlluminationArc illumination={moonInfo.illumination} />}
+              primaryValue={moonInfo.illumination}
+              primaryUnit="%"
+              statusLabel={moonInfo.phaseName}
+              className="animate-breezy-enter"
+              accentColour="var(--zone-a)"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Cards Navigation */}
+      <section className="py-12 border-t mt-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="container">
+          <h3 className="text-xl font-medium mb-6" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
+            Explore Features
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map(({ href, icon: Icon, title, titleAr, desc, color }, i) => (
               <Link key={href} href={href}>
                 <div
-                  className="group p-6 rounded-2xl h-full transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-                  style={{
-                    background: "var(--space-mid)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = `color-mix(in oklch, ${color} 30%, transparent)`;
-                    (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px color-mix(in oklch, ${color} 10%, transparent)`;
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "color-mix(in oklch, var(--gold) 10%, transparent)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                  }}
+                  className="breezy-card group h-full flex flex-col items-start cursor-pointer animate-breezy-enter hover:-translate-y-1 transition-transform"
+                  style={{ animationDelay: `${0.1 * i}s` }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: `color-mix(in oklch, ${color} 15%, transparent)` }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color }} />
+                  <div className="flex items-center gap-3 w-full mb-2">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: `color-mix(in oklch, ${color} 15%, transparent)` }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color }} />
+                    </div>
+                    <div className="flex-1 flex items-baseline justify-between">
+                      <h4 className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
+                        {title}
+                      </h4>
+                      <span className="text-[10px] font-arabic" style={{ color: "var(--gold-dim)" }}>{titleAr}</span>
+                    </div>
                   </div>
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <h3 className="text-base font-semibold" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
-                      {title}
-                    </h3>
-                    <span className="text-xs font-arabic" style={{ color: "var(--gold-dim)" }}>{titleAr}</span>
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{desc}</p>
-                  <div
-                    className="flex items-center gap-1 mt-4 text-xs font-medium transition-all duration-200 group-hover:gap-2"
-                    style={{ color }}
-                  >
-                    Explore <ArrowRight className="w-3 h-3" />
-                  </div>
+                  <p className="text-[11px] leading-relaxed flex-1 mt-1" style={{ color: "var(--muted-foreground)" }}>{desc}</p>
                 </div>
               </Link>
             ))}
@@ -314,10 +347,10 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
             {[
               { zone: "A", label: "Easily Visible", color: "#4ade80", q: "q ≥ +0.216" },
-              { zone: "B", label: "Visible",         color: "#facc15", q: "q ≥ −0.014" },
-              { zone: "C", label: "Optical Aid",     color: "#fb923c", q: "q ≥ −0.160" },
-              { zone: "D", label: "Telescope Only",  color: "#f87171", q: "q ≥ −0.232" },
-              { zone: "E", label: "Not Visible",     color: "#6b7280", q: "q < −0.232" },
+              { zone: "B", label: "Visible", color: "#facc15", q: "q ≥ −0.014" },
+              { zone: "C", label: "Optical Aid", color: "#fb923c", q: "q ≥ −0.160" },
+              { zone: "D", label: "Telescope Only", color: "#f87171", q: "q ≥ −0.232" },
+              { zone: "E", label: "Not Visible", color: "#6b7280", q: "q < −0.232" },
             ].map(({ zone, label, color, q }) => (
               <div
                 key={zone}

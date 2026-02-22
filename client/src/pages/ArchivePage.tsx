@@ -138,16 +138,10 @@ export default function ArchivePage() {
           {/* Year selector + month grid */}
           <div className="lg:col-span-2 space-y-6">
             {/* Year navigation */}
-            <div
-              className="rounded-2xl p-5"
-              style={{
-                background: "var(--space-mid)",
-                border: "1px solid color-mix(in oklch, var(--gold) 12%, transparent)",
-              }}
-            >
+            <div className="breezy-card p-5 animate-breezy-enter">
               <div className="flex items-center justify-between mb-4">
                 <button
-                  onClick={() => setSelectedYear(y => Math.max(1438, y - 1))}
+                  onClick={() => setSelectedYear((y: number) => Math.max(1438, y - 1))}
                   disabled={selectedYear <= 1438}
                   className="p-2 rounded-lg disabled:opacity-30 transition-colors hover:bg-white/5"
                 >
@@ -165,7 +159,7 @@ export default function ArchivePage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => setSelectedYear(y => Math.min(1465, y + 1))}
+                  onClick={() => setSelectedYear((y: number) => Math.min(1465, y + 1))}
                   disabled={selectedYear >= 1465}
                   className="p-2 rounded-lg disabled:opacity-30 transition-colors hover:bg-white/5"
                 >
@@ -254,11 +248,8 @@ export default function ArchivePage() {
           <div className="space-y-4">
             {!selectedMonth && (
               <div
-                className="rounded-2xl p-6 text-center"
-                style={{
-                  background: "var(--space-mid)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-                }}
+                className="breezy-card p-6 text-center animate-breezy-enter"
+                style={{ animationDelay: "50ms" }}
               >
                 <div className="text-3xl mb-3">☽</div>
                 <div className="text-sm font-medium mb-2" style={{ color: "var(--foreground)" }}>
@@ -272,12 +263,8 @@ export default function ArchivePage() {
 
             {isLoadingDetail && (
               <div
-                className="rounded-2xl p-6 flex items-center justify-center"
-                style={{
-                  background: "var(--space-mid)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-                  minHeight: "200px",
-                }}
+                className="breezy-card p-6 flex items-center justify-center animate-breezy-enter"
+                style={{ minHeight: "200px", animationDelay: "100ms" }}
               >
                 <div className="flex flex-col items-center gap-3">
                   <div
@@ -292,11 +279,8 @@ export default function ArchivePage() {
             {monthDetail && !isLoadingDetail && (
               <>
                 <div
-                  className="rounded-2xl p-5"
-                  style={{
-                    background: "var(--space-mid)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)",
-                  }}
+                  className="breezy-card p-5 animate-breezy-enter"
+                  style={{ animationDelay: "50ms" }}
                 >
                   <div className="text-xs mb-2" style={{ color: "var(--muted-foreground)" }}>Month Details</div>
                   <div
@@ -332,11 +316,8 @@ export default function ArchivePage() {
 
                 {/* City results */}
                 <div
-                  className="rounded-2xl p-5"
-                  style={{
-                    background: "var(--space-mid)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-                  }}
+                  className="breezy-card p-5 animate-breezy-enter"
+                  style={{ animationDelay: "100ms" }}
                 >
                   <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
                     City Visibility
@@ -371,11 +352,8 @@ export default function ArchivePage() {
 
                 {/* Legend */}
                 <div
-                  className="rounded-2xl p-4"
-                  style={{
-                    background: "var(--space-mid)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 8%, transparent)",
-                  }}
+                  className="breezy-card p-4 animate-breezy-enter"
+                  style={{ animationDelay: "150ms" }}
                 >
                   <div className="flex items-center gap-1.5 mb-2">
                     <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />

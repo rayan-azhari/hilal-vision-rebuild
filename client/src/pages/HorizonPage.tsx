@@ -340,12 +340,12 @@ export default function HorizonPage() {
         >
           <div className="p-5 space-y-5">
             {/* Date */}
-            <div>
+            <div className="breezy-card p-4 animate-breezy-enter">
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Date</label>
               <input
                 type="date"
                 value={dateStr}
-                onChange={e => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const [y, m, d] = e.target.value.split("-").map(Number);
                   setDate(new Date(y, m - 1, d, 18, 0, 0));
                 }}
@@ -360,13 +360,13 @@ export default function HorizonPage() {
             </div>
 
             {/* Location search */}
-            <div>
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Search Location</label>
               <input
                 type="text"
                 placeholder="Search city…"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg text-sm mb-2"
                 style={{
                   background: "var(--space-light)",
@@ -399,10 +399,10 @@ export default function HorizonPage() {
               )}
 
               {/* City dropdown */}
-              <div className="relative">
+              <div className="relative mt-3">
                 <select
                   value={selectedCity.name}
-                  onChange={e => {
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     const city = MAJOR_CITIES.find(c => c.name === e.target.value);
                     if (city) { setSelectedCity(city); setCustomLat(""); setCustomLng(""); }
                   }}
@@ -424,14 +424,14 @@ export default function HorizonPage() {
             </div>
 
             {/* Custom coordinates */}
-            <div>
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Custom Coordinates</label>
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="number"
                   placeholder="Latitude"
                   value={customLat}
-                  onChange={e => setCustomLat(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomLat(e.target.value)}
                   className="px-3 py-2 rounded-lg text-sm"
                   style={{
                     background: "var(--space-light)",
@@ -443,7 +443,7 @@ export default function HorizonPage() {
                   type="number"
                   placeholder="Longitude"
                   value={customLng}
-                  onChange={e => setCustomLng(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomLng(e.target.value)}
                   className="px-3 py-2 rounded-lg text-sm"
                   style={{
                     background: "var(--space-light)",
@@ -457,25 +457,21 @@ export default function HorizonPage() {
             {/* Data readout */}
             {data && (
               <div
-                className="rounded-xl p-4 space-y-2.5"
-                style={{
-                  background: "var(--space-light)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)",
-                }}
+                className="breezy-card p-4 space-y-2.5 animate-breezy-enter"
+                style={{ animationDelay: "150ms" }}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Visibility</span>
                   <span
                     className="text-xs font-bold px-2 py-0.5 rounded-full"
                     style={{
-                      background: `color-mix(in oklch, ${
-                        data.visibility === "A" ? "#4ade80" :
+                      background: `color-mix(in oklch, ${data.visibility === "A" ? "#4ade80" :
                         data.visibility === "B" ? "#facc15" :
-                        data.visibility === "C" ? "#fb923c" : "#f87171"
-                      } 15%, transparent)`,
+                          data.visibility === "C" ? "#fb923c" : "#f87171"
+                        } 15%, transparent)`,
                       color: data.visibility === "A" ? "#4ade80" :
-                             data.visibility === "B" ? "#facc15" :
-                             data.visibility === "C" ? "#fb923c" : "#f87171",
+                        data.visibility === "B" ? "#facc15" :
+                          data.visibility === "C" ? "#fb923c" : "#f87171",
                     }}
                   >
                     Zone {data.visibility}
@@ -483,16 +479,16 @@ export default function HorizonPage() {
                 </div>
 
                 {[
-                  { label: "Moon Altitude",  value: `${data.moonAlt.toFixed(2)}°` },
-                  { label: "Moon Azimuth",   value: `${data.moonAz.toFixed(1)}°` },
-                  { label: "Sun Altitude",   value: `${data.sunAlt.toFixed(2)}°` },
-                  { label: "Arc of Vision",  value: `${data.arcv.toFixed(2)}°` },
-                  { label: "Elongation",     value: `${data.elongation.toFixed(2)}°` },
+                  { label: "Moon Altitude", value: `${data.moonAlt.toFixed(2)}°` },
+                  { label: "Moon Azimuth", value: `${data.moonAz.toFixed(1)}°` },
+                  { label: "Sun Altitude", value: `${data.sunAlt.toFixed(2)}°` },
+                  { label: "Arc of Vision", value: `${data.arcv.toFixed(2)}°` },
+                  { label: "Elongation", value: `${data.elongation.toFixed(2)}°` },
                   { label: "Crescent Width", value: `${data.crescent.w.toFixed(3)}'` },
-                  { label: "Yallop q",       value: data.qValue.toFixed(4) },
-                  { label: "Sunset",         value: formatTime(data.sunset) },
-                  { label: "Maghrib",        value: formatTime(data.maghrib) },
-                  { label: "Moonset",        value: formatTime(data.moonset) },
+                  { label: "Yallop q", value: data.qValue.toFixed(4) },
+                  { label: "Sunset", value: formatTime(data.sunset) },
+                  { label: "Maghrib", value: formatTime(data.maghrib) },
+                  { label: "Moonset", value: formatTime(data.moonset) },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between">
                     <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{label}</span>

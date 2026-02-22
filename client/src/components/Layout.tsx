@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home } from "lucide-react";
 
@@ -15,6 +15,15 @@ const navItems = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
@@ -22,14 +31,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <header
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          background: "color-mix(in oklch, var(--space) 90%, transparent)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderBottom: "1px solid color-mix(in oklch, var(--gold) 12%, transparent)",
+          background: scrolled ? "oklch(0.05 0.02 265 / 0.96)" : "transparent",
+          backdropFilter: scrolled ? "blur(24px) saturate(1.2)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(24px) saturate(1.2)" : "none",
+          borderBottom: scrolled ? "1px solid color-mix(in oklch, var(--gold) 12%, transparent)" : "1px solid transparent",
+          transition: "all 0.4s ease",
         }}
       >
         <div className="container">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link href="/">
               <div className="flex items-center gap-3 group">
@@ -139,7 +149,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 pt-16">
+      <main className="flex-1 pt-14">
         {children}
       </main>
 

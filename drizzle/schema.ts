@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -25,4 +25,21 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// Telemetry reports for ground-truth observations
+export const observationReports = mysqlTable("observation_reports", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"), // Links to the users table
+  lat: decimal("lat", { precision: 10, scale: 7 }).notNull(),
+  lng: decimal("lng", { precision: 10, scale: 7 }).notNull(),
+  observationTime: timestamp("observationTime").notNull(),
+  temperature: decimal("temperature", { precision: 6, scale: 2 }),
+  pressure: decimal("pressure", { precision: 7, scale: 2 }),
+  cloudFraction: decimal("cloudFraction", { precision: 5, scale: 2 }),
+  pm25: decimal("pm25", { precision: 6, scale: 2 }),
+  visualSuccess: mysqlEnum("visualSuccess", ["naked_eye", "optical_aid", "not_seen"]).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ObservationReport = typeof observationReports.$inferSelect;
+export type InsertObservationReport = typeof observationReports.$inferInsert;

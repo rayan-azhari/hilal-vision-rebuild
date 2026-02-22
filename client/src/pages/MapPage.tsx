@@ -293,11 +293,11 @@ export default function MapPage() {
             background: "var(--space-mid)",
           }}
         >
-          <div>
+          <div className="breezy-card p-4 animate-breezy-enter">
             <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
               Visibility Zones
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
                 <div key={zone} className="flex items-start gap-2.5">
                   <div
@@ -308,7 +308,7 @@ export default function MapPage() {
                     <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
                       Zone {zone} — {VISIBILITY_LABELS[zone].label}
                     </div>
-                    <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                    <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
                       {VISIBILITY_LABELS[zone].desc}
                     </div>
                   </div>
@@ -317,13 +317,7 @@ export default function MapPage() {
             </div>
           </div>
 
-          <div
-            className="p-3 rounded-xl"
-            style={{
-              background: "var(--space-light)",
-              border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-            }}
-          >
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
             <div className="flex items-center gap-1.5 mb-2">
               <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />
               <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>About the Map</span>
@@ -338,13 +332,7 @@ export default function MapPage() {
           </div>
 
           {/* Effective time display */}
-          <div
-            className="p-3 rounded-xl"
-            style={{
-              background: "var(--space-light)",
-              border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-            }}
-          >
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
             <div className="text-xs font-medium mb-1" style={{ color: "var(--muted-foreground)" }}>Showing</div>
             <div className="text-sm font-semibold" style={{ color: "var(--gold)" }}>
               {effectiveDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}

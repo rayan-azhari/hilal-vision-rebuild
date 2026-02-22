@@ -8,16 +8,16 @@ import {
 } from "@/lib/astronomy";
 
 const ISLAMIC_EVENTS: Array<{ month: number; day: number; name: string; nameAr: string; type: "major" | "minor" }> = [
-  { month: 1,  day: 1,  name: "Islamic New Year",    nameAr: "رأس السنة الهجرية", type: "major" },
-  { month: 1,  day: 10, name: "Day of Ashura",        nameAr: "يوم عاشوراء",       type: "major" },
-  { month: 3,  day: 12, name: "Mawlid al-Nabi",       nameAr: "المولد النبوي",      type: "major" },
-  { month: 7,  day: 27, name: "Laylat al-Mi'raj",     nameAr: "ليلة المعراج",       type: "minor" },
-  { month: 8,  day: 15, name: "Laylat al-Bara'ah",    nameAr: "ليلة البراءة",       type: "minor" },
-  { month: 9,  day: 1,  name: "Ramadan Begins",       nameAr: "بداية رمضان",        type: "major" },
-  { month: 9,  day: 27, name: "Laylat al-Qadr",       nameAr: "ليلة القدر",         type: "major" },
-  { month: 10, day: 1,  name: "Eid al-Fitr",          nameAr: "عيد الفطر",          type: "major" },
-  { month: 12, day: 9,  name: "Day of Arafah",        nameAr: "يوم عرفة",           type: "major" },
-  { month: 12, day: 10, name: "Eid al-Adha",          nameAr: "عيد الأضحى",         type: "major" },
+  { month: 1, day: 1, name: "Islamic New Year", nameAr: "رأس السنة الهجرية", type: "major" },
+  { month: 1, day: 10, name: "Day of Ashura", nameAr: "يوم عاشوراء", type: "major" },
+  { month: 3, day: 12, name: "Mawlid al-Nabi", nameAr: "المولد النبوي", type: "major" },
+  { month: 7, day: 27, name: "Laylat al-Mi'raj", nameAr: "ليلة المعراج", type: "minor" },
+  { month: 8, day: 15, name: "Laylat al-Bara'ah", nameAr: "ليلة البراءة", type: "minor" },
+  { month: 9, day: 1, name: "Ramadan Begins", nameAr: "بداية رمضان", type: "major" },
+  { month: 9, day: 27, name: "Laylat al-Qadr", nameAr: "ليلة القدر", type: "major" },
+  { month: 10, day: 1, name: "Eid al-Fitr", nameAr: "عيد الفطر", type: "major" },
+  { month: 12, day: 9, name: "Day of Arafah", nameAr: "يوم عرفة", type: "major" },
+  { month: 12, day: 10, name: "Eid al-Adha", nameAr: "عيد الأضحى", type: "major" },
 ];
 
 function getDaysInHijriMonth(year: number, month: number): number {
@@ -127,13 +127,7 @@ export default function CalendarPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Calendar */}
-          <div
-            className="lg:col-span-2 rounded-2xl overflow-hidden"
-            style={{
-              background: "var(--space-mid)",
-              border: "1px solid color-mix(in oklch, var(--gold) 12%, transparent)",
-            }}
-          >
+          <div className="breezy-card lg:col-span-2 overflow-hidden animate-breezy-enter p-0 pb-2">
             {/* Month navigation */}
             <div
               className="flex items-center justify-between px-6 py-4 border-b"
@@ -191,13 +185,13 @@ export default function CalendarPage() {
                       background: isSelected
                         ? "color-mix(in oklch, var(--gold) 15%, transparent)"
                         : isToday
-                        ? "color-mix(in oklch, var(--gold) 8%, transparent)"
-                        : "transparent",
+                          ? "color-mix(in oklch, var(--gold) 8%, transparent)"
+                          : "transparent",
                       border: isSelected
                         ? "1px solid color-mix(in oklch, var(--gold) 40%, transparent)"
                         : isToday
-                        ? "1px solid color-mix(in oklch, var(--gold) 20%, transparent)"
-                        : "1px solid transparent",
+                          ? "1px solid color-mix(in oklch, var(--gold) 20%, transparent)"
+                          : "1px solid transparent",
                     }}
                   >
                     <span
@@ -228,11 +222,8 @@ export default function CalendarPage() {
             {/* Selected day detail */}
             {selectedDay && selectedGreg && (
               <div
-                className="rounded-2xl p-5"
-                style={{
-                  background: "var(--space-mid)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                }}
+                className="breezy-card p-5 animate-breezy-enter"
+                style={{ animationDelay: "50ms" }}
               >
                 <div className="text-xs mb-3" style={{ color: "var(--muted-foreground)" }}>Selected Day</div>
                 <div className="text-2xl font-bold mb-1" style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>
@@ -277,11 +268,8 @@ export default function CalendarPage() {
 
             {/* Events this month */}
             <div
-              className="rounded-2xl p-5"
-              style={{
-                background: "var(--space-mid)",
-                border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-              }}
+              className="breezy-card p-5 animate-breezy-enter"
+              style={{ animationDelay: "100ms" }}
             >
               <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
                 Events — {monthInfo?.en}
@@ -319,11 +307,8 @@ export default function CalendarPage() {
 
             {/* Year navigation */}
             <div
-              className="rounded-2xl p-5"
-              style={{
-                background: "var(--space-mid)",
-                border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-              }}
+              className="breezy-card p-5 animate-breezy-enter"
+              style={{ animationDelay: "150ms" }}
             >
               <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>Jump to Year</div>
               <div className="flex items-center gap-2">

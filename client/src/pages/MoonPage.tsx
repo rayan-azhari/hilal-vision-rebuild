@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import { Moon, Sun, ArrowRight, Clock } from "lucide-react";
+import { Moon, Sun, ArrowRight, Clock, Eye } from "lucide-react";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
 import SunCalc from "suncalc";
+import { BreezyDetailCard } from "@/components/BreezyDetailCard";
+import { BreezyFullCard } from "@/components/BreezyFullCard";
+import { VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
 
 function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number }) {
   const r = size / 2 - 4;
@@ -205,12 +208,8 @@ export default function MoonPage() {
 
           {/* Moon illustration */}
           <div
-            className="lg:col-span-1 rounded-2xl p-8 flex flex-col items-center justify-center"
-            style={{
-              background: "radial-gradient(ellipse at center, oklch(0.12 0.03 265) 0%, var(--space-mid) 100%)",
-              border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)",
-              minHeight: "360px",
-            }}
+            className="breezy-card lg:col-span-1 p-8 flex flex-col items-center justify-center animate-breezy-enter"
+            style={{ minHeight: "360px" }}
           >
             <div
               style={{ filter: "drop-shadow(0 0 40px oklch(0.78 0.15 75 / 0.35))" }}
@@ -250,128 +249,95 @@ export default function MoonPage() {
           </div>
 
           {/* Stats grid */}
-          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[
-              { label: "Illumination",  value: `${moonInfo.illumination}%`,        icon: "🌕", color: "var(--gold)" },
-              { label: "Lunar Age",     value: `${moonInfo.age.toFixed(2)} days`,   icon: "📅", color: "#60a5fa" },
-              { label: "Moon Altitude", value: `${sunMoon.moonAlt.toFixed(2)}°`,    icon: "📐", color: "#4ade80" },
-              { label: "Moon Azimuth",  value: `${sunMoon.moonAz.toFixed(1)}°`,     icon: "🧭", color: "#fb923c" },
-              { label: "Elongation",    value: `${sunMoon.elongation.toFixed(2)}°`, icon: "📏", color: "#c084fc" },
-              { label: "Phase Angle",   value: `${(moonInfo.phase * 360).toFixed(1)}°`, icon: "🔄", color: "#f472b6" },
-            ].map(({ label, value, icon, color }) => (
-              <div
-                key={label}
-                className="rounded-xl p-4"
-                style={{
-                  background: "var(--space-mid)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-                }}
-              >
-                <div className="text-xl mb-2">{icon}</div>
-                <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{label}</div>
-                <div className="text-lg font-bold font-mono" style={{ color }}>{value}</div>
-              </div>
-            ))}
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            <BreezyDetailCard
+              title="Illumination"
+              icon={<Moon />}
+              decorativeVisual={<IlluminationArc illumination={moonInfo.illumination} />}
+              primaryValue={moonInfo.illumination}
+              primaryUnit="%"
+              statusLabel={moonInfo.phaseName}
+              className="animate-breezy-enter"
+              accentColour="var(--gold)"
+            />
+            <BreezyDetailCard
+              title="Lunar Age"
+              icon={<Clock />}
+              primaryValue={moonInfo.age.toFixed(1)}
+              primaryUnit="Days"
+              statusLabel={`Phase Angle: ${(moonInfo.phase * 360).toFixed(1)}°`}
+              className="animate-breezy-enter"
+              accentColour="#60a5fa"
+            />
+            <BreezyDetailCard
+              title="Visibility (Mecca)"
+              icon={<Eye />}
+              decorativeVisual={<VisibilityDotScale zone={sunMoon.visibility as any} />}
+              primaryValue={sunMoon.visibility}
+              primaryUnit="Zone"
+              statusLabel={`Yallop q = ${sunMoon.qValue.toFixed(2)}`}
+              className="animate-breezy-enter"
+              accentColour={sunMoon.visibility === "A" || sunMoon.visibility === "B" ? "#4ade80" : "#f87171"}
+            />
+
+            <BreezyDetailCard
+              title="Moon Altitude"
+              icon={<ArrowRight className="transform -rotate-45" />}
+              primaryValue={sunMoon.moonAlt.toFixed(1)}
+              primaryUnit="°"
+              statusLabel={`Azimuth: ${sunMoon.moonAz.toFixed(1)}°`}
+              className="animate-breezy-enter"
+              accentColour="#4ade80"
+            />
+            <BreezyDetailCard
+              title="Elongation"
+              icon={<ArrowRight />}
+              primaryValue={sunMoon.elongation.toFixed(1)}
+              primaryUnit="°"
+              className="animate-breezy-enter"
+              accentColour="#c084fc"
+            />
+            <BreezyDetailCard
+              title="Next New Moon"
+              icon={<Moon />}
+              primaryValue={countdown.split(' ')[0] || "0d"}
+              statusLabel={moonInfo.nextNewMoon.toLocaleDateString("en-GB")}
+              className="animate-breezy-enter"
+            />
 
             {/* Times row */}
-            <div
-              className="col-span-2 md:col-span-3 rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4"
-              style={{
-                background: "var(--space-mid)",
-                border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-              }}
+            <BreezyFullCard
+              title="Ephemeris"
+              icon={<Sun />}
+              className="col-span-1 sm:col-span-2 md:col-span-3 animate-breezy-enter"
             >
-              {[
-                { label: "Sunrise",  value: formatTime(sunMoon.sunrise),  icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
-                { label: "Sunset",   value: formatTime(sunMoon.sunset),   icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
-                { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
-                { label: "Moonset",  value: formatTime(sunMoon.moonset),  icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
-              ].map(({ label, value, icon, color }) => (
-                <div key={label} className="text-center">
-                  <div className="flex justify-center mb-1" style={{ color }}>{icon}</div>
-                  <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
-                  <div className="text-sm font-mono font-semibold" style={{ color: "var(--foreground)" }}>{value}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Countdown */}
-          <div
-            className="rounded-2xl p-6 text-center"
-            style={{
-              background: "var(--space-mid)",
-              border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)",
-            }}
-          >
-            <div className="text-xs mb-2" style={{ color: "var(--muted-foreground)" }}>Next New Moon</div>
-            <div
-              className="text-2xl font-bold font-mono mb-1"
-              style={{ color: "var(--gold)", fontFamily: "Cinzel, serif" }}
-            >
-              {countdown}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              {moonInfo.nextNewMoon.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-            </div>
-          </div>
-
-          {/* Next full moon */}
-          <div
-            className="rounded-2xl p-6 text-center"
-            style={{
-              background: "var(--space-mid)",
-              border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)",
-            }}
-          >
-            <div className="text-xs mb-2" style={{ color: "var(--muted-foreground)" }}>Next Full Moon</div>
-            <div
-              className="text-lg font-bold mb-1"
-              style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}
-            >
-              {moonInfo.nextFullMoon.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              {moonInfo.nextFullMoon.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </div>
-          </div>
-
-          {/* Crescent visibility for Mecca */}
-          <div
-            className="rounded-2xl p-6"
-            style={{
-              background: "var(--space-mid)",
-              border: `1px solid color-mix(in oklch, ${sunMoon.visibility === "A" || sunMoon.visibility === "B" ? "#4ade80" : "#f87171"} 20%, transparent)`,
-            }}
-          >
-            <div className="text-xs mb-2" style={{ color: "var(--muted-foreground)" }}>Crescent Visibility (Mecca)</div>
-            <div
-              className="text-sm font-bold mb-1"
-              style={{
-                color: sunMoon.visibility === "A" || sunMoon.visibility === "B" ? "#4ade80" : "#f87171",
-              }}
-            >
-              Zone {sunMoon.visibility}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Yallop q = {sunMoon.qValue.toFixed(4)}
-            </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                {[
+                  { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
+                  { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
+                  { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
+                  { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
+                ].map(({ label, value, icon, color }) => (
+                  <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
+                    <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
+                    <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
+                    <div className="text-sm font-mono font-semibold" style={{ color: "var(--foreground)" }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+            </BreezyFullCard>
           </div>
 
           {/* 30-day phase calendar */}
-          <div
-            className="lg:col-span-3 rounded-2xl p-6"
-            style={{
-              background: "var(--space-mid)",
-              border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
-            }}
+          <BreezyFullCard
+            title="30-Day Phase Calendar"
+            icon={<Clock />}
+            className="lg:col-span-3 animate-breezy-enter"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-4 h-4" style={{ color: "var(--gold-dim)" }} />
-              <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>30-Day Phase Calendar</span>
+            <div className="mt-2">
+              <PhaseCalendarStrip baseDate={date} />
             </div>
-            <PhaseCalendarStrip baseDate={date} />
-          </div>
+          </BreezyFullCard>
         </div>
       </div>
     </div>
