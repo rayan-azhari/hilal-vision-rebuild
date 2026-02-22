@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Moon, Sun, ArrowRight, Clock, Eye, MapPin } from "lucide-react";
 import { LocationSearch } from "@/components/LocationSearch";
+import { PageHeader } from "@/components/PageHeader";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
 import * as SunCalc from "suncalc";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
@@ -185,21 +186,11 @@ export default function MoonPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       {/* Header */}
-      <div
-        className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)", background: "var(--space-mid)" }}
+      <PageHeader
+        icon={<Moon />}
+        title="Moon Phase Dashboard"
+        subtitle="Lunar phase · Illumination · Astronomical data"
       >
-        <div className="flex items-center gap-3">
-          <Moon className="w-5 h-5" style={{ color: "var(--gold)" }} />
-          <div>
-            <h1 className="text-base font-semibold" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
-              Moon Phase Dashboard
-            </h1>
-            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Lunar phase · Illumination · Astronomical data
-            </p>
-          </div>
-        </div>
         <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 relative z-50">
           {/* Location */}
           <div className="w-full sm:w-64">
@@ -249,7 +240,6 @@ export default function MoonPage() {
               value={dateStr}
               onChange={e => {
                 const [y, m, d] = e.target.value.split("-").map(Number);
-                // Keep the current hour/minute
                 const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
                 setDate(newDate);
               }}
@@ -264,7 +254,7 @@ export default function MoonPage() {
             />
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="container py-8 flex flex-col gap-6 relative z-10">
 

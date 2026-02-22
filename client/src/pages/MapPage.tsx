@@ -11,6 +11,7 @@ import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
 import { MapPin } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { LocationSearch } from "@/components/LocationSearch";
 
@@ -267,26 +268,16 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
       {/* Header */}
-      <div
-        className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)", background: "var(--space-mid)" }}
+      <PageHeader
+        icon={<Map />}
+        title="Crescent Visibility Map"
+        subtitle="Global visibility heatmap · Yallop criterion"
       >
-        <div className="flex items-center gap-3">
-          <Map className="w-5 h-5" style={{ color: "var(--gold)" }} />
-          <div>
-            <h1 className="text-base font-semibold" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
-              Crescent Visibility Map
-            </h1>
-            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Global visibility heatmap · Yallop criterion
-            </p>
-          </div>
-        </div>
         <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
           <div>{hijri.day} {hijri.monthNameArabic} {hijri.year} هـ</div>
           <div style={{ color: "var(--muted-foreground)" }}>{hijri.monthName}</div>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Map */}

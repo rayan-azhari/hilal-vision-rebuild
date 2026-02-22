@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Archive, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import {
   hijriToGregorian,
   computeSunMoonAtSunset,
@@ -126,22 +127,11 @@ export default function ArchivePage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       {/* Header */}
-      <div
-        className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)", background: "var(--space-mid)" }}
-      >
-        <div className="flex items-center gap-3">
-          <Archive className="w-5 h-5" style={{ color: "var(--gold)" }} />
-          <div>
-            <h1 className="text-base font-semibold" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
-              Crescent Visibility Archive
-            </h1>
-            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              1438–1465 AH · All 12 Islamic months
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        icon={<Archive />}
+        title="Crescent Visibility Archive"
+        subtitle="1438–1465 AH · All 12 Islamic months"
+      />
 
       <div className="container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

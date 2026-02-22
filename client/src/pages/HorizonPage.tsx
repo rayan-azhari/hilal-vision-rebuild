@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Compass, MapPin, ChevronDown, Clock, Locate } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import {
   computeSunMoonAtSunset,
@@ -309,25 +310,15 @@ export default function HorizonPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
       {/* Header */}
-      <div
-        className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)", background: "var(--space-mid)" }}
+      <PageHeader
+        icon={<Compass />}
+        title="Local Horizon View"
+        subtitle="Moon & sun positions at sunset · Sighting window simulator"
       >
-        <div className="flex items-center gap-3">
-          <Compass className="w-5 h-5" style={{ color: "var(--gold)" }} />
-          <div>
-            <h1 className="text-base font-semibold" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
-              Local Horizon View
-            </h1>
-            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Moon & sun positions at sunset · Sighting window simulator
-            </p>
-          </div>
-        </div>
         <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
           {hijri.day} {hijri.monthNameArabic} {hijri.year} هـ
         </div>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Canvas */}

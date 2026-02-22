@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { PageHeader } from "@/components/PageHeader";
 import {
   gregorianToHijri,
   hijriToGregorian,
@@ -108,21 +109,11 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       {/* Header */}
-      <div
-        className="border-b px-6 py-4 flex items-center justify-between"
-        style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)", background: "var(--space-mid)" }}
+      <PageHeader
+        icon={<Calendar />}
+        title="Islamic Hijri Calendar"
+        subtitle="Hijri ↔ Gregorian · Islamic events · Lunar phases"
       >
-        <div className="flex items-center gap-3">
-          <Calendar className="w-5 h-5" style={{ color: "var(--gold)" }} />
-          <div>
-            <h1 className="text-base font-semibold" style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}>
-              Islamic Hijri Calendar
-            </h1>
-            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Hijri ↔ Gregorian · Islamic events · Lunar phases
-            </p>
-          </div>
-        </div>
         <div className="text-right">
           <div className="text-sm font-medium" style={{ color: "var(--gold)" }}>
             {todayHijri.day} {todayHijri.monthName} {todayHijri.year} AH
@@ -131,7 +122,7 @@ export default function CalendarPage() {
             {todayHijri.day} {todayHijri.monthNameArabic}
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
