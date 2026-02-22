@@ -10,11 +10,20 @@ export type TrpcContext = {
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
-  const auth = getAuth(opts.req);
+  let user: { id: string } | null = null;
+
+  try {
+    const auth = getAuth(opts.req);
+    if (auth.userId) {
+      user = { id: auth.userId };
+    }
+  } catch {
+    // Clerk middleware not applied — public endpoint, no user context
+  }
 
   return {
     req: opts.req,
     res: opts.res,
-    user: auth.userId ? { id: auth.userId } : null,
+    user,
   };
 }
