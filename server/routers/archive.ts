@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const icopData: any[] = require("../data/icop-history.json");
+// Static import so Vercel serverless bundler includes the JSON data
+import icopData from "../data/icop-history.json";
 
 export const archiveRouter = router({
     getHistoricalData: publicProcedure
