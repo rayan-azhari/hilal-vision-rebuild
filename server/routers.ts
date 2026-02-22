@@ -1,49 +1,38 @@
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { archiveRouter } from "./routers/archive";
 import { z } from "zod";
 import { getDb } from "./db";
 import { observationReports } from "../drizzle/schema";
 import { desc } from "drizzle-orm";
+import { computeSunMoonAtSunset } from "../client/src/lib/astronomy";
 
-// ─── Simple in-memory rate limiter ────────────────────────────────────────────
-const rateLimitMap = new Map<string, number[]>();
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const RATE_LIMIT_MAX = 5; // 5 submissions per minute per IP
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { ENV } from "./_core/env";
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(ip) ?? [];
-  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT_MAX) return false;
-  recent.push(now);
-  rateLimitMap.set(ip, recent);
-  return true;
+// ─── Global Redis Rate Limiter ────────────────────────────────────────────────
+let ratelimit: Ratelimit | null = null;
+if (ENV.upstashRedisRestUrl && ENV.upstashRedisRestToken) {
+  const redis = new Redis({
+    url: ENV.upstashRedisRestUrl,
+    token: ENV.upstashRedisRestToken,
+  });
+  // Limit to 5 requests per minute per IP
+  ratelimit = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(5, "1 m"),
+    analytics: true,
+  });
+} else {
+  console.warn("[RateLimiter] Upstash Redis credentials not found. Telemetry endpoint is not rate-limited.");
 }
-
-// Periodic cleanup of stale rate-limit entries
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, timestamps] of rateLimitMap.entries()) {
-    const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
-    if (recent.length === 0) rateLimitMap.delete(ip);
-    else rateLimitMap.set(ip, recent);
-  }
-}, 120_000);
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 
 export const appRouter = router({
   system: systemRouter,
-  auth: router({
-    me: publicProcedure.query((opts) => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return { success: true } as const;
-    }),
-  }),
+  archive: archiveRouter,
   telemetry: router({
     submitObservation: publicProcedure
       .input(
@@ -60,13 +49,16 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        // Rate limit by IP
-        const ip =
-          ctx.req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() ??
-          ctx.req.socket.remoteAddress ??
-          "unknown";
-        if (!checkRateLimit(ip)) {
-          throw new Error("Rate limit exceeded. Please wait before submitting again.");
+        // Rate limit by IP using Upstash
+        if (ratelimit) {
+          const ip =
+            ctx.req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() ??
+            ctx.req.socket.remoteAddress ??
+            "unknown";
+          const { success } = await ratelimit.limit(ip);
+          if (!success) {
+            throw new Error("Rate limit exceeded. Please wait before submitting again.");
+          }
         }
 
         const db = await getDb();
@@ -78,6 +70,13 @@ export const appRouter = router({
         const obsDate = new Date(input.observationTime);
         if (isNaN(obsDate.getTime())) {
           throw new Error("Invalid observation time format");
+        }
+
+        // Smart Sighting Validation
+        // Reject claims of seeing the moon if it is definitively below the horizon or not yet born (Zone F)
+        const computedData = computeSunMoonAtSunset(obsDate, { lat: input.lat, lng: input.lng });
+        if (input.visualSuccess !== "not_seen" && computedData.visibility === "F") {
+          throw new Error("Validation Failed: Astronomical data indicates the moon was below the horizon or not yet born at this location.");
         }
 
         // Autonomously fetch meteorological snap from Open-Meteo if not provided

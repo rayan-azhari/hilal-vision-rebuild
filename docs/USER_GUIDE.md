@@ -7,6 +7,7 @@ Welcome to **Hilal Vision**, a precision astronomical platform designed for pred
 The top navigation bar provides access to all views and includes:
 - **Theme Toggle** (Light/Dark mode)
 - **Report Sighting** button (golden `+` icon)
+- **Account Settings** / Sign In (Clerk authentication)
 
 ---
 
@@ -23,7 +24,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 ### Shared Controls (both views)
 - **Date Picker** — Select any Gregorian date.
 - **Hour Offset Slider** — Slide ±24 hours to see visibility evolve over time.
-- **Location Selector** — Choose from 85+ world capitals, or use **Auto-Detect GPS** to fly to your current position.
+- **Location Selector** — Dynamically search any world city via Open-Meteo geocoding, or use **Auto-Detect GPS** to fly to your current position.
 
 ### 3D Globe View
 - Interactive Globe.gl sphere with day/night terminator.
@@ -41,6 +42,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 ## 3. Moon Phase (`/moon`)
 
 A dedicated dashboard for the lunar cycle.
+- **Location & Date Settings** — Exact same geocoding and synchronized date offsets as the Visibility map.
 - **Sun & Moon Altitude Tracker** (top of page) — Interactive chart plotting Sun and Moon altitudes throughout the day.
 - **Moon Illustration** — Accurate SVG rendering of the current phase with craters and terminator.
 - **Stats Grid** — Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown.
@@ -67,7 +69,8 @@ A dedicated dashboard for the lunar cycle.
 
 ## 6. Archive (`/archive`)
 
-- Historical crescent visibility data and maps (1438–1465 AH).
+- Explore authentic historical crescent visibility data featuring 1,000+ real sighting records scraped from the Islamic Crescents' Observation Project (ICOP) spanning 1438–1465 AH.
+- Sightings are overlaid on theoretical algorithms (Yallop/Odeh) providing a real-world verifiable dashboard of moon crescent visibility.
 
 ---
 
@@ -80,8 +83,9 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
 ## 📡 Crowdsourcing Sighting Reports
 
 ### How to Submit a Report
-1. Click the golden **"Report Sighting" (+)** button in the navigation bar.
-2. Click **"Auto-detect Location"** to grab your GPS coordinates.
+1. **Sign In** using the Clerk widget in the navigation bar. Unauthenticated users cannot submit reports.
+2. Click the golden **"Report Sighting" (+)** button.
+3. Click **"Auto-detect Location"** to grab your GPS coordinates.
 3. Set the **Observation Time** precisely.
 4. Select your result:
    - **Seen with Naked Eye** — Clear sighting without instruments.
@@ -91,7 +95,9 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
 6. Click **Submit Sighting**.
 
 ### What Happens Behind the Scenes
-- **Rate Limiting** — The server enforces a limit of 5 submissions per minute per IP to prevent abuse.
-- **Input Validation** — All fields are validated with strict Zod schemas (coordinate bounds, temperature ranges, etc.).
+- **Authentication** — Clerk ensures bots don't pollute the data.
+- **Rate Limiting** — The server enforces a limit of 5 submissions per minute per IP using an Upstash Redis global database to prevent DDoS attacks.
+- **Smart Validation** — The system algorithmically calculates the sun & moon geometric position at the precise time of sighting. If you claim to see the moon when it is physically below the horizon (Zone F), the mathematical engine rejects the payload immediately.
+- **Input Bounds** — All fields are validated with strict Zod schemas (coordinate bounds, temperature ranges, etc.).
 - **Meteorological Enrichment** — The backend automatically contacts **Open-Meteo** APIs to fetch live Cloud Cover, Surface Pressure, and Aerosol Optical Depth at your exact coordinates, storing this data alongside your report.
 - **Paginated Retrieval** — Observation queries support limit/offset pagination (default 50 results).

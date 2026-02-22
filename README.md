@@ -4,36 +4,35 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 
 ## Features
 
-- **🌐 Unified Visibility Page (`/visibility`)**: A seamless toggle between an interactive 3D Globe (Globe.gl) and a 2D Leaflet Map. Both views share synchronized state — date, hour offset, and selected city carry over instantly when switching between them.
-  - *3D Globe*: Interactive day/night terminator with smooth visibility zone overlays.
-  - *2D Map*: Web Mercator projected visibility heatmap with Gaussian blur smoothing, click-to-inspect, and crowdsourced sighting pins.
+- **🌐 Unified Visibility Page (`/visibility`)**: Toggle between an interactive 3D Globe (Globe.gl) and a 2D Leaflet Map.
   - *Hour Offset Slider*: Slide ±24 hours to see how visibility evolves over time.
   - *GPS Auto-Detect*: Instantly fly to your current position using the browser Geolocation API.
-  - *Global City Selector*: 85+ world capitals and major cities.
-- **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, rise/set times, Sun & Moon Altitude Tracker chart (moved to top of page), and a **Scientific Methodology** section with interactive Yallop criterion charts and Danjon Limit physics.
-- **📅 Hijri Calendar (`/calendar`)**: Astronomical conjunction-based Gregorian ↔ Islamic calendar conversion with moon phase indicators and significant date highlighting.
-- **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun, with **GPS auto-detect** via browser Geolocation API and Nominatim reverse-geocoding.
-- **📁 Archive (`/archive`)**: Historical crescent visibility maps (1438–1465 AH).
+  - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
+- **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
+- **📅 Hijri Calendar (`/calendar`)**: Astronomical conjunction-based calendar accurate to the new moon.
+- **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
+- **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP).
 
 ## Tech Stack
 
 - **Frontend:** React 19, Vite 7, Tailwind CSS v4, Radix UI, Recharts
 - **Design System:** Breezy Weather Design (`.breezy-card`, Space-Navy/Gold themes)
 - **Mapping & Scientific Viz:** Leaflet, Globe.gl, Three.js, SunCalc
-- **Backend:** Node.js, Express, tRPC (Type-safe API with rate limiting & input validation)
+- **Backend:** Node.js, Express, tRPC (Type-safe API)
 - **Database:** Drizzle ORM (MySQL — `observation_reports` table)
-- **State Management:** React Query (`@tanstack/react-query`)
-- **External APIs:** Open-Meteo (weather, air quality, elevation)
+- **Authentication:** Clerk
+- **Rate Limiting:** Upstash Redis
+- **Mobile Packaging:** Capacitor.js (iOS & Android Native)
 
 ## Recent Architecture Highlights
 
-1. **Unified Visibility Page**: Globe and Map views merged into a single page with synced state (date, hour offset, location) lifted to the parent component for seamless toggling.
-2. **Smooth Visibility Zones**: Canvas-based Gaussian blur replaces raw CSS rectangles — zone boundaries are smooth and organic on both 2D and 3D views with no resolution increase needed.
-3. **Scientific Methodology Panel**: Interactive Yallop threshold curve chart, Danjon Limit explanation, and atmospheric refraction notes for pro users on the Moon Phase page.
-4. **Rate-Limited Telemetry API**: Server-side in-memory rate limiter (5 req/min/IP), Zod input validation with min/max bounds, and paginated `getObservations` endpoint.
-5. **Open-Meteo Integration**: Autonomous server-side enrichment of sighting reports with live cloud cover, surface pressure, and aerosol optical depth data.
-6. **Conjunction-Based Hijri Calendar**: SunCalc-powered astronomical new moon detection replaces the old arithmetic algorithm, accurate to ±1 day of the Umm al-Qura calendar.
-7. **SEO & Accessibility**: Dynamic `document.title` on every page, meta descriptions, and semantic HTML.
+1. **Web Worker Visibility Engine**: The heavy astronomical calculations (3,600+ sun-moon evaluations per frame) are completely offloaded to a Web Worker, ensuring a 60FPS buttery-smooth UI map experience.
+2. **Capacitor Mobile Native**: The identical codebase compiles beautifully into native iOS and Android applications.
+3. **Clerk Authentication**: Secure user management replacing legacy custom OAuth.
+4. **Smart Telemetry Validation**: Sighting reports are algorithmically verified against astronomical reality. If a user maliciously claims to see the moon when it is physically below the horizon (Zone F), the mathematical engine rejects the payload.
+5. **Real ICOP Data Extraction**: Features an integrated scraper that autonomously pulled 1,000+ historical crescent sight reports to serve as verifiable proof-of-concept records alongside theoretical algorithms.
+6. **Conjunction-Based Hijri Calendar**: SunCalc-powered astronomical new moon detection replaces the old arithmetic algorithm, precise to the minute of conjunction.
+7. **Production Upstash Protection**: Hardened TRPC mutation endpoints utilizing Upstash Redis sliding window token bucket rate-limiting.
 
 ## Getting Started
 

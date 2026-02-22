@@ -55,6 +55,8 @@ function computeMonthSummary(year: number, month: number): MonthSummary {
   return { hijriYear: year, hijriMonth: month, newMoonDate, cityResults, globalZone };
 }
 
+import { trpc } from "@/lib/trpc";
+
 function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -105,6 +107,11 @@ export default function ArchivePage() {
   }, [selectedYear]);
 
   const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
+
+  const { data: icopData, isLoading: isLoadingIcop } = trpc.archive.getHistoricalData.useQuery(
+    { hijriYear: selectedYear, hijriMonth: selectedMonth ?? 1 },
+    { enabled: selectedMonth !== null }
+  );
 
   const handleMonthClick = (month: number) => {
     setSelectedMonth(month);
@@ -265,7 +272,7 @@ export default function ArchivePage() {
               </div>
             )}
 
-            {isLoadingDetail && (
+            {(isLoadingDetail || isLoadingIcop) && (
               <div
                 className="breezy-card p-6 flex items-center justify-center animate-breezy-enter"
                 style={{ minHeight: "200px", animationDelay: "100ms" }}
@@ -275,7 +282,7 @@ export default function ArchivePage() {
                     className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
                     style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }}
                   />
-                  <span className="text-xs" style={{ color: "var(--gold)" }}>Computing…</span>
+                  <span className="text-xs" style={{ color: "var(--gold)" }}>Loading…</span>
                 </div>
               </div>
             )}
@@ -318,15 +325,62 @@ export default function ArchivePage() {
                   </div>
                 </div>
 
-                {/* City results */}
+                {/* ICOP Actual Observations */}
+                {icopData && icopData.length > 0 && (
+                  <div
+                    className="breezy-card p-5 animate-breezy-enter"
+                    style={{ animationDelay: "100ms" }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
+                        Actual Observations (ICOP)
+                      </div>
+                      <span className="text-xs" style={{ color: "var(--gold-dim)" }}>
+                        {icopData.length} records
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                      {icopData.map((obs: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between px-3 py-2 rounded-lg"
+                          style={{
+                            background: "var(--space-light)",
+                            borderLeft: `3px solid ${obs.result === "Seen" ? "var(--accent)" : "var(--destructive)"}`
+                          }}
+                        >
+                          <div>
+                            <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>{obs.city}</span>
+                            <span className="text-xs ml-1" style={{ color: "var(--muted-foreground)" }}>{obs.country}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono" style={{ color: "var(--muted-foreground)" }}>
+                              {obs.opticalAid === "Unknown (Parsed)" ? "Reported" : obs.opticalAid}
+                            </span>
+                            <div
+                              className="w-2 h-2 rounded-full"
+                              style={{ background: obs.result === "Seen" ? "var(--accent)" : "var(--destructive)" }}
+                            />
+                            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: obs.result === "Seen" ? "var(--accent)" : "var(--destructive)" }}>
+                              {obs.result}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Computed City Visibility */}
                 <div
                   className="breezy-card p-5 animate-breezy-enter"
-                  style={{ animationDelay: "100ms" }}
+                  style={{ animationDelay: "120ms" }}
                 >
                   <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-                    City Visibility
+                    Computed City Visibility (Theoretical)
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                     {monthDetail.cityResults.map(({ city, country, zone, q }) => (
                       <div
                         key={city}

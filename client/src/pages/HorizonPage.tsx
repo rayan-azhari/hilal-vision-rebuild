@@ -10,6 +10,7 @@ import {
   type SunMoonData,
 } from "@/lib/astronomy";
 import * as SunCalc from "suncalc";
+import { LocationSearch } from "@/components/LocationSearch";
 
 function drawHorizon(
   canvas: HTMLCanvasElement,
@@ -353,7 +354,7 @@ export default function HorizonPage() {
 
         {/* Side panel */}
         <div
-          className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l overflow-y-auto"
+          className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l overflow-y-auto relative z-50"
           style={{
             borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
             background: "var(--space-mid)",
@@ -361,7 +362,7 @@ export default function HorizonPage() {
         >
           <div className="p-5 space-y-5">
             {/* Date */}
-            <div className="breezy-card p-4 animate-breezy-enter">
+            <div className="breezy-card overflow-visible p-4 animate-breezy-enter">
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Date</label>
               <input
                 type="date"
@@ -421,26 +422,14 @@ export default function HorizonPage() {
 
               {/* City dropdown */}
               <div className="relative mt-3">
-                <select
-                  value={selectedCity.name}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    const city = MAJOR_CITIES.find(c => c.name === e.target.value);
-                    if (city) { setSelectedCity(city); setCustomLat(""); setCustomLng(""); }
+                <LocationSearch
+                  selectedCity={selectedCity}
+                  onSelect={(city) => {
+                    setSelectedCity(city);
+                    setCustomLat("");
+                    setCustomLng("");
                   }}
-                  className="w-full px-3 py-2 rounded-lg text-sm appearance-none pr-8"
-                  style={{
-                    background: "var(--space-light)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  {MAJOR_CITIES.map(c => (
-                    <option key={`${c.name}-${c.lat}`} value={c.name} style={{ background: "var(--space-mid)" }}>
-                      {c.name}, {c.country}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
+                />
               </div>
             </div>
 

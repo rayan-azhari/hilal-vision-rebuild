@@ -19,8 +19,12 @@ git add . && git commit -m "deploy" && git push
 # 2. Import at https://vercel.com/new
 #    Vercel auto-detects settings from vercel.json
 
-# 3. (Optional) Set environment variables:
-#    DATABASE_URL — MySQL connection string for telemetry persistence
+# 3. Set environment variables in Vercel UI:
+#    DATABASE_URL — MySQL connection string
+#    UPSTASH_REDIS_REST_URL - Upstash Redis URL
+#    UPSTASH_REDIS_REST_TOKEN - Upstash Redis Token
+#    CLERK_SECRET_KEY - Clerk backend secret
+#    VITE_CLERK_PUBLISHABLE_KEY - Clerk frontend key
 ```
 
 ## Configuration Files
@@ -64,6 +68,10 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 |----------|----------|-------------|
 | `DATABASE_URL` | No | MySQL connection string. Without it, telemetry data is not persisted. |
 | `NODE_ENV` | Auto | Set to `production` by Vercel |
+| `UPSTASH_REDIS_REST_URL` | Yes | Upstash Redis connection URL |
+| `UPSTASH_REDIS_REST_TOKEN` | Yes | Upstash Redis token |
+| `CLERK_SECRET_KEY` | Yes | Backend secret |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Frontend public key |
 
 ## What Works on Vercel
 
@@ -75,14 +83,8 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 | 3D Globe + 2D Map | ✅ WebGL + Leaflet |
 | tRPC telemetry API | ✅ Serverless function |
 | Report sighting form | ✅ Uses tRPC endpoint |
-| Rate limiting | ✅ In-memory (per function invocation) |
-
-## What Does NOT Work
-
-| Feature | Reason | Fix |
-|---------|--------|-----|
-| Authentication (OAuth) | Manus SDK is platform-specific | Replace with Clerk, NextAuth, or Auth.js |
-| Persistent rate limiting | In-memory store resets per invocation | Use Vercel KV or Upstash Redis |
+| Rate limiting | ✅ Distributed Upstash Redis |
+| Authentication | ✅ Clerk Auth |
 
 ## Troubleshooting
 

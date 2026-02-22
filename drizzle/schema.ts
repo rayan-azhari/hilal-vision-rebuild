@@ -28,7 +28,7 @@ export type InsertUser = typeof users.$inferInsert;
 // Telemetry reports for ground-truth observations
 export const observationReports = mysqlTable("observation_reports", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId"), // Links to the users table
+  userId: varchar("userId", { length: 255 }), // Clerk userId
   lat: decimal("lat", { precision: 10, scale: 7 }).notNull(),
   lng: decimal("lng", { precision: 10, scale: 7 }).notNull(),
   observationTime: timestamp("observationTime").notNull(),

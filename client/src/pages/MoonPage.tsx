@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Moon, Sun, ArrowRight, Clock, Eye } from "lucide-react";
+import { Moon, Sun, ArrowRight, Clock, Eye, MapPin } from "lucide-react";
+import { LocationSearch } from "@/components/LocationSearch";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
 import * as SunCalc from "suncalc";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
@@ -148,7 +149,7 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
 
 export default function MoonPage() {
   const [date, setDate] = useState(() => new Date());
-  const [location] = useState(MAJOR_CITIES[0]);
+  const [location, setLocation] = useState(MAJOR_CITIES[0]);
   const [moonInfo, setMoonInfo] = useState(() => getMoonPhaseInfo(new Date()));
   const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0]));
   const [countdown, setCountdown] = useState("");
@@ -199,24 +200,73 @@ export default function MoonPage() {
             </p>
           </div>
         </div>
-        <input
-          type="date"
-          value={dateStr}
-          onChange={e => {
-            const [y, m, d] = e.target.value.split("-").map(Number);
-            setDate(new Date(y, m - 1, d));
-          }}
-          className="px-3 py-1.5 rounded-lg text-xs"
-          style={{
-            background: "var(--space-light)",
-            border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-            color: "var(--foreground)",
-            colorScheme: "dark",
-          }}
-        />
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 relative z-50">
+          {/* Location */}
+          <div className="w-full sm:w-64">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Location</label>
+              <button
+                onClick={() => {
+                  if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        const newCity = {
+                          name: "GPS Location",
+                          country: "Current",
+                          lat: pos.coords.latitude,
+                          lng: pos.coords.longitude
+                        };
+                        if (!MAJOR_CITIES.find(c => c.name === "GPS Location")) {
+                          MAJOR_CITIES.unshift(newCity);
+                        }
+                        setLocation(newCity);
+                      },
+                      () => alert("Could not retrieve GPS location.")
+                    );
+                  } else {
+                    alert("Geolocation is not supported by your browser.");
+                  }
+                }}
+                className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider hover:opacity-80 transition-opacity"
+                style={{ color: "var(--gold)" }}
+              >
+                <MapPin className="w-3 h-3" /> Auto-Detect
+              </button>
+            </div>
+            <div className="relative">
+              <LocationSearch
+                selectedCity={location}
+                onSelect={setLocation}
+              />
+            </div>
+          </div>
+
+          {/* Date */}
+          <div className="w-full sm:w-auto">
+            <label className="block text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Date</label>
+            <input
+              type="date"
+              value={dateStr}
+              onChange={e => {
+                const [y, m, d] = e.target.value.split("-").map(Number);
+                // Keep the current hour/minute
+                const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
+                setDate(newDate);
+              }}
+              className="w-full px-3 py-2 rounded-lg text-sm"
+              style={{
+                background: "var(--space-light)",
+                border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                color: "var(--foreground)",
+                colorScheme: "dark",
+                height: "40px"
+              }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="container py-8 flex flex-col gap-6">
+      <div className="container py-8 flex flex-col gap-6 relative z-10">
 
         {/* Sun & Moon Altitude Chart (Moved to Top) */}
         <BreezyFullCard

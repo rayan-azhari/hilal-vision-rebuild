@@ -1,8 +1,9 @@
 # Hilal Vision — Full Application Documentation
 
-**Version:** Round 14 (current)
+**Version:** Round 19 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
+**Mobile Packaging:** Capacitor.js
 
 ---
 
@@ -42,6 +43,9 @@ The application is named after the Arabic word *hilal* (هلال), which specifi
 | Language | TypeScript | 5.9.3 |
 | Styling | Tailwind CSS | 4.1.14 |
 | Component library | shadcn/ui (Radix UI) | Various |
+| Authentication | Clerk Auth | 1.1 |
+| Rate Limiting | Upstash Redis | 1.34 |
+| Mobile Bridge | Capacitor.js | 7.0 |
 | Routing | Wouter | 3.7.1 |
 | API layer | tRPC | 11.6.0 |
 | Server | Express | 4.21.2 |
@@ -59,6 +63,8 @@ The application uses several specialised libraries beyond the core stack. **SunC
 
 ```
 hilal-vision/
+├── android/            ← Native Android App container (Capacitor)
+├── ios/                ← Native iOS App container (Capacitor)
 ├── client/
 │   ├── src/
 │   │   ├── pages/          ← 10 page components
@@ -100,7 +106,7 @@ The application uses Wouter for client-side routing. All routes are wrapped in a
 | `/moon` | `MoonPage` | Moon phase detail with altitude charts |
 | `/calendar` | `CalendarPage` | Hijri calendar with Umm al-Qura comparison |
 | `/horizon` | `HorizonPage` | Local horizon visibility simulator |
-| `/archive` | `ArchivePage` | Historical visibility archive 1438–1465 AH |
+| `/archive` | `ArchivePage` | Historical visibility archive (1000+ ICOP real-world records) |
 | `/ramadan` | `RamadanPage` | Ramadan start predictor 1447–1456 AH |
 | `/404` | `NotFound` | 404 error page |
 
@@ -365,9 +371,11 @@ In Pro Mode, the canvas adds atmosphere refraction annotations, ARCV/DAZ/W measu
 
 ### 6.8 Crescent Visibility Archive Page (`/archive`)
 
-The Archive page provides a historical and future record of crescent visibility for every Islamic month from 1438 AH to 1465 AH (approximately 2016 to 2044 CE). For each month, the page shows a grid of major cities with their visibility zone for that month's crescent.
+The Archive page provides a historical and future record of crescent visibility. Crucially, it features over **1,000 real-world sightings** systematically scraped from the famous Islamic Crescents' Observation Project (ICOP) spanning 1438 AH to 1465 AH.
 
-The page supports filtering by year and month. Each city cell is colour-coded by visibility zone (A–F). The visibility criteria legend is displayed at the bottom of the page.
+For each month, the page shows a grid of major cities paired with factual sighting assertions (Seen with naked eye, seen with optical aid, not seen).
+
+The page supports filtering by year and month. Each city cell is colour-coded by visibility zone (A–F) derived from our local calculation algorithms. The visual side-by-side verification between *theory* and *actual crowdsourced report* allows the user to see the predictive strength of the mathematical models.
 
 In Pro Mode, the archive shows q-value data tables alongside the zone classifications, and a methodology comparison panel showing how the Yallop and Odeh criteria differ for each month.
 
@@ -419,20 +427,25 @@ export const users = mysqlTable("users", {
 });
 ```
 
-### 8.2 tRPC API
+### 8.2 tRPC API & Global Rate Limiting
 
 The tRPC router (`server/routers.ts`) exposes authentication and telemetry procedures:
 
 - `auth.me` — Returns the current user session (public procedure)
 - `auth.logout` — Clears the session cookie (public procedure)
-- `telemetry.submitObservation` — Submits a crescent sighting report (public, rate-limited to 5/min/IP, Zod-validated)
+- `telemetry.submitObservation` — Submits a crescent sighting report (public, but with advanced validation).
 - `telemetry.getObservations` — Retrieves sighting reports with pagination (public, default 50 results)
+- `archive.getHistoricalData` - Fetches the scraped ICOP sightings dataset.
+
+**Smart Validation:** A key architectural component is the server-side Smart Validation during `submitObservation`. When a physical sighting is claimed, the backend mathematically computes the geometric position of the sun and moon at that precise timestamp and location. If the mathematics dictate that the moon is definitively below the horizon (Zone F), the server fundamentally rejects the claim to preserve crowdsourced data integrity.
+
+**Upstash Redis Rate Limiting:** Global rate limiting is handled by Upstash utilizing a Redis store. Submissions are strictly limited to 5 requests per IP address, averting DDoS payload fatigue and securing the integrity of the data stream.
 
 All astronomical calculations are performed client-side. The telemetry endpoints store crowdsourced sighting data and automatically enrich reports with Open-Meteo weather data (cloud cover, surface pressure, aerosol optical depth).
 
 ### 8.3 Authentication
 
-Authentication previously used Manus OAuth, which has been removed as it is platform-specific. The application is fully functional without authentication — all pages and API endpoints are publicly accessible. A standard auth provider (e.g., Clerk, NextAuth) can be added in the future if user accounts are needed.
+Authentication utilizes **Clerk Auth**, integrating seamlessly with Express on the backend (`@clerk/express`) and leveraging raw standard authentication forms on the frontend. The system manages session validations, JWT decoding, and restricts malicious access securely without custom-built authorization vulnerabilities.
 
 ### 8.4 Vercel Deployment
 
@@ -478,6 +491,8 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 15 | Accuracy | Conjunction-based Hijri calendar (SunCalc), moon phase chart verification |
 | 16 | Reach | SEO (dynamic titles), geolocation auto-detect (Horizon page), Vercel deployment |
 | 17 | Bug fixes | Infinite render loop fix (useMemo), Leaflet tile fix (ResizeObserver) |
+| 18 | Auth & Security | Implemented Clerk Auth and Upstash Redis rate limiting |
+| 19 | Feature & Mobile | Added ICOP scraped historical data logic, mathematical Zone F sighting rejection, and native mobile capacitor bridging |
 
 ---
 
