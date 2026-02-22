@@ -90,11 +90,24 @@
 - [x] Bug fix: infinite render loop on Map/Globe (useMemo + stable deps)
 - [x] Bug fix: Leaflet tiles not loading on tab switch (ResizeObserver + invalidateSize)
 
+## Improvements (Round 4)
+- [x] Unified PageHeader component across all tool pages
+- [x] Clerk authentication fix for public tRPC endpoints
+- [x] ICOP historical sighting data integrated into Archive page
+- [x] Custom location search (Open-Meteo geocoding) on all pages
+- [x] Location search on Moon Phase page
+- [x] Clerk Auth replacing Manus OAuth
+- [x] Upstash Redis distributed rate limiting
+- [x] Web Worker for visibility texture computation
+- [x] Capacitor.js mobile app wrapping
+
 ## Future
-- [ ] Custom location search (geocoding API)
-- [ ] add location and Custom location search to Moon Phase page 
-- [ ] ICOP historical sighting data for archive
 - [ ] Server-side visibility grid precomputation
 - [ ] Weather/cloud cover integration on map
 - [ ] Educational "How to Sight the Moon" content
-- [ ] Replace Manus OAuth with standard auth provider (Clerk/NextAuth)
+- [ ] AR Moon Finder (Capacitor camera + WebGL)
+- [ ] Push notifications for sighting alerts
+- [ ] Multi-language UI (Arabic, Urdu, Malay)
+- [ ] Photo upload for sighting reports
+- [ ] Best-time-to-observe calculator
+- [ ] VSOP87/ELP2000 high-accuracy planetary theory

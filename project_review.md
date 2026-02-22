@@ -8,14 +8,14 @@
 
 | Area | Score | Notes |
 |------|:-----:|-------|
-| **Visual Design** | 8/10 | Breezy design is premium. Globe + Map views are impressive. |
+| **Visual Design** | 9/10 | Breezy design is premium. Globe + Map views are impressive. Unified PageHeader component. |
 | **Scientific Accuracy** | 7/10 | Yallop/Odeh criteria solid. Hijri now conjunction-based. SunCalc is good but not VSOP87. |
-| **Data Completeness** | 5/10 | No real sighting data (ICOP/ICOUK). Archive is synthetic. No cloud cover on map. |
-| **Mobile Experience** | 4/10 | Responsive layout works, but no app store presence, no offline, no push notifications. |
-| **Performance** | 6/10 | Visibility grid is heavy (3,600 SunCalc calls per render). No Web Worker. No SSR. |
+| **Data Completeness** | 7/10 | Real ICOP sighting data (1,028+ records, 1440–1446 AH). No cloud cover on map yet. |
+| **Mobile Experience** | 5/10 | Responsive layout works. Capacitor.js configured for Android/iOS builds. No offline or push. |
+| **Performance** | 8/10 | Visibility grid offloaded to Web Worker. Smooth 60FPS UI. No SSR. |
 | **SEO & Reach** | 5/10 | Dynamic titles added. No structured data, no sitemap, no social cards. |
-| **Community** | 3/10 | Sighting form exists but no moderation, no photo uploads, no verification workflow. |
-| **Backend** | 4/10 | tRPC API works. No auth (Manus removed). In-memory rate limit resets on restart. |
+| **Community** | 4/10 | Sighting form exists with Clerk auth, smart validation (Zone F rejection). No photo uploads. |
+| **Backend** | 7/10 | tRPC API works. Clerk auth integrated. Upstash Redis rate limiting. Public endpoints fixed. |
 
 ---
 
@@ -25,11 +25,11 @@
 
 | # | Issue | Impact |
 |---|-------|--------|
-| 1 | **No real sighting data** — Archive page generates synthetic data, not actual ICOP/ICOUK records | Undermines credibility as "THE source" |
-| 2 | **No authentication** — Manus OAuth removed, nothing replaced | Can't identify sighting reporters, no moderation |
-| 3 | **In-memory rate limiter** — Resets on every Vercel cold start | Effectively no rate limiting in production |
-| 4 | **53 unused Radix UI components** — Only ~5 are actually used (Dialog, Select, Dropdown, Tooltip, Slot) | 500KB+ bundle bloat |
-| 5 | **No Web Worker** — Visibility texture computed on main thread; blocks UI for 2-4 seconds | Poor UX on mobile devices |
+| 1 | ~~**No real sighting data**~~ | ✅ Resolved — 1,028+ ICOP records integrated |
+| 2 | ~~**No authentication**~~ | ✅ Resolved — Clerk Auth integrated |
+| 3 | ~~**In-memory rate limiter**~~ | ✅ Resolved — Upstash Redis distributed rate limiting |
+| 4 | ~~**53 unused Radix UI components**~~ | ✅ Resolved — Unused deps removed |
+| 5 | ~~**No Web Worker**~~ | ✅ Resolved — Visibility texture computed in Web Worker |
 
 ### 🟡 Important
 
@@ -144,7 +144,7 @@
 | Push Notifications | ❌ | ❌ | ✅ | ✅ | ❌ |
 | AR Moon Finder | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Photo Sightings | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Real Sighting Data | ❌ | ✅ | ❌ | ✅ | ❌ |
+| Real Sighting Data | ✅ | ✅ | ❌ | ✅ | ❌ |
 | Weather Overlay | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Multi-Language | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Scientific Detail | ✅ | ✅ | ❌ | ❌ | ❌ |
@@ -158,14 +158,14 @@
 ## 6. Recommended Execution Order
 
 ### Phase 1 — Foundation (1-2 weeks)
-- [ ] Capacitor.js integration → Android + iOS builds
-- [ ] Replace in-memory rate limiter with Upstash Redis
-- [ ] Add auth (Clerk or Auth.js) — needed for sighting identity
-- [ ] Remove unused dependencies (AWS SDK, unused Radix components)
-- [ ] Add Web Worker for visibility texture computation
+- [x] Capacitor.js integration → Android + iOS builds
+- [x] Replace in-memory rate limiter with Upstash Redis
+- [x] Add auth (Clerk) — needed for sighting identity
+- [x] Remove unused dependencies (AWS SDK, unused Radix components)
+- [x] Add Web Worker for visibility texture computation
 
 ### Phase 2 — Data & Credibility (2-3 weeks)
-- [ ] ICOP historical sighting database integration
+- [x] ICOP historical sighting database integration
 - [ ] Weather/cloud overlay on visibility map (Open-Meteo cloud cover)
 - [ ] Best-time-to-observe calculator
 - [ ] Exact conjunction times (to the second)
@@ -187,4 +187,4 @@
 
 ---
 
-*Audit completed February 22, 2026.*
+*Audit completed February 22, 2026. Last updated February 23, 2026.*

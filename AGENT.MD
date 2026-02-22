@@ -13,11 +13,17 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 - **State & Data Fetching:** React Query (@tanstack/react-query)
 - **Package Manager:** pnpm
 - **Deployment:** Vercel (static frontend + serverless tRPC API at `api/trpc/[trpc].ts`)
+- **Authentication:** Clerk Auth (`@clerk/express` server-side, `@clerk/clerk-react` client-side)
+- **Rate Limiting:** Upstash Redis (`@upstash/ratelimit`)
+- **Mobile Packaging:** Capacitor.js (Android + iOS)
 
 ## File Organization & Responsibilities
 
 - `client/` - Frontend React application. Contains UI components, pages, and client-side logic.
 - `server/` - Backend Node/Express application. API routes, tRPC routers, and server-side processing.
+  - `server/routers/` - Modular tRPC routers (e.g., `archive.ts` for ICOP data).
+  - `server/data/` - Static datasets (e.g., `icop-history.json` with 1,028+ sighting records).
+  - `server/_core/context.ts` - tRPC context creation with Clerk auth (try/catch for public endpoints).
 - `api/` - Vercel serverless functions. Contains `trpc/[trpc].ts` which wraps the tRPC router for deployment.
 - `shared/` - Shared code between frontend and backend (e.g., Zod schemas, shared types).
 - `drizzle/` - Database migrations, schema definitions, and related configuration.
@@ -26,7 +32,7 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 
 **1. Maintain the Stack Architecture**
 - **Type Safety Pipeline:** Use tRPC for API communication between the client and server to preserve end-to-end type safety.
-- **Styling UI:** Rely on Tailwind CSS, Radix UI components, and the **Breezy Weather Design System**. Ensure components are responsive, accessible, and maintain a high-quality visual standard using `.breezy-card` and `.breezy-chip` paradigms.
+- **Styling UI:** Rely on Tailwind CSS, Radix UI components, and the **Breezy Weather Design System**. Use the shared `PageHeader` component for consistent headers across all tool pages. Ensure components are responsive, accessible, and maintain a high-quality visual standard using `.breezy-card` and `.breezy-chip` paradigms.
 - **Validations:** Use Zod for input validation and schema definitions in the `shared/` directory to keep both frontend and backend synchronized.
 
 **2. Focus on Visual Excellence & Performance**
@@ -40,7 +46,9 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 **4. Evolving Architecture & Deployment**
 - The project deploys on Vercel: Vite static build for the frontend, and a Node.js serverless function for the tRPC API.
 - The Hijri calendar uses an astronomical conjunction-based algorithm (SunCalc new moon detection), not the old arithmetic Kuwaiti algorithm.
+- The Globe and Map views are unified under `/visibility` with a toggle, not separate routes.
 - Backend changes should support Drizzle ORM schemas for telemetry ingestion (`observation_reports`) and proxying DEM/AOD data.
+- Clerk's `getAuth()` in `server/_core/context.ts` is wrapped in try/catch so public endpoints (like archive data) work without authentication middleware.
 
 **5. Update Documentation as You Go**
 - If you establish new patterns or discover unique edge-cases in the data pipeline, document them.

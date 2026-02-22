@@ -1,6 +1,6 @@
 # Hilal Vision — Full Application Documentation
 
-**Version:** Round 19 (current)
+**Version:** Round 20 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -67,10 +67,11 @@ hilal-vision/
 ├── ios/                ← Native iOS App container (Capacitor)
 ├── client/
 │   ├── src/
-│   │   ├── pages/          ← 10 page components
-│   │   ├── components/     ← Shared UI components
-│   │   ├── contexts/       ← React contexts (Location, ProMode, Theme)
-│   │   ├── hooks/          ← Custom hooks (useVisibilityTexture, useGeolocation)
+│   │   ├── pages/          ← 8 page components
+│   │   ├── components/     ← Shared UI components (PageHeader, LocationSearch, etc.)
+│   │   ├── contexts/       ← React contexts (Theme)
+│   │   ├── hooks/          ← Custom hooks (useVisibilityWorker, useGeolocation)
+│   │   ├── workers/        ← Web Workers (visibility.worker.ts)
 │   │   ├── lib/
 │   │   │   ├── astronomy.ts    ← Core calculation engine
 │   │   │   └── ummalqura.ts    ← Umm al-Qura calendar engine
@@ -80,8 +81,11 @@ hilal-vision/
 │   └── public/             ← Static assets
 ├── server/
 │   ├── routers.ts          ← tRPC procedures
+│   ├── routers/            ← Modular routers (archive.ts)
+│   ├── data/               ← ICOP sighting data (icop-history.json)
+│   ├── scripts/            ← Data scrapers (scrape-icop.ts)
 │   ├── db.ts               ← Database query helpers
-│   └── _core/              ← Framework plumbing (OAuth, tRPC, etc.)
+│   └── _core/              ← Framework plumbing (context, tRPC, server setup)
 ├── drizzle/
 │   └── schema.ts           ← Database schema
 ├── shared/
@@ -100,15 +104,14 @@ The application uses Wouter for client-side routing. All routes are wrapped in a
 | Path | Component | Description |
 |---|---|---|
 | `/` | `Home` | Landing page with live status cards and feature navigation |
-| `/dashboard` | `DashboardPage` | Unified multi-panel desktop dashboard |
-| `/globe` | `GlobePage` | Interactive 3D globe with visibility overlay |
-| `/map` | `MapPage` | Flat world map with time-slider heatmap |
+| `/visibility` | `VisibilityPage` | Unified page with 3D Globe / 2D Map toggle |
 | `/moon` | `MoonPage` | Moon phase detail with altitude charts |
-| `/calendar` | `CalendarPage` | Hijri calendar with Umm al-Qura comparison |
+| `/calendar` | `CalendarPage` | Hijri calendar with Islamic events |
 | `/horizon` | `HorizonPage` | Local horizon visibility simulator |
-| `/archive` | `ArchivePage` | Historical visibility archive (1000+ ICOP real-world records) |
-| `/ramadan` | `RamadanPage` | Ramadan start predictor 1447–1456 AH |
+| `/archive` | `ArchivePage` | Historical visibility archive (1,028+ ICOP real-world records) |
 | `/404` | `NotFound` | 404 error page |
+
+All tool pages share a consistent `PageHeader` component providing a unified header bar with icon, title (Cinzel serif), and subtitle, plus an optional right-side slot for page-specific controls (location pickers, dates, Hijri date badges).
 
 ---
 
@@ -492,18 +495,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 16 | Reach | SEO (dynamic titles), geolocation auto-detect (Horizon page), Vercel deployment |
 | 17 | Bug fixes | Infinite render loop fix (useMemo), Leaflet tile fix (ResizeObserver) |
 | 18 | Auth & Security | Implemented Clerk Auth and Upstash Redis rate limiting |
-| 19 | Feature & Mobile | Added ICOP scraped historical data logic, mathematical Zone F sighting rejection, and native mobile capacitor bridging |
+| 19 | Feature & Mobile | Added ICOP scraped historical data logic, mathematical Zone F sighting rejection, and native mobile Capacitor bridging |
+| 20 | UI Consistency | Unified PageHeader component across all tool pages (Moon, Calendar, Horizon, Archive, Globe, Map). Fixed Clerk `getAuth` crash for public tRPC endpoints. |
 
----
-
-## 11. Planned: Round 10 Design Overhaul
-
-The next major development round will apply a comprehensive design overhaul inspired by Breezy Weather's design system. The following changes are planned (tracked in `todo.md`):
-
-The **global CSS** will be rewritten with Breezy Weather's colour tokens adapted for the dark night-sky theme. The **navigation** will be redesigned with Breezy Weather's style — a more minimal, immersive header that blends into the page background. The **Home page** will be restructured with expandable card-based sections rather than a flat grid. Each feature page will be redesigned with the Breezy Weather card pattern: full-width primary content cards and half-width detail cards with decorative visual elements that encode data (e.g., a moon arc card for the moon path, a dot-scale card for visibility quality). The **Dashboard page** will be removed from the navigation and routing, consolidating the application around the individual feature pages.
-
-The design overhaul will not change any astronomical calculations or data — only the visual presentation layer will be modified.
-
----
-
-*Documentation updated February 2026. For the latest feature status, see `todo.md`.*
+*Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*
