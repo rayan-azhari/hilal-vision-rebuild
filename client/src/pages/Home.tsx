@@ -101,6 +101,7 @@ export default function Home() {
 
   const [time, setTime] = useState(new Date());
   useEffect(() => {
+    document.title = "Hilal Vision \u2014 Islamic Crescent Moon Visibility Platform";
     const id = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(id);
   }, []);

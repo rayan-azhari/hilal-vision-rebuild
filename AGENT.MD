@@ -12,11 +12,13 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 - **Database:** Drizzle ORM
 - **State & Data Fetching:** React Query (@tanstack/react-query)
 - **Package Manager:** pnpm
+- **Deployment:** Vercel (static frontend + serverless tRPC API at `api/trpc/[trpc].ts`)
 
 ## File Organization & Responsibilities
 
 - `client/` - Frontend React application. Contains UI components, pages, and client-side logic.
 - `server/` - Backend Node/Express application. API routes, tRPC routers, and server-side processing.
+- `api/` - Vercel serverless functions. Contains `trpc/[trpc].ts` which wraps the tRPC router for deployment.
 - `shared/` - Shared code between frontend and backend (e.g., Zod schemas, shared types).
 - `drizzle/` - Database migrations, schema definitions, and related configuration.
 
@@ -35,9 +37,10 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 - When debugging issues (e.g., Map rendering logic, data calculation issues in Astronomia/SunCalc), read stack traces carefully. Fix the specific type or logic error and test your changes before concluding a task.
 - Understand the context of the astronomical data (Yallop/Odeh criteria). Don't make assumptions about lunar visibility parameters without verifying against trusted logic.
 
-**4. Evolving Architecture & Telemetry Pipeline**
-- The project is evolving to support field observations and ML-based predictions. 
-- Backend changes should eventually support Drizzle ORM schemas for telemetry ingestion (`observation_reports`) and proxying DEM (elevation) and AOD (aerosol optical depth) data.
+**4. Evolving Architecture & Deployment**
+- The project deploys on Vercel: Vite static build for the frontend, and a Node.js serverless function for the tRPC API.
+- The Hijri calendar uses an astronomical conjunction-based algorithm (SunCalc new moon detection), not the old arithmetic Kuwaiti algorithm.
+- Backend changes should support Drizzle ORM schemas for telemetry ingestion (`observation_reports`) and proxying DEM/AOD data.
 
 **5. Update Documentation as You Go**
 - If you establish new patterns or discover unique edge-cases in the data pipeline, document them.

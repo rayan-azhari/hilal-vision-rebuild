@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   gregorianToHijri,
@@ -38,6 +38,10 @@ export default function CalendarPage() {
   const [viewYear, setViewYear] = useState(todayHijri.year);
   const [viewMonth, setViewMonth] = useState(todayHijri.month);
   const [selectedDay, setSelectedDay] = useState<number | null>(todayHijri.day);
+
+  useEffect(() => {
+    document.title = `Hijri Calendar \u2014 ${HIJRI_MONTHS[viewMonth - 1]?.en} ${viewYear} AH | Hilal Vision`;
+  }, [viewMonth, viewYear]);
 
   const monthInfo = HIJRI_MONTHS[viewMonth - 1];
   const daysInMonth = getDaysInHijriMonth(viewYear, viewMonth);

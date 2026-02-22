@@ -10,7 +10,7 @@
 - [x] Sun position calculations (altitude, azimuth, sunset time)
 - [x] Moon position calculations (altitude, azimuth, elongation, age)
 - [x] Yallop/Odeh crescent visibility criterion (q-value)
-- [x] Hijri calendar conversion utilities (Gregorian ↔ Hijri)
+- [x] Hijri calendar conversion utilities (Gregorian ↔ Hijri, conjunction-based)
 - [x] Day/night terminator geometry
 - [x] Major cities database (50+ cities worldwide)
 
@@ -79,3 +79,22 @@
 - [ ] 3D Globe: replace slow hex-bin point cloud with fast canvas texture overlay
 - [ ] Visibility Map: replace stepped rectangle grid with smooth SVG contour curves
 - [ ] Moon Phase: add sun/moon altitude chart (smooth curves, filled areas, day selector, rise/set cards)
+
+## Improvements (Round 3)
+- [x] Geolocation auto-detect (browser GPS + Nominatim reverse-geocoding)
+- [x] SEO: dynamic document.title on all pages
+- [x] Hijri calendar: conjunction-based SunCalc algorithm (replaces Kuwaiti arithmetic)
+- [x] Telemetry: rate limiting (5/min/IP), Zod validation, pagination
+- [x] Cleanup: removed Manus artifacts, dead routes, leaky dependencies
+- [x] Vercel deployment: `vercel.json`, serverless tRPC, `vercel-build` script
+- [x] Bug fix: infinite render loop on Map/Globe (useMemo + stable deps)
+- [x] Bug fix: Leaflet tiles not loading on tab switch (ResizeObserver + invalidateSize)
+
+## Future
+- [ ] Custom location search (geocoding API)
+- [ ] add location and Custom location search to Moon Phase page 
+- [ ] ICOP historical sighting data for archive
+- [ ] Server-side visibility grid precomputation
+- [ ] Weather/cloud cover integration on map
+- [ ] Educational "How to Sight the Moon" content
+- [ ] Replace Manus OAuth with standard auth provider (Clerk/NextAuth)

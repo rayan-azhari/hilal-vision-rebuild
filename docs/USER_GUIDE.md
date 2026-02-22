@@ -1,58 +1,97 @@
 # Hilal Vision User Guide
 
-Welcome to **Hilal Vision**, a precision astronomical platform designed for predicting, tracking, and crowdsourcing Islamic crescent moon sightings worldwide. This guide will walk you through the core features of the dashboard.
+Welcome to **Hilal Vision**, a precision astronomical platform designed for predicting, tracking, and crowdsourcing Islamic crescent moon sightings worldwide. This guide walks you through every feature.
 
-## Overview of the Interface
+## Navigation
 
-At the top of the screen, you will find the main navigation bar. This bar gives you access to the six primary views of the application, alongside the **Theme Toggle** (Light/Dark mode) and the **Report Sighting** button.
+The top navigation bar provides access to all views and includes:
+- **Theme Toggle** (Light/Dark mode)
+- **Report Sighting** button (golden `+` icon)
 
-### 1. Home Dashboard (`/`)
-The home page acts as your command center.
-- **Ephemeris Cards:** Displays the immediate astronomical data (Sunrise, Sighting Probability, etc.).
-- **Interactive Deep-Dives:** Any card with a subtle gold glow can be clicked to expand into a detailed scientific overlay. For instance, clicking the "Visibility Zone" card opens a detailed breakdown of the Yallop $q$-values and what the lettered zones (A-F) mean.
+---
 
-### 2. 3D Globe (`/globe`)
-An interactive, fluid 3D visualization of the Earth.
-- **Terminator Line:** Clearly distinguish between day and night globally.
-- **Visibility Overlay:** A colored texture mapped directly onto the globe highlights regions where the crescent moon is visible at sunset today. 
-- **Performance:** Rendering is heavily optimized to update smoothly when you change dates in the sidebar. The globe satellite texture dynamically matches your chosen Light or Dark theme.
+## 1. Home Dashboard (`/`)
 
-### 3. Visibility Map (`/map`)
-A precise 2D Leaflet map designed for rigorous planning.
-- **Heatmap Grid:** Overlaying the map is a grid of Yallop visibility probabilities.
-- **Time Controls:** Use the slider in the header to step backwards and forwards in time (up to 24 hours) to see how the mathematical visibility changes.
-- **Crowdsourced Data:** If any user has submitted a sighting report, it will appear here as a mapped pin! Green implies "Naked Eye", Blue implies "Optical Aid", and Grey implies the observer attempted but failed to see the moon.
+Your command center for at-a-glance astronomical data.
+- **Ephemeris Cards** — Sunrise time, sighting probability, current Hijri date, and more.
+- **Expandable Deep-Dives** — Cards with a subtle gold glow open into detailed scientific overlays when clicked.
 
-### 4. Moon Phase (`/moon`)
-A dedicated dashboard for analyzing the lunar cycle.
-- **Sun & Moon Altitude Tracker:** Scroll down to find the interactive Recharts graph. This plots the exact altitude of both the Sun (Yellow) and the Moon (Blue) throughout the current day. Move the slider to see how the celestial bodies track across the sky!
-- **Illumination Array:** Click the illumination card to view a sparkline graph of the moon's visibility percentage over the next month.
+## 2. Visibility (`/visibility`)
 
-### 5. Hijri Calendar (`/calendar`)
-A reliable converter tool.
-- View the current Gregorian month mapped against the corresponding Hijri (Islamic) dates.
-- It highlights significant upcoming events based on astronomical probabilities.
+A **unified page** with a floating toggle to switch between **3D Globe** and **2D Map** views. All controls are fully synchronized — changing the date, hour offset, or location on one view carries over instantly to the other.
 
-### 6. Horizon View (`/horizon`)
-A local simulator answering the question: *"Where should I look?"*
-- Input your city, and the simulator calculates exactly where the moon is on the horizon relative to the setting sun.
+### Shared Controls (both views)
+- **Date Picker** — Select any Gregorian date.
+- **Hour Offset Slider** — Slide ±24 hours to see visibility evolve over time.
+- **Location Selector** — Choose from 85+ world capitals, or use **Auto-Detect GPS** to fly to your current position.
+
+### 3D Globe View
+- Interactive Globe.gl sphere with day/night terminator.
+- Smooth Gaussian-blurred visibility zone overlay mapped directly onto the sphere.
+- Play/Pause auto-rotation and toggle the visibility overlay on/off.
+- Sidebar shows live astronomical data for the selected city: Moon altitude, azimuth, elongation, ARCV, crescent width, Yallop q-value, illumination, sunset, and moonset times.
+
+### 2D Map View
+- Leaflet map with dark/light CARTO basemaps.
+- Web Mercator–projected visibility heatmap with smooth Gaussian-blurred zone boundaries.
+- **Click anywhere** on the map to inspect the visibility zone for that exact coordinate.
+- Crowdsourced sighting pins: 🟢 Naked Eye, 🔵 Optical Aid, ⚪ Not Seen.
+- Resolution selector: Fine (2°), Normal (4°), or Fast (6°).
+
+## 3. Moon Phase (`/moon`)
+
+A dedicated dashboard for the lunar cycle.
+- **Sun & Moon Altitude Tracker** (top of page) — Interactive chart plotting Sun and Moon altitudes throughout the day.
+- **Moon Illustration** — Accurate SVG rendering of the current phase with craters and terminator.
+- **Stats Grid** — Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown.
+- **Ephemeris** — Sunrise, Sunset, Moonrise, and Moonset times.
+- **30-Day Phase Calendar** — Visual strip of tiny moon phase icons for the surrounding month.
+- **Scientific Methodology** (bottom) — Pro-level section with:
+  - **Yallop (1997) Criterion** explanation and formula
+  - **Interactive Threshold Curve** (Recharts) — ARCV vs Crescent Width with Zone A/C boundaries
+  - **Danjon Limit** physics (elongation < 7° is physically impossible)
+  - **Atmospheric Refraction** notes
+
+## 4. Hijri Calendar (`/calendar`)
+
+- View the current Gregorian month mapped against Hijri dates.
+- The Hijri dates are computed using an **astronomical conjunction-based algorithm** powered by SunCalc, which finds the actual new moon for each month boundary. This is accurate to ±1 day of the official Umm al-Qura calendar used in Saudi Arabia.
+- Highlights significant upcoming events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid).
+- Each day shows a small moon phase icon.
+
+## 5. Horizon View (`/horizon`)
+
+- Input your city and see exactly where the moon sits on the horizon relative to the setting sun.
+- **Detect My Location** button uses the browser Geolocation API to auto-fill your GPS coordinates, with reverse-geocoding via Nominatim to display a human-readable location name.
+- Custom latitude/longitude input for precise positioning.
+
+## 6. Archive (`/archive`)
+
+- Historical crescent visibility data and maps (1438–1465 AH).
+
+---
+
+## 🔍 SEO
+
+Every page sets a dynamic `document.title` for better search engine discoverability. Titles include the page name and the Hilal Vision brand.
 
 ---
 
 ## 📡 Crowdsourcing Sighting Reports
 
-Hilal Vision's most powerful feature is its live telemetry. We rely on users around the world to report what they see in the sky to validate our mathematical models.
-
-### How to Submit a Report:
-1. Click the golden **"Report Sighting" (+)** button in the top navigation bar.
-2. Click **"Auto-detect Location"** to allow your browser to grab your exact GPS coordinates. *(Note: We do not track you; this data is only used to validate the astronomy at your specific geographic location).*
-3. Set the **Observation Time**. Ensure this perfectly matches the moment you attempted the sighting.
-4. Select your **Observation Result**:
-   - **Seen with Naked Eye:** You saw the crescent clearly without any binoculars or telescopes.
-   - **Seen with Optical Aid:** You had to use a tool to spot it.
-   - **Attempted, but Not Seen:** *This is crucial data!* Negative data helps us define the edge of the visibility curves.
-5. Add any relevant **Notes**, such as "Thick clouds in the western sky."
+### How to Submit a Report
+1. Click the golden **"Report Sighting" (+)** button in the navigation bar.
+2. Click **"Auto-detect Location"** to grab your GPS coordinates.
+3. Set the **Observation Time** precisely.
+4. Select your result:
+   - **Seen with Naked Eye** — Clear sighting without instruments.
+   - **Seen with Optical Aid** — Required binoculars/telescope.
+   - **Attempted, Not Seen** — This negative data is equally valuable for refining models.
+5. Add optional **Notes** (max 1000 characters).
 6. Click **Submit Sighting**.
 
-**What happens behind the scenes?**
-When you hit submit, our backend servers instantly contact **Open-Meteo's** meteorological APIs to grab the live Cloud Cover percentage, Surface Pressure, and Aerosol Optical Depth (Air Pollution/Smog) at your exact coordinates. We store this environmental data alongside your report to construct a bulletproof dataset for future Machine Learning validation.
+### What Happens Behind the Scenes
+- **Rate Limiting** — The server enforces a limit of 5 submissions per minute per IP to prevent abuse.
+- **Input Validation** — All fields are validated with strict Zod schemas (coordinate bounds, temperature ranges, etc.).
+- **Meteorological Enrichment** — The backend automatically contacts **Open-Meteo** APIs to fetch live Cloud Cover, Surface Pressure, and Aerosol Optical Depth at your exact coordinates, storing this data alongside your report.
+- **Paginated Retrieval** — Observation queries support limit/offset pagination (default 50 results).

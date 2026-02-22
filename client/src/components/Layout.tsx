@@ -4,11 +4,11 @@ import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusC
 import { useTheme } from "@/contexts/ThemeContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SightingReportForm } from "./SightingReportForm";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/globe", label: "3D Globe", icon: Globe },
-  { href: "/map", label: "Visibility Map", icon: Map },
+  { href: "/visibility", label: "Visibility", icon: Globe },
   { href: "/moon", label: "Moon Phase", icon: Moon },
   { href: "/calendar", label: "Hijri Calendar", icon: Calendar },
   { href: "/horizon", label: "Horizon View", icon: Compass },
@@ -142,6 +142,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               >
                 {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
+
+              <SignedIn>
+                <div className="flex items-center justify-center p-1 rounded-full border border-white/10 ml-1">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: "w-7 h-7",
+                      },
+                    }}
+                  />
+                </div>
+              </SignedIn>
+
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ml-1"
+                    style={{
+                      background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
+                      color: "var(--foreground)",
+                    }}
+                  >
+                    Sign In
+                  </button>
+                </SignInButton>
+              </SignedOut>
+
               <button
                 className="lg:hidden p-2 rounded-lg"
                 style={{ color: "var(--gold)" }}

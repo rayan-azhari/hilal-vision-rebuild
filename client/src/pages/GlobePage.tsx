@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
-import { Globe2, Play, Pause, ChevronDown } from "lucide-react";
+import { Globe2, Play, Pause, ChevronDown, MapPin, Clock } from "lucide-react";
 import {
   computeSunMoonAtSunset,
   isDaylight,
@@ -9,75 +9,27 @@ import {
   VISIBILITY_LABELS,
   type VisibilityZone,
 } from "@/lib/astronomy";
+import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
+import type { SharedVisibilityState } from "./VisibilityPage";
 
-// Visibility zone colours as [r, g, b]
-const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
-  A: [74, 222, 128],
-  B: [250, 204, 21],
-  C: [251, 146, 60],
-  D: [248, 113, 113],
-  E: [107, 114, 128],
-  F: [31, 41, 55],
-};
 
-const ZONE_HEX: Record<VisibilityZone, string> = {
-  A: "#4ade80",
-  B: "#facc15",
-  C: "#fb923c",
-  D: "#f87171",
-  E: "#6b7280",
-  F: "#1f2937",
-};
-
-/**
- * Build a 512×256 canvas texture encoding visibility zones.
- * Each pixel maps to a lat/lng grid point.
- * Returns a data URL.
- */
-function buildVisibilityTexture(date: Date): string {
-  // Lower resolution for substantially faster rendering
-  const W = 128;
-  const H = 64;
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d")!;
-  const imageData = ctx.createImageData(W, H);
-  const data = imageData.data;
-
-  for (let py = 0; py < H; py++) {
-    const lat = 90 - (py / H) * 180; // +90 at top → -90 at bottom
-    for (let px = 0; px < W; px++) {
-      const lng = -180 + (px / W) * 360;
-      const result = computeSunMoonAtSunset(date, { lat, lng });
-      const [r, g, b] = ZONE_RGB[result.visibility];
-      const night = !isDaylight(lat, lng, date);
-      const alpha = result.visibility === "F" ? 40 : night ? 100 : 180;
-      const idx = (py * W + px) * 4;
-      data[idx] = r;
-      data[idx + 1] = g;
-      data[idx + 2] = b;
-      data[idx + 3] = alpha;
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-  return canvas.toDataURL();
-}
-
-export default function GlobePage() {
+export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
+  const { date, setDate, hourOffset, setHourOffset, selectedCity, setSelectedCity } = shared;
   const globeRef = useRef<HTMLDivElement>(null);
   const globeInstanceRef = useRef<any>(null);
-  const [date, setDate] = useState(() => new Date());
-  const [selectedCity, setSelectedCity] = useState(MAJOR_CITIES[0]);
   const [moonData, setMoonData] = useState(() =>
     computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0])
   );
   const [isAutoRotate, setIsAutoRotate] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showVisibility, setShowVisibility] = useState(true);
-  const hijri = gregorianToHijri(date);
+
+  const effectiveDate = useMemo(
+    () => new Date(date.getTime() + hourOffset * 3600 * 1000),
+    [date, hourOffset]
+  );
+  const hijri = useMemo(() => gregorianToHijri(date), [date]);
   const { theme } = useTheme();
 
   // Initialize globe once
@@ -116,52 +68,56 @@ export default function GlobePage() {
     };
   }, []);
 
-  // Recompute texture when date changes (in a worker-like async pattern)
+  // Recompute texture when date changes (via Web Worker)
+  const effectiveDateTs = effectiveDate.getTime();
+  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility);
+
+  // Sync loading state
+  useEffect(() => {
+    setIsLoading(isComputing);
+  }, [isComputing]);
+
+  // Compute local moon data and labels
   useEffect(() => {
     const globe = globeInstanceRef.current;
     if (!globe) return;
 
-    setIsLoading(true);
-    setMoonData(computeSunMoonAtSunset(date, selectedCity));
+    setMoonData(computeSunMoonAtSunset(new Date(effectiveDateTs), selectedCity));
 
-    // Defer heavy texture build off the main paint
-    const id = setTimeout(() => {
-      if (showVisibility) {
-        const textureUrl = buildVisibilityTexture(date);
+    // City label
+    globe
+      .labelsData([selectedCity])
+      .labelLat((d: any) => d.lat)
+      .labelLng((d: any) => d.lng)
+      .labelText((d: any) => d.name)
+      .labelSize(1.2)
+      .labelColor(() => "#c8a040")
+      .labelDotRadius(0.4)
+      .labelAltitude(0.01);
+  }, [effectiveDateTs, selectedCity]);
 
-        // Render texture on a slightly larger sphere
-        const r = globe.getGlobeRadius();
-        const geometry = new THREE.SphereGeometry(r * 1.002, 72, 72);
-        const material = new THREE.MeshBasicMaterial({
-          map: new THREE.TextureLoader().load(textureUrl),
-          transparent: true,
-          opacity: 1,
-          depthWrite: false, // Prevents z-fighting
-        });
-        const overlayMesh = new THREE.Mesh(geometry, material);
+  // Apply visibility overlay
+  useEffect(() => {
+    const globe = globeInstanceRef.current;
+    if (!globe) return;
 
-        globe.customLayerData([{}])
-          .customThreeObject(() => overlayMesh);
-      } else {
-        globe.customLayerData([]);
-      }
+    if (showVisibility && textureUrl) {
+      const r = globe.getGlobeRadius();
+      const geometry = new THREE.SphereGeometry(r * 1.002, 72, 72);
+      const material = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(textureUrl),
+        transparent: true,
+        opacity: 1,
+        depthWrite: false, // Prevents z-fighting
+      });
+      const overlayMesh = new THREE.Mesh(geometry, material);
 
-      // City label
-      globe
-        .labelsData([selectedCity])
-        .labelLat((d: any) => d.lat)
-        .labelLng((d: any) => d.lng)
-        .labelText((d: any) => d.name)
-        .labelSize(1.2)
-        .labelColor(() => "#c8a040")
-        .labelDotRadius(0.4)
-        .labelAltitude(0.01);
-
-      setIsLoading(false);
-    }, 50);
-
-    return () => clearTimeout(id);
-  }, [date, selectedCity, showVisibility]);
+      globe.customLayerData([{}])
+        .customThreeObject(() => overlayMesh);
+    } else {
+      globe.customLayerData([]);
+    }
+  }, [showVisibility, textureUrl]);
 
   // Sync auto-rotate
   useEffect(() => {
@@ -203,7 +159,7 @@ export default function GlobePage() {
   const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
+    <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
       {/* Page header */}
       <div
         className="border-b px-6 py-4 flex items-center justify-between"
@@ -301,11 +257,68 @@ export default function GlobePage() {
               />
             </div>
 
+            {/* Hour Offset */}
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "25ms" }}>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Hour Offset</label>
+                <span className="text-xs font-mono" style={{ color: "var(--gold)" }}>
+                  {hourOffset >= 0 ? "+" : ""}{hourOffset}h
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" style={{ color: "var(--gold-dim)" }} />
+                <input
+                  type="range"
+                  min={-24}
+                  max={24}
+                  step={1}
+                  value={hourOffset}
+                  onChange={e => setHourOffset(Number(e.target.value))}
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, var(--gold) ${((hourOffset + 24) / 48) * 100}%, var(--space-light) ${((hourOffset + 24) / 48) * 100}%)`,
+                    accentColor: "var(--gold)",
+                  }}
+                />
+              </div>
+            </div>
+
             {/* City selector */}
             <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
-              <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>
-                Location
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
+                  Location
+                </label>
+                <button
+                  onClick={() => {
+                    if ("geolocation" in navigator) {
+                      navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                          const newCity = {
+                            name: "GPS Location",
+                            country: "Current",
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude
+                          };
+                          // Add to list if not present so it shows up in select
+                          if (!MAJOR_CITIES.find(c => c.name === "GPS Location")) {
+                            MAJOR_CITIES.unshift(newCity);
+                          }
+                          setSelectedCity(newCity);
+                          globeInstanceRef.current?.pointOfView({ lat: newCity.lat, lng: newCity.lng, altitude: 2 }, 1000);
+                        },
+                        () => alert("Could not retrieve GPS location.")
+                      );
+                    } else {
+                      alert("Geolocation is not supported by your browser.");
+                    }
+                  }}
+                  className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider hover:opacity-80 transition-opacity"
+                  style={{ color: "var(--gold)" }}
+                >
+                  <MapPin className="w-3 h-3" /> Auto-Detect
+                </button>
+              </div>
               <div className="relative">
                 <select
                   value={selectedCity.name}
@@ -338,14 +351,15 @@ export default function GlobePage() {
 
             {/* Moon data */}
             <div className="breezy-card space-y-3 p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Visibility</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Visibility Zones</span>
+              </div>
+              <div className="flex items-center gap-1.5 mb-2">
                 <span
-                  className="text-xs font-bold px-2 py-0.5 rounded-full"
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{
-                    background: `${ZONE_HEX[moonData.visibility]}22`,
-                    color: ZONE_HEX[moonData.visibility],
-                    border: `1px solid ${ZONE_HEX[moonData.visibility]}44`,
+                    background: `var(--gold-dim)`,
+                    color: "var(--background)",
                   }}
                 >
                   Zone {moonData.visibility} — {VISIBILITY_LABELS[moonData.visibility].label}
@@ -376,9 +390,8 @@ export default function GlobePage() {
               <div className="space-y-1.5">
                 {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
                   <div key={zone} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: ZONE_HEX[zone] }} />
-                    <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                      {zone} — {VISIBILITY_LABELS[zone].label}
+                    <span className="text-xs" style={{ color: "var(--foreground)" }}>
+                      <strong style={{ color: "var(--gold)" }}>{zone}</strong> — {VISIBILITY_LABELS[zone].label}
                     </span>
                   </div>
                 ))}

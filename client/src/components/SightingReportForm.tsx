@@ -1,7 +1,4 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { MapPin, Loader2, CheckCircle2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -9,20 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-
-const formSchema = z.object({
-    lat: z.number(),
-    lng: z.number(),
-    observationTime: z.string(),
-    visualSuccess: z.enum(["naked_eye", "optical_aid", "not_seen"]),
-    notes: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useUser, SignInButton } from "@clerk/clerk-react";
 
 export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
+    const { isSignedIn } = useUser();
     const [isLocating, setIsLocating] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+
+    // Form state
+    const [lat, setLat] = useState<number | "">("");
+    const [lng, setLng] = useState<number | "">("");
+    const [observationTime, setObservationTime] = useState(
+        new Date().toISOString().slice(0, 16) // YYYY-MM-DDThh:mm for datetime-local
+    );
+    const [visualSuccess, setVisualSuccess] = useState<"naked_eye" | "optical_aid" | "not_seen" | "">("");
+    const [notes, setNotes] = useState("");
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const submitMutation = trpc.telemetry.submitObservation.useMutation({
         onSuccess: () => {
@@ -33,29 +32,14 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
         }
     });
 
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        watch,
-        formState: { errors }
-    } = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            observationTime: new Date().toISOString().slice(0, 16), // YYYY-MM-DDThh:mm format for datetime-local
-        }
-    });
-
-    const lat = watch("lat");
-    const lng = watch("lng");
-
     const handleGetLocation = () => {
         setIsLocating(true);
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    setValue("lat", position.coords.latitude, { shouldValidate: true });
-                    setValue("lng", position.coords.longitude, { shouldValidate: true });
+                    setLat(position.coords.latitude);
+                    setLng(position.coords.longitude);
+                    setErrors((e) => ({ ...e, lat: "", lng: "" }));
                     setIsLocating(false);
                 },
                 (error) => {
@@ -70,11 +54,26 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
         }
     };
 
-    const onSubmit = (data: FormValues) => {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const newErrors: Record<string, string> = {};
+
+        if (lat === "" || isNaN(Number(lat))) newErrors.lat = "Latitude is required";
+        if (lng === "" || isNaN(Number(lng))) newErrors.lng = "Longitude is required";
+        if (!observationTime) newErrors.observationTime = "Observation time is required";
+        if (!visualSuccess) newErrors.visualSuccess = "Please select an observation result";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         submitMutation.mutate({
-            ...data,
-            // Convert browser datetime-local back to proper ISO string
-            observationTime: new Date(data.observationTime).toISOString(),
+            lat: Number(lat),
+            lng: Number(lng),
+            observationTime: new Date(observationTime).toISOString(),
+            visualSuccess: visualSuccess as "naked_eye" | "optical_aid" | "not_seen",
+            notes: notes || undefined,
         });
     };
 
@@ -92,8 +91,21 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
         );
     }
 
+    if (!isSignedIn) {
+        return (
+            <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
+                <p className="text-sm text-muted-foreground">
+                    You must be signed in to submit a sighting report. This helps us ensure data quality and avoid spam.
+                </p>
+                <SignInButton mode="modal">
+                    <Button>Sign in to Report</Button>
+                </SignInButton>
+            </div>
+        );
+    }
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
                 <Label>Location Coordinates</Label>
                 <div className="flex gap-2">
@@ -101,13 +113,15 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                         type="number"
                         step="any"
                         placeholder="Latitude"
-                        {...register("lat", { valueAsNumber: true })}
+                        value={lat}
+                        onChange={(e) => setLat(e.target.value === "" ? "" : Number(e.target.value))}
                     />
                     <Input
                         type="number"
                         step="any"
                         placeholder="Longitude"
-                        {...register("lng", { valueAsNumber: true })}
+                        value={lng}
+                        onChange={(e) => setLng(e.target.value === "" ? "" : Number(e.target.value))}
                     />
                 </div>
                 {(errors.lat || errors.lng) && (
@@ -130,16 +144,17 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 <Label>Observation Time (Local)</Label>
                 <Input
                     type="datetime-local"
-                    {...register("observationTime")}
+                    value={observationTime}
+                    onChange={(e) => setObservationTime(e.target.value)}
                 />
                 {errors.observationTime && (
-                    <p className="text-xs text-destructive">{errors.observationTime.message}</p>
+                    <p className="text-xs text-destructive">{errors.observationTime}</p>
                 )}
             </div>
 
             <div className="space-y-2">
                 <Label>Observation Result</Label>
-                <Select onValueChange={(val: any) => setValue("visualSuccess", val, { shouldValidate: true })}>
+                <Select onValueChange={(val: any) => { setVisualSuccess(val); setErrors(e => ({ ...e, visualSuccess: "" })); }}>
                     <SelectTrigger>
                         <SelectValue placeholder="Select outcome..." />
                     </SelectTrigger>
@@ -150,7 +165,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                     </SelectContent>
                 </Select>
                 {errors.visualSuccess && (
-                    <p className="text-xs text-destructive">{errors.visualSuccess.message}</p>
+                    <p className="text-xs text-destructive">{errors.visualSuccess}</p>
                 )}
             </div>
 
@@ -158,7 +173,8 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 <Label>Notes / Weather Details</Label>
                 <Textarea
                     placeholder="E.g. Clear skies, slight haze on horizon..."
-                    {...register("notes")}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
                     className="resize-none h-20"
                 />
             </div>

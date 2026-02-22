@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/clerk-react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -5,21 +6,27 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import GlobePage from "./pages/GlobePage";
-import MapPage from "./pages/MapPage";
+import VisibilityPage from "./pages/VisibilityPage";
 import MoonPage from "./pages/MoonPage";
 import CalendarPage from "./pages/CalendarPage";
 import HorizonPage from "./pages/HorizonPage";
 import ArchivePage from "./pages/ArchivePage";
 import Layout from "./components/Layout";
 
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
+
 function Router() {
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/globe" component={GlobePage} />
-        <Route path="/map" component={MapPage} />
+        <Route path="/visibility" component={VisibilityPage} />
+        <Route path="/globe" component={VisibilityPage} />
+        <Route path="/map" component={VisibilityPage} />
         <Route path="/moon" component={MoonPage} />
         <Route path="/calendar" component={CalendarPage} />
         <Route path="/horizon" component={HorizonPage} />
@@ -34,21 +41,23 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" switchable>
-        <TooltipProvider>
-          <Toaster
-            theme="dark"
-            toastOptions={{
-              style: {
-                background: "oklch(0.10 0.018 265)",
-                border: "1px solid oklch(0.78 0.15 75 / 0.2)",
-                color: "oklch(0.93 0.01 80)",
-              },
-            }}
-          />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <ThemeProvider defaultTheme="dark" switchable>
+          <TooltipProvider>
+            <Toaster
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: "oklch(0.10 0.018 265)",
+                  border: "1px solid oklch(0.78 0.15 75 / 0.2)",
+                  color: "oklch(0.93 0.01 80)",
+                },
+              }}
+            />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
+      </ClerkProvider>
     </ErrorBoundary>
   );
 }

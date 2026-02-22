@@ -100,6 +100,10 @@ export default function ArchivePage() {
   const [monthDetail, setMonthDetail] = useState<MonthSummary | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
+  useEffect(() => {
+    document.title = `Archive \u2014 ${selectedYear} AH | Hilal Vision`;
+  }, [selectedYear]);
+
   const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
 
   const handleMonthClick = (month: number) => {

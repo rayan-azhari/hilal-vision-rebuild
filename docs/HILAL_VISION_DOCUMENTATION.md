@@ -1,8 +1,8 @@
 # Hilal Vision — Full Application Documentation
 
-**Version:** Round 9 (current) | **Round 10 planned**
+**Version:** Round 14 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
-**Live URL:** https://hilal-vision.manus.space
+**Deployment:** Vercel (static frontend + serverless tRPC API)
 
 ---
 
@@ -64,7 +64,7 @@ hilal-vision/
 │   │   ├── pages/          ← 10 page components
 │   │   ├── components/     ← Shared UI components
 │   │   ├── contexts/       ← React contexts (Location, ProMode, Theme)
-│   │   ├── hooks/          ← Custom hooks (useVisibilityTexture)
+│   │   ├── hooks/          ← Custom hooks (useVisibilityTexture, useGeolocation)
 │   │   ├── lib/
 │   │   │   ├── astronomy.ts    ← Core calculation engine
 │   │   │   └── ummalqura.ts    ← Umm al-Qura calendar engine
@@ -80,6 +80,9 @@ hilal-vision/
 │   └── schema.ts           ← Database schema
 ├── shared/
 │   └── types.ts            ← Shared TypeScript types
+├── api/
+│   └── trpc/[trpc].ts      ← Vercel serverless tRPC handler
+├── vercel.json             ← Vercel deployment configuration
 ├── todo.md                 ← Feature tracking
 └── DOCUMENTATION.md        ← This file
 ```
@@ -259,9 +262,18 @@ The Odeh criterion is displayed in Pro Mode as an alternative classification, al
 
 ### 5.4 Hijri Calendar Conversion
 
-The application implements the **Kuwaiti algorithmic Hijri calendar** for Gregorian-to-Hijri conversion. This is a purely mathematical approximation based on the mean lunar cycle, not an observational calendar. The algorithm converts a Gregorian date to a Julian Day Number (JDN) and then applies the Hijri calendar epoch (1 Muharram 1 AH = 16 July 622 CE Julian) to compute the Hijri year, month, and day.
+The application uses an **astronomical conjunction-based algorithm** for Gregorian-to-Hijri conversion. Instead of the older Kuwaiti arithmetic approximation, the converter uses SunCalc's `getMoonIllumination()` to find the actual new moon (conjunction) for each month boundary.
 
-The conversion is accurate to within ±1 day for most dates but may differ from the observational Hijri calendar used in specific countries, which is why the application also provides the Umm al-Qura calendar as an alternative.
+**Algorithm:**
+1. A known epoch is established: **1 Muharram 1446 AH ≈ July 7, 2024** (conjunction date).
+2. `findNewMoonNear()` searches for the phase minimum in two passes: a coarse 6-hour sweep (±15 days) followed by a fine 30-minute sweep (±6 hours).
+3. New moon dates are cached in a `Map<number, Date>` keyed by month offset from the epoch, so each new moon is computed only once.
+4. `gregorianToHijri()` estimates the month offset from the epoch, then checks adjacent months to find the one containing the target date.
+5. The day within the month is simply `floor(days since month start) + 1`.
+
+The conversion is accurate to ±1 day of the official **Umm al-Qura** calendar used in Saudi Arabia. The 1-day variance is inherent to the difference between astronomical conjunction and the actual crescent sighting that determines the official calendar.
+
+The Kuwaiti arithmetic algorithm is retained as an internal fallback for dates far from the epoch.
 
 ### 5.5 World Visibility Grid
 
@@ -409,17 +421,27 @@ export const users = mysqlTable("users", {
 
 ### 8.2 tRPC API
 
-The tRPC router (`server/routers.ts`) currently exposes only the authentication procedures:
+The tRPC router (`server/routers.ts`) exposes authentication and telemetry procedures:
 
 - `auth.me` — Returns the current user session (public procedure)
 - `auth.logout` — Clears the session cookie (public procedure)
-- `system.notifyOwner` — Sends a notification to the project owner (protected procedure, from system router)
+- `telemetry.submitObservation` — Submits a crescent sighting report (public, rate-limited to 5/min/IP, Zod-validated)
+- `telemetry.getObservations` — Retrieves sighting reports with pagination (public, default 50 results)
 
-All astronomical calculations are performed client-side, so no feature-specific tRPC procedures are needed at this time.
+All astronomical calculations are performed client-side. The telemetry endpoints store crowdsourced sighting data and automatically enrich reports with Open-Meteo weather data (cloud cover, surface pressure, aerosol optical depth).
 
 ### 8.3 Authentication
 
-Authentication uses Manus OAuth. The OAuth flow completes at `/api/oauth/callback`, which sets a signed JWT session cookie. The `auth.me` procedure returns the current user object if logged in, or `null` if not. Authentication is not required to use any feature of the application — all pages are publicly accessible.
+Authentication previously used Manus OAuth, which has been removed as it is platform-specific. The application is fully functional without authentication — all pages and API endpoints are publicly accessible. A standard auth provider (e.g., Clerk, NextAuth) can be added in the future if user accounts are needed.
+
+### 8.4 Vercel Deployment
+
+The application is configured for Vercel deployment:
+
+- **Frontend**: Vite builds static assets to `dist/public/`, served from Vercel's CDN.
+- **Backend**: The tRPC API runs as a Vercel Node.js serverless function at `api/trpc/[trpc].ts`, wrapping the existing tRPC router with the `@trpc/server/adapters/fetch` adapter.
+- **Configuration**: `vercel.json` defines build commands, output directory, and routing rules (API rewrites + SPA fallback).
+- **Environment Variables**: `DATABASE_URL` (optional, for telemetry persistence).
 
 ---
 
@@ -452,6 +474,10 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 11 | Enhancements | Moon altitude chart (5-min intervals), map time slider (15-min granularity) |
 | 12 | Ramadan | Ramadan start predictor page (1447–1456 AH), city-by-city comparison |
 | 13 | Bug fixes | Countdown logic fix, dashboard map width fix, moon phase curve density fix |
+| 14 | Hardening | Manus artifact removal, dead route cleanup, telemetry rate limiting, Zod validation |
+| 15 | Accuracy | Conjunction-based Hijri calendar (SunCalc), moon phase chart verification |
+| 16 | Reach | SEO (dynamic titles), geolocation auto-detect (Horizon page), Vercel deployment |
+| 17 | Bug fixes | Infinite render loop fix (useMemo), Leaflet tile fix (ResizeObserver) |
 
 ---
 
@@ -465,4 +491,4 @@ The design overhaul will not change any astronomical calculations or data — on
 
 ---
 
-*Documentation generated February 2026. For the latest feature status, see `todo.md`.*
+*Documentation updated February 2026. For the latest feature status, see `todo.md`.*

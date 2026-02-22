@@ -6,6 +6,7 @@ import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
 import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
+import { PhysicsExplanations } from "@/components/PhysicsExplanations";
 
 function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number }) {
   const r = size / 2 - 4;
@@ -153,6 +154,7 @@ export default function MoonPage() {
   const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
+    document.title = `Moon Phase \u2014 ${moonInfo.phaseName} (${moonInfo.illumination}%) | Hilal Vision`;
     setMoonInfo(getMoonPhaseInfo(date));
     setSunMoon(computeSunMoonAtSunset(date, location));
   }, [date, location]);
@@ -214,7 +216,19 @@ export default function MoonPage() {
         />
       </div>
 
-      <div className="container py-8">
+      <div className="container py-8 flex flex-col gap-6">
+
+        {/* Sun & Moon Altitude Chart (Moved to Top) */}
+        <BreezyFullCard
+          title="Sun & Moon Altitude Tracker"
+          icon={<Clock className="w-4 h-4" />}
+          className="animate-breezy-enter"
+        >
+          <div className="p-2 mt-4 w-full">
+            <SunMoonAltitudeChart date={date} location={location} />
+          </div>
+        </BreezyFullCard>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Moon illustration */}
@@ -338,16 +352,6 @@ export default function MoonPage() {
               </div>
             </BreezyFullCard>
 
-            {/* Sun & Moon Altitude Chart */}
-            <BreezyFullCard
-              title="Sun & Moon Altitude Tracker"
-              icon={<Clock className="w-4 h-4" />}
-              className="col-span-1 sm:col-span-2 md:col-span-3 animate-breezy-enter"
-            >
-              <div className="p-2 mt-4">
-                <SunMoonAltitudeChart date={date} location={location} />
-              </div>
-            </BreezyFullCard>
           </div>
 
           {/* 30-day phase calendar */}
@@ -361,6 +365,10 @@ export default function MoonPage() {
             </div>
           </BreezyFullCard>
         </div>
+
+        {/* Physics Explanations for Pro Users */}
+        <PhysicsExplanations />
+
       </div>
     </div>
   );

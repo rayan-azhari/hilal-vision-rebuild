@@ -4,7 +4,7 @@
  * Uses SunCalc for sun/moon positions and adds Islamic-specific calculations.
  */
 
-import SunCalc from "suncalc";
+import * as SunCalc from "suncalc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -72,27 +72,27 @@ export interface HijriDate {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const HIJRI_MONTHS = [
-  { en: "Muharram",     ar: "مُحَرَّم",      short: "MUH" },
-  { en: "Safar",        ar: "صَفَر",         short: "SFR" },
-  { en: "Rabi al-Awwal",ar: "رَبِيع الأَوَّل",short: "RBA" },
-  { en: "Rabi al-Thani",ar: "رَبِيع الثَّانِي",short: "RBT" },
-  { en: "Jumada al-Ula",ar: "جُمَادَى الأُولَى",short: "JMO" },
-  { en: "Jumada al-Akhira",ar: "جُمَادَى الآخِرَة",short: "JMT" },
-  { en: "Rajab",        ar: "رَجَب",         short: "RJB" },
-  { en: "Sha'ban",      ar: "شَعْبَان",       short: "SHB" },
-  { en: "Ramadan",      ar: "رَمَضَان",       short: "RMD" },
-  { en: "Shawwal",      ar: "شَوَّال",        short: "SHW" },
-  { en: "Dhu al-Qi'dah",ar: "ذُو الْقَعْدَة",short: "ZQD" },
-  { en: "Dhu al-Hijjah",ar: "ذُو الْحِجَّة", short: "ZHJ" },
+  { en: "Muharram", ar: "مُحَرَّم", short: "MUH" },
+  { en: "Safar", ar: "صَفَر", short: "SFR" },
+  { en: "Rabi al-Awwal", ar: "رَبِيع الأَوَّل", short: "RBA" },
+  { en: "Rabi al-Thani", ar: "رَبِيع الثَّانِي", short: "RBT" },
+  { en: "Jumada al-Ula", ar: "جُمَادَى الأُولَى", short: "JMO" },
+  { en: "Jumada al-Akhira", ar: "جُمَادَى الآخِرَة", short: "JMT" },
+  { en: "Rajab", ar: "رَجَب", short: "RJB" },
+  { en: "Sha'ban", ar: "شَعْبَان", short: "SHB" },
+  { en: "Ramadan", ar: "رَمَضَان", short: "RMD" },
+  { en: "Shawwal", ar: "شَوَّال", short: "SHW" },
+  { en: "Dhu al-Qi'dah", ar: "ذُو الْقَعْدَة", short: "ZQD" },
+  { en: "Dhu al-Hijjah", ar: "ذُو الْحِجَّة", short: "ZHJ" },
 ];
 
 export const VISIBILITY_LABELS: Record<VisibilityZone, { label: string; color: string; desc: string }> = {
-  A: { label: "Easily Visible",       color: "#4ade80", desc: "Naked eye sighting highly probable" },
-  B: { label: "Visible",              color: "#facc15", desc: "Visible under good conditions" },
-  C: { label: "Optical Aid Helpful",  color: "#fb923c", desc: "Binoculars may be needed" },
-  D: { label: "Optical Aid Only",     color: "#f87171", desc: "Only visible with telescope" },
-  E: { label: "Not Visible",          color: "#6b7280", desc: "Below visibility threshold" },
-  F: { label: "Below Horizon",        color: "#374151", desc: "Moon sets before or with sun" },
+  A: { label: "Easily Visible", color: "#4ade80", desc: "Naked eye sighting highly probable" },
+  B: { label: "Visible", color: "#facc15", desc: "Visible under good conditions" },
+  C: { label: "Optical Aid Helpful", color: "#fb923c", desc: "Binoculars may be needed" },
+  D: { label: "Optical Aid Only", color: "#f87171", desc: "Only visible with telescope" },
+  E: { label: "Not Visible", color: "#6b7280", desc: "Below visibility threshold" },
+  F: { label: "Below Horizon", color: "#374151", desc: "Moon sets before or with sun" },
 };
 
 // ─── Core Calculations ────────────────────────────────────────────────────────
@@ -141,6 +141,68 @@ function classifyYallop(q: number, moonAltAtSunset: number): VisibilityZone {
   if (q >= -0.160) return "C";
   if (q >= -0.232) return "D";
   return "E";
+}
+
+export const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
+  A: [74, 222, 128],
+  B: [250, 204, 21],
+  C: [251, 146, 60],
+  D: [248, 113, 113],
+  E: [107, 114, 128],
+  F: [31, 41, 55],
+};
+
+export function buildVisibilityTexture(date: Date, resolution = 2, isMercator = false): string {
+  const W = Math.floor(360 / resolution);
+  const H = Math.floor(180 / resolution);
+  const offCanvas = document.createElement("canvas");
+  offCanvas.width = W;
+  offCanvas.height = H;
+  const offCtx = offCanvas.getContext("2d")!;
+  const imageData = offCtx.createImageData(W, H);
+  const data = imageData.data;
+
+  const maxLat = 85.051129;
+
+  for (let py = 0; py < H; py++) {
+    let lat: number;
+    if (isMercator) {
+      const mercY = Math.PI - (py / H) * 2 * Math.PI;
+      lat = (2 * Math.atan(Math.exp(mercY)) - Math.PI / 2) * (180 / Math.PI);
+      if (lat > maxLat) lat = maxLat;
+      if (lat < -maxLat) lat = -maxLat;
+    } else {
+      lat = 90 - (py / H) * 180;
+    }
+
+    for (let px = 0; px < W; px++) {
+      const lng = -180 + (px / W) * 360;
+      const result = computeSunMoonAtSunset(date, { lat, lng });
+      const [r, g, b] = ZONE_RGB[result.visibility];
+      const night = !isDaylight(lat, lng, date);
+      const alpha = result.visibility === "F" ? 40 : night ? 100 : 180;
+      const idx = (py * W + px) * 4;
+      data[idx] = r;
+      data[idx + 1] = g;
+      data[idx + 2] = b;
+      data[idx + 3] = alpha;
+    }
+  }
+  offCtx.putImageData(imageData, 0, 0);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 512;
+  const ctx = canvas.getContext("2d")!;
+
+  // Smooth the boundaries between the low-res computed pixels
+  ctx.filter = "blur(12px)";
+  // Draw 3 times to wrap the edges seamlessly across the dateline
+  ctx.drawImage(offCanvas, -canvas.width, 0, canvas.width, canvas.height);
+  ctx.drawImage(offCanvas, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(offCanvas, canvas.width, 0, canvas.width, canvas.height);
+
+  return canvas.toDataURL();
 }
 
 /**
@@ -323,23 +385,162 @@ function findLastNewMoon(from: Date): Date {
 // ─── Hijri Calendar ───────────────────────────────────────────────────────────
 
 /**
+ * Lunar synodic month length in milliseconds (~29.53059 days).
+ */
+const SYNODIC_MS = 29.53058867 * 24 * 3600 * 1000;
+
+/**
+ * Find the precise moment of the new moon (conjunction) nearest to `approx`.
+ * Searches in 6-hour steps for the phase minimum (phase crosses 0/1).
+ */
+function findNewMoonNear(approx: Date): Date {
+  // Coarse search: 6-hour steps over ±15 days
+  const start = approx.getTime() - 15 * 24 * 3600 * 1000;
+  let bestT = start;
+  let bestPhase = 1;
+
+  for (let t = start; t < start + 30 * 24 * 3600 * 1000; t += 6 * 3600 * 1000) {
+    const p = SunCalc.getMoonIllumination(new Date(t)).phase;
+    // Phase wraps 0→1, new moon is at 0 (or equivalently 1)
+    const dist = Math.min(p, 1 - p);
+    if (dist < bestPhase) {
+      bestPhase = dist;
+      bestT = t;
+    }
+  }
+
+  // Fine search: 30-minute steps over ±6 hours
+  const fineStart = bestT - 6 * 3600 * 1000;
+  for (let t = fineStart; t < bestT + 6 * 3600 * 1000; t += 30 * 60 * 1000) {
+    const p = SunCalc.getMoonIllumination(new Date(t)).phase;
+    const dist = Math.min(p, 1 - p);
+    if (dist < bestPhase) {
+      bestPhase = dist;
+      bestT = t;
+    }
+  }
+
+  return new Date(bestT);
+}
+
+/**
+ * Known reference epoch: 1 Muharram 1446 AH ≈ July 7, 2024 (conjunction-based).
+ * This date corresponds to the new moon nearest to the Umm al-Qura start of 1446.
+ */
+const HIJRI_EPOCH_YEAR = 1446;
+const HIJRI_EPOCH_MONTH = 1; // Muharram
+const HIJRI_EPOCH_GREG = new Date(2024, 6, 7); // July 7, 2024
+
+/**
+ * Build a list of new moon dates starting from an epoch.
+ * Each index corresponds to one Hijri month (0 = epoch month, 1 = next month, etc.).
+ * Returns the Gregorian date of the 1st of each Hijri month.
+ */
+const newMoonCache = new Map<number, Date>();
+
+function getNewMoonForMonthOffset(offset: number): Date {
+  if (newMoonCache.has(offset)) return newMoonCache.get(offset)!;
+
+  // Start from the epoch new moon and step forward/backward
+  const epochNM = findNewMoonNear(HIJRI_EPOCH_GREG);
+
+  if (offset >= 0) {
+    // Walk forward
+    let nm = newMoonCache.get(0) ?? epochNM;
+    newMoonCache.set(0, nm);
+    for (let i = 1; i <= offset; i++) {
+      if (!newMoonCache.has(i)) {
+        const prev = newMoonCache.get(i - 1)!;
+        nm = findNewMoonNear(new Date(prev.getTime() + SYNODIC_MS));
+        newMoonCache.set(i, nm);
+      }
+    }
+  } else {
+    // Walk backward
+    let nm = newMoonCache.get(0) ?? epochNM;
+    newMoonCache.set(0, nm);
+    for (let i = -1; i >= offset; i--) {
+      if (!newMoonCache.has(i)) {
+        const next = newMoonCache.get(i + 1)!;
+        nm = findNewMoonNear(new Date(next.getTime() - SYNODIC_MS));
+        newMoonCache.set(i, nm);
+      }
+    }
+  }
+
+  return newMoonCache.get(offset)!;
+}
+
+/**
+ * Convert month offset to Hijri year/month.
+ */
+function offsetToHijri(offset: number): { year: number; month: number } {
+  const totalMonths = (HIJRI_EPOCH_YEAR - 1) * 12 + (HIJRI_EPOCH_MONTH - 1) + offset;
+  const year = Math.floor(totalMonths / 12) + 1;
+  const month = (totalMonths % 12) + 1;
+  return { year, month };
+}
+
+/**
+ * Convert Hijri year/month to month offset from epoch.
+ */
+function hijriToOffset(year: number, month: number): number {
+  const epochTotal = (HIJRI_EPOCH_YEAR - 1) * 12 + (HIJRI_EPOCH_MONTH - 1);
+  const targetTotal = (year - 1) * 12 + (month - 1);
+  return targetTotal - epochTotal;
+}
+
+/**
  * Convert Gregorian date to Hijri (Islamic) date.
- * Uses the algorithmic conversion (Kuwaiti algorithm).
+ * Uses astronomical conjunction to determine month boundaries.
  */
 export function gregorianToHijri(date: Date): HijriDate {
+  const target = date.getTime();
+
+  // Estimate which month offset we're in
+  const epochNM = findNewMoonNear(HIJRI_EPOCH_GREG);
+  const roughOffset = Math.round((target - epochNM.getTime()) / SYNODIC_MS);
+
+  // Search nearby offsets to find the right month
+  for (let off = roughOffset - 1; off <= roughOffset + 1; off++) {
+    const monthStart = getNewMoonForMonthOffset(off);
+    const nextMonthStart = getNewMoonForMonthOffset(off + 1);
+
+    // Use the calendar day (midnight) for month boundaries
+    const msDay = new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate());
+    const nmsDay = new Date(nextMonthStart.getFullYear(), nextMonthStart.getMonth(), nextMonthStart.getDate());
+    const tDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    if (tDay.getTime() >= msDay.getTime() && tDay.getTime() < nmsDay.getTime()) {
+      const day = Math.floor((tDay.getTime() - msDay.getTime()) / (24 * 3600 * 1000)) + 1;
+      const { year, month } = offsetToHijri(off);
+      const monthInfo = HIJRI_MONTHS[month - 1] ?? HIJRI_MONTHS[0];
+      return {
+        year,
+        month,
+        day,
+        monthName: monthInfo.en,
+        monthNameArabic: monthInfo.ar,
+        monthNameShort: monthInfo.short,
+      };
+    }
+  }
+
+  // Fallback to arithmetic algorithm (should rarely happen)
   const jd = gregorianToJD(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  const { year, month, day } = jdToHijri(jd);
-  const monthInfo = HIJRI_MONTHS[month - 1] ?? HIJRI_MONTHS[0];
+  const result = jdToHijri(jd);
+  const monthInfo = HIJRI_MONTHS[result.month - 1] ?? HIJRI_MONTHS[0];
   return {
-    year,
-    month,
-    day,
+    year: result.year,
+    month: result.month,
+    day: result.day,
     monthName: monthInfo.en,
     monthNameArabic: monthInfo.ar,
     monthNameShort: monthInfo.short,
   };
 }
 
+// Keep arithmetic functions as internal fallbacks
 function gregorianToJD(y: number, m: number, d: number): number {
   if (m <= 2) { y -= 1; m += 12; }
   const A = Math.floor(y / 100);
@@ -353,20 +554,25 @@ function jdToHijri(jd: number): { year: number; month: number; day: number } {
   const n = Math.floor((a - 1) / 10631);
   const aa = a - 10631 * n + 354;
   const j = Math.floor((10985 - aa) / 5316) * Math.floor(50 * aa / 17719) +
-            Math.floor(aa / 5670) * Math.floor(43 * aa / 15238);
+    Math.floor(aa / 5670) * Math.floor(43 * aa / 15238);
   const aa2 = aa - Math.floor((30 - j) / 15) * Math.floor(17719 * j / 50) -
-              Math.floor(j / 16) * Math.floor(15238 * j / 43) + 29;
+    Math.floor(j / 16) * Math.floor(15238 * j / 43) + 29;
   const month = Math.floor(24 * aa2 / 709);
   const day = aa2 - Math.floor(709 * month / 24);
   const year = 30 * n + j - 30;
   return { year, month, day };
 }
 
+/**
+ * Convert Hijri date to Gregorian.
+ * Uses conjunction-based approach to find the correct new moon.
+ */
 export function hijriToGregorian(year: number, month: number, day: number): Date {
-  const jd = Math.floor(11 * year + 3) / 30 +
-    354 * year + 30 * month -
-    Math.floor((month - 1) / 2) + day + 1948440 - 385;
-  return jdToGregorian(jd);
+  const offset = hijriToOffset(year, month);
+  const monthStart = getNewMoonForMonthOffset(offset);
+  // Calendar day of month start
+  const msDay = new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate());
+  return new Date(msDay.getTime() + (day - 1) * 24 * 3600 * 1000);
 }
 
 function jdToGregorian(jd: number): Date {
@@ -397,8 +603,8 @@ export function getSubSolarPoint(date: Date): { lat: number; lng: number } {
   const M = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
   const Mrad = toRad(M);
   const C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(Mrad)
-          + (0.019993 - 0.000101 * T) * Math.sin(2 * Mrad)
-          + 0.000289 * Math.sin(3 * Mrad);
+    + (0.019993 - 0.000101 * T) * Math.sin(2 * Mrad)
+    + 0.000289 * Math.sin(3 * Mrad);
   const sunLon = L0 + C;
   const omega = 125.04 - 1934.136 * T;
   const lambda = sunLon - 0.00569 - 0.00478 * Math.sin(toRad(omega));
@@ -461,33 +667,91 @@ export function formatTime(date: Date | null): string {
 }
 
 export const MAJOR_CITIES: Array<{ name: string; country: string; lat: number; lng: number }> = [
-  { name: "Mecca",         country: "Saudi Arabia", lat: 21.3891, lng: 39.8579 },
-  { name: "Medina",        country: "Saudi Arabia", lat: 24.5247, lng: 39.5692 },
-  { name: "Riyadh",        country: "Saudi Arabia", lat: 24.6877, lng: 46.7219 },
-  { name: "Istanbul",      country: "Turkey",       lat: 41.0082, lng: 28.9784 },
-  { name: "Cairo",         country: "Egypt",        lat: 30.0444, lng: 31.2357 },
-  { name: "Dubai",         country: "UAE",          lat: 25.2048, lng: 55.2708 },
-  { name: "Karachi",       country: "Pakistan",     lat: 24.8607, lng: 67.0011 },
-  { name: "Lahore",        country: "Pakistan",     lat: 31.5204, lng: 74.3587 },
-  { name: "Dhaka",         country: "Bangladesh",   lat: 23.8103, lng: 90.4125 },
-  { name: "Jakarta",       country: "Indonesia",    lat: -6.2088, lng: 106.8456 },
-  { name: "Kuala Lumpur",  country: "Malaysia",     lat: 3.1390,  lng: 101.6869 },
-  { name: "London",        country: "UK",           lat: 51.5074, lng: -0.1278 },
-  { name: "Paris",         country: "France",       lat: 48.8566, lng: 2.3522 },
-  { name: "New York",      country: "USA",          lat: 40.7128, lng: -74.0060 },
-  { name: "Los Angeles",   country: "USA",          lat: 34.0522, lng: -118.2437 },
-  { name: "Toronto",       country: "Canada",       lat: 43.6532, lng: -79.3832 },
-  { name: "Sydney",        country: "Australia",    lat: -33.8688, lng: 151.2093 },
-  { name: "Lagos",         country: "Nigeria",      lat: 6.5244,  lng: 3.3792 },
-  { name: "Nairobi",       country: "Kenya",        lat: -1.2921, lng: 36.8219 },
-  { name: "Tehran",        country: "Iran",         lat: 35.6892, lng: 51.3890 },
-  { name: "Baghdad",       country: "Iraq",         lat: 33.3152, lng: 44.3661 },
-  { name: "Amman",         country: "Jordan",       lat: 31.9454, lng: 35.9284 },
-  { name: "Casablanca",    country: "Morocco",      lat: 33.5731, lng: -7.5898 },
-  { name: "Tunis",         country: "Tunisia",      lat: 36.8065, lng: 10.1815 },
-  { name: "Algiers",       country: "Algeria",      lat: 36.7372, lng: 3.0868 },
-  { name: "Khartoum",      country: "Sudan",        lat: 15.5007, lng: 32.5599 },
-  { name: "Kabul",         country: "Afghanistan",  lat: 34.5553, lng: 69.2075 },
-  { name: "Tashkent",      country: "Uzbekistan",   lat: 41.2995, lng: 69.2401 },
-  { name: "Baku",          country: "Azerbaijan",   lat: 40.4093, lng: 49.8671 },
+  // Expanded list of World Capitals & Major Cities
+  { name: "Mecca", country: "Saudi Arabia", lat: 21.3891, lng: 39.8579 },
+  { name: "Medina", country: "Saudi Arabia", lat: 24.5247, lng: 39.5692 },
+  { name: "Riyadh", country: "Saudi Arabia", lat: 24.6877, lng: 46.7219 },
+  { name: "Abu Dhabi", country: "UAE", lat: 24.4539, lng: 54.3773 },
+  { name: "Dubai", country: "UAE", lat: 25.2048, lng: 55.2708 },
+  { name: "Kuwait City", country: "Kuwait", lat: 29.3759, lng: 47.9774 },
+  { name: "Doha", country: "Qatar", lat: 25.2854, lng: 51.5310 },
+  { name: "Manama", country: "Bahrain", lat: 26.2285, lng: 50.5860 },
+  { name: "Muscat", country: "Oman", lat: 23.5859, lng: 58.4059 },
+  { name: "Sanaa", country: "Yemen", lat: 15.3694, lng: 44.1910 },
+  { name: "Baghdad", country: "Iraq", lat: 33.3152, lng: 44.3661 },
+  { name: "Tehran", country: "Iran", lat: 35.6892, lng: 51.3890 },
+  { name: "Kabul", country: "Afghanistan", lat: 34.5553, lng: 69.2075 },
+  { name: "Islamabad", country: "Pakistan", lat: 33.6844, lng: 73.0479 },
+  { name: "Karachi", country: "Pakistan", lat: 24.8607, lng: 67.0011 },
+  { name: "Lahore", country: "Pakistan", lat: 31.5204, lng: 74.3587 },
+  { name: "New Delhi", country: "India", lat: 28.6139, lng: 77.2090 },
+  { name: "Dhaka", country: "Bangladesh", lat: 23.8103, lng: 90.4125 },
+  { name: "Male", country: "Maldives", lat: 4.1755, lng: 73.5093 },
+  { name: "Colombo", country: "Sri Lanka", lat: 6.9271, lng: 79.8612 },
+  { name: "Jakarta", country: "Indonesia", lat: -6.2088, lng: 106.8456 },
+  { name: "Kuala Lumpur", country: "Malaysia", lat: 3.1390, lng: 101.6869 },
+  { name: "Bandar Seri Begawan", country: "Brunei", lat: 4.9031, lng: 114.9398 },
+  { name: "Singapore", country: "Singapore", lat: 1.3521, lng: 103.8198 },
+  { name: "Bangkok", country: "Thailand", lat: 13.7563, lng: 100.5018 },
+  { name: "Beijing", country: "China", lat: 39.9042, lng: 116.4074 },
+  { name: "Tokyo", country: "Japan", lat: 35.6762, lng: 139.6503 },
+  { name: "Seoul", country: "South Korea", lat: 37.5665, lng: 126.9780 },
+  { name: "Manila", country: "Philippines", lat: 14.5995, lng: 120.9842 },
+  { name: "Canberra", country: "Australia", lat: -35.2809, lng: 149.1300 },
+  { name: "Sydney", country: "Australia", lat: -33.8688, lng: 151.2093 },
+  { name: "Wellington", country: "New Zealand", lat: -41.2865, lng: 174.7762 },
+  { name: "Amman", country: "Jordan", lat: 31.9454, lng: 35.9284 },
+  { name: "Damascus", country: "Syria", lat: 33.5138, lng: 36.2765 },
+  { name: "Beirut", country: "Lebanon", lat: 33.8938, lng: 35.5018 },
+  { name: "Jerusalem", country: "Palestine", lat: 31.7683, lng: 35.2137 },
+  { name: "Ramallah", country: "Palestine", lat: 31.9038, lng: 35.2034 },
+  { name: "Cairo", country: "Egypt", lat: 30.0444, lng: 31.2357 },
+  { name: "Tripoli", country: "Libya", lat: 32.8872, lng: 13.1913 },
+  { name: "Tunis", country: "Tunisia", lat: 36.8065, lng: 10.1815 },
+  { name: "Algiers", country: "Algeria", lat: 36.7372, lng: 3.0868 },
+  { name: "Rabat", country: "Morocco", lat: 34.0209, lng: -6.8416 },
+  { name: "Casablanca", country: "Morocco", lat: 33.5731, lng: -7.5898 },
+  { name: "Nouakchott", country: "Mauritania", lat: 18.0735, lng: -15.9582 },
+  { name: "Khartoum", country: "Sudan", lat: 15.5007, lng: 32.5599 },
+  { name: "Mogadishu", country: "Somalia", lat: 2.0469, lng: 45.3182 },
+  { name: "Djibouti", country: "Djibouti", lat: 11.8251, lng: 42.5903 },
+  { name: "Asmara", country: "Eritrea", lat: 15.3229, lng: 38.9251 },
+  { name: "Addis Ababa", country: "Ethiopia", lat: 9.0222, lng: 38.7468 },
+  { name: "Nairobi", country: "Kenya", lat: -1.2921, lng: 36.8219 },
+  { name: "Kampala", country: "Uganda", lat: 0.3476, lng: 32.5825 },
+  { name: "Dar es Salaam", country: "Tanzania", lat: -6.7924, lng: 39.2083 },
+  { name: "Pretoria", country: "South Africa", lat: -25.7479, lng: 28.2293 },
+  { name: "Abuja", country: "Nigeria", lat: 9.0579, lng: 7.4951 },
+  { name: "Lagos", country: "Nigeria", lat: 6.5244, lng: 3.3792 },
+  { name: "Accra", country: "Ghana", lat: 5.6037, lng: -0.1870 },
+  { name: "Dakar", country: "Senegal", lat: 14.7167, lng: -17.4677 },
+  { name: "Bamako", country: "Mali", lat: 12.6392, lng: -8.0029 },
+  { name: "Niamey", country: "Niger", lat: 13.5116, lng: 2.1254 },
+  { name: "N'Djamena", country: "Chad", lat: 12.1348, lng: 15.0557 },
+  { name: "Istanbul", country: "Turkey", lat: 41.0082, lng: 28.9784 },
+  { name: "Ankara", country: "Turkey", lat: 39.9334, lng: 32.8597 },
+  { name: "Baku", country: "Azerbaijan", lat: 40.4093, lng: 49.8671 },
+  { name: "Tashkent", country: "Uzbekistan", lat: 41.2995, lng: 69.2401 },
+  { name: "Astana", country: "Kazakhstan", lat: 51.1694, lng: 71.4491 },
+  { name: "Ashgabat", country: "Turkmenistan", lat: 37.9601, lng: 58.3261 },
+  { name: "Dushanbe", country: "Tajikistan", lat: 38.5598, lng: 68.7870 },
+  { name: "Bishkek", country: "Kyrgyzstan", lat: 42.8746, lng: 74.5698 },
+  { name: "Moscow", country: "Russia", lat: 55.7558, lng: 37.6173 },
+  { name: "London", country: "UK", lat: 51.5074, lng: -0.1278 },
+  { name: "Paris", country: "France", lat: 48.8566, lng: 2.3522 },
+  { name: "Berlin", country: "Germany", lat: 52.5200, lng: 13.4050 },
+  { name: "Rome", country: "Italy", lat: 41.9028, lng: 12.4964 },
+  { name: "Madrid", country: "Spain", lat: 40.4168, lng: -3.7038 },
+  { name: "Athens", country: "Greece", lat: 37.9838, lng: 23.7275 },
+  { name: "Sarajevo", country: "Bosnia & Herzegovina", lat: 43.8563, lng: 18.4131 },
+  { name: "Washington, D.C.", country: "USA", lat: 38.8951, lng: -77.0364 },
+  { name: "New York", country: "USA", lat: 40.7128, lng: -74.0060 },
+  { name: "Los Angeles", country: "USA", lat: 34.0522, lng: -118.2437 },
+  { name: "Ottawa", country: "Canada", lat: 45.4215, lng: -75.6972 },
+  { name: "Toronto", country: "Canada", lat: 43.6532, lng: -79.3832 },
+  { name: "Mexico City", country: "Mexico", lat: 19.4326, lng: -99.1332 },
+  { name: "Brasilia", country: "Brazil", lat: -15.7975, lng: -47.8919 },
+  { name: "Buenos Aires", country: "Argentina", lat: -34.6037, lng: -58.3816 },
+  { name: "Santiago", country: "Chile", lat: -33.4489, lng: -70.6693 },
+  { name: "Bogota", country: "Colombia", lat: 4.7110, lng: -74.0721 }
 ];

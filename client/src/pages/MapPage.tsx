@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Map, Clock, ChevronDown, Info } from "lucide-react";
 import {
   computeSunMoonAtSunset,
@@ -7,8 +7,11 @@ import {
   VISIBILITY_LABELS,
   type VisibilityZone,
 } from "@/lib/astronomy";
+import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
+import { MapPin } from "lucide-react";
+import type { SharedVisibilityState } from "./VisibilityPage";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
   A: "#4ade80",
@@ -28,51 +31,52 @@ const ZONE_HEX: Record<VisibilityZone, string> = {
   F: "rgba(31,41,55,0.20)",
 };
 
-interface GridPoint {
-  lat: number;
-  lng: number;
-  zone: VisibilityZone;
-}
 
-function computeGrid(date: Date, resolution = 4): GridPoint[] {
-  const pts: GridPoint[] = [];
-  for (let lat = -80; lat <= 80; lat += resolution) {
-    for (let lng = -180; lng <= 180; lng += resolution) {
-      const d = computeSunMoonAtSunset(date, { lat, lng });
-      pts.push({ lat, lng, zone: d.visibility });
-    }
-  }
-  return pts;
-}
 
-export default function MapPage() {
+export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
+  const { date, setDate, hourOffset, setHourOffset, selectedCity, setSelectedCity } = shared;
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
   const pinsGroupRef = useRef<any>(null);
   const tileLayerRef = useRef<any>(null);
+  const overlayRef = useRef<any>(null);
 
   const { theme } = useTheme();
-  const { data: observations } = trpc.telemetry.getObservations.useQuery();
+  const { data: observationsResult } = trpc.telemetry.getObservations.useQuery({});
+  const observations = observationsResult?.data;
 
-  const [date, setDate] = useState(() => new Date());
-  const [hourOffset, setHourOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedPoint, setSelectedPoint] = useState<GridPoint | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<{ lat: number, lng: number, zone: VisibilityZone } | null>(null);
   const [resolution, setResolution] = useState(4);
 
-  const hijri = gregorianToHijri(date);
+  const hijri = useMemo(() => gregorianToHijri(date), [date]);
 
-  // Compute effective date with hour offset
-  const effectiveDate = new Date(date.getTime() + hourOffset * 3600 * 1000);
+  const effectiveDate = useMemo(
+    () => new Date(date.getTime() + hourOffset * 3600 * 1000),
+    [date, hourOffset]
+  );
+  const effectiveDateRef = useRef(effectiveDate);
+  useEffect(() => {
+    effectiveDateRef.current = effectiveDate;
+  }, [effectiveDate]);
 
   // Initialize Leaflet map
   useEffect(() => {
-    if (!mapRef.current || leafletRef.current) return;
+    if (!mapRef.current) return;
+
+    // Cleanup any existing map instance on this div due to strict mode
+    const container = mapRef.current;
+    if ((container as any)._leaflet_id) {
+      (container as any)._leaflet_id = null;
+    }
+
     let mounted = true;
 
+    let mapInstance: any = null;
+
     import("leaflet").then((L) => {
-      if (!mounted || !mapRef.current || leafletRef.current) return;
+      if (!mounted || !mapRef.current) return;
 
       // Fix Leaflet default icon paths
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -106,16 +110,45 @@ export default function MapPage() {
 
       layerGroupRef.current = L.layerGroup().addTo(map);
       pinsGroupRef.current = L.layerGroup().addTo(map);
+
+      map.on('click', (e: any) => {
+        let lat = e.latlng.lat;
+        let lng = e.latlng.lng;
+        if (lat > 90) lat = 90;
+        if (lat < -90) lat = -90;
+        lng = ((lng + 180) % 360 + 360) % 360 - 180;
+
+        const d = computeSunMoonAtSunset(effectiveDateRef.current, { lat, lng });
+        setSelectedPoint({ lat, lng, zone: d.visibility });
+      });
+
       leafletRef.current = map;
+
+      // Delay grid draw slightly until map is sized
+      setTimeout(drawGrid, 100);
     });
 
     return () => {
       mounted = false;
-      if (leafletRef.current) {
-        leafletRef.current.remove();
-        leafletRef.current = null;
+      if (mapInstance) {
+        mapInstance.remove();
       }
+      leafletRef.current = null;
     };
+  }, []);
+
+  // Invalidate map size when container becomes visible (fixes tiles not loading
+  // when switching from Globe to Map view, since Leaflet can't calculate bounds
+  // while the container has display:none)
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const observer = new ResizeObserver(() => {
+      if (leafletRef.current) {
+        leafletRef.current.invalidateSize();
+      }
+    });
+    observer.observe(mapRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // Update tile layer when theme changes
@@ -129,41 +162,55 @@ export default function MapPage() {
     }
   }, [theme]);
 
-  // Draw visibility grid
-  const drawGrid = useCallback(async () => {
-    if (!leafletRef.current || !layerGroupRef.current) return;
-    const L = await import("leaflet");
-    setIsLoading(true);
+  const effectiveDateTs = effectiveDate.getTime();
 
-    const grid = computeGrid(effectiveDate, resolution);
-    const step = resolution;
+  // Custom worker hook handles computation off main thread
+  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility);
 
-    layerGroupRef.current.clearLayers();
-
-    // Draw rectangles for each grid point
-    grid.forEach(({ lat, lng, zone }) => {
-      if (zone === "F") return; // skip below-horizon
-      const bounds: [[number, number], [number, number]] = [
-        [lat - step / 2, lng - step / 2],
-        [lat + step / 2, lng + step / 2],
-      ];
-      L.rectangle(bounds, {
-        color: "transparent",
-        fillColor: ZONE_HEX[zone],
-        fillOpacity: 1,
-        weight: 0,
-      })
-        .on("click", () => setSelectedPoint({ lat, lng, zone }))
-        .addTo(layerGroupRef.current);
-    });
-
-    setIsLoading(false);
-  }, [effectiveDate, resolution]);
-
+  // Compute local moon data
   useEffect(() => {
-    const timeout = setTimeout(drawGrid, 200);
-    return () => clearTimeout(timeout);
-  }, [drawGrid]);
+    setMoonData(computeSunMoonAtSunset(new Date(effectiveDateTs), selectedCity));
+  }, [effectiveDateTs, selectedCity]);
+
+  // Sync loading state
+  useEffect(() => {
+    setIsLoading(isComputing);
+  }, [isComputing]);
+
+  // Handle tile overlay
+  useEffect(() => {
+    let mounted = true;
+
+    if (!textureUrl || !showVisibility || !layerGroupRef.current) {
+      if (overlayRef.current) {
+        overlayRef.current.remove();
+        overlayRef.current = null;
+      }
+      return;
+    }
+
+    const L = (window as any).L;
+    const bounds: [[number, number], [number, number]] = [[-85.051128, -180], [85.051128, 180]];
+
+    if (!L) {
+      import("leaflet").then((Leaflet) => {
+        if (!mounted) return;
+        if (overlayRef.current) {
+          overlayRef.current.setUrl(textureUrl);
+        } else {
+          overlayRef.current = Leaflet.imageOverlay(textureUrl, bounds, { opacity: 0.8, interactive: false }).addTo(layerGroupRef.current!);
+        }
+      });
+    } else {
+      if (overlayRef.current) {
+        overlayRef.current.setUrl(textureUrl);
+      } else {
+        overlayRef.current = L.imageOverlay(textureUrl, bounds, { opacity: 0.8, interactive: false }).addTo(layerGroupRef.current!);
+      }
+    }
+
+    return () => { mounted = false; };
+  }, [textureUrl, showVisibility]);
 
   // Draw observation pins
   useEffect(() => {
@@ -216,7 +263,7 @@ export default function MapPage() {
   const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
+    <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
       {/* Header */}
       <div
         className="border-b px-6 py-4 flex items-center justify-between"
@@ -234,86 +281,9 @@ export default function MapPage() {
           </div>
         </div>
         <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
-          {hijri.day} {hijri.monthNameArabic} {hijri.year} هـ
+          <div>{hijri.day} {hijri.monthNameArabic} {hijri.year} هـ</div>
+          <div style={{ color: "var(--muted-foreground)" }}>{hijri.monthName}</div>
         </div>
-      </div>
-
-      {/* Controls bar */}
-      <div
-        className="px-6 py-3 flex flex-wrap items-center gap-4 border-b"
-        style={{ borderColor: "color-mix(in oklch, var(--gold) 8%, transparent)", background: "var(--space-mid)" }}
-      >
-        {/* Date */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Date</label>
-          <input
-            type="date"
-            value={dateStr}
-            onChange={e => {
-              const [y, m, d] = e.target.value.split("-").map(Number);
-              setDate(new Date(y, m - 1, d, 18, 0, 0));
-            }}
-            className="px-2 py-1 rounded-lg text-xs"
-            style={{
-              background: "var(--space-light)",
-              border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-              color: "var(--foreground)",
-              colorScheme: "dark",
-            }}
-          />
-        </div>
-
-        {/* Hour offset slider */}
-        <div className="flex items-center gap-3 flex-1 min-w-48">
-          <Clock className="w-4 h-4 flex-shrink-0" style={{ color: "var(--gold-dim)" }} />
-          <div className="flex-1">
-            <input
-              type="range"
-              min={-24}
-              max={24}
-              step={1}
-              value={hourOffset}
-              onChange={e => setHourOffset(Number(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, var(--gold) ${((hourOffset + 24) / 48) * 100}%, var(--space-light) ${((hourOffset + 24) / 48) * 100}%)`,
-                accentColor: "var(--gold)",
-              }}
-            />
-          </div>
-          <span className="text-xs font-mono w-16 text-right" style={{ color: "var(--gold)" }}>
-            {hourOffset >= 0 ? "+" : ""}{hourOffset}h
-          </span>
-        </div>
-
-        {/* Resolution */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Resolution</label>
-          <div className="relative">
-            <select
-              value={resolution}
-              onChange={e => setResolution(Number(e.target.value))}
-              className="px-2 py-1 rounded-lg text-xs appearance-none pr-6"
-              style={{
-                background: "var(--space-light)",
-                border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                color: "var(--foreground)",
-              }}
-            >
-              <option value={2}>Fine (2°)</option>
-              <option value={4}>Normal (4°)</option>
-              <option value={6}>Fast (6°)</option>
-            </select>
-            <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
-          </div>
-        </div>
-
-        {isLoading && (
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--gold)" }}>
-            <div className="w-3 h-3 rounded-full border border-t-transparent animate-spin" style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }} />
-            Computing…
-          </div>
-        )}
       </div>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
@@ -356,82 +326,224 @@ export default function MapPage() {
 
         {/* Legend sidebar */}
         <div
-          className="w-full lg:w-64 border-t lg:border-t-0 lg:border-l p-5 space-y-5"
+          className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l overflow-y-auto"
           style={{
             borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
             background: "var(--space-mid)",
           }}
         >
-          <div className="breezy-card p-4 animate-breezy-enter">
-            <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-              Visibility Zones
-            </div>
-            <div className="space-y-3">
-              {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
-                <div key={zone} className="flex items-start gap-2.5">
-                  <div
-                    className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
-                    style={{ background: ZONE_COLORS[zone] }}
+          <div className="p-5 space-y-5">
+
+            {/* Controls */}
+            <div className="breezy-card p-4 animate-breezy-enter">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Map Controls</span>
+                {isLoading && (
+                  <div className="w-3 h-3 rounded-full border border-t-transparent animate-spin" style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }} />
+                )}
+              </div>
+              <div className="space-y-4">
+                {/* Date */}
+                <div>
+                  <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Date</label>
+                  <input
+                    type="date"
+                    value={dateStr}
+                    onChange={e => {
+                      const [y, m, d] = e.target.value.split("-").map(Number);
+                      setDate(new Date(y, m - 1, d, 18, 0, 0));
+                    }}
+                    className="w-full px-3 py-2 rounded-lg text-sm"
+                    style={{
+                      background: "var(--space-light)",
+                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                      color: "var(--foreground)",
+                      colorScheme: "dark",
+                    }}
                   />
-                  <div>
-                    <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
-                      Zone {zone} — {VISIBILITY_LABELS[zone].label}
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
-                      {VISIBILITY_LABELS[zone].desc}
-                    </div>
+                </div>
+
+                {/* Location */}
+                <div className="pt-2 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                  <div className="flex items-center justify-between mb-2 mt-1">
+                    <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Location</label>
+                    <button
+                      onClick={() => {
+                        if ("geolocation" in navigator) {
+                          navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                              const newCity = {
+                                name: "GPS Location",
+                                country: "Current",
+                                lat: pos.coords.latitude,
+                                lng: pos.coords.longitude
+                              };
+                              if (!MAJOR_CITIES.find(c => c.name === "GPS Location")) {
+                                MAJOR_CITIES.unshift(newCity);
+                              }
+                              setSelectedCity(newCity);
+                              leafletRef.current?.setView([newCity.lat, newCity.lng], 5, { animate: true });
+                            },
+                            () => alert("Could not retrieve GPS location.")
+                          );
+                        } else {
+                          alert("Geolocation is not supported by your browser.");
+                        }
+                      }}
+                      className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider hover:opacity-80 transition-opacity"
+                      style={{ color: "var(--gold)" }}
+                    >
+                      <MapPin className="w-3 h-3" /> Auto-Detect
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={selectedCity.name}
+                      onChange={e => {
+                        const city = MAJOR_CITIES.find(c => c.name === e.target.value);
+                        if (city) {
+                          setSelectedCity(city);
+                          leafletRef.current?.setView([city.lat, city.lng], 5, { animate: true });
+                        }
+                      }}
+                      className="w-full px-3 py-2 rounded-lg text-sm appearance-none pr-8"
+                      style={{
+                        background: "var(--space-light)",
+                        border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      {MAJOR_CITIES.map((c, i) => (
+                        <option key={i} value={c.name} style={{ background: "var(--space-mid)" }}>
+                          {c.name}, {c.country}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />
-              <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>About the Map</span>
-            </div>
-            <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-              Colours show the probability of naked-eye crescent sighting at sunset for each region.
-              Use the time slider to see how visibility changes across the globe.
-            </p>
-            <p className="text-xs leading-relaxed mt-2" style={{ color: "var(--muted-foreground)" }}>
-              Based on the <strong style={{ color: "var(--gold-dim)" }}>Yallop (1997)</strong> q-value criterion.
-            </p>
-          </div>
+                {/* Hour offset */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Hour Offset</label>
+                    <span className="text-xs font-mono" style={{ color: "var(--gold)" }}>
+                      {hourOffset >= 0 ? "+" : ""}{hourOffset}h
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" style={{ color: "var(--gold-dim)" }} />
+                    <input
+                      type="range"
+                      min={-24}
+                      max={24}
+                      step={1}
+                      value={hourOffset}
+                      onChange={e => setHourOffset(Number(e.target.value))}
+                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                      style={{
+                        background: `linear-gradient(to right, var(--gold) ${((hourOffset + 24) / 48) * 100}%, var(--space-light) ${((hourOffset + 24) / 48) * 100}%)`,
+                        accentColor: "var(--gold)",
+                      }}
+                    />
+                  </div>
+                </div>
 
-          {/* Effective time display */}
-          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
-            <div className="text-xs font-medium mb-1" style={{ color: "var(--muted-foreground)" }}>Showing</div>
-            <div className="text-sm font-semibold" style={{ color: "var(--gold)" }}>
-              {effectiveDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              {effectiveDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} local
-            </div>
-          </div>
-
-          {/* Sighting Legend */}
-          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
-            <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-              Crowdsourced Sightings
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#4ade80" }} />
-                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Naked Eye</span>
+                {/* Resolution */}
+                <div>
+                  <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Resolution</label>
+                  <div className="relative">
+                    <select
+                      value={resolution}
+                      onChange={e => setResolution(Number(e.target.value))}
+                      className="w-full px-3 py-2 rounded-lg text-sm appearance-none pr-8"
+                      style={{
+                        background: "var(--space-light)",
+                        border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      <option value={2} style={{ background: "var(--space-mid)" }}>Fine (2°)</option>
+                      <option value={4} style={{ background: "var(--space-mid)" }}>Normal (4°)</option>
+                      <option value={6} style={{ background: "var(--space-mid)" }}>Fast (6°)</option>
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#60a5fa" }} />
-                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Optical Aid</span>
+            </div>
+
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
+              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
+                Visibility Zones
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#9ca3af" }} />
-                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Attempted, Not Seen</span>
+              <div className="space-y-3">
+                {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
+                  <div key={zone} className="flex items-start gap-2.5">
+                    <div
+                      className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
+                      style={{ background: ZONE_COLORS[zone] }}
+                    />
+                    <div>
+                      <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
+                        Zone {zone} — {VISIBILITY_LABELS[zone].label}
+                      </div>
+                      <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
+                        {VISIBILITY_LABELS[zone].desc}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />
+                <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>About the Map</span>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+                Colours show the probability of naked-eye crescent sighting at sunset for each region.
+                Use the time slider to see how visibility changes across the globe.
+              </p>
+              <p className="text-xs leading-relaxed mt-2" style={{ color: "var(--muted-foreground)" }}>
+                Based on the <strong style={{ color: "var(--gold-dim)" }}>Yallop (1997)</strong> q-value criterion.
+              </p>
+            </div>
+
+            {/* Effective time display */}
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
+              <div className="text-xs font-medium mb-1" style={{ color: "var(--muted-foreground)" }}>Showing</div>
+              <div className="text-sm font-semibold" style={{ color: "var(--gold)" }}>
+                {effectiveDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+              </div>
+              <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                {effectiveDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} local
+              </div>
+            </div>
+
+            {/* Sighting Legend */}
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
+              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
+                Crowdsourced Sightings
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#4ade80" }} />
+                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Naked Eye</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#60a5fa" }} />
+                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Optical Aid</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#9ca3af" }} />
+                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Attempted, Not Seen</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

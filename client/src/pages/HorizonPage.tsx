@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Compass, MapPin, ChevronDown, Clock } from "lucide-react";
+import { Compass, MapPin, ChevronDown, Clock, Locate } from "lucide-react";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import {
   computeSunMoonAtSunset,
   MAJOR_CITIES,
@@ -247,10 +248,25 @@ export default function HorizonPage() {
   const [customLng, setCustomLng] = useState("");
   const [data, setData] = useState<SunMoonData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const geo = useGeolocation();
 
   const loc = customLat && customLng
     ? { lat: parseFloat(customLat), lng: parseFloat(customLng), name: "Custom" }
     : selectedCity;
+
+  // Set document title
+  useEffect(() => {
+    document.title = `Horizon View \u2014 ${loc.name ?? selectedCity.name} | Hilal Vision`;
+  }, [loc.name, selectedCity.name]);
+
+  // Apply geolocation result when detected
+  useEffect(() => {
+    if (geo.position) {
+      setCustomLat(geo.position.lat.toString());
+      setCustomLng(geo.position.lng.toString());
+      setSearchQuery("");
+    }
+  }, [geo.position]);
 
   useEffect(() => {
     const d = computeSunMoonAtSunset(date, loc);
@@ -428,8 +444,33 @@ export default function HorizonPage() {
               </div>
             </div>
 
-            {/* Custom coordinates */}
+            {/* Geolocation detect */}
             <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
+              <button
+                onClick={geo.detect}
+                disabled={geo.loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]"
+                style={{
+                  background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
+                  color: "var(--space)",
+                  opacity: geo.loading ? 0.6 : 1,
+                }}
+              >
+                <Locate className="w-4 h-4" />
+                {geo.loading ? "Detecting…" : "Detect My Location"}
+              </button>
+              {geo.error && (
+                <p className="text-xs mt-2" style={{ color: "var(--destructive)" }}>{geo.error}</p>
+              )}
+              {geo.position && (
+                <p className="text-xs mt-2" style={{ color: "var(--gold-dim)" }}>
+                  📍 {geo.position.name} ({geo.position.lat.toFixed(4)}°, {geo.position.lng.toFixed(4)}°)
+                </p>
+              )}
+            </div>
+
+            {/* Custom coordinates */}
+            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
               <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Custom Coordinates</label>
               <div className="grid grid-cols-2 gap-2">
                 <input

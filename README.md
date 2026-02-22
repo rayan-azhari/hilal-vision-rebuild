@@ -4,84 +4,90 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 
 ## Features
 
-- **🌐 3D Globe (`/globe`)**: Interactive Globe.gl visualization with real-time day/night terminator and moon visibility overlays.
-- **🗺️ Visibility Map (`/map`)**: Detailed Leaflet map with a time slider, showing crescent visibility predictions highlighting regions (Zones A-E) from "Easily Visible" to "Telescope Only".
-- **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, rise/set times, and upcoming celestial events.
-- **📅 Hijri Calendar (`/calendar`)**: Seamless Gregorian to Islamic calendar conversion, highlighting significant dates and current Hijri months.
-- **🌅 Horizon View (`/horizon`)**: Local horizon simulator visualizing the moon's position relative to the setting sun for a specified location.
-- **📁 Archive (`/archive`)**: Historical crescent visibility data and maps covering Islamic months from 1438 to 1465 AH.
+- **🌐 Unified Visibility Page (`/visibility`)**: A seamless toggle between an interactive 3D Globe (Globe.gl) and a 2D Leaflet Map. Both views share synchronized state — date, hour offset, and selected city carry over instantly when switching between them.
+  - *3D Globe*: Interactive day/night terminator with smooth visibility zone overlays.
+  - *2D Map*: Web Mercator projected visibility heatmap with Gaussian blur smoothing, click-to-inspect, and crowdsourced sighting pins.
+  - *Hour Offset Slider*: Slide ±24 hours to see how visibility evolves over time.
+  - *GPS Auto-Detect*: Instantly fly to your current position using the browser Geolocation API.
+  - *Global City Selector*: 85+ world capitals and major cities.
+- **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, rise/set times, Sun & Moon Altitude Tracker chart (moved to top of page), and a **Scientific Methodology** section with interactive Yallop criterion charts and Danjon Limit physics.
+- **📅 Hijri Calendar (`/calendar`)**: Astronomical conjunction-based Gregorian ↔ Islamic calendar conversion with moon phase indicators and significant date highlighting.
+- **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun, with **GPS auto-detect** via browser Geolocation API and Nominatim reverse-geocoding.
+- **📁 Archive (`/archive`)**: Historical crescent visibility maps (1438–1465 AH).
 
 ## Tech Stack
 
-- **Frontend:** React 19, Vite, Tailwind CSS (v4), Radix UI 
-- **Design System:** Breezy Weather Design System (`.breezy-card`, Space-Navy themes, interactive data-driven SVG decorations)
-- **Mapping & Scientific Viz:** Leaflet (react-leaflet), Globe.gl, Three.js, SunCalc, Astronomia
-- **Backend:** Node.js, Express, tRPC (Type-safe API layer)
-- **Database / Telemetry:** Drizzle ORM (Logging crowd-sourced observation reports)
+- **Frontend:** React 19, Vite 7, Tailwind CSS v4, Radix UI, Recharts
+- **Design System:** Breezy Weather Design (`.breezy-card`, Space-Navy/Gold themes)
+- **Mapping & Scientific Viz:** Leaflet, Globe.gl, Three.js, SunCalc
+- **Backend:** Node.js, Express, tRPC (Type-safe API with rate limiting & input validation)
+- **Database:** Drizzle ORM (MySQL — `observation_reports` table)
 - **State Management:** React Query (`@tanstack/react-query`)
+- **External APIs:** Open-Meteo (weather, air quality, elevation)
 
-## Recent Architecture Upgrades
+## Recent Architecture Highlights
 
-1. **Classy Scientific Redesign (Phase 3)**: Complete UI overhaul replacing the cinematic "Breezy" tokens with a purely academic, high-contrast, black/gold/white monochromatic theme using `Inter`. Implemented deep-dive interactive `recharts` data plots inside Shadcn `<Dialog>` expandable cards.
-2. **Telemetry Pipeline & Open-Meteo (Phase 2)**: Database infrastructure built via Drizzle ORM (`observation_reports`) and tRPC routers to aggregate ground-truth visual sightings. Open-Meteo API integration planned for retrieving real-time Digital Elevation Models (DEM) and Aerosol Optical Depth (AOD) data to validate public moon sighting submissions.
-3. **Optimized Globe.gl Visualization**: Transitioned from generic `overlayImageUrl` to a native `THREE.MeshBasicMaterial` mapping, reducing texture generation resolution for a 16x calculation speedup, and integrated dynamic Light/Dark mode satellite basemaps.
+1. **Unified Visibility Page**: Globe and Map views merged into a single page with synced state (date, hour offset, location) lifted to the parent component for seamless toggling.
+2. **Smooth Visibility Zones**: Canvas-based Gaussian blur replaces raw CSS rectangles — zone boundaries are smooth and organic on both 2D and 3D views with no resolution increase needed.
+3. **Scientific Methodology Panel**: Interactive Yallop threshold curve chart, Danjon Limit explanation, and atmospheric refraction notes for pro users on the Moon Phase page.
+4. **Rate-Limited Telemetry API**: Server-side in-memory rate limiter (5 req/min/IP), Zod input validation with min/max bounds, and paginated `getObservations` endpoint.
+5. **Open-Meteo Integration**: Autonomous server-side enrichment of sighting reports with live cloud cover, surface pressure, and aerosol optical depth data.
+6. **Conjunction-Based Hijri Calendar**: SunCalc-powered astronomical new moon detection replaces the old arithmetic algorithm, accurate to ±1 day of the Umm al-Qura calendar.
+7. **SEO & Accessibility**: Dynamic `document.title` on every page, meta descriptions, and semantic HTML.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js (v18+)
-- `pnpm` or `npm` package manager
+- `pnpm` (recommended) or `npm`
 
 ### Installation & Running
 
-1. **Install dependencies:**
-   ```bash
-   pnpm install
-   # or
-   npm install --legacy-peer-deps
-   ```
+```bash
+# Install dependencies
+pnpm install
+# or
+npm install --legacy-peer-deps
 
-2. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
-   The backend server and Vite frontend will auto-start concurrently.
+# Start the development server
+npm run dev
 
-3. **Database Migration (Optional, for Telemetry features):**
-   Ensure an appropriate `DATABASE_URL` is set in your `.env`, and run:
-   ```bash
-   npm run db:push
-   ```
+# Database migration (optional, for telemetry)
+npm run db:push
 
-4. **Production Build:**
-   ```bash
-   npm run build
-   npm run start
-   ```
+# Production build (self-hosted)
+npm run build && npm run start
+```
+
+### Vercel Deployment
+
+```bash
+# Push to GitHub, then import at https://vercel.com/new
+# Vercel auto-detects settings from vercel.json:
+#   Build: npx vite build
+#   Output: dist/public
+#   API: api/trpc/[trpc].ts (serverless function)
+
+# Optional: set DATABASE_URL env var for telemetry persistence
+```
+
+See `docs/DEPLOYMENT.md` for the full Vercel deployment guide.
 
 ### Code Quality & Testing
 
-Verify the robustness of the astronomical engine and type definitions:
-
-- **Run unit tests** (validates Yallop models and Sun/Moon trajectories):
-  ```bash
-  npm run test
-  ```
-- **Type Checking**:
-  ```bash
-  npm run check
-  ```
+```bash
+npm run test    # Unit tests (Yallop models, Sun/Moon trajectories)
+npm run check   # TypeScript type checking
+```
 
 ## Documentation
 
-Comprehensive project documentation detailing the underlying math, the Yallop & Odeh criteria, ML integration plans, and UI specifications can be found within the `docs/` folder:
-
-- `HILAL_VISION_DOCUMENTATION.md`: Core mechanics and algorithms.
-- `USER_GUIDE.md`: Comprehensive walkthrough of application features and how to log telemetry.
-- `Islamic Calendar Astronomical Dashboard.md`: Broad overview of the problem space and validation data (ICOP).
-- `The Hilal Dashboard Revised Architecture.md`: Telemetry, Hub & Spoke model, DEM/AOD architecture.
-- `BREEZY_DESIGN_REPORT.md` & `BREEZY_CONVERSION_GUIDE.md`: Design system principles.
+- `docs/USER_GUIDE.md` — Comprehensive walkthrough of all features
+- `docs/HILAL_VISION_DOCUMENTATION.md` — Core algorithms and math
+- `docs/DEPLOYMENT.md` — Vercel deployment guide
+- `docs/Islamic Calendar Astronomical Dashboard.md` — Problem space overview
+- `docs/The Hilal Dashboard Revised Architecture.md` — Telemetry architecture
 
 ## License
 
