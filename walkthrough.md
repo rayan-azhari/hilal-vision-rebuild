@@ -173,24 +173,29 @@ The Vite configuration and package scripts have been updated to support publishi
 
 ---
 
-## Vercel Deployment ✅
+## Vercel Deployment Architecture ✅
 
-#### [NEW] [vercel.json](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/vercel.json)
+#### [NEW] [vercel.json](file:///c:/Users/rayan/Desktop/Antigravity workspaces/Moon-dashboard/vercel.json)
 ```json
 {
   "buildCommand": "npx vite build",
   "outputDirectory": "dist/public",
+  "functions": {
+    "api/trpc/[trpc].ts": {
+      "includeFiles": "server/**"
+    }
+  },
   "rewrites": [
-    { "source": "/api/trpc/:path*", "destination": "/api/trpc" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/trpc/:path*", "destination": "/api/trpc/[trpc]" },
+    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ]
 }
 ```
 
-#### [NEW] [api/trpc/[trpc].ts](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/api/trpc/%5Btrpc%5D.ts)
-- Node.js serverless function wrapping tRPC router via fetch adapter
-- Forwards request headers for rate limiting
-- Auth stubbed (user = null) until Manus OAuth is replaced
+**Deployment Fixes Implemented:**
+1. **Serverless Bundling:** Added `"functions": { "includeFiles": "server/**" }` strictly enforcing Node dependencies within the Vercel edge/serverless function.
+2. **Routing Exclusions:** Adjusted catch-all SPA routing (`/((?!.*\\.).*)`) specifically to allow static filenames (like `.json` or `.png`) to be cleanly served by Vercel's Edge CDN without triggering HTML 404 fallbacks.
+3. **ICOP Data Delivery:** Shifted the 160KB `icop-history.json` dataset from the API's node execution into `client/public/`. Vite statically serves this raw dataset globally via CDN for massive performance improvements, entirely bypassing the fragile Node serverless bounds and `drizzle-orm` limits on the heavy `archive.ts` router.
 
 #### Build verified
 - `npx vite build` → **30.65s**, exit code 0

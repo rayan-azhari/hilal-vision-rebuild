@@ -496,6 +496,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 17 | Bug fixes | Infinite render loop fix (useMemo), Leaflet tile fix (ResizeObserver) |
 | 18 | Auth & Security | Implemented Clerk Auth and Upstash Redis rate limiting |
 | 19 | Feature & Mobile | Added ICOP scraped historical data logic, mathematical Zone F sighting rejection, and native mobile Capacitor bridging |
-| 20 | UI Consistency | Unified PageHeader component across all tool pages (Moon, Calendar, Horizon, Archive, Globe, Map). Fixed Clerk `getAuth` crash for public tRPC endpoints. |
+| 20 | UI Consistency | Unified PageHeader component across all tool pages. Fixed Clerk `getAuth` crash for public tRPC endpoints. |
+| 21 | Deployment Fixes | Bypassed Vercel serverless limits by moving 160KB ICOP dataset to `client/public/` for static serving. Fixed Vercel SPA catch-all rewrite preventing `/api/trpc` routes from firing. |
 
 *Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*

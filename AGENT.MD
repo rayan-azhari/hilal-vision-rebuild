@@ -21,8 +21,8 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 
 - `client/` - Frontend React application. Contains UI components, pages, and client-side logic.
 - `server/` - Backend Node/Express application. API routes, tRPC routers, and server-side processing.
-  - `server/routers/` - Modular tRPC routers (e.g., `archive.ts` for ICOP data).
-  - `server/data/` - Static datasets (e.g., `icop-history.json` with 1,028+ sighting records).
+  - `server/routers/` - Modular tRPC routers (e.g., `telemetry.ts` for observations). Note: `archive.ts` is currently deprecated.
+  - `client/public/icop-history.json` - Static dataset with 1,028+ sighting records, served directly by Vite for performance, bypassing tRPC.
   - `server/_core/context.ts` - tRPC context creation with Clerk auth (try/catch for public endpoints).
 - `api/` - Vercel serverless functions. Contains `trpc/[trpc].ts` which wraps the tRPC router for deployment.
 - `shared/` - Shared code between frontend and backend (e.g., Zod schemas, shared types).
