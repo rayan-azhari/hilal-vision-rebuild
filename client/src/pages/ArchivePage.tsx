@@ -103,16 +103,43 @@ export default function ArchivePage() {
   const [monthDetail, setMonthDetail] = useState<MonthSummary | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
+  // Fetch ICOP data from static JSON file (bypasses serverless function)
+  const [icopData, setIcopData] = useState<any[] | null>(null);
+  const [isLoadingIcop, setIsLoadingIcop] = useState(false);
+  const icopCacheRef = useRef<any[] | null>(null);
+
   useEffect(() => {
     document.title = `Archive \u2014 ${selectedYear} AH | Hilal Vision`;
   }, [selectedYear]);
 
   const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
 
-  const { data: icopData, isLoading: isLoadingIcop } = trpc.archive.getHistoricalData.useQuery(
-    { hijriYear: selectedYear, hijriMonth: selectedMonth ?? 1 },
-    { enabled: selectedMonth !== null }
-  );
+  useEffect(() => {
+    if (selectedMonth === null) return;
+
+    // If already cached, filter from cache
+    if (icopCacheRef.current) {
+      const monthData = icopCacheRef.current.find(
+        (d: any) => d.hijriYear === selectedYear && d.hijriMonth === selectedMonth
+      );
+      setIcopData(monthData?.observations ?? null);
+      return;
+    }
+
+    // Fetch the static JSON once
+    setIsLoadingIcop(true);
+    fetch("/icop-history.json")
+      .then((r) => r.json())
+      .then((allData: any[]) => {
+        icopCacheRef.current = allData;
+        const monthData = allData.find(
+          (d: any) => d.hijriYear === selectedYear && d.hijriMonth === selectedMonth
+        );
+        setIcopData(monthData?.observations ?? null);
+      })
+      .catch(() => setIcopData(null))
+      .finally(() => setIsLoadingIcop(false));
+  }, [selectedYear, selectedMonth]);
 
   const handleMonthClick = (month: number) => {
     setSelectedMonth(month);
