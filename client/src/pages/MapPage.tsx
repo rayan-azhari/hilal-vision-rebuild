@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Map, Clock, ChevronDown, Info, Eye, Cloud } from "lucide-react";
+import * as d3 from "d3";
 import {
   computeSunMoonAtSunset,
   gregorianToHijri,
@@ -191,7 +192,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const effectiveDateTs = effectiveDate.getTime();
 
   // Custom worker hook handles computation off main thread
-  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility);
+  const { qData, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility);
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Compute local moon data
@@ -204,40 +205,107 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     setIsLoading(isComputing || (showClouds && isCloudsLoading));
   }, [isComputing, isCloudsLoading, showClouds]);
 
-  // Handle tile overlay
+  // Handle GeoJSON Contour overlay
+  const geoJsonLayerRef = useRef<any>(null);
+
   useEffect(() => {
     let mounted = true;
 
-    if (!textureUrl || !showVisibility || !layerGroupRef.current) {
-      if (overlayRef.current) {
-        overlayRef.current.remove();
-        overlayRef.current = null;
+    if (!qData || !showVisibility || !layerGroupRef.current) {
+      if (geoJsonLayerRef.current) {
+        geoJsonLayerRef.current.remove();
+        geoJsonLayerRef.current = null;
       }
       return;
     }
 
     const L = (window as any).L;
-    const bounds: [[number, number], [number, number]] = [[-85.051128, -180], [85.051128, 180]];
+    if (!L) return;
 
-    if (!L) {
-      import("leaflet").then((Leaflet) => {
-        if (!mounted) return;
-        if (overlayRef.current) {
-          overlayRef.current.setUrl(textureUrl);
-        } else {
-          overlayRef.current = Leaflet.imageOverlay(textureUrl, bounds, { opacity: 0.8, interactive: false }).addTo(layerGroupRef.current!);
-        }
-      });
-    } else {
-      if (overlayRef.current) {
-        overlayRef.current.setUrl(textureUrl);
-      } else {
-        overlayRef.current = L.imageOverlay(textureUrl, bounds, { opacity: 0.8, interactive: false }).addTo(layerGroupRef.current!);
-      }
+    const { qValues, width, height } = qData;
+
+    // Thresholds matching Yallop definitions
+    // -2.0: everything >= -2.0 (Since min is -1.0) -> Zone F
+    // -0.999: everything > -1.0 (Moon above horizon) -> Zone E
+    // -0.232: Zone D
+    // -0.160: Zone C
+    // -0.014: Zone B
+    // 0.216: Zone A
+    const thresholds = [-2.0, -0.999, -0.232, -0.160, -0.014, 0.216];
+
+    const thresholdsToZone = (value: number): VisibilityZone => {
+      if (value >= 0.216) return "A";
+      if (value >= -0.014) return "B";
+      if (value >= -0.160) return "C";
+      if (value >= -0.232) return "D";
+      if (value >= -0.999) return "E";
+      return "F";
+    };
+
+    const contourGen = d3.contours()
+      .size([width, height])
+      .thresholds(thresholds);
+
+    const contours = contourGen(qValues);
+
+    if (geoJsonLayerRef.current) {
+      geoJsonLayerRef.current.remove();
     }
 
+    const maxLat = 85.051129;
+
+    const geoJsonData = {
+      type: "FeatureCollection",
+      features: contours.map((contour: any) => {
+        const mappedCoordinates = contour.coordinates.map((polygon: any) =>
+          polygon.map((ring: any) =>
+            ring.map(([px, py]: [number, number]) => {
+              // Interpolate pixels to longitude
+              const lng = -180 + (px / width) * 360;
+              // Interpolate pixels to Mercator latitude
+              const mercY = Math.PI - (py / height) * 2 * Math.PI;
+              let lat = (2 * Math.atan(Math.exp(mercY)) - Math.PI / 2) * (180 / Math.PI);
+
+              // Clamp latitudes to Leaflet bounds
+              if (lat > maxLat) lat = maxLat;
+              if (lat < -maxLat) lat = -maxLat;
+
+              return [lng, lat];
+            })
+          )
+        );
+
+        return {
+          type: "Feature",
+          geometry: {
+            type: contour.type,
+            coordinates: mappedCoordinates
+          },
+          properties: {
+            value: contour.value,
+            zone: thresholdsToZone(contour.value)
+          }
+        };
+      })
+    };
+
+    geoJsonLayerRef.current = L.geoJSON(geoJsonData, {
+      style: (feature: any) => {
+        const zone = feature.properties.zone as VisibilityZone;
+        return {
+          fillColor: ZONE_COLORS[zone] || "#000",
+          fillOpacity: zone === "F" ? 0.35 : 0.6,
+          stroke: true,
+          color: "var(--background)",
+          weight: 0.5,
+          opacity: 0.5,
+          interactive: false
+        }
+      }
+    }).addTo(layerGroupRef.current!);
+
     return () => { mounted = false; };
-  }, [textureUrl, showVisibility]);
+  }, [qData, showVisibility]);
 
   // Apply clouds overlay
   const cloudOverlayRef = useRef<any>(null);

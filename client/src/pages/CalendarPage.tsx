@@ -9,6 +9,9 @@ import {
   getMoonPhaseInfo,
   gregorianToJD,
   jdToHijri,
+  getUmmAlQuraHijri,
+  getUmmAlQuraDaysInMonth,
+  getUmmAlQuraMonthStart,
   type HijriDate
 } from "@/lib/astronomy";
 
@@ -40,7 +43,8 @@ function getAstronomicalDaysInMonth(year: number, month: number): number {
 }
 
 function getTabularHijri(greg: Date): HijriDate {
-  const jd = gregorianToJD(greg.getFullYear(), greg.getMonth() + 1, greg.getDate());
+  // Use noon to avoid timezone shift issues across the Julian Date boundary
+  const jd = gregorianToJD(greg.getFullYear(), greg.getMonth() + 1, greg.getDate() + 0.5);
   const result = jdToHijri(jd);
   const monthInfo = HIJRI_MONTHS[result.month - 1] || HIJRI_MONTHS[0];
   return {
@@ -56,17 +60,17 @@ function getTabularHijri(greg: Date): HijriDate {
 function getTabularMonthStart(year: number, month: number): Date {
   const guess = hijriToGregorian(year, month, 1);
   for (let i = -5; i <= 5; i++) {
-    const d = new Date(guess.getTime() + i * 24 * 3600 * 1000);
+    const d = new Date(guess.getFullYear(), guess.getMonth(), guess.getDate() + i);
     const tab = getTabularHijri(d);
     if (tab.year === year && tab.month === month && tab.day === 1) return d;
   }
-  return guess;
+  return guess; // Fallback
 }
 
-type CalendarSystem = "astronomical" | "tabular";
+type CalendarSystem = "astronomical" | "tabular" | "ummalqura";
 
 export default function CalendarPage() {
-  const today = useMemo(() => new Date(), []);
+  const today = useMemo(() => new Date(new Date().setHours(12, 0, 0, 0)), []);
 
   const [calendarSystem, setCalendarSystem] = useState<CalendarSystem>("astronomical");
   const [showOverlay, setShowOverlay] = useState(false);
@@ -75,21 +79,31 @@ export default function CalendarPage() {
   const [viewMonth, setViewMonth] = useState(() => gregorianToHijri(today).month);
   const [selectedDay, setSelectedDay] = useState<number | null>(() => gregorianToHijri(today).day);
 
-  // Sync when calendar system changes
+  // Sync today's view when calendar system changes
   useEffect(() => {
-    const newToday = calendarSystem === "astronomical" ? gregorianToHijri(today) : getTabularHijri(today);
+    let newToday: HijriDate;
+    if (calendarSystem === "astronomical") newToday = gregorianToHijri(today);
+    else if (calendarSystem === "ummalqura") newToday = getUmmAlQuraHijri(today);
+    else newToday = getTabularHijri(today);
+
     setViewYear(newToday.year);
     setViewMonth(newToday.month);
     setSelectedDay(newToday.day);
   }, [calendarSystem, today]);
 
   const monthInfo = HIJRI_MONTHS[viewMonth - 1] || HIJRI_MONTHS[0];
-  const daysInMonth = calendarSystem === "astronomical"
-    ? getAstronomicalDaysInMonth(viewYear, viewMonth)
-    : getTabularDaysInMonth(viewYear, viewMonth);
-  const monthStart = calendarSystem === "astronomical"
-    ? hijriToGregorian(viewYear, viewMonth, 1)
-    : getTabularMonthStart(viewYear, viewMonth);
+
+  const daysInMonth = useMemo(() => {
+    if (calendarSystem === "astronomical") return getAstronomicalDaysInMonth(viewYear, viewMonth);
+    if (calendarSystem === "ummalqura") return getUmmAlQuraDaysInMonth(viewYear, viewMonth);
+    return getTabularDaysInMonth(viewYear, viewMonth);
+  }, [calendarSystem, viewYear, viewMonth]);
+
+  const monthStart = useMemo(() => {
+    if (calendarSystem === "astronomical") return hijriToGregorian(viewYear, viewMonth, 1);
+    if (calendarSystem === "ummalqura") return getUmmAlQuraMonthStart(viewYear, viewMonth);
+    return getTabularMonthStart(viewYear, viewMonth);
+  }, [calendarSystem, viewYear, viewMonth]);
 
   const startDow = monthStart.getDay();
   const monthEvents = ISLAMIC_EVENTS.filter(e => e.month === viewMonth);
@@ -99,25 +113,18 @@ export default function CalendarPage() {
     for (let i = 0; i < startDow; i++) cells.push({ day: null, greg: null, phase: 0 });
 
     for (let d = 1; d <= daysInMonth; d++) {
-      const greg = new Date(monthStart.getTime() + (d - 1) * 24 * 3600 * 1000);
+      const greg = new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate() + d - 1, 12, 0, 0);
       const illum = getMoonPhaseInfo(greg);
 
       let differs = false;
-      let otherDay = undefined;
+      let otherDay: number | undefined = undefined;
 
       if (showOverlay) {
-        if (calendarSystem === "tabular") {
-          const astro = gregorianToHijri(greg);
-          if (astro.day !== d || astro.month !== viewMonth) {
-            differs = true;
-            otherDay = astro.day;
-          }
-        } else {
-          const tab = getTabularHijri(greg);
-          if (tab.day !== d || tab.month !== viewMonth) {
-            differs = true;
-            otherDay = tab.day;
-          }
+        // Overlay ALWAYS compares the current system to the Astronomical (SunCalc) reference
+        const astro = gregorianToHijri(greg);
+        if (calendarSystem !== "astronomical" && (astro.day !== d || astro.month !== viewMonth)) {
+          differs = true;
+          otherDay = astro.day;
         }
       }
 
@@ -137,8 +144,18 @@ export default function CalendarPage() {
     setSelectedDay(null);
   };
 
-  const selectedGreg = selectedDay ? new Date(monthStart.getTime() + (selectedDay - 1) * 24 * 3600 * 1000) : null;
-  const selectedHijri = selectedGreg ? (calendarSystem === "astronomical" ? gregorianToHijri(selectedGreg) : getTabularHijri(selectedGreg)) : null;
+  const selectedGreg = useMemo(() => {
+    if (!selectedDay) return null;
+    return new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate() + selectedDay - 1, 12, 0, 0);
+  }, [selectedDay, monthStart]);
+
+  const selectedHijri = useMemo(() => {
+    if (!selectedGreg) return null;
+    if (calendarSystem === "astronomical") return gregorianToHijri(selectedGreg);
+    if (calendarSystem === "ummalqura") return getUmmAlQuraHijri(selectedGreg);
+    return getTabularHijri(selectedGreg);
+  }, [selectedGreg, calendarSystem]);
+
   const selectedMoon = selectedGreg ? getMoonPhaseInfo(selectedGreg) : null;
   const selectedEvent = selectedDay ? monthEvents.find(e => e.day === selectedDay) : null;
 
@@ -163,7 +180,11 @@ export default function CalendarPage() {
     );
   }
 
-  const todayDisplay = calendarSystem === "astronomical" ? gregorianToHijri(today) : getTabularHijri(today);
+  const todayDisplay = useMemo(() => {
+    if (calendarSystem === "astronomical") return gregorianToHijri(today);
+    if (calendarSystem === "ummalqura") return getUmmAlQuraHijri(today);
+    return getTabularHijri(today);
+  }, [calendarSystem, today]);
 
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
@@ -178,24 +199,33 @@ export default function CalendarPage() {
         subtitle="Hijri ↔ Gregorian · Islamic events · Lunar phases"
       >
         <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-3 bg-white/5 px-2 py-1.5 rounded-xl border border-white/5">
+          <div className="flex flex-wrap items-center mt-2 lg:mt-0 gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
             <button
               onClick={() => setCalendarSystem("astronomical")}
-              className={`text-xs font-medium px-2 py-1 rounded transition-colors ${calendarSystem === "astronomical"
+              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "astronomical"
                   ? "bg-[var(--gold)]/20 text-[var(--gold)]"
-                  : "text-muted-foreground hover:text-white"
+                  : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Astronomical
             </button>
             <button
-              onClick={() => setCalendarSystem("tabular")}
-              className={`text-xs font-medium px-2 py-1 rounded transition-colors ${calendarSystem === "tabular"
+              onClick={() => setCalendarSystem("ummalqura")}
+              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "ummalqura"
                   ? "bg-[var(--gold)]/20 text-[var(--gold)]"
-                  : "text-muted-foreground hover:text-white"
+                  : "text-muted-foreground hover:text-foreground"
                 }`}
             >
-              Kuwaiti Tabular
+              Umm al-Qura
+            </button>
+            <button
+              onClick={() => setCalendarSystem("tabular")}
+              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "tabular"
+                  ? "bg-[var(--gold)]/20 text-[var(--gold)]"
+                  : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              Tabular (Kuwaiti)
             </button>
           </div>
         </div>
@@ -283,6 +313,7 @@ export default function CalendarPage() {
                           color: "var(--destruct-foreground)",
                           border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)"
                         }}
+                        title="Astronomical Date"
                       >
                         {cell.otherDay}
                       </span>
@@ -303,10 +334,15 @@ export default function CalendarPage() {
                 );
               })}
             </div>
-            {showOverlay && (
-              <div className="px-6 pb-4 pt-1 flex items-center justify-start text-xs text-muted-foreground gap-2">
-                <div className="w-2 h-2 rounded-sm" style={{ background: "color-mix(in oklch, var(--destruct) 15%, transparent)", border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)" }} />
-                Comparing strictly to {calendarSystem === "astronomical" ? "Tabular" : "Astronomical"}
+            {showOverlay && calendarSystem !== "astronomical" && (
+              <div className="px-6 pb-4 pt-1 flex items-center justify-center lg:justify-start text-xs text-muted-foreground gap-2">
+                <div className="w-2 h-2 flex-shrink-0 rounded-sm" style={{ background: "color-mix(in oklch, var(--destruct) 15%, transparent)", border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)" }} />
+                <span>Comparing to <span className="text-foreground">Astronomical (SunCalc)</span> data</span>
+              </div>
+            )}
+            {showOverlay && calendarSystem === "astronomical" && (
+              <div className="px-6 pb-4 pt-1 flex items-center justify-center lg:justify-start text-xs text-muted-foreground gap-2">
+                <span>You are already viewing the Astronomical reference calendar. Select a differing calendar to overlay comparison markers.</span>
               </div>
             )}
           </div>
@@ -320,7 +356,7 @@ export default function CalendarPage() {
                 <div className="text-xs mb-3 flex items-center justify-between" style={{ color: "var(--muted-foreground)" }}>
                   <span>Selected Day</span>
                   <span className="text-[0.6rem] uppercase tracking-wide border border-[var(--border)] px-1.5 py-0.5 rounded" style={{ background: "var(--space-light)" }}>
-                    {calendarSystem === "astronomical" ? "Astronomical" : "Tabular"}
+                    {calendarSystem === "astronomical" ? "Astronomical" : calendarSystem === "ummalqura" ? "Umm al-Qura" : "Tabular"}
                   </span>
                 </div>
                 <div className="text-2xl font-bold mb-1" style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>
@@ -367,11 +403,11 @@ export default function CalendarPage() {
               className="breezy-card p-5 animate-breezy-enter"
               style={{ animationDelay: "150ms" }}
             >
-              <div className="text-xs font-medium mb-4" style={{ color: "var(--muted-foreground)" }}>Compare Calendars</div>
+              <div className="text-xs font-medium mb-4" style={{ color: "var(--muted-foreground)" }}>Astronomy Engine</div>
               <label className="flex items-center justify-between cursor-pointer group">
                 <div>
-                  <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Show Overlay</div>
-                  <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Highlight diverging dates</div>
+                  <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Compare to Heavens</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Overlay astronomical deviances</div>
                 </div>
                 <div
                   className="w-10 h-5 rounded-full transition-colors relative"

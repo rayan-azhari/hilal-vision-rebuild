@@ -22,7 +22,7 @@ import * as SunCalc from "suncalc";
 
 // ─── Worker-specific calculation (simplified for grid performance) ────────────
 
-function computeVisibilityAtPoint(date: Date, lat: number, lng: number): VisibilityZone {
+function computeVisibilityAtPoint(date: Date, lat: number, lng: number): { zone: VisibilityZone; q: number } {
     const times = SunCalc.getTimes(date, lat, lng);
     const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
         ? times.sunset
@@ -44,7 +44,8 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number): Visibil
 
     const crescent = crescentWidth(elongation, moonPos.distance);
     const q = yallopQ(arcv, crescent.w);
-    return classifyYallop(q, moonAlt);
+    const zone = classifyYallop(q, moonAlt);
+    return { zone, q: moonAlt <= 0 ? -1.0 : q };
 }
 
 function isDaylight(lat: number, lng: number, date: Date): boolean {
@@ -61,6 +62,7 @@ self.onmessage = (e: MessageEvent) => {
     const W = Math.floor(360 / resolution);
     const H = Math.floor(180 / resolution);
     const pixels = new Uint8ClampedArray(W * H * 4);
+    const qValues = new Float32Array(W * H);
     const maxLat = 85.051129;
 
     for (let py = 0; py < H; py++) {
@@ -76,21 +78,24 @@ self.onmessage = (e: MessageEvent) => {
 
         for (let px = 0; px < W; px++) {
             const lng = -180 + (px / W) * 360;
-            const zone = computeVisibilityAtPoint(date, lat, lng);
+            const { zone, q } = computeVisibilityAtPoint(date, lat, lng);
             const [r, g, b] = ZONE_RGB[zone];
             const night = !isDaylight(lat, lng, date);
             const alpha = zone === "F" ? 40 : night ? 100 : 180;
-            const idx = (py * W + px) * 4;
+
+            const pxIdx = py * W + px;
+            const idx = pxIdx * 4;
             pixels[idx] = r;
             pixels[idx + 1] = g;
             pixels[idx + 2] = b;
             pixels[idx + 3] = alpha;
+            qValues[pxIdx] = q;
         }
     }
 
-    // Transfer the buffer for zero-copy performance
+    // Transfer both buffers for zero-copy performance
     (self as any).postMessage(
-        { pixels, width: W, height: H },
-        [pixels.buffer]
+        { pixels, qValues, width: W, height: H },
+        [pixels.buffer, qValues.buffer]
     );
 };

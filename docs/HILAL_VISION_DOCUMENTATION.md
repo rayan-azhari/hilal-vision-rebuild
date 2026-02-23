@@ -526,5 +526,6 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 23 | Audit & Code Quality | Comprehensive audit (7.5/10 scorecard). Extracted astronomy engine to `shared/astronomy.ts` (isomorphic). Added `React.lazy` code splitting for 6 pages. Fixed OG image (SVG→PNG), `getObservations` pagination bug (`COUNT(*)`), `robots.txt`. Rewrote test suite (21 tests import production module). Updated Web Worker to import from shared module. |
 | 24 | PWA & Monitoring | Hand-written Service Worker (`sw.js`) with CacheFirst/NetworkFirst/StaleWhileRevalidate strategies. PWA manifest + icons. Sentry error monitoring with ErrorBoundary and API error capture. |
 | 25 | Location UX | Unified geolocation: all pages auto-detect GPS on mount via `useGeolocation(true)` hook. Created shared `AutoDetectButton` component. Removed ~120 lines of duplicated geolocation code. Red Report Sighting button in navbar. |
+| 26 | Map/Globe UX | Fixed Vercel 500 error on cloud cover fetch by reducing Open-Meteo batch size to avoid URL limits. Unified Visibility Map and Cloud Cover toggles directly within the side panel controls for both MapPage and GlobePage. |
 
 *Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*

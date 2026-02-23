@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
+export interface VisibilityQData {
+    qValues: Float32Array;
+    width: number;
+    height: number;
+}
+
 export function useVisibilityWorker(
     dateTs: number,
     resolution: number,
@@ -7,6 +13,7 @@ export function useVisibilityWorker(
     enabled: boolean = true
 ) {
     const [textureUrl, setTextureUrl] = useState<string | null>(null);
+    const [qData, setQData] = useState<VisibilityQData | null>(null);
     const [isComputing, setIsComputing] = useState(false);
     const workerRef = useRef<Worker | null>(null);
 
@@ -24,7 +31,9 @@ export function useVisibilityWorker(
         setIsComputing(true);
 
         worker.onmessage = (e: MessageEvent) => {
-            const { pixels, width, height } = e.data;
+            const { pixels, qValues, width, height } = e.data;
+
+            setQData({ qValues, width, height });
 
             const offCanvas = document.createElement("canvas");
             offCanvas.width = width;
@@ -64,5 +73,5 @@ export function useVisibilityWorker(
         };
     }, []);
 
-    return { textureUrl, isComputing };
+    return { textureUrl, qData, isComputing };
 }

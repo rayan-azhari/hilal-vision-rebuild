@@ -12,6 +12,7 @@
  */
 
 import * as SunCalc from "suncalc";
+import uq from "@umalqura/core";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -553,6 +554,31 @@ function jdToGregorian(jd: number): Date {
     const month = e < 14 ? e - 1 : e - 13;
     const year = month > 2 ? c - 4716 : c - 4715;
     return new Date(year, month - 1, day);
+}
+
+// ─── Umm Al-Qura Implementation ───────────────────────────────────────────────
+
+export function getUmmAlQuraHijri(date: Date): HijriDate {
+    const d = uq(date);
+    const monthInfo = HIJRI_MONTHS[d.hm - 1] ?? HIJRI_MONTHS[0];
+    return {
+        year: d.hy,
+        month: d.hm,
+        day: d.hd,
+        monthName: monthInfo.en,
+        monthNameArabic: monthInfo.ar,
+        monthNameShort: monthInfo.short,
+    };
+}
+
+export function getUmmAlQuraDaysInMonth(year: number, month: number): number {
+    const d = uq(year, month, 1);
+    return d.daysInMonth;
+}
+
+export function getUmmAlQuraMonthStart(year: number, month: number): Date {
+    const d = uq(year, month, 1);
+    return d.date;
 }
 
 // ─── Day/Night Terminator ─────────────────────────────────────────────────────
