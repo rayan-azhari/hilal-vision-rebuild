@@ -29,7 +29,7 @@ export function BreezyFullCard({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-2">
                     {icon && (
-                        <span style={{ color: "var(--gold-dim)" }} className="w-4 h-4 flex items-center justify-center">{icon}</span>
+                        <span style={{ color: "var(--gold-dim)" }} className="w-4 h-4 flex items-center justify-center shrink-0 [&>svg]:w-full [&>svg]:h-full">{icon}</span>
                     )}
                     <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                         {title}

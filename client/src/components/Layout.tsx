@@ -60,7 +60,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Floating Command Centre Navigation */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
         <header
-          className="pointer-events-auto flex items-center justify-between px-3 md:px-5 h-16 rounded-[3rem] transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+          className="pointer-events-auto flex items-center justify-between px-2 md:px-4 h-14 rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
           style={{
             background: scrolled
               ? "color-mix(in oklch, var(--card) 60%, transparent)"
@@ -81,13 +81,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link href="/">
             <div className="flex items-center gap-3 group magnetic cursor-pointer p-1">
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center"
+                className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
                   background: "linear-gradient(135deg, var(--gold-glow), var(--gold-dim))",
                   boxShadow: "0 0 12px color-mix(in oklch, var(--gold) 40%, transparent)",
                 }}
               >
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none">
                   <path
                     d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5S12.83 18 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c.83 0 1.5-.67 1.5-1.5S12.83 3 12 3z"
                     fill="var(--space)"
@@ -97,7 +97,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     fill="var(--space)"
                   />
                 </svg>
-                <span className="text-sm font-bold" style={{ color: "var(--space)", fontFamily: "Cinzel, serif" }}>☽</span>
+                <span className="text-xs font-bold" style={{ color: "var(--space)", fontFamily: "Cinzel, serif" }}>☽</span>
               </div>
               <div>
                 <div
@@ -120,7 +120,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               return (
                 <Link key={href} href={href}>
                   <div
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-[2rem] text-sm transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic"
                     style={{
                       color: active ? "var(--foreground)" : "var(--muted-foreground)",
                       background: active
@@ -145,7 +145,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Dialog open={reportOpen} onOpenChange={setReportOpen}>
               <DialogTrigger asChild>
                 <button
-                  className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-[2rem] text-sm font-medium magnetic transition-colors"
+                  className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-full text-[13px] font-medium magnetic transition-colors"
                   style={{
                     background: "var(--foreground)",
                     color: "var(--background)",
@@ -169,7 +169,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* Language Switcher */}
             <div className="relative">
               <button
-                className="p-2 rounded-lg transition-colors flex items-center gap-1"
+                className="p-1.5 rounded-lg transition-colors flex items-center gap-1"
                 style={{ color: "var(--muted-foreground)" }}
                 onClick={() => setLangOpen(!langOpen)}
                 aria-label="Change language"
@@ -205,12 +205,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <button
-              className="p-2 rounded-lg transition-colors"
+              className="p-1.5 rounded-lg transition-colors"
               style={{ color: "var(--foreground)" }}
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             <SignedIn>
@@ -240,7 +240,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </SignedOut>
 
             <button
-              className="lg:hidden p-2 rounded-lg"
+              className="lg:hidden p-1.5 rounded-lg"
               style={{ color: "var(--gold)" }}
               onClick={() => setMobileOpen(!mobileOpen)}
             >

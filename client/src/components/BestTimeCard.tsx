@@ -22,7 +22,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
         d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     return (
-        <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay }}>
+        <div className="breezy-card animate-breezy-enter" style={{ animationDelay }}>
             <div className="flex items-center gap-2 mb-3">
                 <div
                     className="w-7 h-7 rounded-lg flex items-center justify-center"

@@ -368,21 +368,21 @@ export default function Home() {
                   className="breezy-card group h-full flex flex-col items-start cursor-pointer animate-breezy-enter hover:-translate-y-1 transition-transform"
                   style={{ animationDelay: `${0.1 * i}s` }}
                 >
-                  <div className="flex items-center gap-3 w-full mb-2">
+                  <div className="flex items-center gap-3.5 w-full mb-3">
                     <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                       style={{ background: `color-mix(in oklch, ${color} 15%, transparent)` }}
                     >
-                      <Icon className="w-4 h-4" style={{ color }} />
+                      <Icon className="w-5 h-5" style={{ color }} />
                     </div>
                     <div className="flex-1 flex items-baseline justify-between">
-                      <h4 className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
+                      <h4 className="text-base font-medium" style={{ color: "var(--foreground)" }}>
                         {title}
                       </h4>
-                      <span className="text-[10px] font-arabic" style={{ color: "var(--gold-dim)" }}>{titleAr}</span>
+                      <span className="text-[11px] font-arabic" style={{ color: "var(--gold-dim)" }}>{titleAr}</span>
                     </div>
                   </div>
-                  <p className="text-[11px] leading-relaxed flex-1 mt-1" style={{ color: "var(--muted-foreground)" }}>{desc}</p>
+                  <p className="text-xs leading-relaxed flex-1" style={{ color: "var(--muted-foreground)" }}>{desc}</p>
                 </div>
               </Link>
             ))}

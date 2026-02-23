@@ -37,7 +37,7 @@ export function BreezyDetailCard({
             {/* Header row */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                    <span style={{ color: accentColour }} className="w-4 h-4 flex items-center justify-center">{icon}</span>
+                    <span style={{ color: accentColour }} className="w-4 h-4 flex items-center justify-center shrink-0 [&>svg]:w-full [&>svg]:h-full">{icon}</span>
                     <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
                         {title}
                     </span>
@@ -66,7 +66,7 @@ export function BreezyDetailCard({
             {/* Giant primary value */}
             <div className="flex items-baseline gap-1 mt-1">
                 <span
-                    className="text-4xl font-light leading-none tracking-tight"
+                    className="text-3xl sm:text-4xl font-light leading-none tracking-tight"
                     style={{ color: "var(--foreground)" }}
                 >
                     {primaryValue}

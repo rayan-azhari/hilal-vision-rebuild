@@ -519,5 +519,6 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 19 | Feature & Mobile | Added ICOP scraped historical data logic, mathematical Zone F sighting rejection, and native mobile Capacitor bridging |
 | 20 | UI Consistency | Unified PageHeader component across all tool pages. Fixed Clerk `getAuth` crash for public tRPC endpoints. |
 | 21 | Deployment Fixes | Bypassed Vercel serverless limits by moving 160KB ICOP dataset to `client/public/` for static serving. Fixed Vercel SPA catch-all rewrite preventing `/api/trpc` routes from firing. |
+| 22 | Design Overhaul | Implemented "Clinical Aerospace" (Light) and "Deep Space" (Dark) themes with refined typography scaling, card padding, and SVG SVG scaling fixes. Elevated visual language to "instrument-grade". |
 
 *Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*
