@@ -140,3 +140,12 @@
 - [x] `client/src/lib/astronomy.ts` reduced to thin re-export wrapper + `buildVisibilityTexture`
 - [x] Web Worker updated to import from shared module (no more inlined copies)
 - [x] Server import fixed: `../shared/astronomy` replaces cross-boundary `../client/src/lib/astronomy`
+
+## Improvements (Round 7 — PWA, Monitoring & UX)
+- [x] Hand-written Service Worker (`sw.js`) with CacheFirst / NetworkFirst / StaleWhileRevalidate strategies
+- [x] PWA manifest + generated icons (192px, 512px, maskable)
+- [x] Sentry error monitoring (`@sentry/react`) with ErrorBoundary + API error capture
+- [x] Unified geolocation: all pages auto-detect GPS on mount via `useGeolocation(true)`
+- [x] Created shared `AutoDetectButton` component (inline + button variants)
+- [x] Removed ~120 lines of duplicated inline geolocation code across 5 files
+- [x] Submit Sighting button made red for visibility, Sign In button sizing fixed

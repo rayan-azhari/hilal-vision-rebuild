@@ -3,6 +3,7 @@ import { SEO } from "@/components/SEO";
 import { Compass, MapPin, ChevronDown, Clock, Locate } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { AutoDetectButton } from "@/components/AutoDetectButton";
 import {
   computeSunMoonAtSunset,
   MAJOR_CITIES,
@@ -251,7 +252,7 @@ export default function HorizonPage() {
   const [customLng, setCustomLng] = useState("");
   const [data, setData] = useState<SunMoonData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const geo = useGeolocation();
+  const geo = useGeolocation(true); // auto-detect GPS on mount
 
   const loc = customLat && customLng
     ? { lat: parseFloat(customLat), lng: parseFloat(customLng), name: "Custom" }
@@ -432,19 +433,7 @@ export default function HorizonPage() {
 
             {/* Geolocation detect */}
             <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
-              <button
-                onClick={geo.detect}
-                disabled={geo.loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]"
-                style={{
-                  background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
-                  color: "var(--space)",
-                  opacity: geo.loading ? 0.6 : 1,
-                }}
-              >
-                <Locate className="w-4 h-4" />
-                {geo.loading ? "Detecting…" : "Detect My Location"}
-              </button>
+              <AutoDetectButton onClick={geo.detect} loading={geo.loading} variant="button" />
               {geo.error && (
                 <p className="text-xs mt-2" style={{ color: "var(--destructive)" }}>{geo.error}</p>
               )}

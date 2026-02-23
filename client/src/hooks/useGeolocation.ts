@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export interface GeoPosition {
     lat: number;
@@ -16,8 +16,10 @@ interface UseGeolocationReturn {
 /**
  * Hook to auto-detect user location via the browser Geolocation API.
  * Falls back gracefully with an error message if denied or unavailable.
+ *
+ * @param autoDetect  If true, triggers detection on mount (default: false)
  */
-export function useGeolocation(): UseGeolocationReturn {
+export function useGeolocation(autoDetect = false): UseGeolocationReturn {
     const [position, setPosition] = useState<GeoPosition | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,13 @@ export function useGeolocation(): UseGeolocationReturn {
             { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
         );
     }, []);
+
+    // Auto-detect on mount if requested
+    useEffect(() => {
+        if (autoDetect) {
+            detect();
+        }
+    }, [autoDetect, detect]);
 
     return { position, loading, error, detect };
 }

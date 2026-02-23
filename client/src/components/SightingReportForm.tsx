@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Loader2, CheckCircle2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useUser, SignInButton } from "@clerk/clerk-react";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { AutoDetectButton } from "@/components/AutoDetectButton";
 
 export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const { isSignedIn } = useUser();
-    const [isLocating, setIsLocating] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const geo = useGeolocation();
 
     // Form state
     const [lat, setLat] = useState<number | "">("");
@@ -32,27 +34,14 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
         }
     });
 
-    const handleGetLocation = () => {
-        setIsLocating(true);
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setLat(position.coords.latitude);
-                    setLng(position.coords.longitude);
-                    setErrors((e) => ({ ...e, lat: "", lng: "" }));
-                    setIsLocating(false);
-                },
-                (error) => {
-                    console.error("Error getting location:", error);
-                    alert("Could not get your location. Please check permissions.");
-                    setIsLocating(false);
-                }
-            );
-        } else {
-            alert("Geolocation is not supported by your browser");
-            setIsLocating(false);
+    // Apply GPS detection result
+    useEffect(() => {
+        if (geo.position) {
+            setLat(geo.position.lat);
+            setLng(geo.position.lng);
+            setErrors((e) => ({ ...e, lat: "", lng: "" }));
         }
-    };
+    }, [geo.position]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -98,7 +87,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                     You must be signed in to submit a sighting report. This helps us ensure data quality and avoid spam.
                 </p>
                 <SignInButton mode="modal">
-                    <Button>Sign in to Report</Button>
+                    <Button size="lg" className="w-full">Sign in to Report</Button>
                 </SignInButton>
             </div>
         );
@@ -127,17 +116,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 {(errors.lat || errors.lng) && (
                     <p className="text-xs text-destructive">Coordinates are required</p>
                 )}
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={handleGetLocation}
-                    disabled={isLocating}
-                >
-                    {isLocating ? <Loader2 className="w-3 h-3 mr-2 animate-spin" /> : <MapPin className="w-3 h-3 mr-2" />}
-                    Auto-detect Location
-                </Button>
+                <AutoDetectButton onClick={geo.detect} loading={geo.loading} variant="inline" />
             </div>
 
             <div className="space-y-2">
@@ -181,8 +160,15 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
 
             <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-11 text-base"
                 disabled={submitMutation.isPending}
+                style={{
+                    background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                    color: "#fff",
+                    border: "none",
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                }}
             >
                 {submitMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Submit Sighting

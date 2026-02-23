@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
 import { Globe2, Play, Pause, ChevronDown, MapPin, Clock } from "lucide-react";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { AutoDetectButton } from "@/components/AutoDetectButton";
 import {
   computeSunMoonAtSunset,
   isDaylight,
@@ -29,6 +31,24 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   const [isGlobeInitialized, setIsGlobeInitialized] = useState(false);
   const [showVisibility, setShowVisibility] = useState(true);
   const [showClouds, setShowClouds] = useState(false);
+  const geo = useGeolocation(true); // auto-detect GPS on mount
+
+  // Apply GPS detection result
+  useEffect(() => {
+    if (geo.position) {
+      const gpsCity = {
+        name: geo.position.name || "GPS Location",
+        country: "Current",
+        lat: geo.position.lat,
+        lng: geo.position.lng,
+      };
+      if (!MAJOR_CITIES.find(c => c.name === gpsCity.name)) {
+        MAJOR_CITIES.unshift(gpsCity);
+      }
+      setSelectedCity(gpsCity);
+      globeInstanceRef.current?.pointOfView({ lat: gpsCity.lat, lng: gpsCity.lng, altitude: 2 }, 1000);
+    }
+  }, [geo.position]);
 
   const effectiveDate = useMemo(
     () => new Date(date.getTime() + hourOffset * 3600 * 1000),
@@ -339,35 +359,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                 <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
                   Location
                 </label>
-                <button
-                  onClick={() => {
-                    if ("geolocation" in navigator) {
-                      navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                          const newCity = {
-                            name: "GPS Location",
-                            country: "Current",
-                            lat: pos.coords.latitude,
-                            lng: pos.coords.longitude
-                          };
-                          // Add to list if not present so it shows up in select
-                          if (!MAJOR_CITIES.find(c => c.name === "GPS Location")) {
-                            MAJOR_CITIES.unshift(newCity);
-                          }
-                          setSelectedCity(newCity);
-                          globeInstanceRef.current?.pointOfView({ lat: newCity.lat, lng: newCity.lng, altitude: 2 }, 1000);
-                        },
-                        () => alert("Could not retrieve GPS location.")
-                      );
-                    } else {
-                      alert("Geolocation is not supported by your browser.");
-                    }
-                  }}
-                  className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider hover:opacity-80 transition-opacity"
-                  style={{ color: "var(--gold)" }}
-                >
-                  <MapPin className="w-3 h-3" /> Auto-Detect
-                </button>
+                <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
               </div>
               <div className="relative">
                 <LocationSearch

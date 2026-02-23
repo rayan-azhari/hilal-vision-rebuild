@@ -4,6 +4,8 @@ import { Moon, Sun, ArrowRight, Clock, Eye, MapPin } from "lucide-react";
 import { LocationSearch } from "@/components/LocationSearch";
 import { PageHeader } from "@/components/PageHeader";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { AutoDetectButton } from "@/components/AutoDetectButton";
 import * as SunCalc from "suncalc";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
@@ -155,6 +157,23 @@ export default function MoonPage() {
   const [moonInfo, setMoonInfo] = useState(() => getMoonPhaseInfo(new Date()));
   const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0]));
   const [countdown, setCountdown] = useState("");
+  const geo = useGeolocation(true); // auto-detect GPS on mount
+
+  // Apply GPS detection result
+  useEffect(() => {
+    if (geo.position) {
+      const gpsCity = {
+        name: geo.position.name || "GPS Location",
+        country: "Current",
+        lat: geo.position.lat,
+        lng: geo.position.lng,
+      };
+      if (!MAJOR_CITIES.find(c => c.name === gpsCity.name)) {
+        MAJOR_CITIES.unshift(gpsCity);
+      }
+      setLocation(gpsCity);
+    }
+  }, [geo.position]);
 
   useEffect(() => {
     // document.title managed by <SEO> component
@@ -202,33 +221,7 @@ export default function MoonPage() {
           <div className="w-full sm:w-64">
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Location</label>
-              <button
-                onClick={() => {
-                  if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(
-                      (pos) => {
-                        const newCity = {
-                          name: "GPS Location",
-                          country: "Current",
-                          lat: pos.coords.latitude,
-                          lng: pos.coords.longitude
-                        };
-                        if (!MAJOR_CITIES.find(c => c.name === "GPS Location")) {
-                          MAJOR_CITIES.unshift(newCity);
-                        }
-                        setLocation(newCity);
-                      },
-                      () => alert("Could not retrieve GPS location.")
-                    );
-                  } else {
-                    alert("Geolocation is not supported by your browser.");
-                  }
-                }}
-                className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider hover:opacity-80 transition-opacity"
-                style={{ color: "var(--gold)" }}
-              >
-                <MapPin className="w-3 h-3" /> Auto-Detect
-              </button>
+              <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
             </div>
             <div className="relative">
               <LocationSearch

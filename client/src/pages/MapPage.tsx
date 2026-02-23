@@ -16,6 +16,8 @@ import type { SharedVisibilityState } from "./VisibilityPage";
 import { LocationSearch } from "@/components/LocationSearch";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
 import { BestTimeCard } from "@/components/BestTimeCard";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { AutoDetectButton } from "@/components/AutoDetectButton";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
   A: "#4ade80",
@@ -58,6 +60,24 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const [moonData, setMoonData] = useState(() =>
     computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0])
   );
+  const geo = useGeolocation(true); // auto-detect GPS on mount
+
+  // Apply GPS detection result
+  useEffect(() => {
+    if (geo.position) {
+      const gpsCity = {
+        name: geo.position.name || "GPS Location",
+        country: "Current",
+        lat: geo.position.lat,
+        lng: geo.position.lng,
+      };
+      if (!MAJOR_CITIES.find(c => c.name === gpsCity.name)) {
+        MAJOR_CITIES.unshift(gpsCity);
+      }
+      setSelectedCity(gpsCity);
+      leafletRef.current?.setView([gpsCity.lat, gpsCity.lng], 5, { animate: true });
+    }
+  }, [geo.position]);
 
   const hijri = useMemo(() => gregorianToHijri(date), [date]);
 
@@ -388,34 +408,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                 <div className="pt-2 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                   <div className="flex items-center justify-between mb-2 mt-1">
                     <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Location</label>
-                    <button
-                      onClick={() => {
-                        if ("geolocation" in navigator) {
-                          navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                              const newCity = {
-                                name: "GPS Location",
-                                country: "Current",
-                                lat: pos.coords.latitude,
-                                lng: pos.coords.longitude
-                              };
-                              if (!MAJOR_CITIES.find(c => c.name === "GPS Location")) {
-                                MAJOR_CITIES.unshift(newCity);
-                              }
-                              setSelectedCity(newCity);
-                              leafletRef.current?.setView([newCity.lat, newCity.lng], 5, { animate: true });
-                            },
-                            () => alert("Could not retrieve GPS location.")
-                          );
-                        } else {
-                          alert("Geolocation is not supported by your browser.");
-                        }
-                      }}
-                      className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider hover:opacity-80 transition-opacity"
-                      style={{ color: "var(--gold)" }}
-                    >
-                      <MapPin className="w-3 h-3" /> Auto-Detect
-                    </button>
+                    <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
                   </div>
                   <div className="relative">
                     <LocationSearch
