@@ -47,26 +47,33 @@
   --card-surface-alt: oklch(0.97 0.0 0);
   --popover: oklch(0.99 0.0 0);
   --popover-foreground: oklch(0.20 0.0 0);
-  --primary: oklch(0.25 0.05 260); /* Deep space-navy accent */
+  --primary: oklch(0.25 0.05 260);
+  /* Deep space-navy accent */
   --primary-foreground: oklch(0.99 0.0 0);
-  --secondary: oklch(0.96 0.02 250); /* Subtle Celesta tint */
+  --secondary: oklch(0.96 0.02 250);
+  /* Subtle Celesta tint */
   --secondary-foreground: oklch(0.25 0.05 260);
-  --muted: oklch(0.97 0.01 250); /* Very light blue-grey */
+  --muted: oklch(0.97 0.01 250);
+  /* Very light blue-grey */
   --muted-foreground: oklch(0.45 0.01 250);
-  --accent: oklch(0.60 0.12 245); /* Celesta Blue for info panels */
+  --accent: oklch(0.60 0.12 245);
+  /* Celesta Blue for info panels */
   --accent-foreground: oklch(0.99 0.0 0);
-  --destructive: oklch(0.60 0.22 25); /* Signal Red */
+  --destructive: oklch(0.60 0.22 25);
+  /* Signal Red */
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.90 0.02 250);
   --input: oklch(0.95 0.01 250);
   --ring: oklch(0.25 0.05 260);
 
   /* Custom palette */
-  --gold: oklch(0.72 0.16 80); /* Luminous Refined Gold */
+  --gold: oklch(0.72 0.16 80);
+  /* Luminous Refined Gold */
   --gold-dim: oklch(0.55 0.12 80);
   --gold-glow: oklch(0.85 0.18 80);
   --gold-subtle: oklch(0.92 0.08 80);
-  --space: oklch(0.98 0.01 250); /* Cool airy space */
+  --space: oklch(0.98 0.01 250);
+  /* Cool airy space */
   --space-mid: oklch(0.92 0.02 250);
   --space-light: oklch(0.85 0.04 250);
   --space-lighter: oklch(0.80 0.05 250);
@@ -89,22 +96,27 @@
   --card-surface-alt: oklch(0.19 0.01 260);
   --popover: oklch(0.15 0.01 260);
   --popover-foreground: oklch(0.95 0.0 0);
-  --primary: oklch(0.99 0.0 0); /* Still crisp white for contrast */
+  --primary: oklch(0.99 0.0 0);
+  /* Still crisp white for contrast */
   --primary-foreground: oklch(0.12 0.01 260);
   --secondary: oklch(0.22 0.02 260);
   --secondary-foreground: oklch(0.90 0.0 0);
   --muted: oklch(0.20 0.02 260);
   --muted-foreground: oklch(0.65 0.01 260);
-  --accent: oklch(0.60 0.12 245); /* Celesta Blue */
+  --accent: oklch(0.60 0.12 245);
+  /* Celesta Blue */
   --accent-foreground: oklch(0.99 0.0 0);
-  --destructive: oklch(0.62 0.25 25); /* Signal Red */
+  --destructive: oklch(0.62 0.25 25);
+  /* Signal Red */
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.25 0.02 260);
   --input: oklch(0.22 0.02 260);
-  --ring: oklch(0.72 0.16 80); /* Refined Gold for focus outline */
+  --ring: oklch(0.72 0.16 80);
+  /* Refined Gold for focus outline */
 
   /* Custom palette */
-  --gold: oklch(0.75 0.16 80); /* Luminous Refined Gold for Deep Space */
+  --gold: oklch(0.75 0.16 80);
+  /* Luminous Refined Gold for Deep Space */
   --gold-dim: oklch(0.55 0.12 80);
   --gold-glow: oklch(0.85 0.20 80);
   --gold-subtle: oklch(0.35 0.05 80);
@@ -148,22 +160,27 @@
     font-weight: 500;
   }
 
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 25%, transparent) transparent;
+  }
+
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--space);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--space-lighter);
-    border-radius: 3px;
+    background: color-mix(in oklch, var(--foreground) 25%, transparent);
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--gold-dim);
+    background: color-mix(in oklch, var(--gold-dim) 50%, transparent);
   }
 
   button:not(:disabled),

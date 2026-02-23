@@ -26,6 +26,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   );
   const [isAutoRotate, setIsAutoRotate] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGlobeInitialized, setIsGlobeInitialized] = useState(false);
   const [showVisibility, setShowVisibility] = useState(true);
   const [showClouds, setShowClouds] = useState(false);
 
@@ -60,7 +61,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       globe.controls().autoRotateSpeed = 0.3;
 
       globeInstanceRef.current = globe;
-      setIsLoading(false);
+      setTimeout(() => setIsGlobeInitialized(true), 150);
     });
 
     return () => {
@@ -218,10 +219,14 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Globe container */}
         <div className="relative flex-1 min-h-[60vh] lg:min-h-0">
-          <div ref={globeRef} className="absolute inset-0" />
+          <div
+            ref={globeRef}
+            className="absolute inset-0 transition-opacity duration-[2000ms] ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+            style={{ opacity: isGlobeInitialized ? 1 : 0 }}
+          />
 
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ background: "rgba(0,0,0,0.3)" }}>
+          {(!isGlobeInitialized || isLoading) && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-500" style={{ background: "rgba(0,0,0,0.2)" }}>
               <div className="flex flex-col items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-full border-2 animate-spin"
