@@ -8,17 +8,14 @@
             "includeFiles": "server/**"
         }
     },
-    "routes": [
+    "rewrites": [
         {
-            "handle": "filesystem"
+            "source": "/api/trpc/:path*",
+            "destination": "/api/trpc/[trpc]"
         },
         {
-            "src": "/api/trpc/(.*)",
-            "dest": "/api/trpc/[trpc]"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/index.html"
+            "source": "/((?!.*\\.).*)",
+            "destination": "/index.html"
         }
     ]
 }
