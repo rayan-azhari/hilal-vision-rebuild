@@ -60,8 +60,8 @@ export const weatherRouter = router({
       const gridPoints = generateGridPoints();
 
       // Open-Meteo supports comma-separated lat/lng for multi-location queries
-      // But there's a practical limit, so we batch in chunks of ~50
-      const BATCH_SIZE = 50;
+      // Vercel/Node has max URL length limits, so we batch in very small chunks.
+      const BATCH_SIZE = 25;
       const allResults: Array<{ lat: number; lng: number; cloud_cover: number }> = [];
 
       for (let i = 0; i < gridPoints.length; i += BATCH_SIZE) {
@@ -70,6 +70,9 @@ export const weatherRouter = router({
         const lngs = batch.map((p) => p.lng).join(",");
 
         try {
+          // Add a small delay between batches to respect rate limits
+          if (i > 0) await new Promise(r => setTimeout(r, 100));
+
           const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&hourly=cloud_cover&forecast_days=1&timezone=auto`;
           const res = await fetch(url);
 

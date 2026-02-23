@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { Map, Clock, ChevronDown, Info } from "lucide-react";
+import { Map, Clock, ChevronDown, Info, Eye, Cloud } from "lucide-react";
 import {
   computeSunMoonAtSunset,
   gregorianToHijri,
@@ -469,84 +469,121 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Best Time to Observe */}
-            <div className="animate-breezy-enter" style={{ animationDelay: "45ms" }}>
-              <BestTimeCard date={effectiveDate} location={selectedCity} />
-            </div>
-
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
-              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-                Visibility Zones
-              </div>
-              <div className="space-y-3">
-                {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
-                  <div key={zone} className="flex items-start gap-2.5">
+              {/* Overlays */}
+              <div className="pt-2 border-t space-y-2 mt-2" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                <div className="flex items-center justify-between text-xs py-1">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Visibility Map</span>
+                  <button
+                    onClick={() => setShowVisibility(!showVisibility)}
+                    className={`w-8 h-4 rounded-full transition-colors relative`}
+                    style={{ background: showVisibility ? "var(--gold)" : "var(--muted)" }}
+                  >
                     <div
-                      className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
-                      style={{ background: ZONE_COLORS[zone] }}
+                      className={`absolute top-0.5 bottom-0.5 w-3 bg-white rounded-full transition-transform`}
+                      style={{
+                        left: "2px",
+                        transform: showVisibility ? "translateX(16px)" : "translateX(0)"
+                      }}
                     />
-                    <div>
-                      <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
-                        Zone {zone} — {VISIBILITY_LABELS[zone].label}
-                      </div>
-                      <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
-                        {VISIBILITY_LABELS[zone].desc}
-                      </div>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between text-xs py-1">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><Cloud className="w-3.5 h-3.5" /> Cloud Cover</span>
+                  <button
+                    onClick={() => setShowClouds(!showClouds)}
+                    className={`w-8 h-4 rounded-full transition-colors relative`}
+                    style={{ background: showClouds ? "var(--gold)" : "var(--muted)" }}
+                  >
+                    <div
+                      className={`absolute top-0.5 bottom-0.5 w-3 bg-white rounded-full transition-transform`}
+                      style={{
+                        left: "2px",
+                        transform: showClouds ? "translateX(16px)" : "translateX(0)"
+                      }}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Best Time to Observe */}
+          <div className="animate-breezy-enter" style={{ animationDelay: "45ms" }}>
+            <BestTimeCard date={effectiveDate} location={selectedCity} />
+          </div>
+
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
+            <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
+              Visibility Zones
+            </div>
+            <div className="space-y-3">
+              {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
+                <div key={zone} className="flex items-start gap-2.5">
+                  <div
+                    className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
+                    style={{ background: ZONE_COLORS[zone] }}
+                  />
+                  <div>
+                    <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
+                      Zone {zone} — {VISIBILITY_LABELS[zone].label}
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
+                      {VISIBILITY_LABELS[zone].desc}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />
-                <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>About the Map</span>
-              </div>
-              <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                Colours show the probability of naked-eye crescent sighting at sunset for each region.
-                Use the time slider to see how visibility changes across the globe.
-              </p>
-              <p className="text-xs leading-relaxed mt-2" style={{ color: "var(--muted-foreground)" }}>
-                Based on the <strong style={{ color: "var(--gold-dim)" }}>Yallop (1997)</strong> q-value criterion.
-              </p>
-            </div>
-
-            {/* Effective time display */}
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
-              <div className="text-xs font-medium mb-1" style={{ color: "var(--muted-foreground)" }}>Showing</div>
-              <div className="text-sm font-semibold" style={{ color: "var(--gold)" }}>
-                {effectiveDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-              </div>
-              <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                {effectiveDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} local
-              </div>
-            </div>
-
-            {/* Sighting Legend */}
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
-              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-                Crowdsourced Sightings
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#4ade80" }} />
-                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Naked Eye</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#60a5fa" }} />
-                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Optical Aid</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#9ca3af" }} />
-                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Attempted, Not Seen</span>
-                </div>
-              </div>
+              ))}
             </div>
-
           </div>
+
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
+            <div className="flex items-center gap-1.5 mb-2">
+              <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />
+              <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>About the Map</span>
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              Colours show the probability of naked-eye crescent sighting at sunset for each region.
+              Use the time slider to see how visibility changes across the globe.
+            </p>
+            <p className="text-xs leading-relaxed mt-2" style={{ color: "var(--muted-foreground)" }}>
+              Based on the <strong style={{ color: "var(--gold-dim)" }}>Yallop (1997)</strong> q-value criterion.
+            </p>
+          </div>
+
+          {/* Effective time display */}
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
+            <div className="text-xs font-medium mb-1" style={{ color: "var(--muted-foreground)" }}>Showing</div>
+            <div className="text-sm font-semibold" style={{ color: "var(--gold)" }}>
+              {effectiveDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            </div>
+            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+              {effectiveDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} local
+            </div>
+          </div>
+
+          {/* Sighting Legend */}
+          <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
+            <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
+              Crowdsourced Sightings
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#4ade80" }} />
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Naked Eye</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#60a5fa" }} />
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Optical Aid</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full border border-black dark:border-white shadow-sm" style={{ background: "#9ca3af" }} />
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Attempted, Not Seen</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

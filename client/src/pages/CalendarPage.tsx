@@ -7,6 +7,9 @@ import {
   hijriToGregorian,
   HIJRI_MONTHS,
   getMoonPhaseInfo,
+  gregorianToJD,
+  jdToHijri,
+  type HijriDate
 } from "@/lib/astronomy";
 
 const ISLAMIC_EVENTS: Array<{ month: number; day: number; name: string; nameAr: string; type: "major" | "minor" }> = [
@@ -22,52 +25,106 @@ const ISLAMIC_EVENTS: Array<{ month: number; day: number; name: string; nameAr: 
   { month: 12, day: 10, name: "Eid al-Adha", nameAr: "عيد الأضحى", type: "major" },
 ];
 
-function getDaysInHijriMonth(year: number, month: number): number {
-  // Approximate: odd months have 30 days, even have 29; last month of leap year has 30
+function getTabularDaysInMonth(year: number, month: number): number {
   const leapYears = [2, 5, 7, 10, 13, 15, 18, 21, 24, 26, 29];
   if (month === 12 && leapYears.includes(year % 30)) return 30;
   return month % 2 === 1 ? 30 : 29;
 }
 
-function getHijriMonthStart(year: number, month: number): Date {
-  return hijriToGregorian(year, month, 1);
+function getAstronomicalDaysInMonth(year: number, month: number): number {
+  const start = hijriToGregorian(year, month, 1);
+  let ny = year, nm = month + 1;
+  if (nm > 12) { nm = 1; ny++; }
+  const nextStart = hijriToGregorian(ny, nm, 1);
+  return Math.round((nextStart.getTime() - start.getTime()) / (24 * 3600 * 1000));
 }
 
+function getTabularHijri(greg: Date): HijriDate {
+  const jd = gregorianToJD(greg.getFullYear(), greg.getMonth() + 1, greg.getDate());
+  const result = jdToHijri(jd);
+  const monthInfo = HIJRI_MONTHS[result.month - 1] || HIJRI_MONTHS[0];
+  return {
+    year: result.year,
+    month: result.month,
+    day: result.day,
+    monthName: monthInfo.en,
+    monthNameArabic: monthInfo.ar,
+    monthNameShort: monthInfo.short,
+  };
+}
+
+function getTabularMonthStart(year: number, month: number): Date {
+  const guess = hijriToGregorian(year, month, 1);
+  for (let i = -5; i <= 5; i++) {
+    const d = new Date(guess.getTime() + i * 24 * 3600 * 1000);
+    const tab = getTabularHijri(d);
+    if (tab.year === year && tab.month === month && tab.day === 1) return d;
+  }
+  return guess;
+}
+
+type CalendarSystem = "astronomical" | "tabular";
+
 export default function CalendarPage() {
-  const today = new Date();
-  const todayHijri = gregorianToHijri(today);
+  const today = useMemo(() => new Date(), []);
 
-  const [viewYear, setViewYear] = useState(todayHijri.year);
-  const [viewMonth, setViewMonth] = useState(todayHijri.month);
-  const [selectedDay, setSelectedDay] = useState<number | null>(todayHijri.day);
+  const [calendarSystem, setCalendarSystem] = useState<CalendarSystem>("astronomical");
+  const [showOverlay, setShowOverlay] = useState(false);
 
+  const [viewYear, setViewYear] = useState(() => gregorianToHijri(today).year);
+  const [viewMonth, setViewMonth] = useState(() => gregorianToHijri(today).month);
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => gregorianToHijri(today).day);
+
+  // Sync when calendar system changes
   useEffect(() => {
-    // document.title managed by <SEO> component
-  }, [viewMonth, viewYear]);
+    const newToday = calendarSystem === "astronomical" ? gregorianToHijri(today) : getTabularHijri(today);
+    setViewYear(newToday.year);
+    setViewMonth(newToday.month);
+    setSelectedDay(newToday.day);
+  }, [calendarSystem, today]);
 
-  const monthInfo = HIJRI_MONTHS[viewMonth - 1];
-  const daysInMonth = getDaysInHijriMonth(viewYear, viewMonth);
-  const monthStart = getHijriMonthStart(viewYear, viewMonth);
+  const monthInfo = HIJRI_MONTHS[viewMonth - 1] || HIJRI_MONTHS[0];
+  const daysInMonth = calendarSystem === "astronomical"
+    ? getAstronomicalDaysInMonth(viewYear, viewMonth)
+    : getTabularDaysInMonth(viewYear, viewMonth);
+  const monthStart = calendarSystem === "astronomical"
+    ? hijriToGregorian(viewYear, viewMonth, 1)
+    : getTabularMonthStart(viewYear, viewMonth);
 
-  // Day of week for month start (0=Sun)
   const startDow = monthStart.getDay();
-
-  // Events this month
   const monthEvents = ISLAMIC_EVENTS.filter(e => e.month === viewMonth);
 
-  // Build calendar grid
   const calendarDays = useMemo(() => {
-    const cells: Array<{ day: number | null; greg: Date | null; phase: number }> = [];
-    // Leading empty cells
+    const cells: Array<{ day: number | null; greg: Date | null; phase: number; differs?: boolean; otherDay?: number }> = [];
     for (let i = 0; i < startDow; i++) cells.push({ day: null, greg: null, phase: 0 });
-    // Month days
+
     for (let d = 1; d <= daysInMonth; d++) {
-      const greg = hijriToGregorian(viewYear, viewMonth, d);
+      const greg = new Date(monthStart.getTime() + (d - 1) * 24 * 3600 * 1000);
       const illum = getMoonPhaseInfo(greg);
-      cells.push({ day: d, greg, phase: illum.phase });
+
+      let differs = false;
+      let otherDay = undefined;
+
+      if (showOverlay) {
+        if (calendarSystem === "tabular") {
+          const astro = gregorianToHijri(greg);
+          if (astro.day !== d || astro.month !== viewMonth) {
+            differs = true;
+            otherDay = astro.day;
+          }
+        } else {
+          const tab = getTabularHijri(greg);
+          if (tab.day !== d || tab.month !== viewMonth) {
+            differs = true;
+            otherDay = tab.day;
+          }
+        }
+      }
+
+      cells.push({ day: d, greg, phase: illum.phase, differs, otherDay });
     }
     return cells;
-  }, [viewYear, viewMonth, daysInMonth, startDow]);
+  }, [viewMonth, daysInMonth, startDow, calendarSystem, showOverlay, monthStart]);
 
   const prevMonth = () => {
     if (viewMonth === 1) { setViewMonth(12); setViewYear(y => y - 1); }
@@ -80,12 +137,11 @@ export default function CalendarPage() {
     setSelectedDay(null);
   };
 
-  const selectedGreg = selectedDay ? hijriToGregorian(viewYear, viewMonth, selectedDay) : null;
-  const selectedHijri = selectedGreg ? gregorianToHijri(selectedGreg) : null;
+  const selectedGreg = selectedDay ? new Date(monthStart.getTime() + (selectedDay - 1) * 24 * 3600 * 1000) : null;
+  const selectedHijri = selectedGreg ? (calendarSystem === "astronomical" ? gregorianToHijri(selectedGreg) : getTabularHijri(selectedGreg)) : null;
   const selectedMoon = selectedGreg ? getMoonPhaseInfo(selectedGreg) : null;
   const selectedEvent = selectedDay ? monthEvents.find(e => e.day === selectedDay) : null;
 
-  // Phase mini moon
   function MiniMoon({ phase }: { phase: number }) {
     const r = 5; const cx = 6; const cy = 6;
     const isWaxing = phase <= 0.5;
@@ -107,6 +163,8 @@ export default function CalendarPage() {
     );
   }
 
+  const todayDisplay = calendarSystem === "astronomical" ? gregorianToHijri(today) : getTabularHijri(today);
+
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
@@ -114,28 +172,38 @@ export default function CalendarPage() {
         description={`Islamic Hijri calendar for ${monthInfo?.en} ${viewYear} AH with Gregorian comparison, Islamic events, and lunar phases.`}
         path="/calendar"
       />
-      {/* Header */}
       <PageHeader
         icon={<Calendar />}
         title="Islamic Hijri Calendar"
         subtitle="Hijri ↔ Gregorian · Islamic events · Lunar phases"
       >
-        <div className="text-right">
-          <div className="text-sm font-medium" style={{ color: "var(--gold)" }}>
-            {todayHijri.day} {todayHijri.monthName} {todayHijri.year} AH
-          </div>
-          <div className="text-xs font-arabic" style={{ color: "var(--gold-dim)" }}>
-            {todayHijri.day} {todayHijri.monthNameArabic}
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-3 bg-white/5 px-2 py-1.5 rounded-xl border border-white/5">
+            <button
+              onClick={() => setCalendarSystem("astronomical")}
+              className={`text-xs font-medium px-2 py-1 rounded transition-colors ${calendarSystem === "astronomical"
+                  ? "bg-[var(--gold)]/20 text-[var(--gold)]"
+                  : "text-muted-foreground hover:text-white"
+                }`}
+            >
+              Astronomical
+            </button>
+            <button
+              onClick={() => setCalendarSystem("tabular")}
+              className={`text-xs font-medium px-2 py-1 rounded transition-colors ${calendarSystem === "tabular"
+                  ? "bg-[var(--gold)]/20 text-[var(--gold)]"
+                  : "text-muted-foreground hover:text-white"
+                }`}
+            >
+              Kuwaiti Tabular
+            </button>
           </div>
         </div>
       </PageHeader>
 
       <div className="container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Calendar */}
           <div className="breezy-card lg:col-span-2 overflow-hidden animate-breezy-enter p-0 pb-2">
-            {/* Month navigation */}
             <div
               className="flex items-center justify-between px-6 py-4 border-b"
               style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}
@@ -146,16 +214,16 @@ export default function CalendarPage() {
 
               <div className="text-center">
                 <div
-                  className="text-xl font-bold"
+                  className="text-xl font-bold flex items-center gap-2 justify-center"
                   style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}
                 >
                   {monthInfo?.en}
+                  <span className="text-[0.6rem] px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: "var(--space-light)", border: "1px solid var(--border)", fontFamily: "sans-serif" }}>
+                    {viewYear} AH
+                  </span>
                 </div>
-                <div className="text-sm font-arabic" style={{ color: "var(--gold)" }}>
+                <div className="text-sm font-arabic mt-0.5" style={{ color: "var(--gold)" }}>
                   {monthInfo?.ar}
-                </div>
-                <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                  {viewYear} AH
                 </div>
               </div>
 
@@ -164,7 +232,6 @@ export default function CalendarPage() {
               </button>
             </div>
 
-            {/* Day headers */}
             <div className="grid grid-cols-7 px-4 pt-3">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => (
                 <div key={d} className="text-center py-2 text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
@@ -173,7 +240,6 @@ export default function CalendarPage() {
               ))}
             </div>
 
-            {/* Calendar grid */}
             <div className="grid grid-cols-7 gap-0.5 px-4 pb-4">
               {calendarDays.map((cell, i) => {
                 if (!cell.day) return <div key={i} />;
@@ -187,7 +253,7 @@ export default function CalendarPage() {
                   <button
                     key={i}
                     onClick={() => setSelectedDay(cell.day)}
-                    className="relative flex flex-col items-center py-2 rounded-xl transition-all duration-150"
+                    className="relative flex flex-col items-center py-2 rounded-xl transition-all duration-150 group"
                     style={{
                       background: isSelected
                         ? "color-mix(in oklch, var(--gold) 15%, transparent)"
@@ -209,6 +275,18 @@ export default function CalendarPage() {
                     >
                       {cell.day}
                     </span>
+                    {cell.differs && (
+                      <span
+                        className="absolute top-1 right-1 lg:right-2 text-[0.5rem] font-bold rounded px-1"
+                        style={{
+                          background: "color-mix(in oklch, var(--destruct) 15%, transparent)",
+                          color: "var(--destruct-foreground)",
+                          border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)"
+                        }}
+                      >
+                        {cell.otherDay}
+                      </span>
+                    )}
                     <span className="text-xs" style={{ color: "var(--muted-foreground)", fontSize: "0.6rem" }}>
                       {cell.greg?.getDate()}
                     </span>
@@ -218,26 +296,38 @@ export default function CalendarPage() {
                         <div className="w-1 h-1 rounded-full" style={{ background: "var(--gold)" }} />
                       )}
                     </div>
+                    {isToday && (
+                      <div className="absolute -bottom-1 w-1/3 h-0.5 rounded-full" style={{ background: "var(--gold)" }} />
+                    )}
                   </button>
                 );
               })}
             </div>
+            {showOverlay && (
+              <div className="px-6 pb-4 pt-1 flex items-center justify-start text-xs text-muted-foreground gap-2">
+                <div className="w-2 h-2 rounded-sm" style={{ background: "color-mix(in oklch, var(--destruct) 15%, transparent)", border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)" }} />
+                Comparing strictly to {calendarSystem === "astronomical" ? "Tabular" : "Astronomical"}
+              </div>
+            )}
           </div>
 
-          {/* Side panel */}
           <div className="space-y-4">
-            {/* Selected day detail */}
-            {selectedDay && selectedGreg && (
+            {selectedDay && selectedGreg && selectedHijri && (
               <div
                 className="breezy-card p-5 animate-breezy-enter"
                 style={{ animationDelay: "50ms" }}
               >
-                <div className="text-xs mb-3" style={{ color: "var(--muted-foreground)" }}>Selected Day</div>
+                <div className="text-xs mb-3 flex items-center justify-between" style={{ color: "var(--muted-foreground)" }}>
+                  <span>Selected Day</span>
+                  <span className="text-[0.6rem] uppercase tracking-wide border border-[var(--border)] px-1.5 py-0.5 rounded" style={{ background: "var(--space-light)" }}>
+                    {calendarSystem === "astronomical" ? "Astronomical" : "Tabular"}
+                  </span>
+                </div>
                 <div className="text-2xl font-bold mb-1" style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>
-                  {selectedDay} {monthInfo?.en}
+                  {selectedHijri.day} {selectedHijri.monthName}
                 </div>
                 <div className="text-base font-arabic mb-3" style={{ color: "var(--gold-dim)" }}>
-                  {selectedDay} {monthInfo?.ar} {viewYear} هـ
+                  {selectedHijri.day} {selectedHijri.monthNameArabic} {selectedHijri.year} هـ
                 </div>
                 <div className="text-sm" style={{ color: "var(--foreground)" }}>
                   {selectedGreg.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -273,82 +363,73 @@ export default function CalendarPage() {
               </div>
             )}
 
-            {/* Events this month */}
-            <div
-              className="breezy-card p-5 animate-breezy-enter"
-              style={{ animationDelay: "100ms" }}
-            >
-              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-                Events — {monthInfo?.en}
-              </div>
-              {monthEvents.length === 0 ? (
-                <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>No major events this month</div>
-              ) : (
-                <div className="space-y-2">
-                  {monthEvents.map(ev => (
-                    <button
-                      key={ev.day}
-                      onClick={() => setSelectedDay(ev.day)}
-                      className="w-full flex items-start gap-3 p-2.5 rounded-xl text-left transition-all hover:bg-white/5"
-                    >
-                      <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                        style={{
-                          background: ev.type === "major"
-                            ? "color-mix(in oklch, var(--gold) 20%, transparent)"
-                            : "color-mix(in oklch, #60a5fa 15%, transparent)",
-                          color: ev.type === "major" ? "var(--gold)" : "#60a5fa",
-                        }}
-                      >
-                        {ev.day}
-                      </div>
-                      <div>
-                        <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>{ev.name}</div>
-                        <div className="text-xs font-arabic" style={{ color: "var(--muted-foreground)" }}>{ev.nameAr}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Year navigation */}
             <div
               className="breezy-card p-5 animate-breezy-enter"
               style={{ animationDelay: "150ms" }}
+            >
+              <div className="text-xs font-medium mb-4" style={{ color: "var(--muted-foreground)" }}>Compare Calendars</div>
+              <label className="flex items-center justify-between cursor-pointer group">
+                <div>
+                  <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Show Overlay</div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Highlight diverging dates</div>
+                </div>
+                <div
+                  className="w-10 h-5 rounded-full transition-colors relative"
+                  style={{ background: showOverlay ? "var(--gold)" : "var(--space-light)", border: "1px solid var(--border)" }}
+                >
+                  <div
+                    className="w-4 h-4 rounded-full bg-white absolute top-[1px] transition-transform"
+                    style={{
+                      transform: showOverlay ? "translateX(21px)" : "translateX(2px)",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.3)"
+                    }}
+                  />
+                </div>
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={showOverlay}
+                  onChange={(e) => setShowOverlay(e.target.checked)}
+                />
+              </label>
+            </div>
+
+            <div
+              className="breezy-card p-5 animate-breezy-enter"
+              style={{ animationDelay: "200ms" }}
             >
               <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>Jump to Year</div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewYear(y => y - 1)}
-                  className="p-1.5 rounded-lg"
+                  className="p-1.5 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
                   style={{ background: "var(--space-light)", color: "var(--gold-dim)" }}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <div className="flex-1 text-center">
                   <span className="text-lg font-bold" style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>
-                    {viewYear} AH
+                    {viewYear}
                   </span>
                 </div>
                 <button
                   onClick={() => setViewYear(y => y + 1)}
-                  className="p-1.5 rounded-lg"
+                  className="p-1.5 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
                   style={{ background: "var(--space-light)", color: "var(--gold-dim)" }}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
               <button
-                onClick={() => { setViewYear(todayHijri.year); setViewMonth(todayHijri.month); setSelectedDay(todayHijri.day); }}
-                className="w-full mt-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                onClick={() => { setViewYear(todayDisplay.year); setViewMonth(todayDisplay.month); setSelectedDay(todayDisplay.day); }}
+                className="w-full mt-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-[var(--gold)]/20"
                 style={{
                   background: "color-mix(in oklch, var(--gold) 10%, transparent)",
                   border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
                   color: "var(--gold)",
                 }}
               >
-                Today
+                Go to Today
               </button>
             </div>
           </div>
