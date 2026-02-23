@@ -8,7 +8,7 @@ Hilal Vision deploys to Vercel as a **hybrid application**:
 |-------|-----------|---------------|
 | Frontend | React 19 + Vite | Static build → CDN (`dist/public/`) |
 | API | tRPC + Express | Node.js serverless function (`api/trpc/[trpc].ts`) |
-| Database | Drizzle ORM + MySQL | External (optional — only needed for telemetry) |
+| Database | Drizzle ORM + MySQL | External (optional - only needed for telemetry) |
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ git add . && git commit -m "deploy" && git push
 #    Vercel auto-detects settings from vercel.json
 
 # 3. Set environment variables in Vercel UI:
-#    DATABASE_URL — MySQL connection string
+#    DATABASE_URL - MySQL connection string
 #    UPSTASH_REDIS_REST_URL - Upstash Redis URL
 #    UPSTASH_REDIS_REST_TOKEN - Upstash Redis Token
 #    CLERK_SECRET_KEY - Clerk backend secret

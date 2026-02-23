@@ -285,7 +285,7 @@ export default function HorizonPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Horizon View — ${loc.name}`}
+        title={`Horizon View - ${loc.name}`}
         description={`Local horizon simulator for ${loc.name} showing moon and sun positions at sunset for crescent sighting.`}
         path="/horizon"
       />

@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
                 title="Privacy Policy"
-                description="Hilal Vision Privacy Policy — how we collect, use, and protect your data."
+                description="Hilal Vision Privacy Policy - how we collect, use, and protect your data."
                 path="/privacy"
             />
 
@@ -76,28 +76,28 @@ export default function PrivacyPage() {
                 </Para>
                 <Ul>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Account information</strong> — Name and
+                        <strong style={{ color: "var(--foreground)" }}>Account information</strong> - Name and
                         email address, collected by Clerk Auth when you sign in with Google, Apple, or email/password.
                         We do not store passwords directly.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Location data</strong> — GPS coordinates
+                        <strong style={{ color: "var(--foreground)" }}>Location data</strong> - GPS coordinates
                         you voluntarily provide when using the Auto-Detect feature or submitting a sighting report.
                         Location is not stored continuously; it is used only at the moment of calculation or
                         report submission.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Sighting reports</strong> — Observation
+                        <strong style={{ color: "var(--foreground)" }}>Sighting reports</strong> - Observation
                         time, GPS coordinates, sighting result (Seen / Not Seen), and optional notes that you
                         submit voluntarily.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Usage data</strong> — Anonymised event
+                        <strong style={{ color: "var(--foreground)" }}>Usage data</strong> - Anonymised event
                         telemetry via Sentry (error reports, page performance metrics). No personally identifiable
                         information is attached.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>IP address</strong> — Temporarily logged
+                        <strong style={{ color: "var(--foreground)" }}>IP address</strong> - Temporarily logged
                         by Upstash Redis for rate-limiting submitted sighting reports (sliding window, 5 requests/minute).
                         Not stored permanently.
                     </li>
@@ -146,7 +146,7 @@ export default function PrivacyPage() {
 
                 <Heading>4. Cookies</Heading>
                 <Para>
-                    Hilal Vision uses only functional cookies — specifically the Clerk authentication session
+                    Hilal Vision uses only functional cookies - specifically the Clerk authentication session
                     cookie required to keep you signed in. We do not use tracking or advertising cookies.
                     Blocking cookies will prevent sign-in but will not affect astronomical calculations, which
                     are fully client-side and require no account.
@@ -160,20 +160,20 @@ export default function PrivacyPage() {
                 <Heading>5. Data Retention</Heading>
                 <Ul>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Account data</strong> — Retained until
+                        <strong style={{ color: "var(--foreground)" }}>Account data</strong> - Retained until
                         you delete your account via Clerk.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Sighting reports</strong> — Retained
+                        <strong style={{ color: "var(--foreground)" }}>Sighting reports</strong> - Retained
                         indefinitely as part of the public scientific dataset. Reports you submit are attributed
                         to your account and visible on the map.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Rate-limit records</strong> — IP entries
+                        <strong style={{ color: "var(--foreground)" }}>Rate-limit records</strong> - IP entries
                         expire automatically after 60 seconds.
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Error logs</strong> — Retained for 30
+                        <strong style={{ color: "var(--foreground)" }}>Error logs</strong> - Retained for 30
                         days by Sentry.
                     </li>
                 </Ul>
@@ -220,7 +220,7 @@ export default function PrivacyPage() {
                         <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                             Email{" "}
                             <span style={{ color: "var(--gold-dim)" }}>privacy@hilalvision.app</span>
-                            {" "}— Also see our{" "}
+                            {" "}- Also see our{" "}
                             <Link href="/terms">
                                 <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>Terms of Service</span>
                             </Link>

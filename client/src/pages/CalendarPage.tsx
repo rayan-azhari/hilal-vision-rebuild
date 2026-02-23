@@ -176,7 +176,7 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Hijri Calendar — ${monthInfo?.en} ${viewYear} AH`}
+        title={`Hijri Calendar - ${monthInfo?.en} ${viewYear} AH`}
         description={`Islamic Hijri calendar for ${monthInfo?.en} ${viewYear} AH with Gregorian comparison, Islamic events, and lunar phases.`}
         path="/calendar"
       />

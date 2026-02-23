@@ -6,18 +6,18 @@ interface ShareButtonProps {
     title?: string;
     /** The text/description to share */
     text?: string;
-    /** The URL to share — defaults to current page */
+    /** The URL to share - defaults to current page */
     url?: string;
-    /** Compact mode — just an icon */
+    /** Compact mode - just an icon */
     compact?: boolean;
 }
 
 /**
- * ShareButton — uses navigator.share() when available (mobile + modern browsers),
+ * ShareButton - uses navigator.share() when available (mobile + modern browsers),
  * falls back to clipboard copy.
  */
 export function ShareButton({
-    title = "Hilal Vision — Moon Visibility",
+    title = "Hilal Vision - Moon Visibility",
     text = "Check out the crescent moon visibility predictions on Hilal Vision!",
     url,
     compact = false,
@@ -33,7 +33,7 @@ export function ShareButton({
                 await navigator.share({ title, text, url: shareUrl });
                 return;
             } catch (err) {
-                // User cancelled — fall through to clipboard
+                // User cancelled - fall through to clipboard
                 if ((err as Error).name === "AbortError") return;
             }
         }

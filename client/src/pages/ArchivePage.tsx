@@ -155,7 +155,7 @@ export default function ArchivePage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Archive — ${selectedYear} AH`}
+        title={`Archive - ${selectedYear} AH`}
         description={`Crescent visibility archive for ${selectedYear} AH. Browse historical moon sighting data for all 12 Islamic months from 1438 to 1465 AH.`}
         path="/archive"
       />

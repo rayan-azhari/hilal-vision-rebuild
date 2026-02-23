@@ -73,17 +73,17 @@ const TECH = [
 const CREDITS = [
     {
         title: "Yallop (1997) Criterion",
-        desc: "B.D. Yallop, HM Nautical Almanac Office — foundational q-value crescent visibility formula.",
+        desc: "B.D. Yallop, HM Nautical Almanac Office - foundational q-value crescent visibility formula.",
         href: "https://astronomycenter.net/pdf/yallop_1997.pdf",
     },
     {
         title: "Odeh (2004) Criterion",
-        desc: "Mohammad Odeh — V-value refinement trained on 737 ICOP sighting observations.",
+        desc: "Mohammad Odeh - V-value refinement trained on 737 ICOP sighting observations.",
         href: "https://www.researchgate.net/publication/225099773",
     },
     {
         title: "Islamic Crescents' Observation Project (ICOP)",
-        desc: "International Astronomical Center — over 1,000 historical crescent sighting records used in the Archive.",
+        desc: "International Astronomical Center - over 1,000 historical crescent sighting records used in the Archive.",
         href: "https://astronomycenter.net/icop.html?l=en",
     },
     {
@@ -108,7 +108,7 @@ export default function AboutPage() {
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
                 title="About"
-                description="About Hilal Vision — a precision astronomical platform for predicting Islamic crescent moon sightings worldwide using Yallop & Odeh criteria."
+                description="About Hilal Vision - a precision astronomical platform for predicting Islamic crescent moon sightings worldwide using Yallop & Odeh criteria."
                 path="/about"
             />
 
@@ -134,7 +134,7 @@ export default function AboutPage() {
                         className="text-xs mb-4 font-arabic tracking-wider"
                         style={{ color: "var(--gold-dim)" }}
                     >
-                        رؤية الهلال — About Hilal Vision
+                        رؤية الهلال - About Hilal Vision
                     </div>
                     <h1
                         className="text-4xl md:text-6xl font-light tracking-tight mb-6 leading-tight"
@@ -188,7 +188,7 @@ export default function AboutPage() {
                         style={{ color: "var(--muted-foreground)" }}
                     >
                         <p>
-                            The Islamic lunar calendar is one of humanity's oldest scientific traditions — the
+                            The Islamic lunar calendar is one of humanity's oldest scientific traditions - the
                             beginning of each sacred month has been determined by the physical sighting of the new
                             crescent moon for over 1,400 years. Yet in the modern world, this practice is
                             fragmented: different countries announce the start of Ramadan on different days, and
@@ -197,15 +197,15 @@ export default function AboutPage() {
                         <p>
                             Hilal Vision exists to answer one question with the precision it deserves:{" "}
                             <strong style={{ color: "var(--foreground)" }}>
-                                "Will the new crescent moon be visible tonight from my location — and why?"
+                                "Will the new crescent moon be visible tonight from my location - and why?"
                             </strong>
                         </p>
                         <p>
                             We implement the internationally recognised{" "}
                             <strong style={{ color: "var(--foreground)" }}>Yallop (1997)</strong> and{" "}
                             <strong style={{ color: "var(--foreground)" }}>Odeh (2004)</strong> visibility
-                            criteria — the same standards used by Islamic calendar authorities in the UK, Malaysia,
-                            and the international astronomical community — and present the results with the visual
+                            criteria - the same standards used by Islamic calendar authorities in the UK, Malaysia,
+                            and the international astronomical community - and present the results with the visual
                             clarity and interactivity that a 21st-century audience expects.
                         </p>
                         <p>
@@ -232,7 +232,7 @@ export default function AboutPage() {
                             {
                                 icon: Moon,
                                 title: "Muslim Communities",
-                                desc: "Get a clear, location-specific prediction for crescent visibility before Ramadan, Eid, and every new Hijri month — without jargon.",
+                                desc: "Get a clear, location-specific prediction for crescent visibility before Ramadan, Eid, and every new Hijri month - without jargon.",
                                 color: "#facc15",
                             },
                             {
@@ -394,7 +394,7 @@ export default function AboutPage() {
                                 className="text-xs leading-relaxed"
                                 style={{ color: "var(--muted-foreground)" }}
                             >
-                                Read the full technical documentation — Yallop and Odeh criteria derivations,
+                                Read the full technical documentation - Yallop and Odeh criteria derivations,
                                 triple-engine Hijri calendar algorithms, the Best-Time-to-Observe scoring function,
                                 atmospheric refraction physics, and ICOP data sourcing.
                             </p>
@@ -496,7 +496,7 @@ export default function AboutPage() {
                                         {vals.map((v, j) => (
                                             <td key={j} className="py-2.5 px-2 text-center">
                                                 {j === 0 ? (
-                                                    // Hilal Vision column — highlight our ✅ in gold, ❌ in muted
+                                                    // Hilal Vision column - highlight our ✅ in gold, ❌ in muted
                                                     v ? (
                                                         <span
                                                             className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
@@ -512,7 +512,7 @@ export default function AboutPage() {
                                                             className="text-[13px]"
                                                             style={{ color: "color-mix(in oklch, var(--muted-foreground) 40%, transparent)" }}
                                                         >
-                                                            —
+                                                            -
                                                         </span>
                                                     )
                                                 ) : v ? (
@@ -527,7 +527,7 @@ export default function AboutPage() {
                                                         className="text-[13px]"
                                                         style={{ color: "color-mix(in oklch, var(--muted-foreground) 35%, transparent)" }}
                                                     >
-                                                        —
+                                                        -
                                                     </span>
                                                 )}
                                             </td>
@@ -542,7 +542,7 @@ export default function AboutPage() {
                         className="mt-5 text-xs italic"
                         style={{ color: "var(--muted-foreground)" }}
                     >
-                        Table reflects publicly available features as of February 2026. ✓ = available, — = not
+                        Table reflects publicly available features as of February 2026. ✓ = available, - = not
                         available.
                     </p>
                 </div>
@@ -605,7 +605,7 @@ export default function AboutPage() {
                                 className="text-sm font-semibold mb-1"
                                 style={{ color: "var(--foreground)" }}
                             >
-                                Open Source — MIT License
+                                Open Source - MIT License
                             </h3>
                             <p
                                 className="text-xs leading-relaxed mb-4"

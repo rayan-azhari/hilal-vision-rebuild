@@ -58,7 +58,7 @@ export function BreezyDetailCard({
                 )}
             </div>
 
-            {/* Decorative visual — encodes the data */}
+            {/* Decorative visual - encodes the data */}
             <div className="flex-1 flex items-center justify-center min-h-[80px]">
                 {decorativeVisual}
             </div>

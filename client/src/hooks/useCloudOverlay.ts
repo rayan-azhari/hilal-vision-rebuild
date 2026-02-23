@@ -1,5 +1,5 @@
 /**
- * useCloudOverlay — Fetches cloud cover grid from tRPC and renders
+ * useCloudOverlay - Fetches cloud cover grid from tRPC and renders
  * it into a canvas texture URL for map/globe overlay.
  */
 import { useMemo } from "react";

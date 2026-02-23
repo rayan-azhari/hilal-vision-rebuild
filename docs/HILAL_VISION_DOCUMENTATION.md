@@ -1,4 +1,4 @@
-# Hilal Vision — Full Application Documentation
+# Hilal Vision - Full Application Documentation
 
 **Version:** Round 21 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
@@ -16,7 +16,7 @@
 5. [Astronomy Engine](#5-astronomy-engine)
 6. [Pages and Features](#6-pages-and-features)
    - 6.1 Home / Dashboard (`/`)
-   - 6.2 Visibility — 3D Globe & 2D Map (`/visibility`, `/globe`, `/map`)
+   - 6.2 Visibility - 3D Globe & 2D Map (`/visibility`, `/globe`, `/map`)
    - 6.3 Moon Phase (`/moon`)
    - 6.4 Hijri Calendar (`/calendar`)
    - 6.5–6.9 Horizon, Archive, Ramadan, Sighting Feed
@@ -36,9 +36,9 @@
 
 Hilal Vision is a precision astronomical web application for predicting and visualising Islamic crescent moon (hilal) sightings worldwide. The application is built for two audiences: the general Muslim public who want to know whether the crescent will be visible from their location on a given evening, and professional astronomers and Islamic calendar scholars who need detailed technical data about moon visibility criteria, conjunction times, and calendar comparisons.
 
-The application's core purpose is to answer the question: **"Will the new crescent moon be visible tonight from my location?"** — and to present the answer with the scientific rigour and visual clarity that the question deserves. Islamic calendar months begin with the sighting of the new crescent moon, making this question of direct religious and practical significance for over 1.8 billion Muslims worldwide.
+The application's core purpose is to answer the question: **"Will the new crescent moon be visible tonight from my location?"** - and to present the answer with the scientific rigour and visual clarity that the question deserves. Islamic calendar months begin with the sighting of the new crescent moon, making this question of direct religious and practical significance for over 1.8 billion Muslims worldwide.
 
-The application is named after the Arabic word *hilal* (هلال), which specifically refers to the new crescent moon — the thin sliver of illuminated moon visible in the western sky shortly after sunset on the first evening of a new lunar month.
+The application is named after the Arabic word *hilal* (هلال), which specifically refers to the new crescent moon - the thin sliver of illuminated moon visible in the western sky shortly after sunset on the first evening of a new lunar month.
 
 ---
 
@@ -59,7 +59,7 @@ The application is named after the Arabic word *hilal* (هلال), which specifi
 | API layer | tRPC | 11.6.0 |
 | Server | Express | 4.21.2 |
 | Database ORM | Drizzle ORM | 0.44.5 |
-| Database | MySQL (TiDB) | — |
+| Database | MySQL (TiDB) | - |
 | Build tool | Vite | 7.1.7 |
 | Test runner | Vitest | 2.1.4 |
 | Package manager | pnpm | 10.4.1 |
@@ -129,7 +129,7 @@ All tool pages share a consistent `PageHeader` component providing a unified hea
 
 ### 3.1 Design Philosophy
 
-Hilal Vision's design is inspired by two sources: the **NASA Daily Moon Guide** (deep navy gradients, large stat cards, immersive hero sections) and **Breezy Weather** (glassmorphism cards, generous whitespace, data-as-decoration visual elements). The result is a dark-mode-first application that feels like a scientific instrument — precise, data-rich, and visually compelling.
+Hilal Vision's design is inspired by two sources: the **NASA Daily Moon Guide** (deep navy gradients, large stat cards, immersive hero sections) and **Breezy Weather** (glassmorphism cards, generous whitespace, data-as-decoration visual elements). The result is a dark-mode-first application that feels like a scientific instrument - precise, data-rich, and visually compelling.
 
 ### 3.2 Colour Palette
 
@@ -169,7 +169,7 @@ The colour system is defined in `client/src/index.css` using OKLCH colour space,
 
 | Zone | OKLCH Value | Meaning |
 |---|---|---|
-| Zone A | `oklch(0.72 0.20 145)` | Easily visible — naked eye |
+| Zone A | `oklch(0.72 0.20 145)` | Easily visible - naked eye |
 | Zone B | `oklch(0.85 0.18 90)` | Visible under good conditions |
 | Zone C | `oklch(0.72 0.20 50)` | Optical aid helpful |
 | Zone D | `oklch(0.60 0.22 25)` | Optical aid only |
@@ -177,37 +177,37 @@ The colour system is defined in `client/src/index.css` using OKLCH colour space,
 
 ### 3.3 Typography
 
-The application uses three typefaces, each serving a distinct purpose. **Inter** is the primary body font — a highly legible, neutral sans-serif used for all data values, descriptions, and UI text. **Cinzel** is the display serif font — a classical Roman letterform used for headings, the logo, and section titles. It evokes the historical and scholarly nature of Islamic calendar science. **Noto Naskh Arabic** is used for all Arabic text — Islamic month names, Quranic phrases, and Arabic numerals — ensuring correct rendering across all platforms.
+The application uses three typefaces, each serving a distinct purpose. **Inter** is the primary body font - a highly legible, neutral sans-serif used for all data values, descriptions, and UI text. **Cinzel** is the display serif font - a classical Roman letterform used for headings, the logo, and section titles. It evokes the historical and scholarly nature of Islamic calendar science. **Noto Naskh Arabic** is used for all Arabic text - Islamic month names, Quranic phrases, and Arabic numerals - ensuring correct rendering across all platforms.
 
-The heading hierarchy uses Cinzel with `letter-spacing: 0.05em` and `line-height: 1.2`. Body text uses Inter with `line-height: 1.6` and `letter-spacing: 0.01em`. The combination of a classical serif for headings and a modern sans-serif for body creates a visual tension that feels both ancient and contemporary — appropriate for an application that bridges 7th-century Islamic calendar tradition with 21st-century astronomical computation.
+The heading hierarchy uses Cinzel with `letter-spacing: 0.05em` and `line-height: 1.2`. Body text uses Inter with `line-height: 1.6` and `letter-spacing: 0.01em`. The combination of a classical serif for headings and a modern sans-serif for body creates a visual tension that feels both ancient and contemporary - appropriate for an application that bridges 7th-century Islamic calendar tradition with 21st-century astronomical computation.
 
 ### 3.4 Component Classes
 
 The design system defines several reusable component classes in `index.css`:
 
-**`.glass`** — A glassmorphism panel with `backdrop-filter: blur(20px)`, a semi-transparent dark background gradient, and a subtle gold border. Used for overlay panels and floating controls.
+**`.glass`** - A glassmorphism panel with `backdrop-filter: blur(20px)`, a semi-transparent dark background gradient, and a subtle gold border. Used for overlay panels and floating controls.
 
-**`.glass-card`** — A more opaque glassmorphism card with `backdrop-filter: blur(16px)`, used for the live status cards on the home page and similar data display elements. Includes a hover state that brightens the gold border.
+**`.glass-card`** - A more opaque glassmorphism card with `backdrop-filter: blur(16px)`, used for the live status cards on the home page and similar data display elements. Includes a hover state that brightens the gold border.
 
-**`.card-elevated`** — A solid dark card without backdrop blur, used for content sections that do not sit over a complex background. Includes a subtle lift animation on hover (`translateY(-2px)`).
+**`.card-elevated`** - A solid dark card without backdrop blur, used for content sections that do not sit over a complex background. Includes a subtle lift animation on hover (`translateY(-2px)`).
 
-**`.glow-gold`**, **`.glow-gold-sm`**, **`.glow-gold-lg`** — Box shadow utilities that add a gold glow effect at different intensities. Used for the logo, primary buttons, and highlighted elements.
+**`.glow-gold`**, **`.glow-gold-sm`**, **`.glow-gold-lg`** - Box shadow utilities that add a gold glow effect at different intensities. Used for the logo, primary buttons, and highlighted elements.
 
-**`.star-field`** — A CSS background-image pattern using multiple `radial-gradient` stops to simulate a star field. Used as an overlay on the hero section and other dark backgrounds.
+**`.star-field`** - A CSS background-image pattern using multiple `radial-gradient` stops to simulate a star field. Used as an overlay on the hero section and other dark backgrounds.
 
-**`.gradient-text-gold`** — A gradient text effect using `-webkit-background-clip: text` to apply a gold gradient to heading text.
+**`.gradient-text-gold`** - A gradient text effect using `-webkit-background-clip: text` to apply a gold gradient to heading text.
 
-**`.section-divider`** — A 1px horizontal line with a gradient that fades from transparent to gold and back, used to separate major sections.
+**`.section-divider`** - A 1px horizontal line with a gradient that fades from transparent to gold and back, used to separate major sections.
 
 ### 3.5 Background Gradient Utilities
 
 Three pre-built background gradient utilities are available:
 
-**`.bg-deep-space`** — A subtle 4-stop vertical gradient from near-black to slightly lighter navy, evoking the depth of space. Used as the default page background.
+**`.bg-deep-space`** - A subtle 4-stop vertical gradient from near-black to slightly lighter navy, evoking the depth of space. Used as the default page background.
 
-**`.bg-twilight`** — A warmer gradient with a slight blue-purple shift, evoking the sky at twilight. Used for the horizon page.
+**`.bg-twilight`** - A warmer gradient with a slight blue-purple shift, evoking the sky at twilight. Used for the horizon page.
 
-**`.bg-horizon-glow`** — A gradient that transitions from dark navy at the top to warm amber at the bottom, evoking the glow of a sunset horizon. Used for the horizon page hero section.
+**`.bg-horizon-glow`** - A gradient that transitions from dark navy at the top to warm amber at the bottom, evoking the glow of a sunset horizon. Used for the horizon page hero section.
 
 ---
 
@@ -215,7 +215,7 @@ Three pre-built background gradient utilities are available:
 
 ### 4.1 GlobalStateContext
 
-The `GlobalStateContext` (`client/src/contexts/GlobalStateContext.tsx`) provides a globally shared state for both **location** and **date**, ensuring that all pages (3D Globe, 2D Map, Moon Phase, Horizon) instantly synchronize to a single source of truth without redundant local pickers. The default location is **Mecca, Saudi Arabia** — the spiritual centre of Islam and the reference point for the Umm al-Qura calendar, and the default date is the current system date.
+The `GlobalStateContext` (`client/src/contexts/GlobalStateContext.tsx`) provides a globally shared state for both **location** and **date**, ensuring that all pages (3D Globe, 2D Map, Moon Phase, Horizon) instantly synchronize to a single source of truth without redundant local pickers. The default location is **Mecca, Saudi Arabia** - the spiritual centre of Islam and the reference point for the Umm al-Qura calendar, and the default date is the current system date.
 
 The context exposes: `location` (the current `CityLocation` object), `setLocation`, `setCustomLocation`, `date`, `setDate`, `nextEvent` (the nearest upcoming Islamic event), and `upcomingEvents` (all upcoming Islamic events sorted by proximity).
 
@@ -223,7 +223,7 @@ The Islamic event calculation covers Ramadan (1 Ramadan), Eid al-Fitr (1 Shawwal
 
 ### 4.2 ProModeContext
 
-The `ProModeContext` (`client/src/contexts/ProModeContext.tsx`) provides a boolean `isPro` flag and a `togglePro` function. When Pro Mode is enabled, each page reveals additional technical data panels — extended orbital parameters, methodology explanations, q-value data tables, and physics annotations. The state persists via `localStorage` under the key `"hilal-pro-mode"`.
+The `ProModeContext` (`client/src/contexts/ProModeContext.tsx`) provides a boolean `isPro` flag and a `togglePro` function. When Pro Mode is enabled, each page reveals additional technical data panels - extended orbital parameters, methodology explanations, q-value data tables, and physics annotations. The state persists via `localStorage` under the key `"hilal-pro-mode"`.
 
 Pro Mode is designed for astronomers, Islamic calendar scholars, and technically sophisticated users who want access to the raw calculation parameters (ARCV, DAZ, W, q-value, Odeh criterion) rather than just the simplified visibility zone classification.
 
@@ -235,7 +235,7 @@ The `ThemeContext` wraps the `next-themes` `ThemeProvider` with `defaultTheme="d
 
 ## 5. Astronomy Engine
 
-The astronomy engine (`shared/astronomy.ts`) is the computational heart of Hilal Vision. It is an **isomorphic module** that runs in the browser main thread, Web Workers, Node.js server, and test runners — with no DOM dependencies. It implements the two primary crescent visibility criteria used by Islamic calendar authorities worldwide, plus supporting calculations for the Hijri calendar, moon phases, and day/night terminator geometry.
+The astronomy engine (`shared/astronomy.ts`) is the computational heart of Hilal Vision. It is an **isomorphic module** that runs in the browser main thread, Web Workers, Node.js server, and test runners - with no DOM dependencies. It implements the two primary crescent visibility criteria used by Islamic calendar authorities worldwide, plus supporting calculations for the Hijri calendar, moon phases, and day/night terminator geometry.
 
 The client-side wrapper (`client/src/lib/astronomy.ts`) re-exports everything from the shared module and adds the single DOM-dependent function `buildVisibilityTexture()`, which uses `document.createElement('canvas')` to render the visibility grid as a data URL.
 
@@ -314,9 +314,9 @@ Phase names are provided in both English and Arabic, covering all 8 standard pha
 The `computeBestObservationTime(date, location)` function determines the optimal time for crescent moon observation. It scans from **sunset** to **moonset** (or sunset + 2 hours if moonset is unavailable/before sunset) in **5-minute steps**.
 
 At each step, the function evaluates:
-- **Moon altitude** — must be above the horizon (> 0°)
-- **Sky darkness factor** — sun below -12° = 1.0 (astronomical twilight), below -6° = 0.8 (nautical), below 0° = 0.5 (civil), above horizon = 0.1
-- **Altitude factor** — penalises very low altitudes where atmospheric extinction is high (airmass ∝ 1/sin(alt))
+- **Moon altitude** - must be above the horizon (> 0°)
+- **Sky darkness factor** - sun below -12° = 1.0 (astronomical twilight), below -6° = 0.8 (nautical), below 0° = 0.5 (civil), above horizon = 0.1
+- **Altitude factor** - penalises very low altitudes where atmospheric extinction is high (airmass ∝ 1/sin(alt))
 
 The composite score is: `score = moonAlt × darknessFactor × altFactor`
 
@@ -354,7 +354,7 @@ The globe supports: auto-rotation toggle, overlay opacity slider, date selection
 
 The **side panel** shows the full astronomical data readout for the selected location and date: sun altitude/azimuth, moon altitude/azimuth, elongation, ARCV, DAZ, crescent width W, q-value, Odeh criterion, visibility zone, illumination, moon age, and rise/set times. In Pro Mode, the panel expands to show additional physics explanations for each parameter.
 
-The globe also features a **cloud cover overlay** — a second Three.js `SphereGeometry` mesh at `r * 1.004` (slightly above the visibility sphere at `r * 1.002`) displaying real-time cloud cover data from Open-Meteo. This overlay is independently toggleable via a "Clouds" button alongside the existing "Visibility" toggle.
+The globe also features a **cloud cover overlay** - a second Three.js `SphereGeometry` mesh at `r * 1.004` (slightly above the visibility sphere at `r * 1.002`) displaying real-time cloud cover data from Open-Meteo. This overlay is independently toggleable via a "Clouds" button alongside the existing "Visibility" toggle.
 
 A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window, computed by the `computeBestObservationTime()` function.
 
@@ -416,7 +416,7 @@ In Pro Mode, the archive shows q-value data tables alongside the zone classifica
 
 The Ramadan page predicts the start date of Ramadan for the next 10 years (1447–1456 AH, approximately 2025–2034 CE). For each year, it shows the predicted Gregorian date range (accounting for the ±1 day uncertainty of crescent sighting), the visibility zone for a selection of major cities, and a visual timeline.
 
-The prediction is based on the Yallop criterion applied to the expected new moon for 1 Ramadan of each year. The city-by-city comparison shows how visibility varies geographically — a crescent that is Zone A (easily visible) in Mecca may be Zone C (optical aid needed) in London due to the different sun-moon geometry at different latitudes.
+The prediction is based on the Yallop criterion applied to the expected new moon for 1 Ramadan of each year. The city-by-city comparison shows how visibility varies geographically - a crescent that is Zone A (easily visible) in Mecca may be Zone C (optical aid needed) in London due to the different sun-moon geometry at different latitudes.
 
 In Pro Mode, the page shows detailed conjunction times, elongation at sunset, and q-values for each city and year.
 
@@ -425,13 +425,13 @@ In Pro Mode, the page shows detailed conjunction times, elongation at sunset, an
 A rich informational page communicating Hilal Vision's mission, platform scope, and scientific foundations to new visitors.
 
 **Sections:**
-- **Mission statement** — Explains the Islamic calendar context, why bi-parametric visibility criteria matter, and the platform's role as a scientific instrument (not a religious authority).
-- **Who Is It For?** — Three audience cards: Muslim communities (simplified predictions), astronomers/researchers (raw q-values, ICOP data), and Islamic calendar scholars (multi-engine Hijri calendar comparison).
-- **Platform Tools** — Clickable card grid for all six tools (Globe, Map, Moon Phase, Hijri Calendar, Horizon, Archive) with descriptions.
-- **How We Compare** — Feature comparison table benchmarking Hilal Vision against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap across 14 dimensions (3D globe, weather overlay, ICOP data, Best-Time calculator, mobile app, push notifications, etc.).
-- **Technology** — Non-technical overview of the stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, Open-Meteo, Sentry).
-- **Data Sources & Attributions** — Linked credits to Yallop 1997, Odeh 2004, ICOP (IAC), SunCalc (Agafonkin), Umm al-Qura tables, and Open-Meteo.
-- **License & Contact** — MIT License notice, GitHub link, email contact, and links to Privacy/Terms pages.
+- **Mission statement** - Explains the Islamic calendar context, why bi-parametric visibility criteria matter, and the platform's role as a scientific instrument (not a religious authority).
+- **Who Is It For?** - Three audience cards: Muslim communities (simplified predictions), astronomers/researchers (raw q-values, ICOP data), and Islamic calendar scholars (multi-engine Hijri calendar comparison).
+- **Platform Tools** - Clickable card grid for all six tools (Globe, Map, Moon Phase, Hijri Calendar, Horizon, Archive) with descriptions.
+- **How We Compare** - Feature comparison table benchmarking Hilal Vision against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap across 14 dimensions (3D globe, weather overlay, ICOP data, Best-Time calculator, mobile app, push notifications, etc.).
+- **Technology** - Non-technical overview of the stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, Open-Meteo, Sentry).
+- **Data Sources & Attributions** - Linked credits to Yallop 1997, Odeh 2004, ICOP (IAC), SunCalc (Agafonkin), Umm al-Qura tables, and Open-Meteo.
+- **License & Contact** - MIT License notice, GitHub link, email contact, and links to Privacy/Terms pages.
 
 **Design:** Stars-field hero section with orbit rings, `.breezy-card` grid layout, gold accent on Hilal Vision column of the comparison table, methodology teaser CTA.
 
@@ -440,16 +440,16 @@ A rich informational page communicating Hilal Vision's mission, platform scope, 
 A comprehensive technical reference page written for astronomers, Islamic calendar scholars, and developers who need to understand the mathematical foundations behind every calculation in Hilal Vision.
 
 **Sections:**
-1. The Crescent Visibility Problem — Why single-parameter models (age, lag time) are unreliable; the need for bi-parametric polynomial criteria.
-2. Yallop (1997) Criterion — Complete q-value derivation, crescent width formula (SD, elongation), Best-Time definition (4/9 × lag time), and full Zone A–F classification table.
-3. Odeh (2004) Criterion — V-value formula, dataset differences from Yallop, and four-zone classification table.
-4. Triple-Engine Hijri Calendar — Astronomical (SunCalc two-pass conjunction search with 1446 AH epoch), Umm al-Qura (KACST tables via `@umalqura/core`), and Tabular/Kuwaiti (Julian Date arithmetic) engines with their trade-offs.
-5. Best-Time-to-Observe Calculator — 5-minute scanning algorithm from sunset to moonset, composite scoring formula (`score = moonAlt × darknessFactor × altFactor`), and viability flag logic.
-6. World Visibility Grid — Three resolution levels (8°/900pts, 4°/3,600pts, 2°/14,400pts), Web Worker offloading, LRU texture cache (24 entries, keyed by date+resolution).
-7. ICOP Historical Archive — What ICOP is, how 1,000+ records were sourced, and how theory-vs-observation comparison enables model validation.
-8. Crowdsourced Telemetry & Validation — Zone F rejection algorithm, Upstash Redis rate limiting (5 req/IP/min), Open-Meteo meteorological enrichment.
-9. Atmospheric Refraction — Saemundsson inverse formula with temperature (T°C) and pressure (P hPa) corrections for observatory-grade horizon accuracy.
-10. References — Yallop 1997, Odeh 2004, Meeus 1998, SunCalc, ICOP, Umm al-Qura.
+1. The Crescent Visibility Problem - Why single-parameter models (age, lag time) are unreliable; the need for bi-parametric polynomial criteria.
+2. Yallop (1997) Criterion - Complete q-value derivation, crescent width formula (SD, elongation), Best-Time definition (4/9 × lag time), and full Zone A–F classification table.
+3. Odeh (2004) Criterion - V-value formula, dataset differences from Yallop, and four-zone classification table.
+4. Triple-Engine Hijri Calendar - Astronomical (SunCalc two-pass conjunction search with 1446 AH epoch), Umm al-Qura (KACST tables via `@umalqura/core`), and Tabular/Kuwaiti (Julian Date arithmetic) engines with their trade-offs.
+5. Best-Time-to-Observe Calculator - 5-minute scanning algorithm from sunset to moonset, composite scoring formula (`score = moonAlt × darknessFactor × altFactor`), and viability flag logic.
+6. World Visibility Grid - Three resolution levels (8°/900pts, 4°/3,600pts, 2°/14,400pts), Web Worker offloading, LRU texture cache (24 entries, keyed by date+resolution).
+7. ICOP Historical Archive - What ICOP is, how 1,000+ records were sourced, and how theory-vs-observation comparison enables model validation.
+8. Crowdsourced Telemetry & Validation - Zone F rejection algorithm, Upstash Redis rate limiting (5 req/IP/min), Open-Meteo meteorological enrichment.
+9. Atmospheric Refraction - Saemundsson inverse formula with temperature (T°C) and pressure (P hPa) corrections for observatory-grade horizon accuracy.
+10. References - Yallop 1997, Odeh 2004, Meeus 1998, SunCalc, ICOP, Umm al-Qura.
 
 **Design:** Fixed Table of Contents sidebar (desktop), `FormulaBlock` monospace display components, coloured zone tables, and anchor-linked headings.
 
@@ -457,10 +457,10 @@ A comprehensive technical reference page written for astronomers, Islamic calend
 
 A GDPR-aware privacy policy covering:
 - **Data collected:** GPS coordinates (opt-in, ephemeral), Clerk email/name, sighting reports (stored permanently as public scientific data), Sentry error events (anonymised), IP addresses (Upstash, TTL 60s).
-- **Sub-processors table:** Clerk Auth, Upstash Redis, Sentry, Open-Meteo, Vercel — each with purpose and data shared.
+- **Sub-processors table:** Clerk Auth, Upstash Redis, Sentry, Open-Meteo, Vercel - each with purpose and data shared.
 - **Cookie policy:** Functional Clerk JWT session cookies only. No tracking or advertising cookies.
 - **Retention:** Account data until deletion; sighting reports retained indefinitely; error logs 30 days.
-- **User rights:** Access, correction, deletion, export — applicable under GDPR, UK DPA 2018, and CCPA.
+- **User rights:** Access, correction, deletion, export - applicable under GDPR, UK DPA 2018, and CCPA.
 
 ### 6.13 Terms of Service (`/terms`)
 
@@ -487,7 +487,7 @@ The visibility texture uses a two-pass progressive rendering strategy. Pass 1 ru
 
 ### 7.3 Texture Caching
 
-Computed textures are cached in a `Map<string, TextureResult>` keyed by `"YYYY-M-D-WxH-RES"`. The cache holds up to 24 entries (LRU eviction). This means that navigating back to a previously viewed date does not require recomputation — the cached texture is used immediately. The cache persists for the lifetime of the browser session.
+Computed textures are cached in a `Map<string, TextureResult>` keyed by `"YYYY-M-D-WxH-RES"`. The cache holds up to 24 entries (LRU eviction). This means that navigating back to a previously viewed date does not require recomputation - the cached texture is used immediately. The cache persists for the lifetime of the browser session.
 
 ---
 
@@ -515,10 +515,10 @@ export const users = mysqlTable("users", {
 
 The tRPC router (`server/routers.ts`) exposes authentication and telemetry procedures:
 
-- `auth.me` — Returns the current user session (public procedure)
-- `auth.logout` — Clears the session cookie (public procedure)
-- `telemetry.submitObservation` — Submits a crescent sighting report (public, but with advanced validation).
-- `telemetry.getObservations` — Retrieves sighting reports with pagination (public, default 50 results)
+- `auth.me` - Returns the current user session (public procedure)
+- `auth.logout` - Clears the session cookie (public procedure)
+- `telemetry.submitObservation` - Submits a crescent sighting report (public, but with advanced validation).
+- `telemetry.getObservations` - Retrieves sighting reports with pagination (public, default 50 results)
 - `archive.getHistoricalData` - Fetches the scraped ICOP sightings dataset.
 
 **Smart Validation:** A key architectural component is the server-side Smart Validation during `submitObservation`. When a physical sighting is claimed, the backend mathematically computes the geometric position of the sun and moon at that precise timestamp and location. If the mathematics dictate that the moon is definitively below the horizon (Zone F), the server fundamentally rejects the claim to preserve crowdsourced data integrity.
@@ -544,7 +544,7 @@ The application is configured for Vercel deployment:
 
 ## 9. Testing
 
-The test suite (`server/astronomy.test.ts`) contains 21 unit tests covering the core astronomical calculation functions. Tests import directly from the production `shared/astronomy.ts` module — not duplicated inline copies — ensuring tests validate the actual production code. Tests are written with Vitest and run with `pnpm test`.
+The test suite (`server/astronomy.test.ts`) contains 21 unit tests covering the core astronomical calculation functions. Tests import directly from the production `shared/astronomy.ts` module - not duplicated inline copies - ensuring tests validate the actual production code. Tests are written with Vitest and run with `pnpm test`.
 
 The test suite covers six areas. The **Yallop q-value classification** tests verify that the zone boundaries (A, B, C, D, E, F) are correctly applied for representative q-values and moon altitudes. The **crescent width calculation** tests verify that the W formula produces physically reasonable values (near-zero for small elongation, increasing with elongation, semi-diameter approximately 15 arcminutes at mean lunar distance). The **Hijri calendar conversion** tests verify known date conversions (e.g., 2024-03-10 → Sha'ban/Ramadan 1445 AH). The **Yallop q-value formula** tests verify the polynomial formula against hand-computed values. The **degree/radian conversion** tests verify the utility functions with round-trip identity checks. The **best-time-to-observe** tests verify the observation window calculator returns valid windows with non-negative scores.
 
@@ -588,4 +588,4 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 28 | Vector Render | Refactored MapPage to generate pure mathematical SVG contours from Yallop `q-value` matrix using `d3-contours`. Removed pixelated canvas generation. Fixed Home page routing overlay issue. |
 | 29 | Global Pickers | Centralized the Date and Location selection (with Auto-Detect GPS) into the main navigation bar using `GlobalStateContext`. All dashboard modules now sync automatically to a single global source of truth. Removed redundant pickers from individual pages. |
 
-*Documentation updated February 23, 2026 (Round 28 — Vector Render). For the latest feature status, see `todo.md`.*
+*Documentation updated February 23, 2026 (Round 28 - Vector Render). For the latest feature status, see `todo.md`.*

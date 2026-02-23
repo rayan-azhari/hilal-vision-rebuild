@@ -61,7 +61,7 @@ export function SunMoonAltitudeChart({ date, location }: Props) {
         <div className="flex flex-col gap-6 w-full">
             <div className="flex items-center gap-3">
                 <h3 className="text-xl font-medium" style={{ color: "var(--foreground)" }}>
-                    Sun & Moon Altitude — {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    Sun & Moon Altitude - {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
             </div>
             <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Drag slider to change time</p>

@@ -1,5 +1,5 @@
 /**
- * Hilal Vision — Astronomy Client Wrapper
+ * Hilal Vision - Astronomy Client Wrapper
  *
  * Re-exports everything from the shared isomorphic astronomy module,
  * and adds DOM-dependent functions that require `document` / `canvas`.

@@ -368,7 +368,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 rounded-sm" style={{ background: ZONE_COLORS[selectedPoint.zone] }} />
                 <span className="font-medium" style={{ color: "var(--foreground)" }}>
-                  Zone {selectedPoint.zone} — {VISIBILITY_LABELS[selectedPoint.zone].label}
+                  Zone {selectedPoint.zone} - {VISIBILITY_LABELS[selectedPoint.zone].label}
                 </span>
               </div>
               <div style={{ color: "var(--muted-foreground)" }}>
@@ -513,7 +513,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                   />
                   <div>
                     <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
-                      Zone {zone} — {VISIBILITY_LABELS[zone].label}
+                      Zone {zone} - {VISIBILITY_LABELS[zone].label}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
                       {VISIBILITY_LABELS[zone].desc}

@@ -19,7 +19,7 @@ export default function VisibilityPage() {
     return (
         <div className="relative h-full flex flex-col pt-12 lg:pt-0">
             <SEO
-                title="Visibility — 3D Globe & 2D Map"
+                title="Visibility - 3D Globe & 2D Map"
                 description="Interactive crescent moon visibility predictions on a 3D globe and 2D map with cloud cover overlay and best observation time calculator."
                 path="/visibility"
             />

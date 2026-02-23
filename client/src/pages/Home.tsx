@@ -150,7 +150,7 @@ export default function Home() {
               className="text-sm mb-4 font-arabic tracking-wider"
               style={{ color: "var(--gold-dim)" }}
             >
-              رؤية الهلال — Islamic Crescent Moon Visibility
+              رؤية الهلال - Islamic Crescent Moon Visibility
             </div>
 
             <h1
@@ -161,7 +161,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg md:text-xl mb-8 max-w-xl leading-relaxed font-light mt-4" style={{ color: "var(--muted-foreground)" }}>
-              A precision astronomical platform for predicting and visualising Islamic crescent moon sightings worldwide — powered by Yallop & Odeh criteria.
+              A precision astronomical platform for predicting and visualising Islamic crescent moon sightings worldwide - powered by Yallop & Odeh criteria.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -433,7 +433,7 @@ export default function Home() {
           <SightingFeed />
           <div className="flex justify-center mt-6">
             <ShareButton
-              title="Hilal Vision — Islamic Moon Visibility"
+              title="Hilal Vision - Islamic Moon Visibility"
               text="Check out the crescent moon visibility predictions on Hilal Vision!"
             />
           </div>

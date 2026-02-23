@@ -1,5 +1,5 @@
 /**
- * BestTimeCard — Displays the optimal time to observe the crescent moon.
+ * BestTimeCard - Displays the optimal time to observe the crescent moon.
  * Uses the computeBestObservationTime function from the astronomy engine.
  */
 import { useMemo } from "react";
@@ -69,7 +69,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                             Window
                         </span>
                         <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
-                            {formatT(result.windowStart)} — {formatT(result.windowEnd)}
+                            {formatT(result.windowStart)} - {formatT(result.windowEnd)}
                         </span>
                     </div>
 

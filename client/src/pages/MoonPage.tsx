@@ -186,7 +186,7 @@ export default function MoonPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Moon Phase — ${moonInfo.phaseName} (${moonInfo.illumination}%)`}
+        title={`Moon Phase - ${moonInfo.phaseName} (${moonInfo.illumination}%)`}
         description={`Current lunar phase: ${moonInfo.phaseName}, ${moonInfo.illumination}% illuminated, ${moonInfo.age.toFixed(1)} days old. View lunar data and astronomical details.`}
         path="/moon"
       />

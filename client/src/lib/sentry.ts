@@ -1,5 +1,5 @@
 /**
- * Sentry Error Monitoring — Client-Side Initialization
+ * Sentry Error Monitoring - Client-Side Initialization
  *
  * Gracefully initializes Sentry when VITE_SENTRY_DSN is set.
  * Does nothing (zero runtime cost) when DSN is undefined (dev mode).
@@ -17,7 +17,7 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 export function initSentry(): void {
     if (!SENTRY_DSN) {
         if (import.meta.env.DEV) {
-            console.info("[Sentry] No DSN configured — error monitoring disabled");
+            console.info("[Sentry] No DSN configured - error monitoring disabled");
         }
         return;
     }

@@ -34,7 +34,7 @@ export default function TermsPage() {
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
                 title="Terms of Service"
-                description="Hilal Vision Terms of Service — acceptable use, liability, and MIT License."
+                description="Hilal Vision Terms of Service - acceptable use, liability, and MIT License."
                 path="/terms"
             />
 
@@ -72,7 +72,7 @@ export default function TermsPage() {
 
                 <Heading>1. Acceptance of Terms</Heading>
                 <Para>
-                    By using Hilal Vision — whether as a guest or a registered account holder — you confirm
+                    By using Hilal Vision - whether as a guest or a registered account holder - you confirm
                     that you are at least 13 years of age and that you accept these Terms. If you are using
                     the Platform on behalf of an organisation, you represent that you have authority to bind
                     that organisation.
@@ -126,8 +126,8 @@ export default function TermsPage() {
                 <Heading>5. Accuracy Disclaimer</Heading>
                 <Para>
                     Hilal Vision provides mathematical predictions based on established astronomical algorithms
-                    (Yallop 1997, Odeh 2004, SunCalc). While we strive for accuracy, we make no warranties —
-                    express or implied — regarding the correctness, completeness, or fitness for any particular
+                    (Yallop 1997, Odeh 2004, SunCalc). While we strive for accuracy, we make no warranties -
+                    express or implied - regarding the correctness, completeness, or fitness for any particular
                     purpose of any prediction, calendar date, or sighting data.
                 </Para>
                 <Para>
@@ -156,7 +156,7 @@ export default function TermsPage() {
                 <Para>
                     To the maximum extent permitted by applicable law, Hilal Vision and its contributors shall
                     not be liable for any indirect, incidental, special, consequential, or punitive damages
-                    arising out of your use of (or inability to use) the Platform — including but not limited
+                    arising out of your use of (or inability to use) the Platform - including but not limited
                     to loss of data, missed religious observances, or reliance on incorrect predictions.
                 </Para>
                 <Para>
@@ -194,7 +194,7 @@ export default function TermsPage() {
                         <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                             Email{" "}
                             <span style={{ color: "var(--gold-dim)" }}>contact@hilalvision.app</span>
-                            {" "}— Also see our{" "}
+                            {" "}- Also see our{" "}
                             <Link href="/privacy">
                                 <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>Privacy Policy</span>
                             </Link>

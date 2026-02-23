@@ -357,7 +357,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                     color: "var(--background)",
                   }}
                 >
-                  Zone {moonData.visibility} — {VISIBILITY_LABELS[moonData.visibility].label}
+                  Zone {moonData.visibility} - {VISIBILITY_LABELS[moonData.visibility].label}
                 </span>
               </div>
 
@@ -369,8 +369,8 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                 { label: "Crescent Width", value: `${moonData.crescent.w.toFixed(3)}'` },
                 { label: "Yallop q", value: moonData.qValue.toFixed(4) },
                 { label: "Illumination", value: `${(moonData.illumination * 100).toFixed(1)}%` },
-                { label: "Sunset", value: moonData.sunset ? moonData.sunset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—" },
-                { label: "Moonset", value: moonData.moonset ? moonData.moonset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—" },
+                { label: "Sunset", value: moonData.sunset ? moonData.sunset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-" },
+                { label: "Moonset", value: moonData.moonset ? moonData.moonset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between items-center">
                   <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{label}</span>
@@ -386,7 +386,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                 {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(zone => (
                   <div key={zone} className="flex items-center gap-2">
                     <span className="text-xs" style={{ color: "var(--foreground)" }}>
-                      <strong style={{ color: "var(--gold)" }}>{zone}</strong> — {VISIBILITY_LABELS[zone].label}
+                      <strong style={{ color: "var(--gold)" }}>{zone}</strong> - {VISIBILITY_LABELS[zone].label}
                     </span>
                   </div>
                 ))}

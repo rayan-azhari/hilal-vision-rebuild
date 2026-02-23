@@ -23,7 +23,7 @@ Hilal Vision is a tool used both during the day (planning) and at night (observi
 - **Instrument-grade Typography:** Use precise, legible typography (e.g., `Inter`, `JetBrains Mono`, `Space Mono` for data). Data should never feel cluttered; let the numbers breathe and align perfectly.
 - **Tactile Micro-Interactions:** Buttons and controls should feel magnetic. Hovering over a control should yield a subtle snap or scale (`cubic-bezier(0.2, 0.8, 0.2, 1)` transitions).
 
-## Agent Flow — MUST FOLLOW
+## Agent Flow - MUST FOLLOW
 
 When the user asks to build or upgrade a feature for Hilal Vision, immediately internalize the request and design the component. If ambiguity exists, ask these questions before proceeding:
 
@@ -32,16 +32,16 @@ When the user asks to build or upgrade a feature for Hilal Vision, immediately i
 
 ## Component Architecture Principles
 
-### A. THE UNIFIED DASHBOARD — "The Command Centre"
+### A. THE UNIFIED DASHBOARD - "The Command Centre"
 - **Floating Overlays:** The 2D Map and 3D Globe are the stars of the show. Controls (time sliders, location pickers) should be floating `.glass-card` elements overlaid on the map, not blocky sidebars that steal screen real estate.
 - **Map/Globe Theming:** Whenever working on the map/leaflet or Globe.gl implementations, ensure the tile providers or 3D materials dynamically adapt to the active theme (Light vs. Dark). This is critical for the "Clinical Aerospace" light theme.
 
-### B. DATA VISUALIZATION — "Telemetry & Science"
+### B. DATA VISUALIZATION - "Telemetry & Science"
 - When displaying astronomical data (Moon Altitude, Danjon Limits, Best Time to Observe), treat the UI like a heads-up display (HUD).
 - Use tabular numerals (`font-variant-numeric: tabular-nums`) for rapidly updating numbers so they don't jump around.
 - Use the predefined scientific color mappings for Visibility Zones (Yallop/Odeh criteria) ensuring readability and striking visual appeal against both themes.
 
-### C. RESPONSIVE & NATIVE READY — "Capacitor First"
+### C. RESPONSIVE & NATIVE READY - "Capacitor First"
 Hilal Vision is packaged for iOS and Android via Capacitor.
 - Avoid `100vh`; use `100dvh` for mobile viewport accuracy.
 - Respect safe-area-insets (`env(safe-area-inset-bottom)`, etc.) for notches and home indicators.

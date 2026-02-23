@@ -301,7 +301,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Mobile Nav — positioned BELOW the header pill */}
+        {/* Mobile Nav - positioned BELOW the header pill */}
         {mobileOpen && (
           <div
             className="lg:hidden pointer-events-auto mt-2 rounded-2xl border flex flex-col"
@@ -391,7 +391,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 ☽ Hilal Vision
               </span>
               <span style={{ color: "var(--muted-foreground)", fontSize: "0.75rem" }}>
-                — Islamic Crescent Moon Visibility
+                - Islamic Crescent Moon Visibility
               </span>
             </div>
             <div className="flex items-center gap-4 flex-wrap justify-center">

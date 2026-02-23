@@ -18,7 +18,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **🌍 i18n**: English, Arabic (العربية), and Urdu (اردو) with a navbar language switcher and full RTL support.
 - **📤 Social Sharing**: Native share API (mobile) with clipboard fallback, plus a live sighting feed on the Home page.
 - **ℹ️ About Page (`/about`)**: Mission statement, platform overview, technology stack, competitor comparison table (vs Moonsighting.com, IslamicFinder, LuneSighting, HilalMap), and data attributions.
-- **🔬 Methodology Page (`/methodology`)**: Full technical reference — Yallop q-value formula derivation, Odeh V-value, triple-engine Hijri calendar algorithms, Best-Time-to-Observe scoring function, ICOP archive sourcing, atmospheric refraction physics, and peer-reviewed references.
+- **🔬 Methodology Page (`/methodology`)**: Full technical reference - Yallop q-value formula derivation, Odeh V-value, triple-engine Hijri calendar algorithms, Best-Time-to-Observe scoring function, ICOP archive sourcing, atmospheric refraction physics, and peer-reviewed references.
 - **⚖️ Legal Pages (`/privacy`, `/terms`)**: Privacy Policy (GDPR-aware, covering GPS, Clerk auth, ICOP data) and Terms of Service (acceptable use, MIT License, accuracy disclaimer).
 
 ## Tech Stack
@@ -27,7 +27,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **Design System:** Breezy Weather Design (`.breezy-card`, Space-Navy/Gold themes)
 - **Mapping & Scientific Viz:** Leaflet, Globe.gl, Three.js, SunCalc
 - **Backend:** Node.js, Express, tRPC (Type-safe API)
-- **Database:** Drizzle ORM (MySQL — `observation_reports` table)
+- **Database:** Drizzle ORM (MySQL - `observation_reports` table)
 - **Authentication:** Clerk
 - **Rate Limiting:** Upstash Redis
 - **i18n:** react-i18next + i18next-browser-languagedetector
@@ -47,10 +47,10 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
 10. **Trilingual i18n with RTL**: Full Arabic and Urdu translation files (100+ strings) with automatic RTL direction switching and browser language detection.
 11. **Dynamic SEO Engine**: Per-page meta tags, OG/Twitter cards (PNG format for social platform compatibility), and JSON-LD structured data via `react-helmet-async`, with canonical URLs and a complete sitemap.
-12. **Shared Astronomy Module**: The 843-line astronomy engine has been extracted to `shared/astronomy.ts` — a platform-agnostic module importable by the server, Web Workers, and tests without cross-boundary imports. Only `buildVisibilityTexture` (DOM-dependent) remains in the client wrapper.
+12. **Shared Astronomy Module**: The 843-line astronomy engine has been extracted to `shared/astronomy.ts` - a platform-agnostic module importable by the server, Web Workers, and tests without cross-boundary imports. Only `buildVisibilityTexture` (DOM-dependent) remains in the client wrapper.
 13. **Code Splitting**: All 6 heavy pages are lazy-loaded via `React.lazy` + `Suspense`, keeping Globe.gl, Three.js, Leaflet, D3, and Recharts out of the initial bundle.
 14. **Reliable Test Suite**: 21 unit tests import directly from the production `shared/astronomy.ts` module (not duplicated copies) and cover Yallop classification, crescent width, Hijri conversion, q-value formula, degree/radian conversions, and best-time-to-observe.
-55. **PWA with Service Worker**: A hand-written `sw.js` implements three caching strategies — CacheFirst for map tiles/fonts, NetworkFirst for API calls, StaleWhileRevalidate for the app shell — enabling offline functionality.
+55. **PWA with Service Worker**: A hand-written `sw.js` implements three caching strategies - CacheFirst for map tiles/fonts, NetworkFirst for API calls, StaleWhileRevalidate for the app shell - enabling offline functionality.
 56. **Sentry Error Monitoring**: `@sentry/react` with `ErrorBoundary`, API error capture, performance tracing (20% sampling), and session replays (10%), with graceful no-op when DSN is unset.
 57. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
 58. **Global Location & Date State**: A unified `GlobalStateContext` centralizes the location and date pickers into the main navigation bar. Changing your location or date instantly pushes the update to all 3D Globe, 2D Map, Moon Phase, and Horizon modules simultaneously.
@@ -60,7 +60,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 ### Prerequisites
 
 - Node.js (v18+)
-- `pnpm` (required — **do not use `npm install`**)
+- `pnpm` (required - **do not use `npm install`**)
 
 ### Installation & Running
 
@@ -101,24 +101,24 @@ See `docs/DEPLOYMENT.md` for the full Vercel deployment guide.
 ### Code Quality & Testing
 
 ```bash
-npm run test    # Unit tests (21 tests — Yallop, crescent width, Hijri calendar, best-time)
+npm run test    # Unit tests (21 tests - Yallop, crescent width, Hijri calendar, best-time)
 npm run check   # TypeScript type checking
 ```
 
 ## Documentation
 
-- `docs/USER_GUIDE.md` — Comprehensive walkthrough of all features
-- `docs/HILAL_VISION_DOCUMENTATION.md` — Core algorithms and math
-- `docs/DEPLOYMENT.md` — Vercel deployment guide
-- `docs/Islamic Calendar Astronomical Dashboard.md` — Problem space overview
-- `docs/The Hilal Dashboard Revised Architecture.md` — Telemetry architecture
+- `docs/USER_GUIDE.md` - Comprehensive walkthrough of all features
+- `docs/HILAL_VISION_DOCUMENTATION.md` - Core algorithms and math
+- `docs/DEPLOYMENT.md` - Vercel deployment guide
+- `docs/Islamic Calendar Astronomical Dashboard.md` - Problem space overview
+- `docs/The Hilal Dashboard Revised Architecture.md` - Telemetry architecture
 
 ### In-App Documentation Pages
 
-- `/about` — Mission, tools, tech stack, competitor comparison, and attributions
-- `/methodology` — Full algorithm reference (Yallop, Odeh, Hijri calendar engines, Best-Time calculator, ICOP, refraction)
-- `/privacy` — Privacy Policy (data collection, sub-processors, GDPR rights)
-- `/terms` — Terms of Service (acceptable use, MIT License, accuracy disclaimer)
+- `/about` - Mission, tools, tech stack, competitor comparison, and attributions
+- `/methodology` - Full algorithm reference (Yallop, Odeh, Hijri calendar engines, Best-Time calculator, ICOP, refraction)
+- `/privacy` - Privacy Policy (data collection, sub-processors, GDPR rights)
+- `/terms` - Terms of Service (acceptable use, MIT License, accuracy disclaimer)
 
 ## License
 

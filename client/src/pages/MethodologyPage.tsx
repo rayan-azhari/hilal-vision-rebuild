@@ -37,7 +37,7 @@ function ZoneTable() {
         { zone: "C", range: "−0.160 ≤ q < −0.014", meaning: "Binoculars may be needed to find crescent", color: "#fb923c" },
         { zone: "D", range: "−0.232 ≤ q < −0.160", meaning: "Visible only with telescope", color: "#f87171" },
         { zone: "E", range: "q < −0.232", meaning: "Not visible even with optical aid", color: "#6b7280" },
-        { zone: "F", range: "Moon below horizon", meaning: "Impossible — below horizon at sunset", color: "#374151" },
+        { zone: "F", range: "Moon below horizon", meaning: "Impossible - below horizon at sunset", color: "#374151" },
     ];
 
     return (
@@ -170,7 +170,7 @@ export default function MethodologyPage() {
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
                 title="Methodology"
-                description="Technical methodology behind Hilal Vision — Yallop & Odeh criteria, triple-engine Hijri calendar, Best-Time-to-Observe algorithm, ICOP archive, and atmospheric refraction physics."
+                description="Technical methodology behind Hilal Vision - Yallop & Odeh criteria, triple-engine Hijri calendar, Best-Time-to-Observe algorithm, ICOP archive, and atmospheric refraction physics."
                 path="/methodology"
             />
 
@@ -187,7 +187,7 @@ export default function MethodologyPage() {
                 <div className="absolute inset-0 star-field opacity-30 pointer-events-none" />
                 <div className="container relative z-10 max-w-3xl">
                     <div className="text-xs mb-4 tracking-wider" style={{ color: "var(--gold-dim)" }}>
-                        Scientific Documentation — علم الفلك
+                        Scientific Documentation - علم الفلك
                     </div>
                     <h1
                         className="text-4xl md:text-5xl font-light tracking-tight mb-4 leading-tight"
@@ -261,8 +261,8 @@ export default function MethodologyPage() {
                     <Para>
                         The Islamic lunar calendar begins each month with the physical sighting of the new
                         crescent moon (<span className="font-arabic" style={{ color: "var(--gold-dim)" }}>الهلال</span>)
-                        at sunset. At the moment of astronomical conjunction — when the Sun and Moon share the
-                        same geocentric ecliptic longitude — the moon is entirely invisible from Earth. Visibility
+                        at sunset. At the moment of astronomical conjunction - when the Sun and Moon share the
+                        same geocentric ecliptic longitude - the moon is entirely invisible from Earth. Visibility
                         only becomes possible as the moon moves away from the Sun's glare, forming a thin illuminated
                         sliver.
                     </Para>
@@ -288,7 +288,7 @@ export default function MethodologyPage() {
 
                     <SubHeading>Input Parameters</SubHeading>
                     <Para>
-                        Two parameters are computed at the "Best Time" — approximately 4/9ths of the lag time
+                        Two parameters are computed at the "Best Time" - approximately 4/9ths of the lag time
                         (duration between sunset and moonset) after sunset:
                     </Para>
                     <ul
@@ -296,12 +296,12 @@ export default function MethodologyPage() {
                         style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}
                     >
                         <li>
-                            <strong style={{ color: "var(--foreground)" }}>ARCV</strong> — Arc of Vision: the
+                            <strong style={{ color: "var(--foreground)" }}>ARCV</strong> - Arc of Vision: the
                             moon's altitude above the horizon minus the sun's altitude at the moment of evaluation
                             (degrees).
                         </li>
                         <li>
-                            <strong style={{ color: "var(--foreground)" }}>W</strong> — Topocentric Crescent Width:
+                            <strong style={{ color: "var(--foreground)" }}>W</strong> - Topocentric Crescent Width:
                             the width of the illuminated crescent in arcminutes.
                         </li>
                     </ul>
@@ -354,7 +354,7 @@ W  = SD × (1 − cos(elongation))`}
                         {`V = ARCV − (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)`}
                     </FormulaBlock>
                     <Para>
-                        The Odeh criterion uses airless topocentric ARCV values — stripping away refraction during
+                        The Odeh criterion uses airless topocentric ARCV values - stripping away refraction during
                         the initial calculation phase to provide a standardised geometric baseline before
                         atmospheric corrections are applied.
                     </Para>
@@ -363,7 +363,7 @@ W  = SD × (1 − cos(elongation))`}
                     <OdehTable />
                     <Para>
                         In regions where Yallop and Odeh diverge, the map may mark borderline areas as
-                        uncertain — acknowledging that local variations in atmospheric transparency and observer
+                        uncertain - acknowledging that local variations in atmospheric transparency and observer
                         eye sensitivity become the dominant factors.
                     </Para>
 
@@ -376,7 +376,7 @@ W  = SD × (1 − cos(elongation))`}
                         a fundamentally different philosophy of Islamic timekeeping.
                     </Para>
 
-                    <SubHeading>Engine 1 — Astronomical (SunCalc)</SubHeading>
+                    <SubHeading>Engine 1 - Astronomical (SunCalc)</SubHeading>
                     <Para>
                         Uses a conjunction-based algorithm to detect the physical new moon. The
                         function <code style={{ color: "var(--gold-dim)" }}>findNewMoonNear()</code> employs a
@@ -386,18 +386,18 @@ W  = SD × (1 − cos(elongation))`}
                         represents true physical reality and may differ from civic calendars by ±1 day.
                     </Para>
 
-                    <SubHeading>Engine 2 — Umm al-Qura</SubHeading>
+                    <SubHeading>Engine 2 - Umm al-Qura</SubHeading>
                     <Para>
                         The official civic calendar of Saudi Arabia, used for administrative and religious
                         announcements. Powered by the pre-computed KACST tables via the{" "}
                         <code style={{ color: "var(--gold-dim)" }}>@umalqura/core</code> package. Since 1423 AH
                         (2002 CE), the Umm al-Qura calendar requires two conditions: the geocentric conjunction
                         must occur before sunset in Mecca, and the moon must set after the sun in Mecca. This
-                        means the calendar does not require actual naked-eye visibility — in roughly 75% of cases
+                        means the calendar does not require actual naked-eye visibility - in roughly 75% of cases
                         where it starts a month, the crescent is too thin to be seen without instruments.
                     </Para>
 
-                    <SubHeading>Engine 3 — Tabular (Kuwaiti)</SubHeading>
+                    <SubHeading>Engine 3 - Tabular (Kuwaiti)</SubHeading>
                     <Para>
                         The standard arithmetic approximation widely used in software applications. Implemented
                         via Julian Date conversions (<code style={{ color: "var(--gold-dim)" }}>gregorianToJD</code>,{" "}
@@ -435,17 +435,17 @@ W  = SD × (1 − cos(elongation))`}
                         style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}
                     >
                         <li>
-                            <strong style={{ color: "var(--foreground)" }}>Moon altitude</strong> — must be above
+                            <strong style={{ color: "var(--foreground)" }}>Moon altitude</strong> - must be above
                             the horizon (&gt; 0°). Penalised heavily for very low altitudes where atmospheric
                             extinction increases airmass ∝ 1/sin(alt).
                         </li>
                         <li>
-                            <strong style={{ color: "var(--foreground)" }}>Sky darkness factor</strong> — scores
+                            <strong style={{ color: "var(--foreground)" }}>Sky darkness factor</strong> - scores
                             the twilight level: 1.0 (astronomical twilight, sun &lt; −12°), 0.8 (nautical, sun &lt;
                             −6°), 0.5 (civil, sun &lt; 0°), 0.1 (day).
                         </li>
                         <li>
-                            <strong style={{ color: "var(--foreground)" }}>Altitude factor</strong> — penalises
+                            <strong style={{ color: "var(--foreground)" }}>Altitude factor</strong> - penalises
                             very low altitudes where atmospheric extinction is highest.
                         </li>
                     </ul>
@@ -481,9 +481,9 @@ W  = SD × (1 − cos(elongation))`}
                             </thead>
                             <tbody>
                                 {[
-                                    ["8°", "900", "Preview pass (~100ms) — immediate visual feedback"],
-                                    ["4°", "3,600", "Standard pass — default map rendering"],
-                                    ["2°", "14,400", "High-quality pass (~800ms) — full detail"],
+                                    ["8°", "900", "Preview pass (~100ms) - immediate visual feedback"],
+                                    ["4°", "3,600", "Standard pass - default map rendering"],
+                                    ["2°", "14,400", "High-quality pass (~800ms) - full detail"],
                                 ].map(([res, pts, use]) => (
                                     <tr key={res} style={{ borderBottom: "1px solid color-mix(in oklch, var(--border) 50%, transparent)" }}>
                                         <td className="py-2 px-3 font-mono" style={{ color: "var(--gold-dim)" }}>{res}</td>
@@ -522,8 +522,8 @@ W  = SD × (1 − cos(elongation))`}
                     </Para>
                     <Para>
                         These real-world sightings serve as empirical ground truth against which Hilal Vision's
-                        theoretical Yallop/Odeh predictions can be validated. The side-by-side comparison — theory
-                        versus actual crowdsourced report — allows users to assess the predictive power of the
+                        theoretical Yallop/Odeh predictions can be validated. The side-by-side comparison - theory
+                        versus actual crowdsourced report - allows users to assess the predictive power of the
                         mathematical models and understand why borderline (Zone C/D) predictions sometimes
                         disagree with physical reality.
                     </Para>
@@ -542,7 +542,7 @@ W  = SD × (1 − cos(elongation))`}
                         A key architectural safeguard: when a physical sighting is claimed, the backend
                         mathematically computes the geometric position of the sun and moon at the precise
                         submitted timestamp and location. If the mathematics determine that the moon is
-                        definitively below the horizon (Zone F), the server rejects the payload — preventing
+                        definitively below the horizon (Zone F), the server rejects the payload - preventing
                         malicious or erroneous data from corrupting the crowdsourced dataset.
                     </Para>
 
@@ -550,7 +550,7 @@ W  = SD × (1 − cos(elongation))`}
                     <Para>
                         Submissions are protected by{" "}
                         <strong style={{ color: "var(--foreground)" }}>Upstash Redis</strong> sliding window
-                        rate limiting — a maximum of 5 reports per IP address per minute. This prevents
+                        rate limiting - a maximum of 5 reports per IP address per minute. This prevents
                         DDoS attacks and preserves data integrity during high-traffic periods (e.g. the eve of
                         Ramadan).
                     </Para>
@@ -558,7 +558,7 @@ W  = SD × (1 − cos(elongation))`}
                     <SubHeading>Meteorological Enrichment</SubHeading>
                     <Para>
                         Each submitted report is automatically enriched with real-time meteorological data from
-                        Open-Meteo — including cloud cover percentage, surface pressure, and aerosol optical
+                        Open-Meteo - including cloud cover percentage, surface pressure, and aerosol optical
                         depth at the observer's exact coordinates. This ancillary data enables future sightability
                         score modeling that combines astronomical prediction with atmospheric conditions.
                     </Para>
@@ -570,7 +570,7 @@ W  = SD × (1 − cos(elongation))`}
                     <Para>
                         Atmospheric refraction is the bending of light as it passes through layers of air with
                         increasing density near Earth's surface. At the horizon, this effect reaches approximately{" "}
-                        <strong style={{ color: "var(--foreground)" }}>34 arcminutes</strong> — enough to make the
+                        <strong style={{ color: "var(--foreground)" }}>34 arcminutes</strong> - enough to make the
                         sun or moon appear fully above the horizon when they are geometrically below it.
                     </Para>
                     <Para>
@@ -585,7 +585,7 @@ R  = R₀ × (P / 1010) × (283 / (273 + T))`}
                         Where <code>h</code> is the apparent altitude in degrees, <code>P</code> is atmospheric
                         pressure in hPa, and <code>T</code> is temperature in Celsius. Real-time P and T values
                         are fetched from Open-Meteo's forecast API. Without this correction, the simulated moon
-                        would appear lower than its physically observed position — particularly critical for
+                        would appear lower than its physically observed position - particularly critical for
                         near-horizon sightings.
                     </Para>
 
@@ -598,7 +598,7 @@ R  = R₀ × (P / 1010) × (283 / (273 + T))`}
                             {
                                 author: "Yallop, B.D. (1997)",
                                 title: "A Method for Predicting the First Sighting of the New Crescent Moon",
-                                pub: "HM Nautical Almanac Office — NAO Technical Note No. 69",
+                                pub: "HM Nautical Almanac Office - NAO Technical Note No. 69",
                                 href: "https://astronomycenter.net/pdf/yallop_1997.pdf",
                             },
                             {
@@ -610,12 +610,12 @@ R  = R₀ × (P / 1010) × (283 / (273 + T))`}
                             {
                                 author: "Meeus, J. (1998)",
                                 title: "Astronomical Algorithms, 2nd Edition",
-                                pub: "Willmann-Bell — Foundation for SunCalc position algorithms",
+                                pub: "Willmann-Bell - Foundation for SunCalc position algorithms",
                                 href: "https://www.willbell.com/math/mc1.htm",
                             },
                             {
                                 author: "Agafonkin, V.",
-                                title: "SunCalc — Sun/Moon Calculations Library",
+                                title: "SunCalc - Sun/Moon Calculations Library",
                                 pub: "JavaScript implementation of Meeus algorithms",
                                 href: "https://github.com/mourner/suncalc",
                             },

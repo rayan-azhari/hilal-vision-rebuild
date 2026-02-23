@@ -21,7 +21,7 @@ export function SEO({
     ogImage = DEFAULT_OG_IMAGE,
     type = "website",
 }: SEOProps) {
-    const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Islamic Moon Visibility & Sighting`;
+    const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} - Islamic Moon Visibility & Sighting`;
     const canonicalUrl = `${BASE_URL}${path}`;
 
     return (
