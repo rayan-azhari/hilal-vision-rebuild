@@ -33,29 +33,30 @@ export default function VisibilityPage() {
                 path="/visibility"
             />
             <div
-                className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex p-1 rounded-lg shadow-xl"
+                className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex p-1 rounded-[2rem] shadow-xl"
                 style={{
-                    background: "color-mix(in oklch, var(--space-mid) 85%, transparent)",
-                    backdropFilter: "blur(12px)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)"
+                    background: "color-mix(in oklch, var(--card) 60%, transparent)",
+                    backdropFilter: "blur(16px)",
+                    WebkitBackdropFilter: "blur(16px)",
+                    border: "1px solid color-mix(in oklch, var(--border) 30%, transparent)"
                 }}
             >
                 <button
                     onClick={() => setView("globe")}
-                    className="px-4 py-1.5 text-xs font-medium rounded-md transition-all"
+                    className="px-5 py-2 text-xs font-semibold rounded-[2rem] transition-all duration-300 magnetic"
                     style={{
-                        background: view === "globe" ? "color-mix(in oklch, var(--gold) 15%, transparent)" : "transparent",
-                        color: view === "globe" ? "var(--gold)" : "var(--muted-foreground)"
+                        background: view === "globe" ? "var(--foreground)" : "transparent",
+                        color: view === "globe" ? "var(--background)" : "var(--muted-foreground)"
                     }}
                 >
                     3D Globe
                 </button>
                 <button
                     onClick={() => setView("map")}
-                    className="px-4 py-1.5 text-xs font-medium rounded-md transition-all"
+                    className="px-5 py-2 text-xs font-semibold rounded-[2rem] transition-all duration-300 magnetic"
                     style={{
-                        background: view === "map" ? "color-mix(in oklch, var(--gold) 15%, transparent)" : "transparent",
-                        color: view === "map" ? "var(--gold)" : "var(--muted-foreground)"
+                        background: view === "map" ? "var(--foreground)" : "transparent",
+                        color: view === "map" ? "var(--background)" : "var(--muted-foreground)"
                     }}
                 >
                     2D Map

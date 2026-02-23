@@ -82,6 +82,17 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     setIsLoading(isComputing || (showClouds && isCloudsLoading));
   }, [isComputing, isCloudsLoading, showClouds]);
 
+  // Update globe texture when theme changes
+  useEffect(() => {
+    const globe = globeInstanceRef.current;
+    if (!globe) return;
+    globe.globeImageUrl(
+      theme === "light"
+        ? "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+        : "https://unpkg.com/three-globe/example/img/earth-dark.jpg"
+    );
+  }, [theme]);
+
   // Compute local moon data and labels
   useEffect(() => {
     const globe = globeInstanceRef.current;

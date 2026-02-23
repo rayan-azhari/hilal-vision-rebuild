@@ -249,10 +249,10 @@ export default function MoonPage() {
                 const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
                 setDate(newDate);
               }}
-              className="w-full px-3 py-2 rounded-lg text-sm"
+              className="w-full px-3 py-2 rounded-xl text-sm data-text"
               style={{
-                background: "var(--space-light)",
-                border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                background: "var(--card-surface-alt)",
+                border: "1px solid var(--border)",
                 color: "var(--foreground)",
                 colorScheme: "dark",
                 height: "40px"
@@ -313,7 +313,7 @@ export default function MoonPage() {
                   }}
                 />
               </div>
-              <div className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>
+              <div className="text-xs mt-1 data-text" style={{ color: "var(--muted-foreground)" }}>
                 {phasePercent.toFixed(1)}% through lunar cycle
               </div>
             </div>
@@ -392,7 +392,7 @@ export default function MoonPage() {
                   <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
                     <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
                     <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
-                    <div className="text-sm font-mono font-semibold" style={{ color: "var(--foreground)" }}>{value}</div>
+                    <div className="text-sm font-mono font-semibold data-text" style={{ color: "var(--foreground)" }}>{value}</div>
                   </div>
                 ))}
               </div>

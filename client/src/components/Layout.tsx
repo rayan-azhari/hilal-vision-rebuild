@@ -49,229 +49,243 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
-      {/* Header */}
-      <header
-        className="fixed top-0 left-0 right-0 z-50"
-        style={{
-          background: scrolled ? "oklch(0.05 0.02 265 / 0.96)" : "transparent",
-          backdropFilter: scrolled ? "blur(24px) saturate(1.2)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(24px) saturate(1.2)" : "none",
-          borderBottom: scrolled ? "1px solid color-mix(in oklch, var(--gold) 12%, transparent)" : "1px solid transparent",
-          transition: "all 0.4s ease",
-        }}
-      >
-        <div className="container">
-          <div className="flex items-center justify-between h-14">
-            {/* Logo */}
-            <Link href="/">
-              <div className="flex items-center gap-3 group">
+      {/* Global CSS Noise Overlay */}
+      <svg className="noise-overlay" xmlns="http://www.w3.org/2000/svg">
+        <filter id="noiseFilter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+      </svg>
+
+      {/* Floating Command Centre Navigation */}
+      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
+        <header
+          className="pointer-events-auto flex items-center justify-between px-3 md:px-5 h-16 rounded-[3rem] transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+          style={{
+            background: scrolled
+              ? "color-mix(in oklch, var(--card) 60%, transparent)"
+              : "color-mix(in oklch, var(--card) 20%, transparent)",
+            backdropFilter: "blur(24px) saturate(1.2)",
+            WebkitBackdropFilter: "blur(24px) saturate(1.2)",
+            border: scrolled
+              ? "1px solid color-mix(in oklch, var(--border) 50%, transparent)"
+              : "1px solid color-mix(in oklch, var(--border) 20%, transparent)",
+            boxShadow: scrolled
+              ? "0 12px 40px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.05) inset"
+              : "none",
+            width: "100%",
+            maxWidth: "900px"
+          }}
+        >
+          {/* Logo */}
+          <Link href="/">
+            <div className="flex items-center gap-3 group magnetic cursor-pointer p-1">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{
+                  background: "linear-gradient(135deg, var(--gold-glow), var(--gold-dim))",
+                  boxShadow: "0 0 12px color-mix(in oklch, var(--gold) 40%, transparent)",
+                }}
+              >
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                  <path
+                    d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5S12.83 18 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c.83 0 1.5-.67 1.5-1.5S12.83 3 12 3z"
+                    fill="var(--space)"
+                  />
+                  <path
+                    d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5S12.83 18 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c.83 0 1.5-.67 1.5-1.5S12.83 3 12 3z"
+                    fill="var(--space)"
+                  />
+                </svg>
+                <span className="text-sm font-bold" style={{ color: "var(--space)", fontFamily: "Cinzel, serif" }}>☽</span>
+              </div>
+              <div>
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center"
+                  className="text-base font-semibold leading-none"
+                  style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}
+                >
+                  Hilal Vision
+                </div>
+                <div className="text-xs leading-none mt-0.5" style={{ color: "var(--gold-dim)", fontFamily: "Noto Naskh Arabic, serif" }}>
+                  هلال
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center gap-1.5 ml-8 mr-auto">
+            {navItems.map(({ href, label, icon: Icon }) => {
+              const active = location === href;
+              return (
+                <Link key={href} href={href}>
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-[2rem] text-sm transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic"
+                    style={{
+                      color: active ? "var(--foreground)" : "var(--muted-foreground)",
+                      background: active
+                        ? "color-mix(in oklch, var(--primary) 10%, transparent)"
+                        : "transparent",
+                      border: active
+                        ? "1px solid color-mix(in oklch, var(--primary) 20%, transparent)"
+                        : "1px solid transparent",
+                      fontWeight: active ? 600 : 500,
+                    }}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {label}
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Actions: Theme, Lang, Clerk, Report */}
+          <div className="flex items-center gap-1 md:gap-2">
+            <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+              <DialogTrigger asChild>
+                <button
+                  className="flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-[2rem] text-sm font-medium magnetic transition-colors"
                   style={{
-                    background: "linear-gradient(135deg, var(--gold-glow), var(--gold-dim))",
-                    boxShadow: "0 0 12px color-mix(in oklch, var(--gold) 40%, transparent)",
+                    background: "var(--foreground)",
+                    color: "var(--background)",
                   }}
                 >
-                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-                    <path
-                      d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5S12.83 18 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c.83 0 1.5-.67 1.5-1.5S12.83 3 12 3z"
-                      fill="var(--space)"
-                    />
-                    <path
-                      d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5S12.83 18 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c.83 0 1.5-.67 1.5-1.5S12.83 3 12 3z"
-                      fill="var(--space)"
-                    />
-                  </svg>
-                  <span className="text-sm font-bold" style={{ color: "var(--space)", fontFamily: "Cinzel, serif" }}>☽</span>
-                </div>
-                <div>
-                  <div
-                    className="text-base font-semibold leading-none"
-                    style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}
-                  >
-                    Hilal Vision
-                  </div>
-                  <div className="text-xs leading-none mt-0.5" style={{ color: "var(--gold-dim)", fontFamily: "Noto Naskh Arabic, serif" }}>
-                    هلال
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map(({ href, label, icon: Icon }) => {
-                const active = location === href;
-                return (
-                  <Link key={href} href={href}>
-                    <div
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-200"
-                      style={{
-                        color: active ? "var(--gold)" : "var(--muted-foreground)",
-                        background: active
-                          ? "color-mix(in oklch, var(--gold) 10%, transparent)"
-                          : "transparent",
-                        border: active
-                          ? "1px solid color-mix(in oklch, var(--gold) 20%, transparent)"
-                          : "1px solid transparent",
-                      }}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      {label}
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Mobile menu and Theme toggle */}
-            <div className="flex items-center gap-2">
-              <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-                <DialogTrigger asChild>
-                  <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      background: "color-mix(in oklch, var(--gold) 15%, transparent)",
-                      color: "var(--gold)",
-                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)"
-                    }}
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Report Sighting</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Submit Crescent Sighting</DialogTitle>
-                    <DialogDescription>
-                      Share your live observation. Environmental conditions will be fetched automatically.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <SightingReportForm onSuccess={() => setReportOpen(false)} />
-                </DialogContent>
-              </Dialog>
-
-              {/* Language Switcher */}
-              <div className="relative">
-                <button
-                  className="p-2 rounded-lg transition-colors flex items-center gap-1"
-                  style={{ color: "var(--muted-foreground)" }}
-                  onClick={() => setLangOpen(!langOpen)}
-                  aria-label="Change language"
-                >
-                  <Languages className="w-4 h-4" />
-                  <span className="text-xs font-bold uppercase">{i18n.language}</span>
+                  <PlusCircle className="w-4 h-4" />
+                  <span className="hidden sm:inline">Report Sighting</span>
                 </button>
-                {langOpen && (
-                  <div
-                    className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden shadow-xl z-[100]"
-                    style={{
-                      background: "var(--space-mid)",
-                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                      minWidth: "120px",
-                    }}
-                  >
-                    {LANG_OPTIONS.map(({ code, label }) => (
-                      <button
-                        key={code}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/5"
-                        style={{
-                          color: i18n.language === code ? "var(--gold)" : "var(--foreground)",
-                          background: i18n.language === code ? "color-mix(in oklch, var(--gold) 10%, transparent)" : "transparent",
-                        }}
-                        onClick={() => { i18n.changeLanguage(code); setLangOpen(false); }}
-                      >
-                        <span className="font-bold">{label}</span>
-                        <span style={{ color: "var(--muted-foreground)" }}>{t(`language.${code}`)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Submit Crescent Sighting</DialogTitle>
+                  <DialogDescription>
+                    Share your live observation. Environmental conditions will be fetched automatically.
+                  </DialogDescription>
+                </DialogHeader>
+                <SightingReportForm onSuccess={() => setReportOpen(false)} />
+              </DialogContent>
+            </Dialog>
 
+            {/* Language Switcher */}
+            <div className="relative">
               <button
-                className="p-2 rounded-lg transition-colors"
-                style={{ color: "var(--foreground)" }}
-                onClick={toggleTheme}
-                aria-label="Toggle theme"
+                className="p-2 rounded-lg transition-colors flex items-center gap-1"
+                style={{ color: "var(--muted-foreground)" }}
+                onClick={() => setLangOpen(!langOpen)}
+                aria-label="Change language"
               >
-                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                <Languages className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase">{i18n.language}</span>
               </button>
-
-              <SignedIn>
-                <div className="flex items-center justify-center p-1 rounded-full border border-white/10 ml-1">
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        userButtonAvatarBox: "w-7 h-7",
-                      },
-                    }}
-                  />
-                </div>
-              </SignedIn>
-
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ml-1"
-                    style={{
-                      background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
-                      color: "var(--foreground)",
-                    }}
-                  >
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-
-              <button
-                className="lg:hidden p-2 rounded-lg"
-                style={{ color: "var(--gold)" }}
-                onClick={() => setMobileOpen(!mobileOpen)}
-              >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Nav */}
-        {mobileOpen && (
-          <div
-            className="lg:hidden border-t"
-            style={{
-              background: "color-mix(in oklch, var(--space) 95%, transparent)",
-              borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
-            }}
-          >
-            <div className="container py-3 flex flex-col gap-1">
-              {navItems.map(({ href, label, icon: Icon }) => {
-                const active = location === href;
-                return (
-                  <Link key={href} href={href}>
-                    <div
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all"
+              {langOpen && (
+                <div
+                  className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden shadow-xl z-[100]"
+                  style={{
+                    background: "var(--space-mid)",
+                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                    minWidth: "120px",
+                  }}
+                >
+                  {LANG_OPTIONS.map(({ code, label }) => (
+                    <button
+                      key={code}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/5"
                       style={{
-                        color: active ? "var(--gold)" : "var(--muted-foreground)",
-                        background: active
-                          ? "color-mix(in oklch, var(--gold) 8%, transparent)"
-                          : "transparent",
+                        color: i18n.language === code ? "var(--gold)" : "var(--foreground)",
+                        background: i18n.language === code ? "color-mix(in oklch, var(--gold) 10%, transparent)" : "transparent",
                       }}
-                      onClick={() => setMobileOpen(false)}
+                      onClick={() => { i18n.changeLanguage(code); setLangOpen(false); }}
                     >
-                      <Icon className="w-4 h-4" />
-                      {label}
-                    </div>
-                  </Link>
-                );
-              })}
+                      <span className="font-bold">{label}</span>
+                      <span style={{ color: "var(--muted-foreground)" }}>{t(`language.${code}`)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            <button
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: "var(--foreground)" }}
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
+            <SignedIn>
+              <div className="flex items-center justify-center p-1 rounded-full border border-white/10 ml-1">
+                <UserButton
+                  appearance={{
+                    elements: {
+                      userButtonAvatarBox: "w-7 h-7",
+                    },
+                  }}
+                />
+              </div>
+            </SignedIn>
+
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ml-1"
+                  style={{
+                    background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
+                    color: "var(--foreground)",
+                  }}
+                >
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <button
+              className="lg:hidden p-2 rounded-lg"
+              style={{ color: "var(--gold)" }}
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
-        )}
-      </header>
+
+          {/* Mobile Nav */}
+          {mobileOpen && (
+            <div
+              className="lg:hidden border-t"
+              style={{
+                background: "color-mix(in oklch, var(--space) 95%, transparent)",
+                borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
+              }}
+            >
+              <div className="container py-3 flex flex-col gap-1">
+                {navItems.map(({ href, label, icon: Icon }) => {
+                  const active = location === href;
+                  return (
+                    <Link key={href} href={href}>
+                      <div
+                        className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all"
+                        style={{
+                          color: active ? "var(--gold)" : "var(--muted-foreground)",
+                          background: active
+                            ? "color-mix(in oklch, var(--gold) 8%, transparent)"
+                            : "transparent",
+                        }}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </header>
+      </div>
 
       {/* Main content */}
-      <main className="flex-1 pt-14">
+      <main className="flex-1 w-full relative z-10 pt-28">
         {children}
       </main>
 

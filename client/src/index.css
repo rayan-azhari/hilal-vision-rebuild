@@ -35,30 +35,33 @@
 }
 
 :root {
-  /* Classy, Sophisticated Light Scientific Theme */
-  --radius: 0.5rem;
+  /* Classy, Sophisticated Light Scientific Theme ("Clinical Aerospace") */
+  --radius: 1.5rem;
+  /* Base radius increased for modern premium feel */
   --background: oklch(0.99 0.0 0);
   /* Pure White */
-  --foreground: oklch(0.15 0.0 0);
-  /* Pitch Black / Dark Grey */
-  --card: oklch(0.99 0.0 0);
-  --card-foreground: oklch(0.15 0.0 0);
-  --card-surface-alt: oklch(0.96 0.0 0);
+  --foreground: oklch(0.20 0.0 0);
+  /* Very Dark Grey for high contrast */
+  --card: oklch(1 0.0 0);
+  --card-foreground: oklch(0.20 0.0 0);
+  --card-surface-alt: oklch(0.97 0.0 0);
   --popover: oklch(0.99 0.0 0);
-  --popover-foreground: oklch(0.15 0.0 0);
-  --primary: oklch(0.30 0.0 0);
+  --popover-foreground: oklch(0.20 0.0 0);
+  --primary: oklch(0.30 0.01 260);
+  /* Deep space-navy accent */
   --primary-foreground: oklch(0.99 0.0 0);
-  --secondary: oklch(0.95 0.0 0);
-  --secondary-foreground: oklch(0.25 0.0 0);
-  --muted: oklch(0.95 0.0 0);
+  --secondary: oklch(0.96 0.0 0);
+  --secondary-foreground: oklch(0.30 0.0 0);
+  --muted: oklch(0.97 0.0 0);
   --muted-foreground: oklch(0.45 0.0 0);
-  --accent: oklch(0.95 0.0 0);
-  --accent-foreground: oklch(0.20 0.0 0);
+  --accent: oklch(0.96 0.0 0);
+  --accent-foreground: oklch(0.25 0.0 0);
   --destructive: oklch(0.60 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.90 0.0 0);
-  --input: oklch(0.94 0.0 0);
-  --ring: oklch(0.15 0.0 0);
+  /* Signal Red */
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.93 0.0 0);
+  --input: oklch(0.95 0.0 0);
+  --ring: oklch(0.20 0.0 0);
 
   /* Custom palette */
   --gold: oklch(0.20 0.0 0);
@@ -80,26 +83,27 @@
 
 
 .dark {
-  /* Classy, Sophisticated Dark Scientific Theme */
-  --background: oklch(0.13 0.0 0);
+  /* Classy, Sophisticated Dark Scientific Theme ("Deep Space") */
+  --background: oklch(0.12 0.01 260);
+  /* Pitch dark with slight navy/space tint */
   --foreground: oklch(0.95 0.0 0);
-  --card: oklch(0.16 0.0 0);
+  --card: oklch(0.16 0.01 260);
   --card-foreground: oklch(0.95 0.0 0);
-  --card-surface-alt: oklch(0.20 0.0 0);
-  --popover: oklch(0.16 0.0 0);
+  --card-surface-alt: oklch(0.19 0.01 260);
+  --popover: oklch(0.15 0.01 260);
   --popover-foreground: oklch(0.95 0.0 0);
   --primary: oklch(0.90 0.0 0);
-  --primary-foreground: oklch(0.13 0.0 0);
-  --secondary: oklch(0.22 0.0 0);
+  --primary-foreground: oklch(0.12 0.01 260);
+  --secondary: oklch(0.22 0.01 260);
   --secondary-foreground: oklch(0.90 0.0 0);
-  --muted: oklch(0.22 0.0 0);
+  --muted: oklch(0.20 0.01 260);
   --muted-foreground: oklch(0.65 0.0 0);
-  --accent: oklch(0.90 0.0 0);
-  --accent-foreground: oklch(0.13 0.0 0);
+  --accent: oklch(0.20 0.01 260);
+  --accent-foreground: oklch(0.90 0.0 0);
   --destructive: oklch(0.62 0.25 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.28 0.0 0);
-  --input: oklch(0.22 0.0 0);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.25 0.01 260);
+  --input: oklch(0.22 0.01 260);
   --ring: oklch(0.90 0.0 0);
 
   /* Custom palette */
@@ -170,6 +174,24 @@
   [role="button"]:not([aria-disabled="true"]),
   a[href] {
     cursor: pointer;
+  }
+
+  /* Global Noise Overlay Effect */
+  .noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.03;
+    /* Subdued, organic 0.05 max */
+  }
+
+  /* Data Numbers */
+  .data-text {
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -297,29 +319,41 @@
     background: var(--space-mid) !important;
   }
 
+  /* Magnetic interactable objects */
+  .magnetic {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  .magnetic:hover {
+    transform: scale(1.03);
+  }
+
   /* Breezy Style Cards */
   .breezy-card {
     background: var(--card);
-    border-radius: var(--radius-md);
-    padding: 1rem;
+    border-radius: var(--radius-xl);
+    /* Increased to 3rem-ish feel */
+    padding: 1.5rem;
+    /* Increased breathing room */
     border: 1px solid var(--border);
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
     position: relative;
     overflow: hidden;
   }
 
   .breezy-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
   }
 
   .breezy-card-full {
     background: var(--card);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
     border: 1px solid var(--border);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   }
 
   .breezy-chip {
