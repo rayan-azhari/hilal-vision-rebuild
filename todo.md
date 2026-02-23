@@ -109,7 +109,7 @@
 - [x] `useCloudOverlay` hook with bilinear interpolation canvas texture
 - [x] Fixed CSS @import ordering for Vite hot-reload
 
-## Future
+## Feature Backlog
 - [ ] Server-side visibility grid precomputation
 - [ ] Educational "How to Sight the Moon" content
 - [ ] AR Moon Finder (Capacitor camera + WebGL)
@@ -117,3 +117,12 @@
 - [ ] Multi-language UI (Arabic, Urdu, Malay)
 - [ ] Photo upload for sighting reports
 - [ ] VSOP87/ELP2000 high-accuracy planetary theory
+
+## Phase 5: Advanced Astronomy & Telemetry
+- [ ] **Photo Uploads:** Allowing users to attach photos of the crescent to their sighting reports, integrating with cloud storage.
+- [ ] **Planetary Theory Upgrade:** Replacing SunCalc with ultra-high precision VSOP87/ELP2000 algorithms.
+- [ ] **Server-Side Grid Precomputation:** Setup cron job to precompute global grids on the backend.
+
+## Phase 6: Deep Mobile Integration (Capacitor)
+- [ ] **AR Moon Finder:** Use Capacitor camera APIs + device-orientation sensors.
+- [ ] **Malay Language:** Add Malay (ms) to i18n setup.

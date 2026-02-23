@@ -185,6 +185,17 @@
 - [ ] 3D crescent rendering (WebGL earthshine)
 - [ ] Embeddable widget for mosques/websites
 
+### Phase 5 — Advanced Astronomy & Telemetry
+Now that the UI is stunning, we upgrade the underlying data and reporting pipeline.
+- [ ] **Photo Uploads:** Allowing users to attach photos of the crescent to their sighting reports, integrating with cloud storage (e.g., Firebase Storage or an S3 bucket).
+- [ ] **Planetary Theory Upgrade:** Replacing the lightweight SunCalc formulas with ultra-high precision VSOP87/ELP2000 planetary algorithms for observatory-grade accuracy.
+- [ ] **Server-Side Grid Precomputation:** Instead of calculating 3,600+ points on the client's Web Worker, we setup a cron job to precompute identical high-res global grids on the backend to allow instant loading on mobile.
+
+### Phase 6 — Deep Mobile Integration (Capacitor)
+Leveraging the native capabilities of iOS and Android.
+- [ ] **AR Moon Finder:** Using Capacitor camera APIs combined with WebGL/Three.js device-orientation sensors to let users point their phone at the sky and see exactly where the crescent is located relative to their physical horizon.
+- [ ] **Malay Language:** Adding Malay (ms) to complete the primary Islamic geographic language targeting in our i18n setup.
+
 ---
 
 *Audit completed February 22, 2026. Last updated February 23, 2026 (Visual Design Overhaul completed to 1:1 Pixel-Perfect instrument-grade, including Final 1% UI Refinements).*
