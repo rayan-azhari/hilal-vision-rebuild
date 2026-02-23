@@ -275,6 +275,28 @@ export default function MoonPage() {
           </div>
         </BreezyFullCard>
 
+        {/* Times row (Ephemeris) */}
+        <BreezyFullCard
+          title="Ephemeris"
+          icon={<Sun />}
+          className="animate-breezy-enter"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+            {[
+              { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
+              { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
+              { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
+              { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
+            ].map(({ label, value, icon, color }) => (
+              <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
+                <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
+                <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
+                <div className="text-sm font-mono font-semibold data-text" style={{ color: "var(--foreground)" }}>{value}</div>
+              </div>
+            ))}
+          </div>
+        </BreezyFullCard>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Moon illustration */}
@@ -376,27 +398,6 @@ export default function MoonPage() {
               className="animate-breezy-enter"
             />
 
-            {/* Times row */}
-            <BreezyFullCard
-              title="Ephemeris"
-              icon={<Sun />}
-              className="col-span-1 sm:col-span-2 md:col-span-3 animate-breezy-enter"
-            >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                {[
-                  { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
-                  { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
-                  { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
-                  { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
-                ].map(({ label, value, icon, color }) => (
-                  <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
-                    <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
-                    <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
-                    <div className="text-sm font-mono font-semibold data-text" style={{ color: "var(--foreground)" }}>{value}</div>
-                  </div>
-                ))}
-              </div>
-            </BreezyFullCard>
 
           </div>
 
