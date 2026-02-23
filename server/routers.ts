@@ -1,6 +1,7 @@
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { archiveRouter } from "./routers/archive";
+import { weatherRouter } from "./routers/weather";
 import { z } from "zod";
 import { getDb } from "./db";
 import { observationReports } from "../drizzle/schema";
@@ -33,6 +34,7 @@ if (ENV.upstashRedisRestUrl && ENV.upstashRedisRestToken) {
 export const appRouter = router({
   system: systemRouter,
   archive: archiveRouter,
+  weather: weatherRouter,
   telemetry: router({
     submitObservation: publicProcedure
       .input(

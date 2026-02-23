@@ -14,6 +14,8 @@ import { MapPin } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { LocationSearch } from "@/components/LocationSearch";
+import { useCloudOverlay } from "@/hooks/useCloudOverlay";
+import { BestTimeCard } from "@/components/BestTimeCard";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
   A: "#4ade80",
@@ -52,6 +54,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const [selectedPoint, setSelectedPoint] = useState<{ lat: number, lng: number, zone: VisibilityZone } | null>(null);
   const [resolution, setResolution] = useState(4);
   const [showVisibility, setShowVisibility] = useState(true);
+  const [showClouds, setShowClouds] = useState(false);
   const [moonData, setMoonData] = useState(() =>
     computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0])
   );

@@ -29,12 +29,16 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 ### 3D Globe View
 - Interactive Globe.gl sphere with day/night terminator.
 - Smooth Gaussian-blurred visibility zone overlay mapped directly onto the sphere.
+- **Cloud Cover Overlay** — Real-time cloud cover from Open-Meteo rendered as a translucent sphere above the visibility layer. Toggle on/off with the "Clouds" button.
 - Play/Pause auto-rotation and toggle the visibility overlay on/off.
+- **Best Time to Observe** card — Shows the optimal crescent viewing time, observation window, and moon/sun altitudes.
 - Sidebar shows live astronomical data for the selected city: Moon altitude, azimuth, elongation, ARCV, crescent width, Yallop q-value, illumination, sunset, and moonset times.
 
 ### 2D Map View
 - Leaflet map with dark/light CARTO basemaps.
 - Web Mercator–projected visibility heatmap with smooth Gaussian-blurred zone boundaries.
+- **Cloud Cover Overlay** — Open-Meteo cloud data rendered as a semi-transparent layer over the map. Toggle independently from visibility using the "Cloud Cover" switch in Map Controls.
+- **Best Time to Observe** card — Automatically calculates the optimal observation window (sunset → moonset) and displays it in the sidebar.
 - **Click anywhere** on the map to inspect the visibility zone for that exact coordinate.
 - Crowdsourced sighting pins: 🟢 Naked Eye, 🔵 Optical Aid, ⚪ Not Seen.
 - Resolution selector: Fine (2°), Normal (4°), or Fast (6°).

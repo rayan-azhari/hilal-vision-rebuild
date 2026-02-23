@@ -101,13 +101,19 @@
 - [x] Web Worker for visibility texture computation
 - [x] Capacitor.js mobile app wrapping
 
+## Improvements (Round 5 — Phase 2 Features)
+- [x] Open-Meteo cloud cover overlay on Visibility Map & Globe (toggleable)
+- [x] Best-time-to-observe calculator (`computeBestObservationTime()` in astronomy.ts)
+- [x] BestTimeCard sidebar component on both Map and Globe pages
+- [x] New `weather` tRPC router with `getCloudGrid` endpoint (5-min TTL cache)
+- [x] `useCloudOverlay` hook with bilinear interpolation canvas texture
+- [x] Fixed CSS @import ordering for Vite hot-reload
+
 ## Future
 - [ ] Server-side visibility grid precomputation
-- [ ] Weather/cloud cover integration on map
 - [ ] Educational "How to Sight the Moon" content
 - [ ] AR Moon Finder (Capacitor camera + WebGL)
 - [ ] Push notifications for sighting alerts
 - [ ] Multi-language UI (Arabic, Urdu, Malay)
 - [ ] Photo upload for sighting reports
-- [ ] Best-time-to-observe calculator
 - [ ] VSOP87/ELP2000 high-accuracy planetary theory

@@ -300,6 +300,19 @@ The `getMoonPhaseInfo()` function returns a complete moon phase description for 
 
 Phase names are provided in both English and Arabic, covering all 8 standard phases from New Moon (المحاق) through Waxing Crescent (الهلال المتزايد), First Quarter (التربيع الأول), Waxing Gibbous (الأحدب المتزايد), Full Moon (البدر), Waning Gibbous (الأحدب المتناقص), Last Quarter (التربيع الأخير), and Waning Crescent (الهلال المتناقص).
 
+### 5.8 Best-Time-to-Observe Calculator
+
+The `computeBestObservationTime(date, location)` function determines the optimal time for crescent moon observation. It scans from **sunset** to **moonset** (or sunset + 2 hours if moonset is unavailable/before sunset) in **5-minute steps**.
+
+At each step, the function evaluates:
+- **Moon altitude** — must be above the horizon (> 0°)
+- **Sky darkness factor** — sun below -12° = 1.0 (astronomical twilight), below -6° = 0.8 (nautical), below 0° = 0.5 (civil), above horizon = 0.1
+- **Altitude factor** — penalises very low altitudes where atmospheric extinction is high (airmass ∝ 1/sin(alt))
+
+The composite score is: `score = moonAlt × darknessFactor × altFactor`
+
+The function returns the time with the highest score, along with the full observation window (windowStart = sunset, windowEnd = moonset), moon/sun altitudes at the optimal moment, and a `viable` flag indicating whether any valid observation window exists.
+
 ---
 
 ## 6. Pages and Features
@@ -332,11 +345,19 @@ The globe supports: auto-rotation toggle, overlay opacity slider, date selection
 
 The **side panel** shows the full astronomical data readout for the selected location and date: sun altitude/azimuth, moon altitude/azimuth, elongation, ARCV, DAZ, crescent width W, q-value, Odeh criterion, visibility zone, illumination, moon age, and rise/set times. In Pro Mode, the panel expands to show additional physics explanations for each parameter.
 
+The globe also features a **cloud cover overlay** — a second Three.js `SphereGeometry` mesh at `r * 1.004` (slightly above the visibility sphere at `r * 1.002`) displaying real-time cloud cover data from Open-Meteo. This overlay is independently toggleable via a "Clouds" button alongside the existing "Visibility" toggle.
+
+A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window, computed by the `computeBestObservationTime()` function.
+
 ### 6.4 Visibility Map Page (`/map`)
 
 The Map page uses Leaflet with CartoDB dark tiles to render a flat 2D world map. The crescent visibility heatmap is rendered as a canvas overlay using bilinear interpolation between the grid points, producing a smooth gradient rather than the stepped rectangular grid of earlier versions.
 
 The page features a **time slider** with 15-minute granularity covering ±24 hours from the selected date, an **animate button** that plays through the time range automatically, and a **resolution control** (2°/4°/6°) that trades computation time for grid density. Clicking any point on the map shows the visibility data for that location in a popup.
+
+A **cloud cover overlay** fetches real-time data from Open-Meteo's forecast API via a dedicated tRPC endpoint (`weather.getCloudGrid`). The sparse grid (~162 points at 15°×20° resolution) is bilinearly interpolated into a smooth canvas texture and rendered as an independent Leaflet `imageOverlay` at 35% opacity. The overlay can be toggled on/off independently from the visibility layer.
+
+A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window computed by `computeBestObservationTime()`, showing the optimal time, observation window (sunset to moonset), and moon/sun altitudes at the best moment.
 
 The map also supports geolocation auto-detect and shareable URLs. In Pro Mode, a methodology panel explains the Yallop and Odeh criteria in detail, and a contour label overlay shows the q-value contour lines.
 

@@ -646,6 +646,91 @@ export function isDaylight(lat: number, lng: number, date: Date): boolean {
   return sunPos.altitude > 0;
 }
 
+// ─── Best Time to Observe ─────────────────────────────────────────────────────
+
+export interface BestObservationResult {
+  bestTime: Date;
+  score: number;
+  moonAltAtBest: number;
+  sunAltAtBest: number;
+  windowStart: Date;
+  windowEnd: Date;
+  viable: boolean; // true if there's a meaningful observation window
+}
+
+/**
+ * Compute the best time to observe the crescent moon for a given date and location.
+ * Scans from sunset to moonset (or sunset + 2h if no moonset) in 5-minute steps.
+ */
+export function computeBestObservationTime(
+  date: Date,
+  loc: { lat: number; lng: number }
+): BestObservationResult {
+  const times = SunCalc.getTimes(date, loc.lat, loc.lng);
+  const moonTimes = SunCalc.getMoonTimes(date, loc.lat, loc.lng);
+
+  // Window starts at sunset
+  const sunset =
+    times.sunset instanceof Date && !isNaN(times.sunset.getTime())
+      ? times.sunset
+      : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
+
+  // Window ends at moonset, or sunset + 2h if no set time or set is before sunset
+  let windowEnd: Date;
+  if (
+    moonTimes.set instanceof Date &&
+    !isNaN(moonTimes.set.getTime()) &&
+    moonTimes.set.getTime() > sunset.getTime()
+  ) {
+    windowEnd = moonTimes.set;
+  } else {
+    windowEnd = new Date(sunset.getTime() + 2 * 3600 * 1000); // 2h fallback
+  }
+
+  const STEP_MS = 5 * 60 * 1000;
+  let bestTime = sunset;
+  let bestScore = -Infinity;
+  let bestMoonAlt = 0;
+  let bestSunAlt = 0;
+
+  for (let t = sunset.getTime(); t <= windowEnd.getTime(); t += STEP_MS) {
+    const moment = new Date(t);
+    const sunPos = SunCalc.getPosition(moment, loc.lat, loc.lng);
+    const moonPos = SunCalc.getMoonPosition(moment, loc.lat, loc.lng);
+
+    const moonAlt = (moonPos.altitude * 180) / Math.PI;
+    const sunAlt = (sunPos.altitude * 180) / Math.PI;
+
+    if (moonAlt <= 0) continue; // Moon must be above horizon
+
+    // Scoring formula:
+    // Higher score for:
+    // 1. Darker sky (sun further below horizon)
+    // 2. Higher moon altitude
+    const darknessFactor =
+      sunAlt < -12 ? 1.0 : sunAlt < -6 ? 0.8 : sunAlt < 0 ? 0.5 : 0.1;
+    const altFactor = moonAlt > 5 ? Math.min(moonAlt / 20, 1.0) : moonAlt / 10;
+    const score = moonAlt * darknessFactor * altFactor;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTime = moment;
+      bestMoonAlt = moonAlt;
+      bestSunAlt = sunAlt;
+    }
+  }
+
+  return {
+    bestTime,
+    score: Math.max(0, bestScore),
+    moonAltAtBest: bestMoonAlt,
+    sunAltAtBest: bestSunAlt,
+    windowStart: sunset,
+    windowEnd,
+    viable: bestScore > 0,
+  };
+}
+
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
 export function formatDegrees(deg: number): string {

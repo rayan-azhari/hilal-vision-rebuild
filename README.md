@@ -8,6 +8,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *Hour Offset Slider*: Slide ±24 hours to see how visibility evolves over time.
   - *GPS Auto-Detect*: Instantly fly to your current position using the browser Geolocation API.
   - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
+  - *Cloud Cover Overlay*: Real-time cloud cover data from Open-Meteo rendered as a translucent overlay (toggleable independently from visibility zones).
+  - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness.
 - **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
 - **📅 Hijri Calendar (`/calendar`)**: Astronomical conjunction-based calendar accurate to the new moon.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
@@ -33,6 +35,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 5. **Real ICOP Data Extraction**: Features an integrated scraper that autonomously pulled 1,000+ historical crescent sight reports to serve as verifiable proof-of-concept records alongside theoretical algorithms.
 6. **Conjunction-Based Hijri Calendar**: SunCalc-powered astronomical new moon detection replaces the old arithmetic algorithm, precise to the minute of conjunction.
 7. **Production Upstash Protection**: Hardened TRPC mutation endpoints utilizing Upstash Redis sliding window token bucket rate-limiting.
+8. **Open-Meteo Cloud Cover Overlay**: Real-time cloud cover data fetched from Open-Meteo's forecast API for a sparse global grid (~162 points), bilinearly interpolated into a smooth canvas texture, and overlaid on both 2D Map (Leaflet `imageOverlay`) and 3D Globe (Three.js sphere mesh). Independently toggleable from visibility zones.
+9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
 
 ## Getting Started
 

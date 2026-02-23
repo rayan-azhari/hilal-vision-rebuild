@@ -9,8 +9,8 @@
 | Area | Score | Notes |
 |------|:-----:|-------|
 | **Visual Design** | 9/10 | Breezy design is premium. Globe + Map views are impressive. Unified PageHeader component. |
-| **Scientific Accuracy** | 7/10 | Yallop/Odeh criteria solid. Hijri now conjunction-based. SunCalc is good but not VSOP87. |
-| **Data Completeness** | 7/10 | Real ICOP sighting data (1,028+ records, 1440–1446 AH). No cloud cover on map yet. |
+| **Scientific Accuracy** | 8/10 | Yallop/Odeh criteria solid. Hijri now conjunction-based. Best-time-to-observe engine added. SunCalc is good but not VSOP87. |
+| **Data Completeness** | 8/10 | Real ICOP sighting data (1,028+ records, 1440–1446 AH). Cloud cover overlay integrated via Open-Meteo. |
 | **Mobile Experience** | 5/10 | Responsive layout works. Capacitor.js configured for Android/iOS builds. No offline or push. |
 | **Performance** | 8/10 | Visibility grid offloaded to Web Worker. Smooth 60FPS UI. No SSR. |
 | **SEO & Reach** | 5/10 | Dynamic titles added. No structured data, no sitemap, no social cards. |
@@ -36,7 +36,7 @@
 | # | Issue | Impact |
 |---|-------|--------|
 | 6 | **SunCalc accuracy** — Uses simplified algorithms (~0.3° error). Professional tools use VSOP87/ELP2000 | Borderline cases may classify wrong zone |
-| 7 | **No weather/cloud overlay** — Users can't tell if skies are clear for sighting tonight | Missing critical real-world factor |
+| 7 | ~~**No weather/cloud overlay**~~ | ✅ Resolved — Open-Meteo cloud cover overlay on both Map and Globe views |
 | 8 | **No push notifications** — Users can't get "Tonight's crescent may be visible!" alerts | Major engagement gap |
 | 9 | **No offline support** — PWA manifest exists but no service worker | App is useless without internet |
 | 10 | **No photo upload for sightings** — Competitors (LuneSighting) allow photo evidence | Missing community trust feature |
@@ -97,7 +97,7 @@
 | **Upgrade to VSOP87/ELP2000** — Higher-accuracy planetary theory (replace SunCalc for critical calculations) | 🟡 Med | High |
 | **Add South African Astronomical Observatory (SAAO) criteria** — Used by many African countries | 🟡 Med | Low |
 | **Topocentric correction** — Account for observer's elevation and atmospheric refraction more precisely | 🟡 Med | Medium |
-| **Best-time-to-observe calculator** — Given location, compute the exact minute window when crescent is most likely visible | 🔴 High | Medium |
+| ~~**Best-time-to-observe calculator**~~ | ✅ Done | ✅ `computeBestObservationTime()` scans sunset→moonset in 5-min steps |
 | **Conjunction times** — Show exact new moon (conjunction) time to the second, not just the day | 🔴 High | Low |
 
 ### Visual Excellence
@@ -106,7 +106,7 @@
 |--------|:--------:|:------:|
 | **AR Moon Finder** — Camera-based augmented reality showing where the crescent is in the sky (Capacitor camera) | 🔴 High | High |
 | **Animated visibility timeline** — Smooth animation showing how crescent visibility evolves minute-by-minute after sunset | 🔴 High | Medium |
-| **Weather overlay on map** — Cloud cover layer from Open-Meteo showing where skies are clear tonight | 🔴 High | Medium |
+| ~~**Weather overlay on map**~~ | ✅ Done | ✅ Open-Meteo cloud cover on both Map and Globe, independently toggleable |
 | **3D crescent rendering** — Replace SVG with WebGL crescent that shows actual earthshine and crater detail | 🟡 Med | High |
 | **Comparison mode** — Side-by-side: "What Mecca sees vs what London sees at sunset tonight" | 🟡 Med | Medium |
 | **Dark Sky Quality overlay** — Light pollution map for optimal sighting locations | 🟢 Low | Medium |
@@ -145,13 +145,13 @@
 | AR Moon Finder | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Photo Sightings | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Real Sighting Data | ✅ | ✅ | ❌ | ✅ | ❌ |
-| Weather Overlay | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Weather Overlay | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Multi-Language | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Scientific Detail | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Animated Timeline | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Best-Time Calculator | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Best-Time Calculator | ✅ | ❌ | ❌ | ❌ | ❌ |
 
-> **Key insight:** No competitor has ALL of: 3D globe, AR, weather overlay, photo sightings, and real ICOP data. That's the gap Hilal Vision should own.
+> **Key insight:** No competitor has ALL of: 3D globe, AR, weather overlay, photo sightings, and real ICOP data. Hilal Vision now uniquely owns the weather overlay + best-time calculator combination.
 
 ---
 
@@ -166,8 +166,8 @@
 
 ### Phase 2 — Data & Credibility (2-3 weeks)
 - [x] ICOP historical sighting database integration
-- [ ] Weather/cloud overlay on visibility map (Open-Meteo cloud cover)
-- [ ] Best-time-to-observe calculator
+- [x] Weather/cloud overlay on visibility map (Open-Meteo cloud cover)
+- [x] Best-time-to-observe calculator
 - [ ] Exact conjunction times (to the second)
 - [ ] Photo upload for sighting reports
 
@@ -187,4 +187,4 @@
 
 ---
 
-*Audit completed February 22, 2026. Last updated February 23, 2026.*
+*Audit completed February 22, 2026. Last updated February 23, 2026 (Phase 2 features: cloud overlay + best-time calculator implemented).*

@@ -14,6 +14,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { LocationSearch } from "@/components/LocationSearch";
+import { useCloudOverlay } from "@/hooks/useCloudOverlay";
+import { BestTimeCard } from "@/components/BestTimeCard";
 
 export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
   const { date, setDate, hourOffset, setHourOffset, selectedCity, setSelectedCity } = shared;
@@ -25,6 +27,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   const [isAutoRotate, setIsAutoRotate] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showVisibility, setShowVisibility] = useState(true);
+  const [showClouds, setShowClouds] = useState(false);
 
   const effectiveDate = useMemo(
     () => new Date(date.getTime() + hourOffset * 3600 * 1000),
@@ -69,14 +72,15 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     };
   }, []);
 
-  // Recompute texture when date changes (via Web Worker)
+  // Recompute textures when date/visibility/clouds change
   const effectiveDateTs = effectiveDate.getTime();
   const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility);
+  const { textureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Sync loading state
   useEffect(() => {
-    setIsLoading(isComputing);
-  }, [isComputing]);
+    setIsLoading(isComputing || (showClouds && isCloudsLoading));
+  }, [isComputing, isCloudsLoading, showClouds]);
 
   // Compute local moon data and labels
   useEffect(() => {

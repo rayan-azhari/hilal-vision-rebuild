@@ -42,9 +42,9 @@ function jdToHijri(jd: number): { year: number; month: number; day: number } {
   const n = Math.floor((a - 1) / 10631);
   const aa = a - 10631 * n + 354;
   const j = Math.floor((10985 - aa) / 5316) * Math.floor(50 * aa / 17719) +
-            Math.floor(aa / 5670) * Math.floor(43 * aa / 15238);
+    Math.floor(aa / 5670) * Math.floor(43 * aa / 15238);
   const aa2 = aa - Math.floor((30 - j) / 15) * Math.floor(17719 * j / 50) -
-              Math.floor(j / 16) * Math.floor(15238 * j / 43) + 29;
+    Math.floor(j / 16) * Math.floor(15238 * j / 43) + 29;
   const month = Math.floor(24 * aa2 / 709);
   const day = aa2 - Math.floor(709 * month / 24);
   const year = 30 * n + j - 30;
@@ -154,5 +154,103 @@ describe("Degree/radian conversions", () => {
   it("round-trip conversion is identity", () => {
     const deg = 45.678;
     expect(toDeg(toRad(deg))).toBeCloseTo(deg, 10);
+  });
+});
+
+// ─── Best Time to Observe ─────────────────────────────────────────────────────
+import SunCalc from "suncalc";
+
+function computeBestObservationTime(date: Date, loc: { lat: number; lng: number }) {
+  const times = SunCalc.getTimes(date, loc.lat, loc.lng);
+  const moonTimes = SunCalc.getMoonTimes(date, loc.lat, loc.lng);
+
+  const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
+    ? times.sunset
+    : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
+
+  let windowEnd: Date;
+  if (
+    moonTimes.set instanceof Date &&
+    !isNaN(moonTimes.set.getTime()) &&
+    moonTimes.set.getTime() > sunset.getTime()
+  ) {
+    windowEnd = moonTimes.set;
+  } else {
+    windowEnd = new Date(sunset.getTime() + 2 * 3600 * 1000);
+  }
+
+  const STEP_MS = 5 * 60 * 1000;
+  let bestTime = sunset;
+  let bestScore = -Infinity;
+  let bestMoonAlt = 0;
+  let bestSunAlt = 0;
+
+  for (let t = sunset.getTime(); t <= windowEnd.getTime(); t += STEP_MS) {
+    const moment = new Date(t);
+    const sunPos = SunCalc.getPosition(moment, loc.lat, loc.lng);
+    const moonPos = SunCalc.getMoonPosition(moment, loc.lat, loc.lng);
+
+    const moonAlt = toDeg(moonPos.altitude);
+    const sunAlt = toDeg(sunPos.altitude);
+
+    if (moonAlt <= 0) continue;
+
+    const darknessFactor = sunAlt < -12 ? 1.0 : sunAlt < -6 ? 0.8 : sunAlt < 0 ? 0.5 : 0.1;
+    const altFactor = moonAlt > 5 ? Math.min(moonAlt / 20, 1.0) : moonAlt / 10;
+    const score = moonAlt * darknessFactor * altFactor;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTime = moment;
+      bestMoonAlt = moonAlt;
+      bestSunAlt = sunAlt;
+    }
+  }
+
+  return {
+    bestTime,
+    score: Math.max(0, bestScore),
+    moonAltAtBest: bestMoonAlt,
+    sunAltAtBest: bestSunAlt,
+    windowStart: sunset,
+    windowEnd,
+    viable: bestScore > 0,
+  };
+}
+
+describe("Best time to observe calculator", () => {
+  it("returns a best time between sunset and moonset", () => {
+    const date = new Date(2026, 1, 23);
+    const loc = { lat: 21.3891, lng: 39.8579 };
+    const result = computeBestObservationTime(date, loc);
+
+    expect(result.bestTime.getTime()).toBeGreaterThanOrEqual(result.windowStart.getTime());
+    expect(result.bestTime.getTime()).toBeLessThanOrEqual(result.windowEnd.getTime());
+  });
+
+  it("windowEnd is after windowStart", () => {
+    const date = new Date(2026, 1, 23);
+    const loc = { lat: 21.3891, lng: 39.8579 };
+    const result = computeBestObservationTime(date, loc);
+
+    expect(result.windowEnd.getTime()).toBeGreaterThan(result.windowStart.getTime());
+  });
+
+  it("score is non-negative", () => {
+    const date = new Date(2026, 1, 23);
+    const loc = { lat: 21.3891, lng: 39.8579 };
+    const result = computeBestObservationTime(date, loc);
+
+    expect(result.score).toBeGreaterThanOrEqual(0);
+  });
+
+  it("sun altitude at best time is below or near horizon", () => {
+    const date = new Date(2026, 1, 23);
+    const loc = { lat: 21.3891, lng: 39.8579 };
+    const result = computeBestObservationTime(date, loc);
+
+    if (result.viable) {
+      expect(result.sunAltAtBest).toBeLessThanOrEqual(0);
+    }
   });
 });

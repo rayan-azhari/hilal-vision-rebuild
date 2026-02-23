@@ -1,0 +1,116 @@
+/**
+ * Weather Router — Cloud Cover Grid
+ *
+ * Fetches cloud cover data from Open-Meteo for a sparse global grid
+ * and returns it for client-side interpolation into a cloud overlay texture.
+ */
+import { publicProcedure, router } from "../_core/trpc";
+import { z } from "zod";
+
+// ─── In-Memory Cache ──────────────────────────────────────────────────────────
+
+interface CacheEntry {
+  data: Array<{ lat: number; lng: number; cloud_cover: number }>;
+  timestamp: number;
+}
+
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const cache = new Map<string, CacheEntry>();
+
+function getCached(key: string): CacheEntry["data"] | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+// ─── Grid Generation ──────────────────────────────────────────────────────────
+
+/**
+ * Generate a sparse grid of lat/lng points for cloud cover sampling.
+ * 15° latitude steps × 20° longitude steps over ±60° lat = ~162 points.
+ */
+function generateGridPoints(): Array<{ lat: number; lng: number }> {
+  const points: Array<{ lat: number; lng: number }> = [];
+  for (let lat = -60; lat <= 60; lat += 15) {
+    for (let lng = -180; lng < 180; lng += 20) {
+      points.push({ lat, lng });
+    }
+  }
+  return points;
+}
+
+// ─── Router ───────────────────────────────────────────────────────────────────
+
+export const weatherRouter = router({
+  getCloudGrid: publicProcedure
+    .input(
+      z.object({
+        date: z.string().max(32),
+      })
+    )
+    .query(async ({ input }) => {
+      const dateKey = input.date.slice(0, 10); // YYYY-MM-DD
+      const cached = getCached(dateKey);
+      if (cached) return { data: cached };
+
+      const gridPoints = generateGridPoints();
+
+      // Open-Meteo supports comma-separated lat/lng for multi-location queries
+      // But there's a practical limit, so we batch in chunks of ~50
+      const BATCH_SIZE = 50;
+      const allResults: Array<{ lat: number; lng: number; cloud_cover: number }> = [];
+
+      for (let i = 0; i < gridPoints.length; i += BATCH_SIZE) {
+        const batch = gridPoints.slice(i, i + BATCH_SIZE);
+        const lats = batch.map((p) => p.lat).join(",");
+        const lngs = batch.map((p) => p.lng).join(",");
+
+        try {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&hourly=cloud_cover&forecast_days=1&timezone=auto`;
+          const res = await fetch(url);
+
+          if (!res.ok) {
+            console.error(`Open-Meteo cloud fetch failed: ${res.status}`);
+            // Fill with 0 (clear) as fallback
+            batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
+            continue;
+          }
+
+          const json = (await res.json()) as any;
+
+          // Open-Meteo returns an array when multiple coordinates are provided
+          const locations = Array.isArray(json) ? json : [json];
+
+          for (let j = 0; j < batch.length; j++) {
+            const locData = locations[j];
+            if (!locData?.hourly?.cloud_cover) {
+              allResults.push({ ...batch[j], cloud_cover: 0 });
+              continue;
+            }
+
+            // Find the cloud cover value nearest to sunset time (~18:00 local)
+            // The hourly array has 24 entries (0-23h), we use index 18
+            const hourlyCloud = locData.hourly.cloud_cover as number[];
+            const sunsetHourIdx = Math.min(18, hourlyCloud.length - 1);
+            allResults.push({
+              lat: batch[j].lat,
+              lng: batch[j].lng,
+              cloud_cover: hourlyCloud[sunsetHourIdx] ?? 0,
+            });
+          }
+        } catch (err) {
+          console.error("Open-Meteo cloud grid fetch error:", err);
+          batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
+        }
+      }
+
+      // Cache
+      cache.set(dateKey, { data: allResults, timestamp: Date.now() });
+
+      return { data: allResults };
+    }),
+});
