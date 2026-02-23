@@ -44,8 +44,9 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number): { zone:
 
     const crescent = crescentWidth(elongation, moonPos.distance);
     const q = yallopQ(arcv, crescent.w);
-    const zone = classifyYallop(q, moonAlt);
-    return { zone, q: moonAlt <= 0 ? -1.0 : q };
+    const safeQ = isNaN(q) ? -1.0 : q;
+    const zone = classifyYallop(safeQ, moonAlt);
+    return { zone, q: moonAlt <= 0 ? -1.0 : safeQ };
 }
 
 function isDaylight(lat: number, lng: number, date: Date): boolean {

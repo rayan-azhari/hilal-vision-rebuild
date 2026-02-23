@@ -155,12 +155,4 @@
 - [x] Fix cloud cover overlay not visible on 3D Globe (Fixed Vercel 500 long-URL error)
 - [x] Add Cloud Cover and Visibility toggles to 2D Map (`MapPage.tsx`)
 - [x] Unify overlay toggles on Globe + Map into the Map Controls sidebar
-
-## Improvements (Round 7 — PWA, Monitoring & UX)
-- [x] Hand-written Service Worker (`sw.js`) with CacheFirst / NetworkFirst / StaleWhileRevalidate strategies
-- [x] PWA manifest + generated icons (192px, 512px, maskable)
-- [x] Sentry error monitoring (`@sentry/react`) with ErrorBoundary + API error capture
-- [x] Unified geolocation: all pages auto-detect GPS on mount via `useGeolocation(true)`
-- [x] Created shared `AutoDetectButton` component (inline + button variants)
-- [x] Removed ~120 lines of duplicated inline geolocation code across 5 files
-- [x] Submit Sighting button made red for visibility, Sign In button sizing fixed
+- [x] Replace stepped visibility grid on 2D map with smooth mathematical SVG contour curves (`d3-contour`)

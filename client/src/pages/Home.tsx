@@ -165,32 +165,28 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link href="/globe">
-                <div
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105"
-                  style={{
-                    background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
-                    color: "var(--space)",
-                    boxShadow: "0 0 24px oklch(0.78 0.15 75 / 0.4)",
-                  }}
-                >
-                  <Globe className="w-4 h-4" />
-                  Explore Globe
-                  <ArrowRight className="w-4 h-4" />
-                </div>
+              <Link href="/globe"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105"
+                style={{
+                  background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
+                  color: "var(--space)",
+                  boxShadow: "0 0 24px oklch(0.78 0.15 75 / 0.4)",
+                }}
+              >
+                <Globe className="w-4 h-4" />
+                Explore Globe
+                <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/map">
-                <div
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105"
-                  style={{
-                    background: "color-mix(in oklch, var(--space-light) 80%, transparent)",
-                    color: "var(--foreground)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                  }}
-                >
-                  <Map className="w-4 h-4" />
-                  Visibility Map
-                </div>
+              <Link href="/map"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105"
+                style={{
+                  background: "color-mix(in oklch, var(--space-light) 80%, transparent)",
+                  color: "var(--foreground)",
+                  border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                }}
+              >
+                <Map className="w-4 h-4" />
+                Visibility Map
               </Link>
             </div>
           </div>

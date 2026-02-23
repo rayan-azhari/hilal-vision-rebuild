@@ -61,7 +61,11 @@ A dedicated dashboard for the lunar cycle.
 ## 4. Hijri Calendar (`/calendar`)
 
 - View the current Gregorian month mapped against Hijri dates.
-- The Hijri dates are computed using an **astronomical conjunction-based algorithm** powered by SunCalc, which finds the actual new moon for each month boundary. This is accurate to ±1 day of the official Umm al-Qura calendar used in Saudi Arabia.
+- **Triple-Engine Calendar**: Choose between three distinct calculation algorithms:
+  - **Astronomical (SunCalc)**: Conjunction-based algorithm finding the actual physical new moon.
+  - **Umm al-Qura**: The official civic Saudi Arabian calendar powered by KACST tables.
+  - **Tabular (Kuwaiti)**: The standard arithmetic approximation.
+- **Compare to Heavens**: A visual overlay highlighting instances where civic calendar systems diverge from true astronomical reality.
 - Highlights significant upcoming events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid).
 - Each day shows a small moon phase icon.
 
@@ -105,3 +109,41 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
 - **Input Bounds** — All fields are validated with strict Zod schemas (coordinate bounds, temperature ranges, etc.).
 - **Meteorological Enrichment** — The backend automatically contacts **Open-Meteo** APIs to fetch live Cloud Cover, Surface Pressure, and Aerosol Optical Depth at your exact coordinates, storing this data alongside your report.
 - **Paginated Retrieval** — Observation queries support limit/offset pagination (default 50 results).
+
+---
+
+## 7. About (`/about`)
+
+Hilal Vision's mission and background page.
+
+- **Mission statement** — Why this platform exists and who it is for.
+- **Platform tools** — Clickable overview of all six tools (Globe, Map, Moon, Calendar, Horizon, Archive).
+- **How We Compare** — Feature comparison table against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap, showing Hilal Vision's unique combination of 3D globe, weather overlay, ICOP data, and Best-Time calculator.
+- **Technology** — Brief overview of the tech stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, etc.).
+- **Data Sources & Attributions** — Linked credits for Yallop 1997, Odeh 2004, ICOP, SunCalc, Umm al-Qura tables, and Open-Meteo.
+- **Open Source / MIT License** — GitHub link and license information.
+
+## 8. Methodology (`/methodology`)
+
+A full technical reference for scientists, Islamic calendar scholars, and astronomers.
+
+- **Table of Contents sidebar** (desktop) — Anchored navigation to all sections.
+- **The Crescent Visibility Problem** — Why bi-parametric criteria are necessary; limits of age/lag-time models.
+- **Yallop (1997) Criterion** — Complete q-value formula, crescent width derivation (SD, elongation), and zone classification table (A–F).
+- **Odeh (2004) Criterion** — V-value formula and four-zone classification table.
+- **Triple-Engine Hijri Calendar** — Astronomical (SunCalc conjunction search), Umm al-Qura (KACST tables), and Tabular (Kuwaiti Julian Date) engines explained.
+- **Best-Time-to-Observe Calculator** — 5-minute scanning algorithm, darkness/altitude scoring formula.
+- **World Visibility Grid** — Resolution levels (8°/4°/2°), Web Worker offloading, texture caching.
+- **ICOP Archive** — How 1,000+ records were sourced and how theory and observation are compared.
+- **Crowdsourced Telemetry & Validation** — Zone F rejection, Upstash rate limiting, Open-Meteo enrichment.
+- **Atmospheric Refraction** — Saemundsson formula with temperature and pressure correction.
+- **References** — Yallop 1997, Odeh 2004, Meeus, SunCalc, ICOP, Umm al-Qura.
+
+## 9. Privacy Policy (`/privacy`)
+
+Covers what data Hilal Vision collects (GPS, Clerk account, sighting reports, Sentry error logs), third-party sub-processors (Clerk, Upstash, Sentry, Open-Meteo, Vercel), cookie usage, data retention periods, and your GDPR/UK DPA/CCPA rights (access, correction, deletion, export).
+
+## 10. Terms of Service (`/terms`)
+
+Covers acceptable use of the platform (no false sighting reports, no DDoS), user-generated content policy, accuracy disclaimer (predictions ≠ religious rulings), MIT License notice, limitation of liability, and governing law.
+

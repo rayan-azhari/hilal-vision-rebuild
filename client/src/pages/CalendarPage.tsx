@@ -73,7 +73,6 @@ export default function CalendarPage() {
   const today = useMemo(() => new Date(new Date().setHours(12, 0, 0, 0)), []);
 
   const [calendarSystem, setCalendarSystem] = useState<CalendarSystem>("astronomical");
-  const [showOverlay, setShowOverlay] = useState(false);
 
   const [viewYear, setViewYear] = useState(() => gregorianToHijri(today).year);
   const [viewMonth, setViewMonth] = useState(() => gregorianToHijri(today).month);
@@ -116,22 +115,10 @@ export default function CalendarPage() {
       const greg = new Date(monthStart.getFullYear(), monthStart.getMonth(), monthStart.getDate() + d - 1, 12, 0, 0);
       const illum = getMoonPhaseInfo(greg);
 
-      let differs = false;
-      let otherDay: number | undefined = undefined;
-
-      if (showOverlay) {
-        // Overlay ALWAYS compares the current system to the Astronomical (SunCalc) reference
-        const astro = gregorianToHijri(greg);
-        if (calendarSystem !== "astronomical" && (astro.day !== d || astro.month !== viewMonth)) {
-          differs = true;
-          otherDay = astro.day;
-        }
-      }
-
-      cells.push({ day: d, greg, phase: illum.phase, differs, otherDay });
+      cells.push({ day: d, greg, phase: illum.phase });
     }
     return cells;
-  }, [viewMonth, daysInMonth, startDow, calendarSystem, showOverlay, monthStart]);
+  }, [viewMonth, daysInMonth, startDow, monthStart]);
 
   const prevMonth = () => {
     if (viewMonth === 1) { setViewMonth(12); setViewYear(y => y - 1); }
@@ -203,8 +190,8 @@ export default function CalendarPage() {
             <button
               onClick={() => setCalendarSystem("astronomical")}
               className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "astronomical"
-                  ? "bg-[var(--gold)]/20 text-[var(--gold)]"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "bg-[var(--gold)]/20 text-[var(--gold)]"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Astronomical
@@ -212,8 +199,8 @@ export default function CalendarPage() {
             <button
               onClick={() => setCalendarSystem("ummalqura")}
               className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "ummalqura"
-                  ? "bg-[var(--gold)]/20 text-[var(--gold)]"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "bg-[var(--gold)]/20 text-[var(--gold)]"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Umm al-Qura
@@ -221,8 +208,8 @@ export default function CalendarPage() {
             <button
               onClick={() => setCalendarSystem("tabular")}
               className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "tabular"
-                  ? "bg-[var(--gold)]/20 text-[var(--gold)]"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "bg-[var(--gold)]/20 text-[var(--gold)]"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Tabular (Kuwaiti)
@@ -305,19 +292,6 @@ export default function CalendarPage() {
                     >
                       {cell.day}
                     </span>
-                    {cell.differs && (
-                      <span
-                        className="absolute top-1 right-1 lg:right-2 text-[0.5rem] font-bold rounded px-1"
-                        style={{
-                          background: "color-mix(in oklch, var(--destruct) 15%, transparent)",
-                          color: "var(--destruct-foreground)",
-                          border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)"
-                        }}
-                        title="Astronomical Date"
-                      >
-                        {cell.otherDay}
-                      </span>
-                    )}
                     <span className="text-xs" style={{ color: "var(--muted-foreground)", fontSize: "0.6rem" }}>
                       {cell.greg?.getDate()}
                     </span>
@@ -334,17 +308,6 @@ export default function CalendarPage() {
                 );
               })}
             </div>
-            {showOverlay && calendarSystem !== "astronomical" && (
-              <div className="px-6 pb-4 pt-1 flex items-center justify-center lg:justify-start text-xs text-muted-foreground gap-2">
-                <div className="w-2 h-2 flex-shrink-0 rounded-sm" style={{ background: "color-mix(in oklch, var(--destruct) 15%, transparent)", border: "1px solid color-mix(in oklch, var(--destruct) 30%, transparent)" }} />
-                <span>Comparing to <span className="text-foreground">Astronomical (SunCalc)</span> data</span>
-              </div>
-            )}
-            {showOverlay && calendarSystem === "astronomical" && (
-              <div className="px-6 pb-4 pt-1 flex items-center justify-center lg:justify-start text-xs text-muted-foreground gap-2">
-                <span>You are already viewing the Astronomical reference calendar. Select a differing calendar to overlay comparison markers.</span>
-              </div>
-            )}
           </div>
 
           <div className="space-y-4">
@@ -402,37 +365,6 @@ export default function CalendarPage() {
             <div
               className="breezy-card p-5 animate-breezy-enter"
               style={{ animationDelay: "150ms" }}
-            >
-              <div className="text-xs font-medium mb-4" style={{ color: "var(--muted-foreground)" }}>Astronomy Engine</div>
-              <label className="flex items-center justify-between cursor-pointer group">
-                <div>
-                  <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>Compare to Heavens</div>
-                  <div className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Overlay astronomical deviances</div>
-                </div>
-                <div
-                  className="w-10 h-5 rounded-full transition-colors relative"
-                  style={{ background: showOverlay ? "var(--gold)" : "var(--space-light)", border: "1px solid var(--border)" }}
-                >
-                  <div
-                    className="w-4 h-4 rounded-full bg-white absolute top-[1px] transition-transform"
-                    style={{
-                      transform: showOverlay ? "translateX(21px)" : "translateX(2px)",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.3)"
-                    }}
-                  />
-                </div>
-                <input
-                  type="checkbox"
-                  className="sr-only"
-                  checked={showOverlay}
-                  onChange={(e) => setShowOverlay(e.target.checked)}
-                />
-              </label>
-            </div>
-
-            <div
-              className="breezy-card p-5 animate-breezy-enter"
-              style={{ animationDelay: "200ms" }}
             >
               <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>Jump to Year</div>
               <div className="flex items-center gap-2">

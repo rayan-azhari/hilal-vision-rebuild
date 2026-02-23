@@ -312,8 +312,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 — Islamic Crescent Moon Visibility
               </span>
             </div>
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              {[
+                { href: "/about", label: "About" },
+                { href: "/methodology", label: "Methodology" },
+                { href: "/privacy", label: "Privacy" },
+                { href: "/terms", label: "Terms" },
+              ].map(({ href, label }) => (
+                <Link key={href} href={href}>
+                  <span
+                    className="text-xs transition-colors cursor-pointer hover:text-amber-300"
+                    style={{ color: "var(--muted-foreground)" }}
+                  >
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
             <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Calculations based on Yallop & Odeh criteria · Astronomical data via SunCalc
+              Yallop & Odeh criteria · MIT License
             </div>
           </div>
         </div>

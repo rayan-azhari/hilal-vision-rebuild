@@ -225,12 +225,6 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     const { qValues, width, height } = qData;
 
     // Thresholds matching Yallop definitions
-    // -2.0: everything >= -2.0 (Since min is -1.0) -> Zone F
-    // -0.999: everything > -1.0 (Moon above horizon) -> Zone E
-    // -0.232: Zone D
-    // -0.160: Zone C
-    // -0.014: Zone B
-    // 0.216: Zone A
     const thresholds = [-2.0, -0.999, -0.232, -0.160, -0.014, 0.216];
 
     const thresholdsToZone = (value: number): VisibilityZone => {
@@ -252,56 +246,32 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       geoJsonLayerRef.current.remove();
     }
 
-    const maxLat = 85.051129;
+    const pathGen = d3.geoPath();
 
-    const geoJsonData = {
-      type: "FeatureCollection",
-      features: contours.map((contour: any) => {
-        const mappedCoordinates = contour.coordinates.map((polygon: any) =>
-          polygon.map((ring: any) =>
-            ring.map(([px, py]: [number, number]) => {
-              // Interpolate pixels to longitude
-              const lng = -180 + (px / width) * 360;
-              // Interpolate pixels to Mercator latitude
-              const mercY = Math.PI - (py / height) * 2 * Math.PI;
-              let lat = (2 * Math.atan(Math.exp(mercY)) - Math.PI / 2) * (180 / Math.PI);
+    let svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" style="width:100%; height:100%;">`;
+    contours.forEach(contour => {
+      const zone = thresholdsToZone(contour.value);
+      const color = ZONE_COLORS[zone] || "#000";
+      // Ensure lower zones have lower opacity so the stack looks correct
+      const opacity = zone === "F" ? 0.35 : 0.6;
 
-              // Clamp latitudes to Leaflet bounds
-              if (lat > maxLat) lat = maxLat;
-              if (lat < -maxLat) lat = -maxLat;
-
-              return [lng, lat];
-            })
-          )
-        );
-
-        return {
-          type: "Feature",
-          geometry: {
-            type: contour.type,
-            coordinates: mappedCoordinates
-          },
-          properties: {
-            value: contour.value,
-            zone: thresholdsToZone(contour.value)
-          }
-        };
-      })
-    };
-
-    geoJsonLayerRef.current = L.geoJSON(geoJsonData, {
-      style: (feature: any) => {
-        const zone = feature.properties.zone as VisibilityZone;
-        return {
-          fillColor: ZONE_COLORS[zone] || "#000",
-          fillOpacity: zone === "F" ? 0.35 : 0.6,
-          stroke: true,
-          color: "var(--background)",
-          weight: 0.5,
-          opacity: 0.5,
-          interactive: false
-        }
+      // Draw the contour using perfectly scalable SVG path
+      const d = pathGen(contour);
+      if (d) {
+        svgString += `<path d="${d}" fill="${color}" fill-opacity="${opacity}" fill-rule="evenodd" stroke="none" />`;
       }
+    });
+    svgString += `</svg>`;
+
+    // Encode string to valid data URL
+    const svgUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
+
+    const bounds: [[number, number], [number, number]] = [[-85.051128, -180], [85.051128, 180]];
+
+    geoJsonLayerRef.current = L.imageOverlay(svgUrl, bounds, {
+      opacity: 0.8,
+      interactive: false,
+      zIndex: 10
     }).addTo(layerGroupRef.current!);
 
     return () => { mounted = false; };

@@ -1,6 +1,6 @@
 # Hilal Vision — Full Application Documentation
 
-**Version:** Round 20 (current)
+**Version:** Round 21 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -15,6 +15,15 @@
 4. [Global State Management](#4-global-state-management)
 5. [Astronomy Engine](#5-astronomy-engine)
 6. [Pages and Features](#6-pages-and-features)
+   - 6.1 Home / Dashboard (`/`)
+   - 6.2 Visibility — 3D Globe & 2D Map (`/visibility`, `/globe`, `/map`)
+   - 6.3 Moon Phase (`/moon`)
+   - 6.4 Hijri Calendar (`/calendar`)
+   - 6.5–6.9 Horizon, Archive, Ramadan, Sighting Feed
+   - 6.10 About (`/about`)
+   - 6.11 Methodology (`/methodology`)
+   - 6.12 Privacy Policy (`/privacy`)
+   - 6.13 Terms of Service (`/terms`)
 7. [Performance Architecture](#7-performance-architecture)
 8. [Database and Backend](#8-database-and-backend)
 9. [Testing](#9-testing)
@@ -274,18 +283,15 @@ The Odeh criterion is displayed in Pro Mode as an alternative classification, al
 
 ### 5.4 Hijri Calendar Conversion
 
-The application uses an **astronomical conjunction-based algorithm** for Gregorian-to-Hijri conversion. Instead of the older Kuwaiti arithmetic approximation, the converter uses SunCalc's `getMoonIllumination()` to find the actual new moon (conjunction) for each month boundary.
+The application features a **triple-engine Hijri calendar system**, supporting three distinct methodologies for converting Gregorian dates to Hijri dates:
 
-**Algorithm:**
-1. A known epoch is established: **1 Muharram 1446 AH ≈ July 7, 2024** (conjunction date).
-2. `findNewMoonNear()` searches for the phase minimum in two passes: a coarse 6-hour sweep (±15 days) followed by a fine 30-minute sweep (±6 hours).
-3. New moon dates are cached in a `Map<number, Date>` keyed by month offset from the epoch, so each new moon is computed only once.
-4. `gregorianToHijri()` estimates the month offset from the epoch, then checks adjacent months to find the one containing the target date.
-5. The day within the month is simply `floor(days since month start) + 1`.
+1. **Astronomical (SunCalc):** The default engine uses an astronomical conjunction-based algorithm. `findNewMoonNear()` uses SunCalc's `getMoonIllumination()` to search for the physical phase minimum in two passes (6-hour coarse sweep, 30-minute fine sweep). Dates are cached relative to an epoch (1 Muharram 1446 AH ≈ July 7, 2024). This provides the true physical commencement of the lunar cycle.
 
-The conversion is accurate to ±1 day of the official **Umm al-Qura** calendar used in Saudi Arabia. The 1-day variance is inherent to the difference between astronomical conjunction and the actual crescent sighting that determines the official calendar.
+2. **Umm al-Qura:** The official civic calendar of Saudi Arabia, powered by the pre-computed KACST tables via the `@umalqura/core` package. This acts as the standard for civic/administrative date conversions. A set of wrapper functions (`getUmmAlQuraHijri`, `getUmmAlQuraDaysInMonth`, `getUmmAlQuraMonthStart`) within `shared/astronomy.ts` normalises the package's output to match the application's `HijriDate` interface.
 
-The Kuwaiti arithmetic algorithm is retained as an internal fallback for dates far from the epoch.
+3. **Tabular (Kuwaiti):** The standard arithmetic approximation commonly used in software, implemented via Julian Date conversions (`gregorianToJD`, `jdToHijri`).
+
+The UI supports a "Compare to Heavens" overlay that visually flags days where the selected civic calendar (Umm al-Qura or Tabular) diverges from the purely Astronomical reality, offering users a unique educational tool for understanding calendar discrepancies.
 
 ### 5.5 World Visibility Grid
 
@@ -378,11 +384,11 @@ In Pro Mode, the page shows extended orbital data including libration (the appar
 
 ### 6.6 Hijri Calendar Page (`/calendar`)
 
-The Calendar page provides a comprehensive Hijri calendar with two parallel calendar systems displayed side by side.
+The Calendar page provides a comprehensive Hijri calendar supporting three calculation engines. Users can instantly toggle between **Astronomical**, **Umm al-Qura**, and **Tabular (Kuwaiti)** dates. 
 
-The **tabular Hijri calendar** uses the Kuwaiti algorithmic conversion. The **Umm al-Qura calendar** uses the pre-computed KACST tables from the `ummalqura.ts` engine, covering Hijri years 1437–1465 AH (approximately 2015–2044 CE). Where the two systems disagree on a date (which happens roughly 30–40% of the time due to the difference between algorithmic and observational calendars), the discrepancy is highlighted with a visual indicator.
+A unique **Compare to Heavens** astronomical discrepancy overlay allows users to visualise divergences. When enabled, a small red indicator badge displaying the true astronomical date will appear inside the calendar cell on days where the currently selected civic or tabular calendar diverges from the strict SunCalc astronomical calculation.
 
-The page supports year navigation from 1438 to 1465 AH, month selection, and day selection with a moon phase indicator for each day. Islamic events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid, etc.) are marked on their respective dates.
+The page supports dynamic year and month navigation. Each cell renders its exact local moon phase via an inline stylised SVG, and major/minor Islamic events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid, etc.) are highlighted distinctly on their respective dates.
 
 In Pro Mode, the page shows conjunction times (the exact moment of new moon) and a lunar month length analysis showing the variation in month lengths over the selected year.
 
@@ -413,6 +419,57 @@ The Ramadan page predicts the start date of Ramadan for the next 10 years (1447�
 The prediction is based on the Yallop criterion applied to the expected new moon for 1 Ramadan of each year. The city-by-city comparison shows how visibility varies geographically — a crescent that is Zone A (easily visible) in Mecca may be Zone C (optical aid needed) in London due to the different sun-moon geometry at different latitudes.
 
 In Pro Mode, the page shows detailed conjunction times, elongation at sunset, and q-values for each city and year.
+
+### 6.10 About Page (`/about`)
+
+A rich informational page communicating Hilal Vision's mission, platform scope, and scientific foundations to new visitors.
+
+**Sections:**
+- **Mission statement** — Explains the Islamic calendar context, why bi-parametric visibility criteria matter, and the platform's role as a scientific instrument (not a religious authority).
+- **Who Is It For?** — Three audience cards: Muslim communities (simplified predictions), astronomers/researchers (raw q-values, ICOP data), and Islamic calendar scholars (multi-engine Hijri calendar comparison).
+- **Platform Tools** — Clickable card grid for all six tools (Globe, Map, Moon Phase, Hijri Calendar, Horizon, Archive) with descriptions.
+- **How We Compare** — Feature comparison table benchmarking Hilal Vision against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap across 14 dimensions (3D globe, weather overlay, ICOP data, Best-Time calculator, mobile app, push notifications, etc.).
+- **Technology** — Non-technical overview of the stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, Open-Meteo, Sentry).
+- **Data Sources & Attributions** — Linked credits to Yallop 1997, Odeh 2004, ICOP (IAC), SunCalc (Agafonkin), Umm al-Qura tables, and Open-Meteo.
+- **License & Contact** — MIT License notice, GitHub link, email contact, and links to Privacy/Terms pages.
+
+**Design:** Stars-field hero section with orbit rings, `.breezy-card` grid layout, gold accent on Hilal Vision column of the comparison table, methodology teaser CTA.
+
+### 6.11 Methodology Page (`/methodology`)
+
+A comprehensive technical reference page written for astronomers, Islamic calendar scholars, and developers who need to understand the mathematical foundations behind every calculation in Hilal Vision.
+
+**Sections:**
+1. The Crescent Visibility Problem — Why single-parameter models (age, lag time) are unreliable; the need for bi-parametric polynomial criteria.
+2. Yallop (1997) Criterion — Complete q-value derivation, crescent width formula (SD, elongation), Best-Time definition (4/9 × lag time), and full Zone A–F classification table.
+3. Odeh (2004) Criterion — V-value formula, dataset differences from Yallop, and four-zone classification table.
+4. Triple-Engine Hijri Calendar — Astronomical (SunCalc two-pass conjunction search with 1446 AH epoch), Umm al-Qura (KACST tables via `@umalqura/core`), and Tabular/Kuwaiti (Julian Date arithmetic) engines with their trade-offs.
+5. Best-Time-to-Observe Calculator — 5-minute scanning algorithm from sunset to moonset, composite scoring formula (`score = moonAlt × darknessFactor × altFactor`), and viability flag logic.
+6. World Visibility Grid — Three resolution levels (8°/900pts, 4°/3,600pts, 2°/14,400pts), Web Worker offloading, LRU texture cache (24 entries, keyed by date+resolution).
+7. ICOP Historical Archive — What ICOP is, how 1,000+ records were sourced, and how theory-vs-observation comparison enables model validation.
+8. Crowdsourced Telemetry & Validation — Zone F rejection algorithm, Upstash Redis rate limiting (5 req/IP/min), Open-Meteo meteorological enrichment.
+9. Atmospheric Refraction — Saemundsson inverse formula with temperature (T°C) and pressure (P hPa) corrections for observatory-grade horizon accuracy.
+10. References — Yallop 1997, Odeh 2004, Meeus 1998, SunCalc, ICOP, Umm al-Qura.
+
+**Design:** Fixed Table of Contents sidebar (desktop), `FormulaBlock` monospace display components, coloured zone tables, and anchor-linked headings.
+
+### 6.12 Privacy Policy (`/privacy`)
+
+A GDPR-aware privacy policy covering:
+- **Data collected:** GPS coordinates (opt-in, ephemeral), Clerk email/name, sighting reports (stored permanently as public scientific data), Sentry error events (anonymised), IP addresses (Upstash, TTL 60s).
+- **Sub-processors table:** Clerk Auth, Upstash Redis, Sentry, Open-Meteo, Vercel — each with purpose and data shared.
+- **Cookie policy:** Functional Clerk JWT session cookies only. No tracking or advertising cookies.
+- **Retention:** Account data until deletion; sighting reports retained indefinitely; error logs 30 days.
+- **User rights:** Access, correction, deletion, export — applicable under GDPR, UK DPA 2018, and CCPA.
+
+### 6.13 Terms of Service (`/terms`)
+
+A clear terms document covering:
+- **Acceptable use:** No false sighting reports, no DDoS/rate-limit bypass, no impersonation.
+- **User-generated content:** Worldwide, royalty-free, irrevocable licence granted for submitted sighting reports used in the public dataset.
+- **Accuracy disclaimer:** Predictions are mathematical estimates, not religious rulings. Not suitable as the sole basis for civic or religious decisions.
+- **MIT License:** Full source code available under MIT. ICOP data and Umm al-Qura tables subject to their original terms.
+- **Limitation of liability:** No liability for indirect damages, missed observances, or incorrect predictions.
 
 ---
 
@@ -527,5 +584,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 24 | PWA & Monitoring | Hand-written Service Worker (`sw.js`) with CacheFirst/NetworkFirst/StaleWhileRevalidate strategies. PWA manifest + icons. Sentry error monitoring with ErrorBoundary and API error capture. |
 | 25 | Location UX | Unified geolocation: all pages auto-detect GPS on mount via `useGeolocation(true)` hook. Created shared `AutoDetectButton` component. Removed ~120 lines of duplicated geolocation code. Red Report Sighting button in navbar. |
 | 26 | Map/Globe UX | Fixed Vercel 500 error on cloud cover fetch by reducing Open-Meteo batch size to avoid URL limits. Unified Visibility Map and Cloud Cover toggles directly within the side panel controls for both MapPage and GlobePage. |
+| 27 | Informational Pages | Added four new route pages: `/about` (mission, tools, competitor comparison, attributions), `/methodology` (full Yallop/Odeh formula reference, triple-engine calendar, ICOP, refraction), `/privacy` (GDPR-aware policy), `/terms` (acceptable use, MIT License). Linked in footer nav. All routes lazy-loaded in `App.tsx`. |
+| 28 | Vector Render | Refactored MapPage to generate pure mathematical SVG contours from Yallop `q-value` matrix using `d3-contours`. Removed pixelated canvas generation. Fixed Home page routing overlay issue. |
 
-*Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*
+*Documentation updated February 23, 2026 (Round 28 — Vector Render). For the latest feature status, see `todo.md`.*

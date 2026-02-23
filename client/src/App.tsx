@@ -19,6 +19,10 @@ const MoonPage = lazy(() => import("./pages/MoonPage"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
 const HorizonPage = lazy(() => import("./pages/HorizonPage"));
 const ArchivePage = lazy(() => import("./pages/ArchivePage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const MethodologyPage = lazy(() => import("./pages/MethodologyPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -50,6 +54,10 @@ function Router() {
           <Route path="/calendar" component={CalendarPage} />
           <Route path="/horizon" component={HorizonPage} />
           <Route path="/archive" component={ArchivePage} />
+          <Route path="/about" component={AboutPage} />
+          <Route path="/methodology" component={MethodologyPage} />
+          <Route path="/privacy" component={PrivacyPage} />
+          <Route path="/terms" component={TermsPage} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
