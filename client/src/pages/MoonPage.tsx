@@ -98,7 +98,7 @@ function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number 
 function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
   const days = Array.from({ length: 30 }, (_, i) => {
     const d = new Date(baseDate);
-    d.setDate(d.getDate() - 14 + i);
+    d.setDate(d.getDate() + i);
     const illum = SunCalc.getMoonIllumination(d);
     return { date: d, phase: illum.phase, fraction: illum.fraction };
   });
