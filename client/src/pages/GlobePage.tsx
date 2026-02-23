@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
-import { Globe2, Play, Pause, ChevronDown, MapPin, Clock } from "lucide-react";
+import { Globe2, Play, Pause, ChevronDown, MapPin, Clock, Eye, Cloud } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { AutoDetectButton } from "@/components/AutoDetectButton";
 import {
@@ -257,7 +257,6 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
             </div>
           )}
 
-          {/* Controls overlay */}
           <div className="absolute bottom-4 left-4 flex gap-2">
             <button
               onClick={() => setIsAutoRotate(!isAutoRotate)}
@@ -271,30 +270,6 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
             >
               {isAutoRotate ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
               {isAutoRotate ? "Pause" : "Rotate"}
-            </button>
-            <button
-              onClick={() => setShowVisibility(!showVisibility)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
-              style={{
-                background: showVisibility ? "rgba(200,160,64,0.18)" : "rgba(10,14,26,0.85)",
-                border: "1px solid rgba(200,160,64,0.25)",
-                color: "#c8a040",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              Visibility
-            </button>
-            <button
-              onClick={() => setShowClouds(!showClouds)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
-              style={{
-                background: showClouds ? "rgba(200,160,64,0.18)" : "rgba(10,14,26,0.85)",
-                border: "1px solid rgba(200,160,64,0.25)",
-                color: "#c8a040",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              Clouds
             </button>
           </div>
         </div>
@@ -372,6 +347,43 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
               </div>
               <div className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>
                 {selectedCity.lat.toFixed(4)}°, {selectedCity.lng.toFixed(4)}°
+              </div>
+
+              {/* Overlays */}
+              <div className="pt-4 border-t space-y-2 mt-4" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                <div className="flex items-center justify-between text-xs py-1">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Visibility Overlay</span>
+                  <button
+                    onClick={() => setShowVisibility(!showVisibility)}
+                    className={`w-8 h-4 rounded-full transition-colors relative`}
+                    style={{ background: showVisibility ? "var(--gold)" : "var(--muted)" }}
+                  >
+                    <div
+                      className={`absolute top-0.5 bottom-0.5 w-3 bg-white rounded-full transition-transform`}
+                      style={{
+                        left: "2px",
+                        transform: showVisibility ? "translateX(16px)" : "translateX(0)"
+                      }}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between text-xs py-1">
+                  <span className="text-muted-foreground flex items-center gap-1.5"><Cloud className="w-3.5 h-3.5" /> Cloud Cover</span>
+                  <button
+                    onClick={() => setShowClouds(!showClouds)}
+                    className={`w-8 h-4 rounded-full transition-colors relative`}
+                    style={{ background: showClouds ? "var(--gold)" : "var(--muted)" }}
+                  >
+                    <div
+                      className={`absolute top-0.5 bottom-0.5 w-3 bg-white rounded-full transition-transform`}
+                      style={{
+                        left: "2px",
+                        transform: showClouds ? "translateX(16px)" : "translateX(0)"
+                      }}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
 
