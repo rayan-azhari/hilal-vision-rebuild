@@ -109,13 +109,13 @@ async function main() {
         }
     }
 
-    const outDir = path.join(__dirname, "..", "data");
-    await fs.mkdir(outDir, { recursive: true });
+    // Write to a TS file so it can be statically imported and bundled easily by Vercel
+    const outputPath = path.join(process.cwd(), "server", "data", "icop-history.ts");
+    await fs.mkdir(path.dirname(outputPath), { recursive: true });
+    const fileContent = `export const icopData = ${JSON.stringify(allData, null, 2)};\n`;
+    await fs.writeFile(outputPath, fileContent, "utf-8");
 
-    const outFile = path.join(outDir, "icop-history.json");
-    await fs.writeFile(outFile, JSON.stringify(allData, null, 2), "utf-8");
-
-    console.log(`\n✅ Saved ${allData.length} months of ICOP data to ${outFile}`);
+    console.log(`\n✅ Done! Saved ${allData.length} months of data to server/data/icop-history.ts`);
     console.log(`Total observations parsed: ${allData.reduce((acc, m) => acc + m.observations.length, 0)}`);
 }
 

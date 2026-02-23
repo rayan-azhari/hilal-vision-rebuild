@@ -1,4 +1,4 @@
-[
+export const icopData = [
   {
     "hijriYear": 1440,
     "hijriMonth": 9,
@@ -6251,4 +6251,4 @@
       }
     ]
   }
-]
+];
