@@ -8,6 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Layout from "./components/Layout";
 import { lazy, Suspense } from "react";
+import { Sentry } from "@/lib/sentry";
 
 // ─── Lazy-loaded pages (code splitting) ─────────────────────────────────────
 // Globe.gl + Three.js + Leaflet + D3 + Recharts are heavy.
@@ -59,27 +60,44 @@ function Router() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <ErrorBoundary>
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-          <ThemeProvider defaultTheme="dark" switchable>
-            <TooltipProvider>
-              <Toaster
-                theme="dark"
-                toastOptions={{
-                  style: {
-                    background: "oklch(0.10 0.018 265)",
-                    border: "1px solid oklch(0.78 0.15 75 / 0.2)",
-                    color: "oklch(0.93 0.01 80)",
-                  },
-                }}
-              />
-              <Router />
-            </TooltipProvider>
-          </ThemeProvider>
-        </ClerkProvider>
-      </ErrorBoundary>
-    </HelmetProvider>
+    <Sentry.ErrorBoundary
+      fallback={({ error }) => (
+        <div className="flex items-center justify-center min-h-screen bg-[oklch(0.06_0.02_265)]">
+          <div className="text-center p-8 max-w-md">
+            <h1 className="text-2xl font-bold text-amber-400 mb-4">Something went wrong</h1>
+            <p className="text-zinc-400 mb-6">An unexpected error occurred. Please refresh the page.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-amber-400/20 border border-amber-400/30 rounded-lg text-amber-400 hover:bg-amber-400/30 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )}
+    >
+      <HelmetProvider>
+        <ErrorBoundary>
+          <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+            <ThemeProvider defaultTheme="dark" switchable>
+              <TooltipProvider>
+                <Toaster
+                  theme="dark"
+                  toastOptions={{
+                    style: {
+                      background: "oklch(0.10 0.018 265)",
+                      border: "1px solid oklch(0.78 0.15 75 / 0.2)",
+                      color: "oklch(0.93 0.01 80)",
+                    },
+                  }}
+                />
+                <Router />
+              </TooltipProvider>
+            </ThemeProvider>
+          </ClerkProvider>
+        </ErrorBoundary>
+      </HelmetProvider>
+    </Sentry.ErrorBoundary>
   );
 }
 

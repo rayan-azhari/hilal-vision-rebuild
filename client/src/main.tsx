@@ -1,3 +1,7 @@
+// Initialize error monitoring first (before any other imports)
+import { initSentry, Sentry } from "@/lib/sentry";
+initSentry();
+
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,6 +31,7 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
+    Sentry.captureException(error);
     console.error("[API Query Error]", error);
   }
 });
@@ -35,6 +40,7 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
+    Sentry.captureException(error);
     console.error("[API Mutation Error]", error);
   }
 });
@@ -61,3 +67,17 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </trpc.Provider>
 );
+
+// Register service worker for offline support (production only)
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => {
+        console.info("[SW] Registered, scope:", reg.scope);
+        // Check for updates every 60 minutes
+        setInterval(() => reg.update(), 60 * 60 * 1000);
+      })
+      .catch((err) => console.warn("[SW] Registration failed:", err));
+  });
+}

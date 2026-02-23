@@ -1,0 +1,37 @@
+{
+    "name": "Hilal Vision",
+    "short_name": "Hilal Vision",
+    "description": "Precision astronomical platform for predicting Islamic crescent moon visibility worldwide",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0e1a",
+    "theme_color": "#c8a84e",
+    "orientation": "portrait-primary",
+    "categories": [
+        "education",
+        "utilities",
+        "weather"
+    ],
+    "lang": "en",
+    "dir": "ltr",
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
