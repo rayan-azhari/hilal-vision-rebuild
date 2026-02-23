@@ -14,6 +14,9 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **📅 Hijri Calendar (`/calendar`)**: Astronomical conjunction-based calendar accurate to the new moon.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
 - **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP).
+- **🌐 SEO**: Per-page dynamic meta tags, Open Graph & Twitter cards, JSON-LD structured data, sitemap.xml, robots.txt.
+- **🌍 i18n**: English, Arabic (العربية), and Urdu (اردو) with a navbar language switcher and full RTL support.
+- **📤 Social Sharing**: Native share API (mobile) with clipboard fallback, plus a live sighting feed on the Home page.
 
 ## Tech Stack
 
@@ -24,6 +27,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **Database:** Drizzle ORM (MySQL — `observation_reports` table)
 - **Authentication:** Clerk
 - **Rate Limiting:** Upstash Redis
+- **i18n:** react-i18next + i18next-browser-languagedetector
+- **SEO:** react-helmet-async
 - **Mobile Packaging:** Capacitor.js (iOS & Android Native)
 
 ## Recent Architecture Highlights
@@ -37,21 +42,23 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 7. **Production Upstash Protection**: Hardened TRPC mutation endpoints utilizing Upstash Redis sliding window token bucket rate-limiting.
 8. **Open-Meteo Cloud Cover Overlay**: Real-time cloud cover data fetched from Open-Meteo's forecast API for a sparse global grid (~162 points), bilinearly interpolated into a smooth canvas texture, and overlaid on both 2D Map (Leaflet `imageOverlay`) and 3D Globe (Three.js sphere mesh). Independently toggleable from visibility zones.
 9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
+10. **Trilingual i18n with RTL**: Full Arabic and Urdu translation files (100+ strings) with automatic RTL direction switching and browser language detection.
+11. **Dynamic SEO Engine**: Per-page meta tags, OG/Twitter cards, and JSON-LD structured data via `react-helmet-async`, with canonical URLs and a complete sitemap.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js (v18+)
-- `pnpm` (recommended) or `npm`
+- `pnpm` (required — **do not use `npm install`**)
 
 ### Installation & Running
 
 ```bash
-# Install dependencies
+# Install dependencies (MUST use pnpm)
 pnpm install
-# or
-npm install --legacy-peer-deps
+# or if pnpm is not installed globally:
+npx pnpm install
 
 # Start the development server
 npm run dev
@@ -71,6 +78,10 @@ npm run build && npm run start
 #   Build: npx vite build
 #   Output: dist/public
 #   API: api/trpc/[trpc].ts (serverless function)
+
+# ⚠️ IMPORTANT: Always use pnpm for package management.
+# npm install will desync pnpm-lock.yaml and break Vercel builds.
+# If desynced, run: npx pnpm install --no-frozen-lockfile
 
 # Optional: set DATABASE_URL env var for telemetry persistence
 ```
