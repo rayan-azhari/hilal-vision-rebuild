@@ -145,13 +145,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Dialog open={reportOpen} onOpenChange={setReportOpen}>
               <DialogTrigger asChild>
                 <button
-                  className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-full text-[13px] font-medium magnetic transition-colors"
+                  className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-full text-[13px] font-medium magnetic transition-colors whitespace-nowrap flex-shrink-0"
                   style={{
-                    background: "var(--foreground)",
-                    color: "var(--background)",
+                    background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                    color: "#fff",
                   }}
                 >
-                  <PlusCircle className="w-4 h-4" />
+                  <PlusCircle className="w-4 h-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Report Sighting</span>
                 </button>
               </DialogTrigger>
@@ -228,7 +228,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <SignedOut>
               <SignInButton mode="modal">
                 <button
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ml-1"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ml-1 whitespace-nowrap flex-shrink-0"
                   style={{
                     background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
                     color: "var(--foreground)",
@@ -247,41 +247,46 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
-
-          {/* Mobile Nav */}
-          {mobileOpen && (
-            <div
-              className="lg:hidden border-t"
-              style={{
-                background: "color-mix(in oklch, var(--space) 95%, transparent)",
-                borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
-              }}
-            >
-              <div className="container py-3 flex flex-col gap-1">
-                {navItems.map(({ href, label, icon: Icon }) => {
-                  const active = location === href;
-                  return (
-                    <Link key={href} href={href}>
-                      <div
-                        className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all"
-                        style={{
-                          color: active ? "var(--gold)" : "var(--muted-foreground)",
-                          background: active
-                            ? "color-mix(in oklch, var(--gold) 8%, transparent)"
-                            : "transparent",
-                        }}
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {label}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </header>
+
+        {/* Mobile Nav — positioned BELOW the header pill */}
+        {mobileOpen && (
+          <div
+            className="lg:hidden pointer-events-auto mt-2 rounded-2xl border"
+            style={{
+              background: "color-mix(in oklch, var(--space) 95%, transparent)",
+              backdropFilter: "blur(24px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(24px) saturate(1.2)",
+              borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)",
+              boxShadow: "0 12px 40px -10px rgba(0,0,0,0.3)",
+              maxWidth: "900px",
+              width: "100%",
+            }}
+          >
+            <div className="py-3 px-2 flex flex-col gap-1">
+              {navItems.map(({ href, label, icon: Icon }) => {
+                const active = location === href;
+                return (
+                  <Link key={href} href={href}>
+                    <div
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all"
+                      style={{
+                        color: active ? "var(--gold)" : "var(--muted-foreground)",
+                        background: active
+                          ? "color-mix(in oklch, var(--gold) 8%, transparent)"
+                          : "transparent",
+                      }}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main content */}

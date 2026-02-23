@@ -68,7 +68,7 @@ hilal-vision/
 ├── client/
 │   ├── src/
 │   │   ├── pages/          ← 8 page components
-│   │   ├── components/     ← Shared UI components (PageHeader, LocationSearch, etc.)
+│   │   ├── components/     ← Shared UI components (PageHeader, LocationSearch, AutoDetectButton, etc.)
 │   │   ├── contexts/       ← React contexts (Theme)
 │   │   ├── hooks/          ← Custom hooks (useVisibilityWorker, useGeolocation)
 │   │   ├── workers/        ← Web Workers (visibility.worker.ts)
@@ -524,5 +524,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 21 | Deployment Fixes | Bypassed Vercel serverless limits by moving 160KB ICOP dataset to `client/public/` for static serving. Fixed Vercel SPA catch-all rewrite preventing `/api/trpc` routes from firing. |
 | 22 | Design Overhaul | Implemented "Clinical Aerospace" (Light) and "Deep Space" (Dark) themes with refined typography scaling, card padding, and SVG SVG scaling fixes. Elevated visual language to "instrument-grade". |
 | 23 | Audit & Code Quality | Comprehensive audit (7.5/10 scorecard). Extracted astronomy engine to `shared/astronomy.ts` (isomorphic). Added `React.lazy` code splitting for 6 pages. Fixed OG image (SVG→PNG), `getObservations` pagination bug (`COUNT(*)`), `robots.txt`. Rewrote test suite (21 tests import production module). Updated Web Worker to import from shared module. |
+| 24 | PWA & Monitoring | Hand-written Service Worker (`sw.js`) with CacheFirst/NetworkFirst/StaleWhileRevalidate strategies. PWA manifest + icons. Sentry error monitoring with ErrorBoundary and API error capture. |
+| 25 | Location UX | Unified geolocation: all pages auto-detect GPS on mount via `useGeolocation(true)` hook. Created shared `AutoDetectButton` component. Removed ~120 lines of duplicated geolocation code. Red Report Sighting button in navbar. |
 
 *Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*

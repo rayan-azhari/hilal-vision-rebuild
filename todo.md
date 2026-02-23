@@ -76,9 +76,9 @@
 - [x] Fix duplicate React keys — MAJOR_CITIES has duplicate entries (e.g. Kuala Lumpur) causing non-unique keys
 
 ## Improvements (Round 2)
-- [ ] 3D Globe: replace slow hex-bin point cloud with fast canvas texture overlay
+- [x] 3D Globe: replace slow hex-bin point cloud with fast canvas texture overlay
 - [ ] Visibility Map: replace stepped rectangle grid with smooth SVG contour curves
-- [ ] Moon Phase: add sun/moon altitude chart (smooth curves, filled areas, day selector, rise/set cards)
+- [x] Moon Phase: add sun/moon altitude chart (smooth curves, filled areas, day selector, rise/set cards)
 
 ## Improvements (Round 3)
 - [x] Geolocation auto-detect (browser GPS + Nominatim reverse-geocoding)
