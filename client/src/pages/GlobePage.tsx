@@ -75,7 +75,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   // Recompute textures when date/visibility/clouds change
   const effectiveDateTs = effectiveDate.getTime();
   const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility);
-  const { textureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
+  const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Sync loading state
   useEffect(() => {
@@ -123,6 +123,33 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       globe.customLayerData([]);
     }
   }, [showVisibility, textureUrl]);
+
+  // Apply clouds overlay
+  useEffect(() => {
+    const globe = globeInstanceRef.current;
+    if (!globe) return;
+
+    // Remove existing cloud layer
+    const scene = globe.scene();
+    const existing = scene.children.find((c: any) => c.name === "clouds-layer");
+    if (existing) scene.remove(existing);
+
+    if (showClouds && cloudsUrl) {
+      const texture = new THREE.TextureLoader().load(cloudsUrl);
+      const r = globe.getGlobeRadius();
+      const cloudMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(r * 1.004, 64, 64),
+        new THREE.MeshPhongMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 0.8,
+          side: THREE.DoubleSide,
+        })
+      );
+      cloudMesh.name = "clouds-layer";
+      scene.add(cloudMesh);
+    }
+  }, [cloudsUrl, showClouds]);
 
   // Sync auto-rotate
   useEffect(() => {
@@ -220,6 +247,18 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
               }}
             >
               Visibility
+            </button>
+            <button
+              onClick={() => setShowClouds(!showClouds)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all"
+              style={{
+                background: showClouds ? "rgba(200,160,64,0.18)" : "rgba(10,14,26,0.85)",
+                border: "1px solid rgba(200,160,64,0.25)",
+                color: "#c8a040",
+                backdropFilter: "blur(8px)",
+              }}
+            >
+              Clouds
             </button>
           </div>
         </div>
@@ -326,6 +365,11 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
               <div className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>
                 {selectedCity.lat.toFixed(4)}°, {selectedCity.lng.toFixed(4)}°
               </div>
+            </div>
+
+            {/* Best Time to Observe */}
+            <div className="animate-breezy-enter" style={{ animationDelay: "75ms" }}>
+              <BestTimeCard date={effectiveDate} location={selectedCity} />
             </div>
 
             {/* Moon data */}

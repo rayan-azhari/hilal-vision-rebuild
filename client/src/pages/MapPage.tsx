@@ -172,6 +172,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
   // Custom worker hook handles computation off main thread
   const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility);
+  const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Compute local moon data
   useEffect(() => {
@@ -180,8 +181,8 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
   // Sync loading state
   useEffect(() => {
-    setIsLoading(isComputing);
-  }, [isComputing]);
+    setIsLoading(isComputing || (showClouds && isCloudsLoading));
+  }, [isComputing, isCloudsLoading, showClouds]);
 
   // Handle tile overlay
   useEffect(() => {
@@ -217,6 +218,30 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
     return () => { mounted = false; };
   }, [textureUrl, showVisibility]);
+
+  // Apply clouds overlay
+  const cloudOverlayRef = useRef<any>(null);
+  useEffect(() => {
+    if (!leafletRef.current) return;
+    const L = (window as any).L;
+    if (!L) return;
+
+    if (showClouds && cloudsUrl) {
+      const bounds: [[number, number], [number, number]] = [[-85.051128, -180], [85.051128, 180]];
+      if (cloudOverlayRef.current) {
+        cloudOverlayRef.current.setUrl(cloudsUrl);
+      } else {
+        cloudOverlayRef.current = L.imageOverlay(cloudsUrl, bounds, {
+          opacity: 0.35,
+          zIndex: 15,
+          interactive: false,
+        }).addTo(leafletRef.current);
+      }
+    } else if (cloudOverlayRef.current) {
+      cloudOverlayRef.current.remove();
+      cloudOverlayRef.current = null;
+    }
+  }, [cloudsUrl, showClouds]);
 
   // Draw observation pins
   useEffect(() => {
@@ -451,6 +476,11 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Best Time to Observe */}
+            <div className="animate-breezy-enter" style={{ animationDelay: "45ms" }}>
+              <BestTimeCard date={effectiveDate} location={selectedCity} />
             </div>
 
             <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
