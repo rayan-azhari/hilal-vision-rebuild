@@ -1,10 +1,13 @@
 import { Link } from "wouter";
+import { SEO } from "@/components/SEO";
 import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getMoonPhaseInfo, gregorianToHijri, formatTime, HIJRI_MONTHS } from "@/lib/astronomy";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { MoonArcVisual, VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
+import { ShareButton } from "@/components/ShareButton";
+import { SightingFeed } from "@/components/SightingFeed";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const features = [
@@ -101,13 +104,17 @@ export default function Home() {
 
   const [time, setTime] = useState(new Date());
   useEffect(() => {
-    document.title = "Hilal Vision \u2014 Islamic Crescent Moon Visibility Platform";
     const id = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
 
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
+      <SEO
+        title="Home"
+        description="Precision Islamic crescent moon visibility predictions with interactive 3D globe, Hijri calendar, and real-time sighting reports. Powered by Yallop & Odeh criteria."
+        path="/"
+      />
       {/* Hero */}
       <section
         className="relative min-h-[92vh] flex items-center overflow-hidden"
@@ -420,6 +427,19 @@ export default function Home() {
                 <div className="text-xs font-mono" style={{ color }}>{q}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Live Sighting Feed */}
+      <section className="container py-16">
+        <div className="max-w-2xl mx-auto">
+          <SightingFeed />
+          <div className="flex justify-center mt-6">
+            <ShareButton
+              title="Hilal Vision — Islamic Moon Visibility"
+              text="Check out the crescent moon visibility predictions on Hilal Vision!"
+            />
           </div>
         </div>
       </section>

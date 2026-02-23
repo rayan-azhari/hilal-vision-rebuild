@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { SEO } from "@/components/SEO";
 import { Archive, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -109,7 +110,7 @@ export default function ArchivePage() {
   const icopCacheRef = useRef<any[] | null>(null);
 
   useEffect(() => {
-    document.title = `Archive \u2014 ${selectedYear} AH | Hilal Vision`;
+    // document.title managed by <SEO> component
   }, [selectedYear]);
 
   const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
@@ -153,6 +154,11 @@ export default function ArchivePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
+      <SEO
+        title={`Archive — ${selectedYear} AH`}
+        description={`Crescent visibility archive for ${selectedYear} AH. Browse historical moon sighting data for all 12 Islamic months from 1438 to 1465 AH.`}
+        path="/archive"
+      />
       {/* Header */}
       <PageHeader
         icon={<Archive />}

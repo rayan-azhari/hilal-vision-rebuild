@@ -10,6 +10,10 @@
     },
     "rewrites": [
         {
+            "source": "/api/og",
+            "destination": "/api/og"
+        },
+        {
             "source": "/api/trpc/:path*",
             "destination": "/api/trpc/[trpc]"
         },

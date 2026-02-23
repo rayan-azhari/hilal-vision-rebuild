@@ -6,3 +6,7 @@ dist/
 package-lock.json
 .vercel
 .env*.local
+
+# Firebase service account keys (NEVER commit these)
+*-firebase-adminsdk-*.json
+firebase-service-account.json

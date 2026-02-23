@@ -1,0 +1,107 @@
+{
+    "nav": {
+        "home": "ہوم",
+        "globe": "تھری ڈی گلوب",
+        "map": "نقشہ رؤیت",
+        "moon": "چاند کے مراحل",
+        "calendar": "ہجری تقویم",
+        "horizon": "افق کا منظر",
+        "archive": "محفوظات",
+        "reportSighting": "رؤیت کی رپورٹ",
+        "signIn": "سائن ان"
+    },
+    "common": {
+        "loading": "لوڈ ہو رہا ہے…",
+        "error": "خرابی",
+        "retry": "دوبارہ کوشش کریں",
+        "close": "بند کریں",
+        "save": "محفوظ کریں",
+        "cancel": "منسوخ",
+        "search": "تلاش",
+        "today": "آج",
+        "date": "تاریخ",
+        "location": "مقام",
+        "autoDetect": "خود پتہ لگائیں",
+        "searchCity": "شہر تلاش کریں…",
+        "customCoordinates": "اپنے کوآرڈینیٹ",
+        "latitude": "عرض البلد",
+        "longitude": "طول البلد",
+        "visibility": "رؤیت",
+        "clouds": "بادل",
+        "pause": "روکیں",
+        "resume": "جاری رکھیں",
+        "hourOffset": "گھنٹوں کا فرق",
+        "bestTimeToObserve": "مشاہدے کا بہترین وقت",
+        "detectMyLocation": "میرا مقام تلاش کریں",
+        "detecting": "تلاش ہو رہا ہے…"
+    },
+    "zones": {
+        "A": "آسانی سے نظر آتا ہے",
+        "B": "نظر آ سکتا ہے",
+        "C": "آلہ بصری ضروری",
+        "D": "صرف دوربین سے",
+        "E": "نظر نہیں آتا",
+        "F": "افق سے نیچے"
+    },
+    "phases": {
+        "newMoon": "نیا چاند",
+        "waxingCrescent": "بڑھتا ہلال",
+        "firstQuarter": "پہلی سہ ماہی",
+        "waxingGibbous": "بڑھتا کُبّا",
+        "fullMoon": "پورا چاند",
+        "waningGibbous": "گھٹتا کُبّا",
+        "lastQuarter": "آخری سہ ماہی",
+        "waningCrescent": "گھٹتا ہلال"
+    },
+    "home": {
+        "subtitle": "اسلامی ہلال کی رؤیت",
+        "tagline": "دنیا بھر میں اسلامی ہلال کی رؤیت کی پیشگوئی اور تصور کے لیے ایک درست فلکیاتی پلیٹ فارم — یالوپ اور اودہ کے معیارات پر مبنی۔",
+        "exploreGlobe": "گلوب دیکھیں",
+        "visibilityMap": "رؤیت کا نقشہ",
+        "exploreFeatures": "خصوصیات دیکھیں",
+        "visibilityCriteria": "رؤیت کے معیارات"
+    },
+    "moon": {
+        "moonPhaseDashboard": "چاند کے مراحل ڈیش بورڈ",
+        "illumination": "روشنی",
+        "lunarAge": "چاند کی عمر",
+        "elongation": "طولانیت",
+        "moonAltitude": "چاند کی بلندی",
+        "nextNewMoon": "اگلا نیا چاند",
+        "sunrise": "طلوع آفتاب",
+        "sunset": "غروب آفتاب",
+        "moonrise": "طلوع قمر",
+        "moonset": "غروب قمر"
+    },
+    "calendar": {
+        "hijriCalendar": "اسلامی ہجری تقویم",
+        "selectedDay": "منتخب دن",
+        "events": "تقریبات",
+        "noEvents": "اس مہینے کوئی اہم تقریب نہیں",
+        "jumpToYear": "سال پر جائیں"
+    },
+    "horizon": {
+        "localHorizonView": "مقامی افق کا منظر",
+        "moonBelowHorizon": "چاند افق سے نیچے ہے"
+    },
+    "archive": {
+        "crescentVisibilityArchive": "ہلال رؤیت کا محفوظات",
+        "selectMonth": "مہینہ منتخب کریں",
+        "monthDetails": "مہینے کی تفصیلات",
+        "actualObservations": "اصل مشاہدات (ICOP)",
+        "computedCityVisibility": "شہروں کی حساب شدہ رؤیت (نظری)",
+        "zoneLegend": "زون گائیڈ"
+    },
+    "sighting": {
+        "reportSighting": "رؤیت کی رپورٹ",
+        "visualSuccess": "بصری کامیابی",
+        "opticalAid": "بصری آلہ",
+        "notes": "نوٹس",
+        "submit": "رپورٹ جمع کریں"
+    },
+    "language": {
+        "en": "English",
+        "ar": "العربية",
+        "ur": "اردو"
+    }
+}

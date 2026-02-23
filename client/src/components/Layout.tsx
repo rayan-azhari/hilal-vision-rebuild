@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle } from "lucide-react";
+import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle, Languages } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SightingReportForm } from "./SightingReportForm";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
@@ -15,12 +16,28 @@ const navItems = [
   { href: "/archive", label: "Archive", icon: Archive },
 ];
 
+const RTL_LANGS = ["ar", "ur"];
+const LANG_OPTIONS = [
+  { code: "en", label: "EN", flag: "A" },
+  { code: "ar", label: "عر", flag: "ع" },
+  { code: "ur", label: "ار", flag: "ا" },
+] as const;
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { t, i18n } = useTranslation();
+
+  // Set RTL direction based on language
+  useEffect(() => {
+    const isRtl = RTL_LANGS.includes(i18n.language);
+    document.documentElement.dir = isRtl ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -133,6 +150,44 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <SightingReportForm onSuccess={() => setReportOpen(false)} />
                 </DialogContent>
               </Dialog>
+
+              {/* Language Switcher */}
+              <div className="relative">
+                <button
+                  className="p-2 rounded-lg transition-colors flex items-center gap-1"
+                  style={{ color: "var(--muted-foreground)" }}
+                  onClick={() => setLangOpen(!langOpen)}
+                  aria-label="Change language"
+                >
+                  <Languages className="w-4 h-4" />
+                  <span className="text-xs font-bold uppercase">{i18n.language}</span>
+                </button>
+                {langOpen && (
+                  <div
+                    className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden shadow-xl z-[100]"
+                    style={{
+                      background: "var(--space-mid)",
+                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                      minWidth: "120px",
+                    }}
+                  >
+                    {LANG_OPTIONS.map(({ code, label }) => (
+                      <button
+                        key={code}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/5"
+                        style={{
+                          color: i18n.language === code ? "var(--gold)" : "var(--foreground)",
+                          background: i18n.language === code ? "color-mix(in oklch, var(--gold) 10%, transparent)" : "transparent",
+                        }}
+                        onClick={() => { i18n.changeLanguage(code); setLangOpen(false); }}
+                      >
+                        <span className="font-bold">{label}</span>
+                        <span style={{ color: "var(--muted-foreground)" }}>{t(`language.${code}`)}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <button
                 className="p-2 rounded-lg transition-colors"

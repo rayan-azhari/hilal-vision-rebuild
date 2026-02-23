@@ -8,6 +8,7 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
+import "@/lib/i18n";
 
 const queryClient = new QueryClient();
 

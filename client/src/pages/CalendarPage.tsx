@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { SEO } from "@/components/SEO";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import {
@@ -41,7 +42,7 @@ export default function CalendarPage() {
   const [selectedDay, setSelectedDay] = useState<number | null>(todayHijri.day);
 
   useEffect(() => {
-    document.title = `Hijri Calendar \u2014 ${HIJRI_MONTHS[viewMonth - 1]?.en} ${viewYear} AH | Hilal Vision`;
+    // document.title managed by <SEO> component
   }, [viewMonth, viewYear]);
 
   const monthInfo = HIJRI_MONTHS[viewMonth - 1];
@@ -108,6 +109,11 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
+      <SEO
+        title={`Hijri Calendar — ${monthInfo?.en} ${viewYear} AH`}
+        description={`Islamic Hijri calendar for ${monthInfo?.en} ${viewYear} AH with Gregorian comparison, Islamic events, and lunar phases.`}
+        path="/calendar"
+      />
       {/* Header */}
       <PageHeader
         icon={<Calendar />}

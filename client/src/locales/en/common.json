@@ -1,0 +1,107 @@
+{
+    "nav": {
+        "home": "Home",
+        "globe": "3D Globe",
+        "map": "2D Map",
+        "moon": "Moon Phase",
+        "calendar": "Hijri Calendar",
+        "horizon": "Horizon View",
+        "archive": "Archive",
+        "reportSighting": "Report Sighting",
+        "signIn": "Sign In"
+    },
+    "common": {
+        "loading": "Loading…",
+        "error": "Error",
+        "retry": "Retry",
+        "close": "Close",
+        "save": "Save",
+        "cancel": "Cancel",
+        "search": "Search",
+        "today": "Today",
+        "date": "Date",
+        "location": "Location",
+        "autoDetect": "Auto-Detect",
+        "searchCity": "Search city…",
+        "customCoordinates": "Custom Coordinates",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "visibility": "Visibility",
+        "clouds": "Clouds",
+        "pause": "Pause",
+        "resume": "Resume",
+        "hourOffset": "Hour Offset",
+        "bestTimeToObserve": "Best Time to Observe",
+        "detectMyLocation": "Detect My Location",
+        "detecting": "Detecting…"
+    },
+    "zones": {
+        "A": "Easily Visible",
+        "B": "Visible",
+        "C": "Optical Aid Required",
+        "D": "Telescope Only",
+        "E": "Not Visible",
+        "F": "Below Horizon"
+    },
+    "phases": {
+        "newMoon": "New Moon",
+        "waxingCrescent": "Waxing Crescent",
+        "firstQuarter": "First Quarter",
+        "waxingGibbous": "Waxing Gibbous",
+        "fullMoon": "Full Moon",
+        "waningGibbous": "Waning Gibbous",
+        "lastQuarter": "Last Quarter",
+        "waningCrescent": "Waning Crescent"
+    },
+    "home": {
+        "subtitle": "Islamic Crescent Moon Visibility",
+        "tagline": "A precision astronomical platform for predicting and visualising Islamic crescent moon sightings worldwide — powered by Yallop & Odeh criteria.",
+        "exploreGlobe": "Explore Globe",
+        "visibilityMap": "Visibility Map",
+        "exploreFeatures": "Explore Features",
+        "visibilityCriteria": "Visibility Criteria"
+    },
+    "moon": {
+        "moonPhaseDashboard": "Moon Phase Dashboard",
+        "illumination": "Illumination",
+        "lunarAge": "Lunar Age",
+        "elongation": "Elongation",
+        "moonAltitude": "Moon Altitude",
+        "nextNewMoon": "Next New Moon",
+        "sunrise": "Sunrise",
+        "sunset": "Sunset",
+        "moonrise": "Moonrise",
+        "moonset": "Moonset"
+    },
+    "calendar": {
+        "hijriCalendar": "Islamic Hijri Calendar",
+        "selectedDay": "Selected Day",
+        "events": "Events",
+        "noEvents": "No major events this month",
+        "jumpToYear": "Jump to Year"
+    },
+    "horizon": {
+        "localHorizonView": "Local Horizon View",
+        "moonBelowHorizon": "Moon below horizon"
+    },
+    "archive": {
+        "crescentVisibilityArchive": "Crescent Visibility Archive",
+        "selectMonth": "Select a Month",
+        "monthDetails": "Month Details",
+        "actualObservations": "Actual Observations (ICOP)",
+        "computedCityVisibility": "Computed City Visibility (Theoretical)",
+        "zoneLegend": "Zone Legend"
+    },
+    "sighting": {
+        "reportSighting": "Report Sighting",
+        "visualSuccess": "Visual Success",
+        "opticalAid": "Optical Aid",
+        "notes": "Notes",
+        "submit": "Submit Report"
+    },
+    "language": {
+        "en": "English",
+        "ar": "العربية",
+        "ur": "اردو"
+    }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { SEO } from "@/components/SEO";
 import { Moon, Sun, ArrowRight, Clock, Eye, MapPin } from "lucide-react";
 import { LocationSearch } from "@/components/LocationSearch";
 import { PageHeader } from "@/components/PageHeader";
@@ -156,7 +157,7 @@ export default function MoonPage() {
   const [countdown, setCountdown] = useState("");
 
   useEffect(() => {
-    document.title = `Moon Phase \u2014 ${moonInfo.phaseName} (${moonInfo.illumination}%) | Hilal Vision`;
+    // document.title managed by <SEO> component
     setMoonInfo(getMoonPhaseInfo(date));
     setSunMoon(computeSunMoonAtSunset(date, location));
   }, [date, location]);
@@ -185,6 +186,11 @@ export default function MoonPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
+      <SEO
+        title={`Moon Phase — ${moonInfo.phaseName} (${moonInfo.illumination}%)`}
+        description={`Current lunar phase: ${moonInfo.phaseName}, ${moonInfo.illumination}% illuminated, ${moonInfo.age.toFixed(1)} days old. View lunar data and astronomical details.`}
+        path="/moon"
+      />
       {/* Header */}
       <PageHeader
         icon={<Moon />}

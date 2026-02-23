@@ -1,0 +1,107 @@
+{
+    "nav": {
+        "home": "الرئيسية",
+        "globe": "الكرة الأرضية",
+        "map": "خريطة الرؤية",
+        "moon": "أطوار القمر",
+        "calendar": "التقويم الهجري",
+        "horizon": "منظر الأفق",
+        "archive": "الأرشيف",
+        "reportSighting": "إبلاغ عن رؤية",
+        "signIn": "تسجيل الدخول"
+    },
+    "common": {
+        "loading": "جارٍ التحميل…",
+        "error": "خطأ",
+        "retry": "إعادة المحاولة",
+        "close": "إغلاق",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "search": "بحث",
+        "today": "اليوم",
+        "date": "التاريخ",
+        "location": "الموقع",
+        "autoDetect": "كشف تلقائي",
+        "searchCity": "ابحث عن مدينة…",
+        "customCoordinates": "إحداثيات مخصصة",
+        "latitude": "خط العرض",
+        "longitude": "خط الطول",
+        "visibility": "الرؤية",
+        "clouds": "الغيوم",
+        "pause": "إيقاف",
+        "resume": "استئناف",
+        "hourOffset": "فارق الساعات",
+        "bestTimeToObserve": "أفضل وقت للرصد",
+        "detectMyLocation": "تحديد موقعي",
+        "detecting": "جارٍ التحديد…"
+    },
+    "zones": {
+        "A": "رؤية سهلة بالعين المجردة",
+        "B": "رؤية ممكنة بالعين المجردة",
+        "C": "تحتاج أداة بصرية",
+        "D": "تلسكوب فقط",
+        "E": "غير مرئي",
+        "F": "تحت الأفق"
+    },
+    "phases": {
+        "newMoon": "محاق",
+        "waxingCrescent": "هلال متزايد",
+        "firstQuarter": "تربيع أول",
+        "waxingGibbous": "أحدب متزايد",
+        "fullMoon": "بدر",
+        "waningGibbous": "أحدب متناقص",
+        "lastQuarter": "تربيع أخير",
+        "waningCrescent": "هلال متناقص"
+    },
+    "home": {
+        "subtitle": "رؤية الهلال الإسلامي",
+        "tagline": "منصة فلكية دقيقة للتنبؤ بمواعيد رؤية الهلال الإسلامي حول العالم — مبنية على معايير يالوب وعودة.",
+        "exploreGlobe": "استكشاف الكرة الأرضية",
+        "visibilityMap": "خريطة الرؤية",
+        "exploreFeatures": "استكشاف الميزات",
+        "visibilityCriteria": "معايير الرؤية"
+    },
+    "moon": {
+        "moonPhaseDashboard": "لوحة أطوار القمر",
+        "illumination": "الإضاءة",
+        "lunarAge": "عمر القمر",
+        "elongation": "الاستطالة",
+        "moonAltitude": "ارتفاع القمر",
+        "nextNewMoon": "المحاق القادم",
+        "sunrise": "الشروق",
+        "sunset": "الغروب",
+        "moonrise": "طلوع القمر",
+        "moonset": "غروب القمر"
+    },
+    "calendar": {
+        "hijriCalendar": "التقويم الهجري الإسلامي",
+        "selectedDay": "اليوم المختار",
+        "events": "المناسبات",
+        "noEvents": "لا توجد مناسبات رئيسية هذا الشهر",
+        "jumpToYear": "الانتقال إلى سنة"
+    },
+    "horizon": {
+        "localHorizonView": "منظر الأفق المحلي",
+        "moonBelowHorizon": "القمر تحت الأفق"
+    },
+    "archive": {
+        "crescentVisibilityArchive": "أرشيف رؤية الهلال",
+        "selectMonth": "اختر شهرًا",
+        "monthDetails": "تفاصيل الشهر",
+        "actualObservations": "الأرصاد الفعلية (ICOP)",
+        "computedCityVisibility": "رؤية المدن المحسوبة (نظري)",
+        "zoneLegend": "دليل المناطق"
+    },
+    "sighting": {
+        "reportSighting": "إبلاغ عن رؤية",
+        "visualSuccess": "نجاح الرؤية",
+        "opticalAid": "أداة بصرية",
+        "notes": "ملاحظات",
+        "submit": "إرسال التقرير"
+    },
+    "language": {
+        "en": "English",
+        "ar": "العربية",
+        "ur": "اردو"
+    }
+}

@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@clerk/clerk-react";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -40,25 +41,27 @@ function Router() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-        <ThemeProvider defaultTheme="dark" switchable>
-          <TooltipProvider>
-            <Toaster
-              theme="dark"
-              toastOptions={{
-                style: {
-                  background: "oklch(0.10 0.018 265)",
-                  border: "1px solid oklch(0.78 0.15 75 / 0.2)",
-                  color: "oklch(0.93 0.01 80)",
-                },
-              }}
-            />
-            <Router />
-          </TooltipProvider>
-        </ThemeProvider>
-      </ClerkProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+          <ThemeProvider defaultTheme="dark" switchable>
+            <TooltipProvider>
+              <Toaster
+                theme="dark"
+                toastOptions={{
+                  style: {
+                    background: "oklch(0.10 0.018 265)",
+                    border: "1px solid oklch(0.78 0.15 75 / 0.2)",
+                    color: "oklch(0.93 0.01 80)",
+                  },
+                }}
+              />
+              <Router />
+            </TooltipProvider>
+          </ThemeProvider>
+        </ClerkProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 

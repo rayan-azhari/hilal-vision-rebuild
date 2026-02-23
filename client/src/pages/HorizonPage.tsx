@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { SEO } from "@/components/SEO";
 import { Compass, MapPin, ChevronDown, Clock, Locate } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { useGeolocation } from "@/hooks/useGeolocation";
@@ -258,7 +259,7 @@ export default function HorizonPage() {
 
   // Set document title
   useEffect(() => {
-    document.title = `Horizon View \u2014 ${loc.name ?? selectedCity.name} | Hilal Vision`;
+    // document.title managed by <SEO> component
   }, [loc.name, selectedCity.name]);
 
   // Apply geolocation result when detected
@@ -309,6 +310,11 @@ export default function HorizonPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
+      <SEO
+        title={`Horizon View — ${loc.name ?? selectedCity.name}`}
+        description={`Local horizon simulator for ${loc.name ?? selectedCity.name} showing moon and sun positions at sunset for crescent sighting.`}
+        path="/horizon"
+      />
       {/* Header */}
       <PageHeader
         icon={<Compass />}
