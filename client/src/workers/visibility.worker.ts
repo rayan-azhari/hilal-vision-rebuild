@@ -1,48 +1,26 @@
 /**
  * Visibility Texture Web Worker
  *
- * Offloads the heavy computeSunMoonAtSunset grid computation to a background
- * thread, keeping the main thread responsive during the 2-4 second calculation.
+ * Offloads the heavy visibility grid computation to a background thread,
+ * keeping the main thread responsive during the 2-4 second calculation.
+ *
+ * Now imports from the shared astronomy module instead of inlining copies.
  *
  * Input message:  { dateTs: number, resolution: number, isMercator: boolean }
  * Output message: { pixels: Uint8ClampedArray, width: number, height: number }
  */
+import {
+    toRad,
+    toDeg,
+    crescentWidth,
+    yallopQ,
+    classifyYallop,
+    ZONE_RGB,
+    type VisibilityZone,
+} from "@shared/astronomy";
 import * as SunCalc from "suncalc";
 
-// ─── Inlined core calculations (can't import DOM-dependent astronomy.ts) ───
-
-function toRad(d: number) { return d * Math.PI / 180; }
-function toDeg(r: number) { return r * 180 / Math.PI; }
-
-function crescentWidth(elongationDeg: number, moonDistKm: number) {
-    const SD = toDeg(Math.asin(1737.4 / moonDistKm)) * 60;
-    const w = SD * (1 - Math.cos(toRad(elongationDeg)));
-    return { w, sd: SD };
-}
-
-function yallopQ(arcv: number, w: number): number {
-    return (arcv - (11.8371 - 6.3226 * w + 0.7319 * w * w - 0.1018 * w * w * w)) / 10;
-}
-
-type VisibilityZone = "A" | "B" | "C" | "D" | "E" | "F";
-
-function classifyYallop(q: number, moonAltAtSunset: number): VisibilityZone {
-    if (moonAltAtSunset < 0) return "F";
-    if (q >= 0.216) return "A";
-    if (q >= -0.014) return "B";
-    if (q >= -0.160) return "C";
-    if (q >= -0.232) return "D";
-    return "E";
-}
-
-const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
-    A: [74, 222, 128],
-    B: [250, 204, 21],
-    C: [251, 146, 60],
-    D: [248, 113, 113],
-    E: [107, 114, 128],
-    F: [31, 41, 55],
-};
+// ─── Worker-specific calculation (simplified for grid performance) ────────────
 
 function computeVisibilityAtPoint(date: Date, lat: number, lng: number): VisibilityZone {
     const times = SunCalc.getTimes(date, lat, lng);

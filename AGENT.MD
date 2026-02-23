@@ -25,7 +25,9 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
   - `client/public/icop-history.json` - Static dataset with 1,028+ sighting records, served directly by Vite for performance, bypassing tRPC.
   - `server/_core/context.ts` - tRPC context creation with Clerk auth (try/catch for public endpoints).
 - `api/` - Vercel serverless functions. Contains `trpc/[trpc].ts` which wraps the tRPC router for deployment.
-- `shared/` - Shared code between frontend and backend (e.g., Zod schemas, shared types).
+- `shared/` - Shared isomorphic code between frontend, backend, and Web Workers.
+  - `shared/astronomy.ts` - The core astronomical calculation engine (Yallop/Odeh criteria, Hijri calendar, visibility grid, best-time-to-observe). Imported by the server, Web Worker, tests, and client (via re-export wrapper).
+  - `shared/types.ts` - Shared TypeScript types and Zod schemas.
 - `drizzle/` - Database migrations, schema definitions, and related configuration.
 
 ## ⚠️ Critical: Package Management

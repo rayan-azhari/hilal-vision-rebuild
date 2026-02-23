@@ -43,7 +43,10 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 8. **Open-Meteo Cloud Cover Overlay**: Real-time cloud cover data fetched from Open-Meteo's forecast API for a sparse global grid (~162 points), bilinearly interpolated into a smooth canvas texture, and overlaid on both 2D Map (Leaflet `imageOverlay`) and 3D Globe (Three.js sphere mesh). Independently toggleable from visibility zones.
 9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
 10. **Trilingual i18n with RTL**: Full Arabic and Urdu translation files (100+ strings) with automatic RTL direction switching and browser language detection.
-11. **Dynamic SEO Engine**: Per-page meta tags, OG/Twitter cards, and JSON-LD structured data via `react-helmet-async`, with canonical URLs and a complete sitemap.
+11. **Dynamic SEO Engine**: Per-page meta tags, OG/Twitter cards (PNG format for social platform compatibility), and JSON-LD structured data via `react-helmet-async`, with canonical URLs and a complete sitemap.
+12. **Shared Astronomy Module**: The 843-line astronomy engine has been extracted to `shared/astronomy.ts` — a platform-agnostic module importable by the server, Web Workers, and tests without cross-boundary imports. Only `buildVisibilityTexture` (DOM-dependent) remains in the client wrapper.
+13. **Code Splitting**: All 6 heavy pages are lazy-loaded via `React.lazy` + `Suspense`, keeping Globe.gl, Three.js, Leaflet, D3, and Recharts out of the initial bundle.
+14. **Reliable Test Suite**: 21 unit tests import directly from the production `shared/astronomy.ts` module (not duplicated copies) and cover Yallop classification, crescent width, Hijri conversion, q-value formula, degree/radian conversions, and best-time-to-observe.
 
 ## Getting Started
 
@@ -91,7 +94,7 @@ See `docs/DEPLOYMENT.md` for the full Vercel deployment guide.
 ### Code Quality & Testing
 
 ```bash
-npm run test    # Unit tests (Yallop models, Sun/Moon trajectories)
+npm run test    # Unit tests (21 tests — Yallop, crescent width, Hijri calendar, best-time)
 npm run check   # TypeScript type checking
 ```
 

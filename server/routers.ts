@@ -6,8 +6,8 @@ import { notificationsRouter } from "./routers/notifications";
 import { z } from "zod";
 import { getDb } from "./db";
 import { observationReports } from "../drizzle/schema";
-import { desc } from "drizzle-orm";
-import { computeSunMoonAtSunset } from "../client/src/lib/astronomy";
+import { desc, count } from "drizzle-orm";
+import { computeSunMoonAtSunset } from "../shared/astronomy";
 
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -134,13 +134,18 @@ export const appRouter = router({
         if (!db) return { data: [], total: 0 };
         const limit = input?.limit ?? 50;
         const offset = input?.offset ?? 0;
-        const data = await db
-          .select()
-          .from(observationReports)
-          .orderBy(desc(observationReports.createdAt))
-          .limit(limit)
-          .offset(offset);
-        return { data, total: data.length };
+        const [data, totalResult] = await Promise.all([
+          db
+            .select()
+            .from(observationReports)
+            .orderBy(desc(observationReports.createdAt))
+            .limit(limit)
+            .offset(offset),
+          db
+            .select({ total: count() })
+            .from(observationReports),
+        ]);
+        return { data, total: totalResult[0]?.total ?? 0 };
       }),
   }),
   environment: router({

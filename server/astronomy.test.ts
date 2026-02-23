@@ -1,60 +1,21 @@
 /**
  * Hilal Vision — Astronomy Engine Unit Tests
- * Tests the core calculation functions for correctness.
+ * Tests the ACTUAL production functions from astronomy.ts for correctness.
  */
 import { describe, it, expect } from "vitest";
+import {
+  toRad,
+  toDeg,
+  yallopQ,
+  crescentWidth,
+  classifyYallop,
+  gregorianToJD,
+  jdToHijri,
+  gregorianToHijri,
+  computeBestObservationTime,
+} from "../shared/astronomy";
 
-// We test pure math functions inline since they don't depend on the server
-const toRad = (d: number) => (d * Math.PI) / 180;
-const toDeg = (r: number) => (r * 180) / Math.PI;
-
-function yallopQ(arcv: number, w: number): number {
-  const f = 11.8371 - 6.3226 * w + 0.7319 * w * w - 0.1018 * w * w * w;
-  return (arcv - f) / 10;
-}
-
-function crescentWidth(elongationDeg: number, moonDistKm: number): { w: number; sd: number } {
-  const SD = toDeg(Math.asin(1737.4 / moonDistKm)) * 60;
-  const arcl = toRad(elongationDeg);
-  const w = SD * (1 - Math.cos(arcl));
-  return { w, sd: SD };
-}
-
-function classifyYallop(q: number, moonAlt: number): string {
-  if (moonAlt <= 0) return "F";
-  if (q >= 0.216) return "A";
-  if (q >= -0.014) return "B";
-  if (q >= -0.160) return "C";
-  if (q >= -0.232) return "D";
-  return "E";
-}
-
-function gregorianToJD(y: number, m: number, d: number): number {
-  if (m <= 2) { y -= 1; m += 12; }
-  const A = Math.floor(y / 100);
-  const B = 2 - A + Math.floor(A / 4);
-  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
-}
-
-function jdToHijri(jd: number): { year: number; month: number; day: number } {
-  const z = Math.floor(jd + 0.5);
-  const a = z - 1948440 + 10632;
-  const n = Math.floor((a - 1) / 10631);
-  const aa = a - 10631 * n + 354;
-  const j = Math.floor((10985 - aa) / 5316) * Math.floor(50 * aa / 17719) +
-    Math.floor(aa / 5670) * Math.floor(43 * aa / 15238);
-  const aa2 = aa - Math.floor((30 - j) / 15) * Math.floor(17719 * j / 50) -
-    Math.floor(j / 16) * Math.floor(15238 * j / 43) + 29;
-  const month = Math.floor(24 * aa2 / 709);
-  const day = aa2 - Math.floor(709 * month / 24);
-  const year = 30 * n + j - 30;
-  return { year, month, day };
-}
-
-function gregorianToHijri(date: Date): { year: number; month: number; day: number } {
-  const jd = gregorianToJD(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  return jdToHijri(jd);
-}
+// ─── Yallop Classification ───────────────────────────────────────────────────
 
 describe("Yallop q-value classification", () => {
   it("classifies zone A for high q-value", () => {
@@ -78,6 +39,8 @@ describe("Yallop q-value classification", () => {
   });
 });
 
+// ─── Crescent Width ──────────────────────────────────────────────────────────
+
 describe("Crescent width calculation", () => {
   it("returns near-zero width for very small elongation", () => {
     const { w } = crescentWidth(1, 384400);
@@ -98,38 +61,43 @@ describe("Crescent width calculation", () => {
   });
 });
 
-describe("Hijri calendar conversion", () => {
+// ─── Hijri Calendar ──────────────────────────────────────────────────────────
+
+describe("Hijri calendar conversion (arithmetic fallback)", () => {
+  function gregorianToHijriArithmetic(date: Date) {
+    const jd = gregorianToJD(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    return jdToHijri(jd);
+  }
+
   it("converts 2024-03-10 to approximately Sha'ban/Ramadan 1445", () => {
-    const hijri = gregorianToHijri(new Date(2024, 2, 10));
+    const hijri = gregorianToHijriArithmetic(new Date(2024, 2, 10));
     expect(hijri.year).toBe(1445);
-    // March 10, 2024 is in Sha'ban (8) or Ramadan (9)
     expect([8, 9]).toContain(hijri.month);
   });
 
   it("converts 2024-04-10 to approximately Shawwal 1445", () => {
-    const hijri = gregorianToHijri(new Date(2024, 3, 10));
+    const hijri = gregorianToHijriArithmetic(new Date(2024, 3, 10));
     expect(hijri.year).toBe(1445);
-    expect(hijri.month).toBe(10); // Shawwal
+    expect(hijri.month).toBe(10);
   });
 
   it("converts 2022-04-01 to approximately Sha'ban 1443", () => {
-    const hijri = gregorianToHijri(new Date(2022, 3, 1));
+    const hijri = gregorianToHijriArithmetic(new Date(2022, 3, 1));
     expect(hijri.year).toBe(1443);
-    // April 1, 2022 is in Sha'ban (month 8) or early Ramadan (month 9)
     expect([8, 9]).toContain(hijri.month);
   });
 
   it("year is within expected range for modern dates", () => {
-    const hijri = gregorianToHijri(new Date(2026, 1, 18));
+    const hijri = gregorianToHijriArithmetic(new Date(2026, 1, 18));
     expect(hijri.year).toBeGreaterThan(1440);
     expect(hijri.year).toBeLessThan(1450);
   });
 });
 
+// ─── Yallop q-value Formula ──────────────────────────────────────────────────
+
 describe("Yallop q-value formula", () => {
   it("produces expected q for known values", () => {
-    // For arcv=10, w=0.5: f = 11.8371 - 3.1613 + 0.18298 - 0.01273 ≈ 8.85
-    // q = (10 - 8.85) / 10 ≈ 0.115
     const q = yallopQ(10, 0.5);
     expect(q).toBeGreaterThan(0.0);
     expect(q).toBeLessThan(0.5);
@@ -141,6 +109,8 @@ describe("Yallop q-value formula", () => {
     expect(q1).toBeGreaterThan(q2);
   });
 });
+
+// ─── Degree/Radian Conversions ───────────────────────────────────────────────
 
 describe("Degree/radian conversions", () => {
   it("toRad converts 180° to π", () => {
@@ -157,66 +127,7 @@ describe("Degree/radian conversions", () => {
   });
 });
 
-// ─── Best Time to Observe ─────────────────────────────────────────────────────
-import SunCalc from "suncalc";
-
-function computeBestObservationTime(date: Date, loc: { lat: number; lng: number }) {
-  const times = SunCalc.getTimes(date, loc.lat, loc.lng);
-  const moonTimes = SunCalc.getMoonTimes(date, loc.lat, loc.lng);
-
-  const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
-    ? times.sunset
-    : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
-
-  let windowEnd: Date;
-  if (
-    moonTimes.set instanceof Date &&
-    !isNaN(moonTimes.set.getTime()) &&
-    moonTimes.set.getTime() > sunset.getTime()
-  ) {
-    windowEnd = moonTimes.set;
-  } else {
-    windowEnd = new Date(sunset.getTime() + 2 * 3600 * 1000);
-  }
-
-  const STEP_MS = 5 * 60 * 1000;
-  let bestTime = sunset;
-  let bestScore = -Infinity;
-  let bestMoonAlt = 0;
-  let bestSunAlt = 0;
-
-  for (let t = sunset.getTime(); t <= windowEnd.getTime(); t += STEP_MS) {
-    const moment = new Date(t);
-    const sunPos = SunCalc.getPosition(moment, loc.lat, loc.lng);
-    const moonPos = SunCalc.getMoonPosition(moment, loc.lat, loc.lng);
-
-    const moonAlt = toDeg(moonPos.altitude);
-    const sunAlt = toDeg(sunPos.altitude);
-
-    if (moonAlt <= 0) continue;
-
-    const darknessFactor = sunAlt < -12 ? 1.0 : sunAlt < -6 ? 0.8 : sunAlt < 0 ? 0.5 : 0.1;
-    const altFactor = moonAlt > 5 ? Math.min(moonAlt / 20, 1.0) : moonAlt / 10;
-    const score = moonAlt * darknessFactor * altFactor;
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestTime = moment;
-      bestMoonAlt = moonAlt;
-      bestSunAlt = sunAlt;
-    }
-  }
-
-  return {
-    bestTime,
-    score: Math.max(0, bestScore),
-    moonAltAtBest: bestMoonAlt,
-    sunAltAtBest: bestSunAlt,
-    windowStart: sunset,
-    windowEnd,
-    viable: bestScore > 0,
-  };
-}
+// ─── Best Time to Observe ────────────────────────────────────────────────────
 
 describe("Best time to observe calculator", () => {
   it("returns a best time between sunset and moonset", () => {

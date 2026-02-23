@@ -67,7 +67,7 @@
 - [x] Leaflet CSS dark theme overrides
 - [x] Star field background
 - [x] Float/glow animations
-- [x] Vitest unit tests (18 tests, all passing)
+- [x] Vitest unit tests (21 tests, all passing)
 - [x] TypeScript: 0 errors
 - [x] Final checkpoint
 
@@ -114,7 +114,8 @@
 - [ ] Educational "How to Sight the Moon" content
 - [ ] AR Moon Finder (Capacitor camera + WebGL)
 - [ ] Push notifications for sighting alerts
-- [ ] Multi-language UI (Arabic, Urdu, Malay)
+- [x] Multi-language UI (Arabic, Urdu) — English, Arabic, Urdu with RTL support
+- [ ] Multi-language UI (Malay)
 - [ ] Photo upload for sighting reports
 - [ ] VSOP87/ELP2000 high-accuracy planetary theory
 
@@ -126,3 +127,16 @@
 ## Phase 6: Deep Mobile Integration (Capacitor)
 - [ ] **AR Moon Finder:** Use Capacitor camera APIs + device-orientation sensors.
 - [ ] **Malay Language:** Add Malay (ms) to i18n setup.
+
+## Improvements (Round 6 — Audit & Code Quality)
+- [x] Comprehensive code audit (7.5/10 scorecard, competitive analysis, tiered action plan)
+- [x] `robots.txt` updated with `/api/` Disallow
+- [x] OG image format fixed (SVG → PNG for social platform compatibility)
+- [x] `getObservations` pagination bug fixed (proper `COUNT(*)` query)
+- [x] Code splitting with `React.lazy` + `Suspense` (6 heavy pages lazy-loaded)
+- [x] Exported 6 private astronomy functions for testability
+- [x] Test suite rewritten to import from production module (21 tests, no more inline copies)
+- [x] Extracted astronomy engine to `shared/astronomy.ts` (isomorphic, no DOM)
+- [x] `client/src/lib/astronomy.ts` reduced to thin re-export wrapper + `buildVisibilityTexture`
+- [x] Web Worker updated to import from shared module (no more inlined copies)
+- [x] Server import fixed: `../shared/astronomy` replaces cross-boundary `../client/src/lib/astronomy`

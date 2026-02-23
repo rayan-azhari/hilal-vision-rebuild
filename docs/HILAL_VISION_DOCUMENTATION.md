@@ -73,9 +73,9 @@ hilal-vision/
 │   │   ├── hooks/          ← Custom hooks (useVisibilityWorker, useGeolocation)
 │   │   ├── workers/        ← Web Workers (visibility.worker.ts)
 │   │   ├── lib/
-│   │   │   ├── astronomy.ts    ← Core calculation engine
+│   │   │   ├── astronomy.ts    ← Re-export wrapper (re-exports shared + DOM-only buildVisibilityTexture)
 │   │   │   └── ummalqura.ts    ← Umm al-Qura calendar engine
-│   │   ├── App.tsx         ← Routes and providers
+│   │   ├── App.tsx         ← Routes, providers, and React.lazy code splitting
 │   │   ├── main.tsx        ← Entry point
 │   │   └── index.css       ← Global design system
 │   └── public/             ← Static assets
@@ -89,6 +89,7 @@ hilal-vision/
 ├── drizzle/
 │   └── schema.ts           ← Database schema
 ├── shared/
+│   ├── astronomy.ts        ← Core astronomy engine (isomorphic, no DOM)
 │   └── types.ts            ← Shared TypeScript types
 ├── api/
 │   └── trpc/[trpc].ts      ← Vercel serverless tRPC handler
@@ -225,7 +226,9 @@ The `ThemeContext` wraps the `next-themes` `ThemeProvider` with `defaultTheme="d
 
 ## 5. Astronomy Engine
 
-The astronomy engine (`client/src/lib/astronomy.ts`) is the computational heart of Hilal Vision. It implements the two primary crescent visibility criteria used by Islamic calendar authorities worldwide, plus supporting calculations for the Hijri calendar, moon phases, and day/night terminator geometry.
+The astronomy engine (`shared/astronomy.ts`) is the computational heart of Hilal Vision. It is an **isomorphic module** that runs in the browser main thread, Web Workers, Node.js server, and test runners — with no DOM dependencies. It implements the two primary crescent visibility criteria used by Islamic calendar authorities worldwide, plus supporting calculations for the Hijri calendar, moon phases, and day/night terminator geometry.
+
+The client-side wrapper (`client/src/lib/astronomy.ts`) re-exports everything from the shared module and adds the single DOM-dependent function `buildVisibilityTexture()`, which uses `document.createElement('canvas')` to render the visibility grid as a data URL.
 
 ### 5.1 Data Dependencies
 
@@ -484,11 +487,11 @@ The application is configured for Vercel deployment:
 
 ## 9. Testing
 
-The test suite (`server/astronomy.test.ts`) contains 18 unit tests covering the core astronomical calculation functions. Tests are written with Vitest and run with `pnpm test`.
+The test suite (`server/astronomy.test.ts`) contains 21 unit tests covering the core astronomical calculation functions. Tests import directly from the production `shared/astronomy.ts` module — not duplicated inline copies — ensuring tests validate the actual production code. Tests are written with Vitest and run with `pnpm test`.
 
-The test suite covers five areas. The **Yallop q-value classification** tests verify that the zone boundaries (A, B, C, D, E, F) are correctly applied for representative q-values and moon altitudes. The **crescent width calculation** tests verify that the W formula produces physically reasonable values (near-zero for small elongation, increasing with elongation, semi-diameter approximately 15 arcminutes at mean lunar distance). The **Hijri calendar conversion** tests verify known date conversions (e.g., 2024-03-10 → Sha'ban/Ramadan 1445 AH). The **Yallop q-value formula** tests verify the polynomial formula against hand-computed values. The **degree/radian conversion** tests verify the utility functions with round-trip identity checks.
+The test suite covers six areas. The **Yallop q-value classification** tests verify that the zone boundaries (A, B, C, D, E, F) are correctly applied for representative q-values and moon altitudes. The **crescent width calculation** tests verify that the W formula produces physically reasonable values (near-zero for small elongation, increasing with elongation, semi-diameter approximately 15 arcminutes at mean lunar distance). The **Hijri calendar conversion** tests verify known date conversions (e.g., 2024-03-10 → Sha'ban/Ramadan 1445 AH). The **Yallop q-value formula** tests verify the polynomial formula against hand-computed values. The **degree/radian conversion** tests verify the utility functions with round-trip identity checks. The **best-time-to-observe** tests verify the observation window calculator returns valid windows with non-negative scores.
 
-All 18 tests pass as of the current version.
+All 21 tests pass as of the current version.
 
 ---
 
@@ -520,5 +523,6 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 20 | UI Consistency | Unified PageHeader component across all tool pages. Fixed Clerk `getAuth` crash for public tRPC endpoints. |
 | 21 | Deployment Fixes | Bypassed Vercel serverless limits by moving 160KB ICOP dataset to `client/public/` for static serving. Fixed Vercel SPA catch-all rewrite preventing `/api/trpc` routes from firing. |
 | 22 | Design Overhaul | Implemented "Clinical Aerospace" (Light) and "Deep Space" (Dark) themes with refined typography scaling, card padding, and SVG SVG scaling fixes. Elevated visual language to "instrument-grade". |
+| 23 | Audit & Code Quality | Comprehensive audit (7.5/10 scorecard). Extracted astronomy engine to `shared/astronomy.ts` (isomorphic). Added `React.lazy` code splitting for 6 pages. Fixed OG image (SVG→PNG), `getObservations` pagination bug (`COUNT(*)`), `robots.txt`. Rewrote test suite (21 tests import production module). Updated Web Worker to import from shared module. |
 
 *Documentation updated February 23, 2026. For the latest feature status, see `todo.md`.*
