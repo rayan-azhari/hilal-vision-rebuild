@@ -6,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SightingReportForm } from "./SightingReportForm";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { useGlobalState } from "@/contexts/GlobalStateContext";
+import { LocationSearch } from "./LocationSearch";
+import { AutoDetectButton } from "./AutoDetectButton";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -24,13 +28,29 @@ const LANG_OPTIONS = [
 ] as const;
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [routePath] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
+
+  const { location, setLocation, date, setDate } = useGlobalState();
+  const geo = useGeolocation(true);
+
+  // Apply GPS detection result globally
+  useEffect(() => {
+    if (geo.position) {
+      const gpsCity = {
+        name: geo.position.name || "GPS Location",
+        country: "Current",
+        lat: geo.position.lat,
+        lng: geo.position.lng,
+      };
+      setLocation(gpsCity);
+    }
+  }, [geo.position, setLocation]);
 
   // Set RTL direction based on language
   useEffect(() => {
@@ -114,13 +134,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1.5 ml-8 mr-auto">
+          <nav className="hidden lg:flex items-center gap-1.5 ml-4 mr-2">
             {navItems.map(({ href, label, icon: Icon }) => {
-              const active = location === href;
+              const active = routePath === href;
               return (
                 <Link key={href} href={href}>
                   <div
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[13px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic"
                     style={{
                       color: active ? "var(--foreground)" : "var(--muted-foreground)",
                       background: active
@@ -139,6 +159,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+
+          {/* Global Location & Date Selectors */}
+          <div className="hidden lg:flex items-center gap-2 mr-auto mx-2 flex-1 max-w-[340px]">
+            <div className="flex items-center gap-2 bg-black/10 px-1 py-1 rounded-xl border border-white/5 w-full">
+              <div className="w-full relative min-w-0">
+                <LocationSearch
+                  selectedCity={location}
+                  onSelect={setLocation}
+                />
+              </div>
+              <AutoDetectButton onClick={geo.detect} loading={geo.loading} className="mr-1" />
+            </div>
+
+            <input
+              type="date"
+              value={`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`}
+              onChange={e => {
+                if (!e.target.value) return;
+                const [y, m, d] = e.target.value.split("-").map(Number);
+                const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
+                setDate(newDate);
+              }}
+              className="px-2 py-[7px] min-w-0 rounded-lg text-[13px] font-sans text-center transition-colors"
+              style={{
+                background: "var(--space-light)",
+                border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                color: "var(--foreground)",
+                colorScheme: "dark",
+                width: "125px"
+              }}
+            />
+          </div>
 
           {/* Actions: Theme, Lang, Clerk, Report */}
           <div className="flex items-center gap-1 md:gap-2">
@@ -252,7 +304,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Mobile Nav — positioned BELOW the header pill */}
         {mobileOpen && (
           <div
-            className="lg:hidden pointer-events-auto mt-2 rounded-2xl border"
+            className="lg:hidden pointer-events-auto mt-2 rounded-2xl border flex flex-col"
             style={{
               background: "color-mix(in oklch, var(--space) 95%, transparent)",
               backdropFilter: "blur(24px) saturate(1.2)",
@@ -263,9 +315,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               width: "100%",
             }}
           >
-            <div className="py-3 px-2 flex flex-col gap-1">
+            <div className="py-2 px-3 flex flex-col gap-2 border-b border-white/5">
+              <label className="text-xs uppercase text-[var(--gold-dim)] font-bold ml-1">Settings</label>
+              <div className="flex flex-col gap-2">
+                <LocationSearch
+                  selectedCity={location}
+                  onSelect={setLocation}
+                />
+                <div className="flex justify-between items-center gap-2">
+                  <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
+                  <input
+                    type="date"
+                    value={`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`}
+                    onChange={e => {
+                      if (!e.target.value) return;
+                      const [y, m, d] = e.target.value.split("-").map(Number);
+                      const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
+                      setDate(newDate);
+                    }}
+                    className="px-2 py-[7px] w-full max-w-[140px] rounded-lg text-[13px] font-sans text-center transition-colors"
+                    style={{
+                      background: "var(--space-light)",
+                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                      color: "var(--foreground)",
+                      colorScheme: "dark",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="py-2 px-2 flex flex-col gap-1">
               {navItems.map(({ href, label, icon: Icon }) => {
-                const active = location === href;
+                const active = routePath === href;
                 return (
                   <Link key={href} href={href}>
                     <div

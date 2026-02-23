@@ -5,6 +5,7 @@ Welcome to **Hilal Vision**, a precision astronomical platform designed for pred
 ## Navigation
 
 The top navigation bar provides access to all views and includes:
+- **Global Date & Location Pickers** (Search any city or Auto-Detect GPS. Syncs across all map and dashboard views)
 - **Theme Toggle** (Light/Dark mode)
 - **Report Sighting** button (golden `+` icon)
 - **Account Settings** / Sign In (Clerk authentication)
@@ -21,10 +22,10 @@ Your command center for at-a-glance astronomical data.
 
 A **unified page** with a floating toggle to switch between **3D Globe** and **2D Map** views. All controls are fully synchronized — changing the date, hour offset, or location on one view carries over instantly to the other.
 
-### Shared Controls (both views)
-- **Date Picker** — Select any Gregorian date.
-- **Hour Offset Slider** — Slide ±24 hours to see visibility evolve over time.
-- **Location Selector** — Dynamically search any world city via Open-Meteo geocoding, or use **Auto-Detect GPS** to fly to your current position.
+### Shared Controls (Both Views & Global Navbar)
+- **Global Date Picker** (in Navbar) — Select any Gregorian date to instantly update the map, globe, and moon phases.
+- **Global Location Selector** (in Navbar) — Dynamically search any world city via Open-Meteo geocoding, or use **Auto-Detect GPS** to fly to your current position.
+- **Hour Offset Slider** (in Map/Globe Sidebars) — Slide ±24 hours to see visibility evolve over time for the currently selected global date.
 
 ### 3D Globe View
 - Interactive Globe.gl sphere with day/night terminator.

@@ -2,18 +2,15 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { SEO } from "@/components/SEO";
 import { Compass, MapPin, ChevronDown, Clock, Locate } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { useGeolocation } from "@/hooks/useGeolocation";
-import { AutoDetectButton } from "@/components/AutoDetectButton";
+import { useGlobalState } from "@/contexts/GlobalStateContext";
 import {
   computeSunMoonAtSunset,
-  MAJOR_CITIES,
   VISIBILITY_LABELS,
   gregorianToHijri,
   formatTime,
   type SunMoonData,
 } from "@/lib/astronomy";
 import * as SunCalc from "suncalc";
-import { LocationSearch } from "@/components/LocationSearch";
 
 function drawHorizon(
   canvas: HTMLCanvasElement,
@@ -246,31 +243,13 @@ function drawHorizon(
 
 export default function HorizonPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [date, setDate] = useState(() => new Date());
-  const [selectedCity, setSelectedCity] = useState(MAJOR_CITIES[0]);
-  const [customLat, setCustomLat] = useState("");
-  const [customLng, setCustomLng] = useState("");
+  const { date, location: loc } = useGlobalState();
   const [data, setData] = useState<SunMoonData | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const geo = useGeolocation(true); // auto-detect GPS on mount
-
-  const loc = customLat && customLng
-    ? { lat: parseFloat(customLat), lng: parseFloat(customLng), name: "Custom" }
-    : selectedCity;
 
   // Set document title
   useEffect(() => {
     // document.title managed by <SEO> component
-  }, [loc.name, selectedCity.name]);
-
-  // Apply geolocation result when detected
-  useEffect(() => {
-    if (geo.position) {
-      setCustomLat(geo.position.lat.toString());
-      setCustomLng(geo.position.lng.toString());
-      setSearchQuery("");
-    }
-  }, [geo.position]);
+  }, [loc.name]);
 
   useEffect(() => {
     const d = computeSunMoonAtSunset(date, loc);
@@ -302,18 +281,12 @@ export default function HorizonPage() {
   }, [data, date]);
 
   const hijri = gregorianToHijri(date);
-  const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-  const filteredCities = MAJOR_CITIES.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.country.toLowerCase().includes(searchQuery.toLowerCase())
-  ).slice(0, 8);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Horizon View — ${loc.name ?? selectedCity.name}`}
-        description={`Local horizon simulator for ${loc.name ?? selectedCity.name} showing moon and sun positions at sunset for crescent sighting.`}
+        title={`Horizon View — ${loc.name}`}
+        description={`Local horizon simulator for ${loc.name} showing moon and sun positions at sunset for crescent sighting.`}
         path="/horizon"
       />
       {/* Header */}
@@ -346,7 +319,7 @@ export default function HorizonPage() {
             }}
           >
             <MapPin className="w-3 h-3" />
-            {loc.name ?? selectedCity.name} · {loc.lat.toFixed(2)}°, {loc.lng.toFixed(2)}°
+            {loc.name} · {loc.lat.toFixed(2)}°, {loc.lng.toFixed(2)}°
           </div>
         </div>
 
@@ -359,122 +332,6 @@ export default function HorizonPage() {
           }}
         >
           <div className="p-5 space-y-5">
-            {/* Date */}
-            <div className="breezy-card overflow-visible p-4 animate-breezy-enter">
-              <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Date</label>
-              <input
-                type="date"
-                value={dateStr}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const [y, m, d] = e.target.value.split("-").map(Number);
-                  setDate(new Date(y, m - 1, d, 18, 0, 0));
-                }}
-                className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{
-                  background: "var(--space-light)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                  color: "var(--foreground)",
-                  colorScheme: "dark",
-                }}
-              />
-            </div>
-
-            {/* Location search */}
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
-              <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Search Location</label>
-              <input
-                type="text"
-                placeholder="Search city…"
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-sm mb-2"
-                style={{
-                  background: "var(--space-light)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                  color: "var(--foreground)",
-                }}
-              />
-              {searchQuery && (
-                <div
-                  className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid color-mix(in oklch, var(--gold) 15%, transparent)" }}
-                >
-                  {filteredCities.map(city => (
-                    <button
-                      key={`${city.name}-${city.lat}`}
-                      onClick={() => { setSelectedCity(city); setSearchQuery(""); setCustomLat(""); setCustomLng(""); }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-left hover:bg-white/5 transition-colors"
-                      style={{
-                        background: selectedCity.name === city.name ? "color-mix(in oklch, var(--gold) 8%, transparent)" : "var(--space-light)",
-                        color: "var(--foreground)",
-                        borderBottom: "1px solid color-mix(in oklch, var(--gold) 8%, transparent)",
-                      }}
-                    >
-                      <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: "var(--gold-dim)" }} />
-                      <span>{city.name}</span>
-                      <span style={{ color: "var(--muted-foreground)" }}>{city.country}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* City dropdown */}
-              <div className="relative mt-3">
-                <LocationSearch
-                  selectedCity={selectedCity}
-                  onSelect={(city) => {
-                    setSelectedCity(city);
-                    setCustomLat("");
-                    setCustomLng("");
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Geolocation detect */}
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
-              <AutoDetectButton onClick={geo.detect} loading={geo.loading} variant="button" />
-              {geo.error && (
-                <p className="text-xs mt-2" style={{ color: "var(--destructive)" }}>{geo.error}</p>
-              )}
-              {geo.position && (
-                <p className="text-xs mt-2" style={{ color: "var(--gold-dim)" }}>
-                  📍 {geo.position.name} ({geo.position.lat.toFixed(4)}°, {geo.position.lng.toFixed(4)}°)
-                </p>
-              )}
-            </div>
-
-            {/* Custom coordinates */}
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "150ms" }}>
-              <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>Custom Coordinates</label>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="number"
-                  placeholder="Latitude"
-                  value={customLat}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomLat(e.target.value)}
-                  className="px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: "var(--space-light)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                    color: "var(--foreground)",
-                  }}
-                />
-                <input
-                  type="number"
-                  placeholder="Longitude"
-                  value={customLng}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomLng(e.target.value)}
-                  className="px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: "var(--space-light)",
-                    border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                    color: "var(--foreground)",
-                  }}
-                />
-              </div>
-            </div>
-
             {/* Data readout */}
             {data && (
               <div

@@ -213,11 +213,11 @@ Three pre-built background gradient utilities are available:
 
 ## 4. Global State Management
 
-### 4.1 LocationContext
+### 4.1 GlobalStateContext
 
-The `LocationContext` (`client/src/contexts/LocationContext.tsx`) provides a globally shared location state that persists across all pages and survives page refreshes via `localStorage`. The default location is **Mecca, Saudi Arabia** — the spiritual centre of Islam and the reference point for the Umm al-Qura calendar.
+The `GlobalStateContext` (`client/src/contexts/GlobalStateContext.tsx`) provides a globally shared state for both **location** and **date**, ensuring that all pages (3D Globe, 2D Map, Moon Phase, Horizon) instantly synchronize to a single source of truth without redundant local pickers. The default location is **Mecca, Saudi Arabia** — the spiritual centre of Islam and the reference point for the Umm al-Qura calendar, and the default date is the current system date.
 
-The context exposes: `location` (the current `CityLocation` object with `name`, `country`, `lat`, `lng`), `setLocation` (set to a city from the `MAJOR_CITIES` database), `setCustomLocation` (set to arbitrary coordinates), `nextEvent` (the nearest upcoming Islamic event), and `upcomingEvents` (all upcoming Islamic events sorted by proximity).
+The context exposes: `location` (the current `CityLocation` object), `setLocation`, `setCustomLocation`, `date`, `setDate`, `nextEvent` (the nearest upcoming Islamic event), and `upcomingEvents` (all upcoming Islamic events sorted by proximity).
 
 The Islamic event calculation covers Ramadan (1 Ramadan), Eid al-Fitr (1 Shawwal), and Eid al-Adha (10 Dhu al-Hijjah). Events are computed by converting the Hijri event date to Gregorian using the algorithmic Hijri calendar, checking the current year and the next two years to ensure a future event is always available, and sorting by days until the event. The computation runs hourly via `setInterval` to stay current.
 
@@ -586,5 +586,6 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 26 | Map/Globe UX | Fixed Vercel 500 error on cloud cover fetch by reducing Open-Meteo batch size to avoid URL limits. Unified Visibility Map and Cloud Cover toggles directly within the side panel controls for both MapPage and GlobePage. |
 | 27 | Informational Pages | Added four new route pages: `/about` (mission, tools, competitor comparison, attributions), `/methodology` (full Yallop/Odeh formula reference, triple-engine calendar, ICOP, refraction), `/privacy` (GDPR-aware policy), `/terms` (acceptable use, MIT License). Linked in footer nav. All routes lazy-loaded in `App.tsx`. |
 | 28 | Vector Render | Refactored MapPage to generate pure mathematical SVG contours from Yallop `q-value` matrix using `d3-contours`. Removed pixelated canvas generation. Fixed Home page routing overlay issue. |
+| 29 | Global Pickers | Centralized the Date and Location selection (with Auto-Detect GPS) into the main navigation bar using `GlobalStateContext`. All dashboard modules now sync automatically to a single global source of truth. Removed redundant pickers from individual pages. |
 
 *Documentation updated February 23, 2026 (Round 28 — Vector Render). For the latest feature status, see `todo.md`.*

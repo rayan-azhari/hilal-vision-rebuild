@@ -1,28 +1,19 @@
 import { useState } from "react";
 import { SEO } from "@/components/SEO";
-import { MAJOR_CITIES } from "@/lib/astronomy";
 import GlobePage from "./GlobePage";
 import MapPage from "./MapPage";
 
 export interface SharedVisibilityState {
-    date: Date;
-    setDate: (d: Date) => void;
     hourOffset: number;
     setHourOffset: (h: number) => void;
-    selectedCity: (typeof MAJOR_CITIES)[0];
-    setSelectedCity: (c: (typeof MAJOR_CITIES)[0]) => void;
 }
 
 export default function VisibilityPage() {
     const [view, setView] = useState<"globe" | "map">("globe");
-    const [date, setDate] = useState(() => new Date());
     const [hourOffset, setHourOffset] = useState(0);
-    const [selectedCity, setSelectedCity] = useState(MAJOR_CITIES[0]);
 
     const shared: SharedVisibilityState = {
-        date, setDate,
         hourOffset, setHourOffset,
-        selectedCity, setSelectedCity,
     };
 
     return (

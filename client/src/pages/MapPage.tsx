@@ -14,11 +14,9 @@ import { trpc } from "@/lib/trpc";
 import { MapPin } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
-import { LocationSearch } from "@/components/LocationSearch";
+import { useGlobalState } from "@/contexts/GlobalStateContext";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
 import { BestTimeCard } from "@/components/BestTimeCard";
-import { useGeolocation } from "@/hooks/useGeolocation";
-import { AutoDetectButton } from "@/components/AutoDetectButton";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
   A: "#4ade80",
@@ -41,7 +39,8 @@ const ZONE_HEX: Record<VisibilityZone, string> = {
 
 
 export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
-  const { date, setDate, hourOffset, setHourOffset, selectedCity, setSelectedCity } = shared;
+  const { hourOffset, setHourOffset } = shared;
+  const { date, location: selectedCity } = useGlobalState();
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
@@ -61,24 +60,12 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const [moonData, setMoonData] = useState(() =>
     computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0])
   );
-  const geo = useGeolocation(true); // auto-detect GPS on mount
 
-  // Apply GPS detection result
   useEffect(() => {
-    if (geo.position) {
-      const gpsCity = {
-        name: geo.position.name || "GPS Location",
-        country: "Current",
-        lat: geo.position.lat,
-        lng: geo.position.lng,
-      };
-      if (!MAJOR_CITIES.find(c => c.name === gpsCity.name)) {
-        MAJOR_CITIES.unshift(gpsCity);
-      }
-      setSelectedCity(gpsCity);
-      leafletRef.current?.setView([gpsCity.lat, gpsCity.lng], 5, { animate: true });
+    if (leafletRef.current) {
+      leafletRef.current.setView([selectedCity.lat, selectedCity.lng], Math.max(leafletRef.current.getZoom(), 4), { animate: true });
     }
-  }, [geo.position]);
+  }, [selectedCity]);
 
   const hijri = useMemo(() => gregorianToHijri(date), [date]);
 
@@ -240,7 +227,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       .size([width, height])
       .thresholds(thresholds);
 
-    const contours = contourGen(qValues);
+    const contours = contourGen(Array.from(qValues));
 
     if (geoJsonLayerRef.current) {
       geoJsonLayerRef.current.remove();
@@ -349,8 +336,6 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     });
   }, [observations, theme]);
 
-  const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
       {/* Header */}
@@ -422,43 +407,6 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                 )}
               </div>
               <div className="space-y-4">
-                {/* Date */}
-                <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Date</label>
-                  <input
-                    type="date"
-                    value={dateStr}
-                    onChange={e => {
-                      const [y, m, d] = e.target.value.split("-").map(Number);
-                      setDate(new Date(y, m - 1, d, 18, 0, 0));
-                    }}
-                    className="w-full px-3 py-2 rounded-lg text-sm"
-                    style={{
-                      background: "var(--space-light)",
-                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                      color: "var(--foreground)",
-                      colorScheme: "dark",
-                    }}
-                  />
-                </div>
-
-                {/* Location */}
-                <div className="pt-2 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
-                  <div className="flex items-center justify-between mb-2 mt-1">
-                    <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Location</label>
-                    <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
-                  </div>
-                  <div className="relative">
-                    <LocationSearch
-                      selectedCity={selectedCity}
-                      onSelect={(city) => {
-                        setSelectedCity(city);
-                        leafletRef.current?.setView([city.lat, city.lng], 5, { animate: true });
-                      }}
-                    />
-                  </div>
-                </div>
-
                 {/* Hour offset */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">

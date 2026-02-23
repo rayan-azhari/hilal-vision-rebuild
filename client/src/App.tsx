@@ -6,6 +6,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { GlobalStateProvider } from "./contexts/GlobalStateContext";
 import Layout from "./components/Layout";
 import { lazy, Suspense } from "react";
 import { Sentry } from "@/lib/sentry";
@@ -88,19 +89,21 @@ function App() {
         <ErrorBoundary>
           <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
             <ThemeProvider defaultTheme="dark" switchable>
-              <TooltipProvider>
-                <Toaster
-                  theme="dark"
-                  toastOptions={{
-                    style: {
-                      background: "oklch(0.10 0.018 265)",
-                      border: "1px solid oklch(0.78 0.15 75 / 0.2)",
-                      color: "oklch(0.93 0.01 80)",
-                    },
-                  }}
-                />
-                <Router />
-              </TooltipProvider>
+              <GlobalStateProvider>
+                <TooltipProvider>
+                  <Toaster
+                    theme="dark"
+                    toastOptions={{
+                      style: {
+                        background: "oklch(0.10 0.018 265)",
+                        border: "1px solid oklch(0.78 0.15 75 / 0.2)",
+                        color: "oklch(0.93 0.01 80)",
+                      },
+                    }}
+                  />
+                  <Router />
+                </TooltipProvider>
+              </GlobalStateProvider>
             </ThemeProvider>
           </ClerkProvider>
         </ErrorBoundary>

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import * as THREE from "three";
 import { Globe2, Play, Pause, ChevronDown, MapPin, Clock, Eye, Cloud } from "lucide-react";
-import { useGeolocation } from "@/hooks/useGeolocation";
-import { AutoDetectButton } from "@/components/AutoDetectButton";
+import { useGlobalState } from "@/contexts/GlobalStateContext";
 import {
   computeSunMoonAtSunset,
   isDaylight,
@@ -15,12 +14,12 @@ import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
-import { LocationSearch } from "@/components/LocationSearch";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
 import { BestTimeCard } from "@/components/BestTimeCard";
 
 export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
-  const { date, setDate, hourOffset, setHourOffset, selectedCity, setSelectedCity } = shared;
+  const { hourOffset, setHourOffset } = shared;
+  const { date, location: selectedCity } = useGlobalState();
   const globeRef = useRef<HTMLDivElement>(null);
   const globeInstanceRef = useRef<any>(null);
   const [moonData, setMoonData] = useState(() =>
@@ -31,24 +30,12 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   const [isGlobeInitialized, setIsGlobeInitialized] = useState(false);
   const [showVisibility, setShowVisibility] = useState(true);
   const [showClouds, setShowClouds] = useState(false);
-  const geo = useGeolocation(true); // auto-detect GPS on mount
 
-  // Apply GPS detection result
   useEffect(() => {
-    if (geo.position) {
-      const gpsCity = {
-        name: geo.position.name || "GPS Location",
-        country: "Current",
-        lat: geo.position.lat,
-        lng: geo.position.lng,
-      };
-      if (!MAJOR_CITIES.find(c => c.name === gpsCity.name)) {
-        MAJOR_CITIES.unshift(gpsCity);
-      }
-      setSelectedCity(gpsCity);
-      globeInstanceRef.current?.pointOfView({ lat: gpsCity.lat, lng: gpsCity.lng, altitude: 2 }, 1000);
+    if (isGlobeInitialized && globeInstanceRef.current) {
+      globeInstanceRef.current.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 }, 1000);
     }
-  }, [geo.position]);
+  }, [selectedCity, isGlobeInitialized]);
 
   const effectiveDate = useMemo(
     () => new Date(date.getTime() + hourOffset * 3600 * 1000),
@@ -76,7 +63,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
         .atmosphereAltitude(0.12)
         .enablePointerInteraction(true);
 
-      globe.pointOfView({ lat: 25, lng: 45, altitude: 2.5 });
+      globe.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 });
       globe.controls().autoRotate = true;
       globe.controls().autoRotateSpeed = 0.3;
 
@@ -215,12 +202,18 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const [y, m, d] = e.target.value.split("-").map(Number);
-    setDate(new Date(y, m - 1, d, 18, 0, 0));
-  };
-
-  const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  // Handle resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (globeRef.current && globeInstanceRef.current) {
+        globeInstanceRef.current
+          .width(globeRef.current.clientWidth)
+          .height(globeRef.current.clientHeight);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
@@ -283,25 +276,6 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
           }}
         >
           <div className="p-5 space-y-5">
-            {/* Date */}
-            <div className="breezy-card overflow-visible p-4 animate-breezy-enter">
-              <label className="block text-xs font-medium mb-2" style={{ color: "var(--muted-foreground)" }}>
-                Date
-              </label>
-              <input
-                type="date"
-                value={dateStr}
-                onChange={handleDateChange}
-                className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{
-                  background: "var(--space-light)",
-                  border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
-                  color: "var(--foreground)",
-                  colorScheme: "dark",
-                }}
-              />
-            </div>
-
             {/* Hour Offset */}
             <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "25ms" }}>
               <div className="flex justify-between items-center mb-2">
@@ -310,7 +284,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                   {hourOffset >= 0 ? "+" : ""}{hourOffset}h
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4" style={{ color: "var(--gold-dim)" }} />
                 <input
                   type="range"
@@ -326,31 +300,9 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                   }}
                 />
               </div>
-            </div>
-
-            {/* City selector */}
-            <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
-                  Location
-                </label>
-                <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
-              </div>
-              <div className="relative">
-                <LocationSearch
-                  selectedCity={selectedCity}
-                  onSelect={(city) => {
-                    setSelectedCity(city);
-                    globeInstanceRef.current?.pointOfView({ lat: city.lat, lng: city.lng, altitude: 2 }, 1000);
-                  }}
-                />
-              </div>
-              <div className="text-xs mt-1" style={{ color: "var(--muted-foreground)" }}>
-                {selectedCity.lat.toFixed(4)}°, {selectedCity.lng.toFixed(4)}°
-              </div>
 
               {/* Overlays */}
-              <div className="pt-4 border-t space-y-2 mt-4" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+              <div className="pt-4 border-t space-y-2 mt-2" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 <div className="flex items-center justify-between text-xs py-1">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Visibility Overlay</span>
                   <button

@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { Moon, Sun, ArrowRight, Clock, Eye, MapPin } from "lucide-react";
-import { LocationSearch } from "@/components/LocationSearch";
 import { PageHeader } from "@/components/PageHeader";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
-import { useGeolocation } from "@/hooks/useGeolocation";
-import { AutoDetectButton } from "@/components/AutoDetectButton";
+import { useGlobalState } from "@/contexts/GlobalStateContext";
 import * as SunCalc from "suncalc";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
-import { VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
+import { VisibilityDotScale, IlluminationArc, LunarAgeProgress, AzimuthCompass, ElongationVisual, CountdownCircle } from "@/components/BreezyVisuals";
 import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
 import { PhysicsExplanations } from "@/components/PhysicsExplanations";
 
@@ -152,28 +150,10 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
 }
 
 export default function MoonPage() {
-  const [date, setDate] = useState(() => new Date());
-  const [location, setLocation] = useState(MAJOR_CITIES[0]);
-  const [moonInfo, setMoonInfo] = useState(() => getMoonPhaseInfo(new Date()));
-  const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0]));
+  const { location, date } = useGlobalState();
+  const [moonInfo, setMoonInfo] = useState(() => getMoonPhaseInfo(date));
+  const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(date, location));
   const [countdown, setCountdown] = useState("");
-  const geo = useGeolocation(true); // auto-detect GPS on mount
-
-  // Apply GPS detection result
-  useEffect(() => {
-    if (geo.position) {
-      const gpsCity = {
-        name: geo.position.name || "GPS Location",
-        country: "Current",
-        lat: geo.position.lat,
-        lng: geo.position.lng,
-      };
-      if (!MAJOR_CITIES.find(c => c.name === gpsCity.name)) {
-        MAJOR_CITIES.unshift(gpsCity);
-      }
-      setLocation(gpsCity);
-    }
-  }, [geo.position]);
 
   useEffect(() => {
     // document.title managed by <SEO> component
@@ -215,45 +195,7 @@ export default function MoonPage() {
         icon={<Moon />}
         title="Moon Phase Dashboard"
         subtitle="Lunar phase · Illumination · Astronomical data"
-      >
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 relative z-50">
-          {/* Location */}
-          <div className="w-full sm:w-64">
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs" style={{ color: "var(--muted-foreground)" }}>Location</label>
-              <AutoDetectButton onClick={geo.detect} loading={geo.loading} />
-            </div>
-            <div className="relative">
-              <LocationSearch
-                selectedCity={location}
-                onSelect={setLocation}
-              />
-            </div>
-          </div>
-
-          {/* Date */}
-          <div className="w-full sm:w-auto">
-            <label className="block text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Date</label>
-            <input
-              type="date"
-              value={dateStr}
-              onChange={e => {
-                const [y, m, d] = e.target.value.split("-").map(Number);
-                const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
-                setDate(newDate);
-              }}
-              className="w-full px-3 py-2 rounded-xl text-sm data-text"
-              style={{
-                background: "var(--card-surface-alt)",
-                border: "1px solid var(--border)",
-                color: "var(--foreground)",
-                colorScheme: "dark",
-                height: "40px"
-              }}
-            />
-          </div>
-        </div>
-      </PageHeader>
+      />
 
       <div className="container py-8 flex flex-col gap-6 relative z-10">
 
@@ -349,6 +291,7 @@ export default function MoonPage() {
             <BreezyDetailCard
               title="Lunar Age"
               icon={<Clock />}
+              decorativeVisual={<LunarAgeProgress age={moonInfo.age} />}
               primaryValue={moonInfo.age.toFixed(1)}
               primaryUnit="Days"
               statusLabel={`Phase Angle: ${(moonInfo.phase * 360).toFixed(1)}°`}
@@ -356,7 +299,7 @@ export default function MoonPage() {
               accentColour="#60a5fa"
             />
             <BreezyDetailCard
-              title="Visibility (Mecca)"
+              title={`Visibility (${location.name})`}
               icon={<Eye />}
               decorativeVisual={<VisibilityDotScale zone={sunMoon.visibility as any} />}
               primaryValue={sunMoon.visibility}
@@ -369,6 +312,7 @@ export default function MoonPage() {
             <BreezyDetailCard
               title="Moon Altitude"
               icon={<ArrowRight className="transform -rotate-45" />}
+              decorativeVisual={<AzimuthCompass azimuth={sunMoon.moonAz} />}
               primaryValue={sunMoon.moonAlt.toFixed(1)}
               primaryUnit="°"
               statusLabel={`Azimuth: ${sunMoon.moonAz.toFixed(1)}°`}
@@ -378,6 +322,7 @@ export default function MoonPage() {
             <BreezyDetailCard
               title="Elongation"
               icon={<ArrowRight />}
+              decorativeVisual={<ElongationVisual elongation={sunMoon.elongation} />}
               primaryValue={sunMoon.elongation.toFixed(1)}
               primaryUnit="°"
               className="animate-breezy-enter"
@@ -386,6 +331,7 @@ export default function MoonPage() {
             <BreezyDetailCard
               title="Next New Moon"
               icon={<Moon />}
+              decorativeVisual={<CountdownCircle daysLeft={parseInt(countdown.split(' ')[0]) || 0} totalDays={29.53} />}
               primaryValue={countdown.split(' ')[0] || "0d"}
               statusLabel={moonInfo.nextNewMoon.toLocaleDateString("en-GB")}
               className="animate-breezy-enter"

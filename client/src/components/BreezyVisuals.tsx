@@ -129,3 +129,116 @@ export function IlluminationArc({ illumination }: { illumination: number }) {
         </div>
     );
 }
+
+export function LunarAgeProgress({ age }: { age: number }) {
+    const cycle = 29.53059;
+    const progress = Math.min(100, Math.max(0, (age / cycle) * 100));
+
+    return (
+        <div className="h-1 w-full max-w-[80px] bg-[var(--space-lighter)] rounded-full overflow-hidden self-center">
+            <div
+                className="h-full rounded-full transition-all duration-1000 ease-out"
+                style={{
+                    width: `${progress}%`,
+                    background: "linear-gradient(90deg, var(--gold-dim), var(--gold-glow))"
+                }}
+            />
+        </div>
+    );
+}
+
+export function AzimuthCompass({ azimuth }: { azimuth: number }) {
+    return (
+        <div className="relative w-12 h-12 flex items-center justify-center rounded-full border border-[var(--space-lighter)]">
+            {/* Compass ticks */}
+            {[0, 90, 180, 270].map((deg) => (
+                <div
+                    key={deg}
+                    className="absolute w-0.5 h-1.5 bg-[var(--space-lighter)]"
+                    style={{
+                        transform: `rotate(${deg}deg) translateY(-20px)`
+                    }}
+                />
+            ))}
+            {/* The needle pointing to the azimuth angle. */}
+            <div
+                className="absolute w-0.5 h-5 bg-[#4ade80] origin-bottom transition-transform duration-1000 ease-out"
+                style={{
+                    transform: `rotate(${azimuth}deg) translateY(-10px)`,
+                    boxShadow: "0 0 6px #4ade80"
+                }}
+            />
+            {/* Center dot */}
+            <div className="absolute w-1.5 h-1.5 bg-[#4ade80] rounded-full z-10" />
+        </div>
+    );
+}
+
+export function ElongationVisual({ elongation }: { elongation: number }) {
+    // Elongation is 0-180 degrees.
+    // Let's sweep an arc.
+    const cx = 50, cy = 50, r = 40;
+    const c = Math.PI * r; // half circle representation
+    const activeLength = (elongation / 180) * c;
+
+    return (
+        <div className="relative w-16 h-12 flex items-center justify-center -mb-4">
+            <svg viewBox="0 0 100 60" className="w-full h-full">
+                <path
+                    d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+                    fill="none"
+                    stroke="var(--space-lighter)"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                />
+                <path
+                    d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+                    fill="none"
+                    stroke="#c084fc"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={c}
+                    strokeDashoffset={c - activeLength}
+                    className="transition-all duration-1000 ease-out"
+                />
+                {/* Sun & Moon Icons at ends */}
+                <circle cx={cx - r} cy={cy} r="4" fill="#fb923c" />
+                <circle cx={cx + r} cy={cy} r="3" fill="#818cf8" />
+            </svg>
+        </div>
+    );
+}
+
+export function CountdownCircle({ daysLeft, totalDays = 29.53 }: { daysLeft: number, totalDays?: number }) {
+    const cx = 50, cy = 50, r = 40;
+    const c = 2 * Math.PI * r;
+    const progress = Math.min(1, Math.max(0, 1 - (daysLeft / totalDays)));
+    const activeLength = progress * c;
+
+    return (
+        <div className="relative w-16 h-16 flex items-center justify-center">
+            <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                <circle
+                    cx={cx} cy={cy} r={r}
+                    fill="none"
+                    stroke="var(--space-lighter)"
+                    strokeWidth="4"
+                    strokeDasharray="4 4"
+                />
+                <circle
+                    cx={cx} cy={cy} r={r}
+                    fill="none"
+                    stroke="var(--gold-dim)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray={c}
+                    strokeDashoffset={c - activeLength}
+                    className="transition-all duration-1000 ease-out"
+                />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center flex-col leading-none">
+                <span className="text-xs font-bold" style={{ color: "var(--gold)" }}>{daysLeft}d</span>
+            </div>
+        </div>
+    );
+}

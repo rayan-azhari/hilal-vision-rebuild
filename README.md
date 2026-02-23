@@ -50,9 +50,10 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 12. **Shared Astronomy Module**: The 843-line astronomy engine has been extracted to `shared/astronomy.ts` — a platform-agnostic module importable by the server, Web Workers, and tests without cross-boundary imports. Only `buildVisibilityTexture` (DOM-dependent) remains in the client wrapper.
 13. **Code Splitting**: All 6 heavy pages are lazy-loaded via `React.lazy` + `Suspense`, keeping Globe.gl, Three.js, Leaflet, D3, and Recharts out of the initial bundle.
 14. **Reliable Test Suite**: 21 unit tests import directly from the production `shared/astronomy.ts` module (not duplicated copies) and cover Yallop classification, crescent width, Hijri conversion, q-value formula, degree/radian conversions, and best-time-to-observe.
-15. **PWA with Service Worker**: A hand-written `sw.js` implements three caching strategies — CacheFirst for map tiles/fonts, NetworkFirst for API calls, StaleWhileRevalidate for the app shell — enabling offline functionality.
-16. **Sentry Error Monitoring**: `@sentry/react` with `ErrorBoundary`, API error capture, performance tracing (20% sampling), and session replays (10%), with graceful no-op when DSN is unset.
-17. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
+55. **PWA with Service Worker**: A hand-written `sw.js` implements three caching strategies — CacheFirst for map tiles/fonts, NetworkFirst for API calls, StaleWhileRevalidate for the app shell — enabling offline functionality.
+56. **Sentry Error Monitoring**: `@sentry/react` with `ErrorBoundary`, API error capture, performance tracing (20% sampling), and session replays (10%), with graceful no-op when DSN is unset.
+57. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
+58. **Global Location & Date State**: A unified `GlobalStateContext` centralizes the location and date pickers into the main navigation bar. Changing your location or date instantly pushes the update to all 3D Globe, 2D Map, Moon Phase, and Horizon modules simultaneously.
 
 ## Getting Started
 
