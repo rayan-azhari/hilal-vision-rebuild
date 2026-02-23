@@ -28,6 +28,17 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 - `shared/` - Shared code between frontend and backend (e.g., Zod schemas, shared types).
 - `drizzle/` - Database migrations, schema definitions, and related configuration.
 
+## ⚠️ Critical: Package Management
+
+> **NEVER use `npm install` or `npm uninstall` in this project.**
+> This project uses **pnpm** as its package manager (`pnpm-lock.yaml`). Vercel deploys with `pnpm install --frozen-lockfile`, which will **fail** if the lockfile is out of sync with `package.json`.
+
+- **To install a package:** `npx pnpm add <package>` (or `pnpm add <package>` if pnpm is installed globally)
+- **To install a dev dependency:** `npx pnpm add -D <package>`
+- **To remove a package:** `npx pnpm remove <package>`
+- **To update the lockfile after manual `package.json` edits:** `npx pnpm install --no-frozen-lockfile`
+- **If you accidentally used `npm`:** Run `npx pnpm install --no-frozen-lockfile` to regenerate `pnpm-lock.yaml`, then commit the updated lockfile.
+
 ## Operating Principles
 
 **1. Maintain the Stack Architecture**
