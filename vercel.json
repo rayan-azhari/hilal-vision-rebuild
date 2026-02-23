@@ -3,14 +3,22 @@
     "buildCommand": "npx vite build",
     "outputDirectory": "dist/public",
     "framework": null,
-    "rewrites": [
+    "functions": {
+        "api/trpc/[trpc].ts": {
+            "includeFiles": "server/**"
+        }
+    },
+    "routes": [
         {
-            "source": "/api/trpc/:path*",
-            "destination": "/api/trpc"
+            "handle": "filesystem"
         },
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "/api/trpc/(.*)",
+            "dest": "/api/trpc/[trpc]"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }
