@@ -1,5 +1,8 @@
 import { trpc } from "@/lib/trpc";
-import { Eye, MapPin, Clock } from "lucide-react";
+import { Eye, MapPin, Clock, Bell } from "lucide-react";
+import { useState } from "react";
+import { requestNotificationPermission } from "@/lib/firebase";
+import { toast } from "sonner";
 
 const SIGHTING_COLORS: Record<string, string> = {
     positive: "#4ade80",
@@ -14,6 +17,30 @@ const SIGHTING_LABELS: Record<string, string> = {
 };
 
 export function SightingFeed() {
+    const [isSubscribing, setIsSubscribing] = useState(false);
+    const subscribeMutation = trpc.notifications.subscribe.useMutation({
+        onSuccess: () => {
+            toast.success("Successfully subscribed to notifications!");
+            setIsSubscribing(false);
+        },
+        onError: (err) => {
+            console.error("Subscription failed:", err);
+            toast.error("Failed to subscribe to notifications.");
+            setIsSubscribing(false);
+        }
+    });
+
+    const handleSubscribe = async () => {
+        setIsSubscribing(true);
+        const token = await requestNotificationPermission();
+        if (token) {
+            subscribeMutation.mutate({ token, deviceType: "web" });
+        } else {
+            setIsSubscribing(false);
+            toast.error("Permission denied or browser unsupported.");
+        }
+    };
+
     const { data, isLoading } = trpc.telemetry.getObservations.useQuery(
         { limit: 10, offset: 0 },
         {
@@ -32,6 +59,14 @@ export function SightingFeed() {
                     <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                         Live Sighting Feed
                     </span>
+                    <button
+                        onClick={handleSubscribe}
+                        disabled={isSubscribing}
+                        className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                        title="Enable Notifications"
+                    >
+                        <Bell className="w-4 h-4 text-white" />
+                    </button>
                     <span className="ml-auto flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Live</span>
@@ -58,6 +93,14 @@ export function SightingFeed() {
                     <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                         Live Sighting Feed
                     </span>
+                    <button
+                        onClick={handleSubscribe}
+                        disabled={isSubscribing}
+                        className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                        title="Enable Notifications"
+                    >
+                        <Bell className="w-4 h-4 text-white" />
+                    </button>
                 </div>
                 <div className="text-center py-6">
                     <div className="text-2xl mb-2">☽</div>
@@ -76,6 +119,14 @@ export function SightingFeed() {
                 <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                     Live Sighting Feed
                 </span>
+                <button
+                    onClick={handleSubscribe}
+                    disabled={isSubscribing}
+                    className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                    title="Enable Notifications"
+                >
+                    <Bell className="w-4 h-4 text-white" />
+                </button>
                 <span className="ml-auto flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>

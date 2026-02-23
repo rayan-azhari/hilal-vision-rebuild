@@ -2,6 +2,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { archiveRouter } from "./routers/archive";
 import { weatherRouter } from "./routers/weather";
+import { notificationsRouter } from "./routers/notifications";
 import { z } from "zod";
 import { getDb } from "./db";
 import { observationReports } from "../drizzle/schema";
@@ -35,6 +36,7 @@ export const appRouter = router({
   system: systemRouter,
   archive: archiveRouter,
   weather: weatherRouter,
+  notifications: notificationsRouter,
   telemetry: router({
     submitObservation: publicProcedure
       .input(

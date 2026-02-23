@@ -43,3 +43,16 @@ export const observationReports = mysqlTable("observation_reports", {
 
 export type ObservationReport = typeof observationReports.$inferSelect;
 export type InsertObservationReport = typeof observationReports.$inferInsert;
+
+// Push notification tokens
+export const pushTokens = mysqlTable("push_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  userId: varchar("userId", { length: 255 }), // Clerk userId (optional, for anonymous subs)
+  deviceType: varchar("deviceType", { length: 50 }), // 'web', 'ios', 'android'
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PushToken = typeof pushTokens.$inferSelect;
+export type InsertPushToken = typeof pushTokens.$inferInsert;
