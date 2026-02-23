@@ -170,6 +170,7 @@ export default function AboutPage() {
                     icon={<Info />}
                     title="About Hilal Vision"
                     subtitle="Mission, tools, technology & attributions"
+                    className="max-w-3xl"
                 />
             </div>
 

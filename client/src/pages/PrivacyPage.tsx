@@ -46,6 +46,7 @@ export default function PrivacyPage() {
                     icon={<Shield />}
                     title="Privacy Policy"
                     subtitle={`Last updated: ${updated}`}
+                    className="max-w-2xl"
                 />
             </div>
 

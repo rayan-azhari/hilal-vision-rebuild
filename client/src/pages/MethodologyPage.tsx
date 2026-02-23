@@ -216,6 +216,7 @@ export default function MethodologyPage() {
                     icon={<FlaskConical />}
                     title="Methodology"
                     subtitle="Algorithms, formulas, and data sources"
+                    className="max-w-5xl"
                 />
             </div>
 

@@ -3,12 +3,13 @@ interface PageHeaderProps {
     title: string;
     subtitle: string;
     children?: React.ReactNode;
+    className?: string;
 }
 
-export function PageHeader({ icon, title, subtitle, children }: PageHeaderProps) {
+export function PageHeader({ icon, title, subtitle, children, className = "" }: PageHeaderProps) {
     return (
         <div className="w-full" style={{ background: "transparent" }}>
-            <div className="container py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className={`container py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 ${className}`.trim()}>
                 <div className="flex items-center gap-4">
                     <div
                         className="w-8 h-8 rounded-xl flex items-center justify-center"

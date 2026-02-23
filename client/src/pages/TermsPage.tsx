@@ -46,6 +46,7 @@ export default function TermsPage() {
                     icon={<BookOpen />}
                     title="Terms of Service"
                     subtitle={`Last updated: ${updated}`}
+                    className="max-w-2xl"
                 />
             </div>
 
