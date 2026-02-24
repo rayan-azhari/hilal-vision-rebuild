@@ -40,7 +40,7 @@ const ZONE_HEX: Record<VisibilityZone, string> = {
 
 export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const { hourOffset, setHourOffset } = shared;
-  const { date, location: selectedCity } = useGlobalState();
+  const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
@@ -179,7 +179,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const effectiveDateTs = effectiveDate.getTime();
 
   // Custom worker hook handles computation off main thread
-  const { qData, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility);
+  const { qData, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility, visibilityCriterion);
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Compute local moon data
@@ -211,16 +211,26 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
     const { qValues, width, height } = qData;
 
-    // Thresholds matching Yallop definitions
-    const thresholds = [-2.0, -0.999, -0.232, -0.160, -0.014, 0.216];
+    // Thresholds matching Yallop or Odeh definitions
+    const thresholds = visibilityCriterion === "yallop"
+      ? [-2.0, -0.999, -0.232, -0.160, -0.014, 0.216]
+      : [-10.0, -0.999, -0.96, 2.00, 5.65];
 
     const thresholdsToZone = (value: number): VisibilityZone => {
-      if (value >= 0.216) return "A";
-      if (value >= -0.014) return "B";
-      if (value >= -0.160) return "C";
-      if (value >= -0.232) return "D";
-      if (value >= -0.999) return "E";
-      return "F";
+      if (visibilityCriterion === "yallop") {
+        if (value >= 0.216) return "A";
+        if (value >= -0.014) return "B";
+        if (value >= -0.160) return "C";
+        if (value >= -0.232) return "D";
+        if (value >= -0.999) return "E";
+        return "F";
+      } else {
+        if (value >= 5.65) return "A";
+        if (value >= 2.00) return "B";
+        if (value >= -0.96) return "C";
+        if (value >= -0.999) return "D"; // Odeh has D=requires telescope, groups invisible with D. E makes sense to plot anyway
+        return "F";
+      }
     };
 
     const contourGen = d3.contours()
@@ -262,7 +272,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     }).addTo(layerGroupRef.current!);
 
     return () => { mounted = false; };
-  }, [qData, showVisibility]);
+  }, [qData, showVisibility, visibilityCriterion]);
 
   // Apply clouds overlay
   const cloudOverlayRef = useRef<any>(null);
@@ -342,7 +352,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       <PageHeader
         icon={<Map />}
         title="Crescent Visibility Map"
-        subtitle="Global visibility heatmap · Yallop criterion"
+        subtitle={`Global visibility heatmap · ${visibilityCriterion === "yallop" ? "Yallop (1997)" : "Odeh (2004)"} criterion`}
       >
         <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
           <div>{hijri.day} {hijri.monthNameArabic} {hijri.year} هـ</div>
@@ -454,6 +464,27 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
                   </div>
                 </div>
+
+                {/* Criterion switch */}
+                <div>
+                  <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Criterion</label>
+                  <div className="relative">
+                    <select
+                      value={visibilityCriterion}
+                      onChange={e => setVisibilityCriterion(e.target.value as "yallop" | "odeh")}
+                      className="w-full px-3 py-2 rounded-lg text-sm appearance-none pr-8"
+                      style={{
+                        background: "var(--space-light)",
+                        border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                        color: "var(--foreground)",
+                      }}
+                    >
+                      <option value="yallop" style={{ background: "var(--space-mid)" }}>Yallop (1997)</option>
+                      <option value="odeh" style={{ background: "var(--space-mid)" }}>Odeh (2004)</option>
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
+                  </div>
+                </div>
               </div>
 
               {/* Overlays */}
@@ -534,7 +565,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
               Use the time slider to see how visibility changes across the globe.
             </p>
             <p className="text-xs leading-relaxed mt-2" style={{ color: "var(--muted-foreground)" }}>
-              Based on the <strong style={{ color: "var(--gold-dim)" }}>Yallop (1997)</strong> q-value criterion.
+              Based on the <strong style={{ color: "var(--gold-dim)" }}>{visibilityCriterion === "yallop" ? "Yallop (1997) q-value" : "Odeh (2004) V-value"}</strong> criterion.
             </p>
           </div>
 

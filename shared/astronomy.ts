@@ -170,6 +170,17 @@ export function classifyYallop(q: number, moonAltAtSunset: number): VisibilityZo
     return "E";
 }
 
+/**
+ * Classify visibility zone from Odeh (2004) V-value.
+ */
+export function classifyOdeh(v: number, moonAltAtSunset: number): VisibilityZone {
+    if (moonAltAtSunset <= 0) return "F";
+    if (v >= 5.65) return "A";
+    if (v >= 2.00) return "B";
+    if (v >= -0.96) return "C";
+    return "D"; // Or E, Odeh groups D/E as 'not visible' or 'requires telescope'
+}
+
 // ─── Sun/Moon Calculations ────────────────────────────────────────────────────
 
 /**
@@ -262,14 +273,16 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
  */
 export function generateVisibilityGrid(
     date: Date,
-    resolution = 4
-): Array<{ lat: number; lng: number; zone: VisibilityZone; q: number }> {
-    const results: Array<{ lat: number; lng: number; zone: VisibilityZone; q: number }> = [];
+    resolution = 4,
+    criterion: "yallop" | "odeh" = "yallop"
+): Array<{ lat: number; lng: number; zone: VisibilityZone; q: number; v?: number }> {
+    const results: Array<{ lat: number; lng: number; zone: VisibilityZone; q: number; v?: number }> = [];
 
     for (let lat = -80; lat <= 80; lat += resolution) {
         for (let lng = -180; lng <= 180; lng += resolution) {
             const data = computeSunMoonAtSunset(date, { lat, lng });
-            results.push({ lat, lng, zone: data.visibility, q: data.qValue });
+            const zone = criterion === "yallop" ? classifyYallop(data.qValue, data.moonAlt) : classifyOdeh(data.odehCriterion, data.moonAlt);
+            results.push({ lat, lng, zone, q: data.qValue, v: data.odehCriterion });
         }
     }
 

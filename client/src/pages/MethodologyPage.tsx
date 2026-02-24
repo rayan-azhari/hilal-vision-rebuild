@@ -406,13 +406,7 @@ W  = SD × (1 − cos(elongation))`}
                         computation. Fastest to compute and most portable, but least physically accurate.
                     </Para>
 
-                    <SubHeading>Compare to Heavens Overlay</SubHeading>
-                    <Para>
-                        When enabled, this overlay identifies days where the selected civic or tabular calendar
-                        diverges from the strict astronomical new moon calculation. Cells with divergence display
-                        a small red badge showing the true astronomical Hijri date alongside the civic date,
-                        providing scholars with an immediate visual tool for understanding calendar discrepancies.
-                    </Para>
+
 
                     <SectionDivider />
 

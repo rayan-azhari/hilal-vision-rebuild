@@ -14,7 +14,9 @@ import {
     toDeg,
     crescentWidth,
     yallopQ,
+    odehV,
     classifyYallop,
+    classifyOdeh,
     ZONE_RGB,
     type VisibilityZone,
 } from "@shared/astronomy";
@@ -22,7 +24,7 @@ import * as SunCalc from "suncalc";
 
 // ─── Worker-specific calculation (simplified for grid performance) ────────────
 
-function computeVisibilityAtPoint(date: Date, lat: number, lng: number): { zone: VisibilityZone; q: number } {
+function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterion: "yallop" | "odeh"): { zone: VisibilityZone; value: number } {
     const times = SunCalc.getTimes(date, lat, lng);
     const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
         ? times.sunset
@@ -43,10 +45,18 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number): { zone:
     ));
 
     const crescent = crescentWidth(elongation, moonPos.distance);
-    const q = yallopQ(arcv, crescent.w);
-    const safeQ = isNaN(q) ? -1.0 : q;
-    const zone = classifyYallop(safeQ, moonAlt);
-    return { zone, q: moonAlt <= 0 ? -1.0 : safeQ };
+
+    if (criterion === "yallop") {
+        const q = yallopQ(arcv, crescent.w);
+        const safeQ = isNaN(q) ? -1.0 : q;
+        const zone = classifyYallop(safeQ, moonAlt);
+        return { zone, value: moonAlt <= 0 ? -1.0 : safeQ };
+    } else {
+        const v = odehV(arcv, crescent.w);
+        const safeV = isNaN(v) ? -10.0 : v;
+        const zone = classifyOdeh(safeV, moonAlt);
+        return { zone, value: moonAlt <= 0 ? -10.0 : safeV };
+    }
 }
 
 function isDaylight(lat: number, lng: number, date: Date): boolean {
@@ -57,7 +67,7 @@ function isDaylight(lat: number, lng: number, date: Date): boolean {
 // ─── Worker message handler ──────────────────────────────────────────────────
 
 self.onmessage = (e: MessageEvent) => {
-    const { dateTs, resolution, isMercator } = e.data;
+    const { dateTs, resolution, isMercator, criterion } = e.data;
     const date = new Date(dateTs);
 
     const W = Math.floor(360 / resolution);
@@ -79,7 +89,7 @@ self.onmessage = (e: MessageEvent) => {
 
         for (let px = 0; px < W; px++) {
             const lng = -180 + (px / W) * 360;
-            const { zone, q } = computeVisibilityAtPoint(date, lat, lng);
+            const { zone, value } = computeVisibilityAtPoint(date, lat, lng, criterion || "yallop");
             const [r, g, b] = ZONE_RGB[zone];
             const night = !isDaylight(lat, lng, date);
             const alpha = zone === "F" ? 40 : night ? 100 : 180;
@@ -90,7 +100,7 @@ self.onmessage = (e: MessageEvent) => {
             pixels[idx + 1] = g;
             pixels[idx + 2] = b;
             pixels[idx + 3] = alpha;
-            qValues[pxIdx] = q;
+            qValues[pxIdx] = value;
         }
     }
 

@@ -19,7 +19,7 @@ import { BestTimeCard } from "@/components/BestTimeCard";
 
 export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
   const { hourOffset, setHourOffset } = shared;
-  const { date, location: selectedCity } = useGlobalState();
+  const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
   const globeRef = useRef<HTMLDivElement>(null);
   const globeInstanceRef = useRef<any>(null);
   const [moonData, setMoonData] = useState(() =>
@@ -82,7 +82,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
   // Recompute textures when date/visibility/clouds change
   const effectiveDateTs = effectiveDate.getTime();
-  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility);
+  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility, visibilityCriterion);
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Sync loading state
@@ -221,7 +221,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       <PageHeader
         icon={<Globe2 />}
         title="Interactive 3D Globe"
-        subtitle="Day/night terminator · Moon visibility overlay"
+        subtitle={`Day/night terminator · Moon visibility overlay (${visibilityCriterion === "yallop" ? "Yallop" : "Odeh"})`}
       >
         <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
           <div>{hijri.day} {hijri.monthNameArabic} {hijri.year} هـ</div>
@@ -301,8 +301,29 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                 />
               </div>
 
+              {/* Criterion switch */}
+              <div>
+                <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Criterion</label>
+                <div className="relative">
+                  <select
+                    value={visibilityCriterion}
+                    onChange={e => setVisibilityCriterion(e.target.value as "yallop" | "odeh")}
+                    className="w-full px-3 py-2 rounded-lg text-sm appearance-none pr-8"
+                    style={{
+                      background: "var(--space-light)",
+                      border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+                      color: "var(--foreground)",
+                    }}
+                  >
+                    <option value="yallop" style={{ background: "var(--space-mid)" }}>Yallop (1997)</option>
+                    <option value="odeh" style={{ background: "var(--space-mid)" }}>Odeh (2004)</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
+                </div>
+              </div>
+
               {/* Overlays */}
-              <div className="pt-4 border-t space-y-2 mt-2" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+              <div className="pt-4 border-t space-y-2 mt-4" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 <div className="flex items-center justify-between text-xs py-1">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Visibility Overlay</span>
                   <button
@@ -367,7 +388,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                 { label: "Elongation", value: `${moonData.elongation.toFixed(2)}°` },
                 { label: "Arc of Vision", value: `${moonData.arcv.toFixed(2)}°` },
                 { label: "Crescent Width", value: `${moonData.crescent.w.toFixed(3)}'` },
-                { label: "Yallop q", value: moonData.qValue.toFixed(4) },
+                { label: visibilityCriterion === "yallop" ? "Yallop q" : "Odeh V", value: visibilityCriterion === "yallop" ? moonData.qValue.toFixed(4) : moonData.odehCriterion.toFixed(4) },
                 { label: "Illumination", value: `${(moonData.illumination * 100).toFixed(1)}%` },
                 { label: "Sunset", value: moonData.sunset ? moonData.sunset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-" },
                 { label: "Moonset", value: moonData.moonset ? moonData.moonset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-" },

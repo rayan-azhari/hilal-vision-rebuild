@@ -34,7 +34,7 @@ export default function TermsPage() {
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
                 title="Terms of Service"
-                description="Hilal Vision Terms of Service - acceptable use, liability, and MIT License."
+                description="Hilal Vision Terms of Service - acceptable use, liability, and End-User License Agreement."
                 path="/terms"
             />
 
@@ -60,9 +60,9 @@ export default function TermsPage() {
                     }}
                 >
                     <Para>
-                        These Terms of Service ("Terms") govern your use of Hilal Vision ("the Platform"),
-                        operated as an open-source project. By accessing or using the Platform you agree to these
-                        Terms. If you do not agree, please do not use the Platform.
+                        These Terms of Service ("Terms") govern your use of Hilal Vision ("the Platform").
+                        By accessing or using the Platform you agree to these Terms. If you do not agree,
+                        please do not use the Platform.
                     </Para>
                     <Para>
                         Questions? Contact us at{" "}
@@ -136,12 +136,13 @@ export default function TermsPage() {
                     any religious or civic decision.
                 </Para>
 
-                <Heading>6. Intellectual Property & Open Source License</Heading>
+                <Heading>6. Intellectual Property & End-User License Agreement</Heading>
                 <Para>
-                    Hilal Vision's source code is released under the{" "}
-                    <strong style={{ color: "var(--foreground)" }}>MIT License</strong>. You are free to
-                    inspect, copy, modify, and redistribute the source code subject to the terms of that
-                    license. The MIT License text is included in the GitHub repository.
+                    All content, features, and functionality of Hilal Vision are owned by its developers
+                    and are protected by international copyright, trademark, patent, trade secret, and other
+                    intellectual property laws. You are granted a limited, non-exclusive, non-transferable
+                    licence to access and use the Platform. You may not copy, modify, distribute, sell, or
+                    lease any part of our Platform or its underlying software.
                 </Para>
                 <Para>
                     Third-party data included in the Platform (e.g., ICOP sighting records, Umm al-Qura
