@@ -32,7 +32,7 @@
   </text>
   <!-- Bottom bar -->
   <rect x="0" y="590" width="1200" height="40" fill="#c8a030" opacity="0.08"/>
-  <text x="600" y="616" font-family="sans-serif" font-size="14" fill="#c8a030" text-anchor="middle" opacity="0.6">moon-dashboard-one.vercel.app</text>
+  <text x="600" y="616" font-family="sans-serif" font-size="14" fill="#c8a030" text-anchor="middle" opacity="0.6">moonsighting.live</text>
   <defs>
     <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#c8a030" stop-opacity="0.6"/>

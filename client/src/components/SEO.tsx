@@ -11,7 +11,7 @@ interface SEOProps {
 const SITE_NAME = "Hilal Vision";
 const DEFAULT_DESCRIPTION =
     "Precision Islamic crescent moon visibility predictions, interactive 3D globe, Hijri calendar, and real-time sighting reports.";
-const BASE_URL = "https://moon-dashboard-one.vercel.app";
+const BASE_URL = "https://moonsighting.live";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
 
 export function SEO({
