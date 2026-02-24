@@ -44,7 +44,7 @@ export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props
     const SIZE = 400;
     const CX = SIZE / 2;
     const CY = SIZE / 2;
-    const R_HORIZON = 160;
+    const R_HORIZON = 180;
 
     const getCoords = (alt: number, az: number) => {
         const r = (R_HORIZON * (90 - alt)) / 90;
@@ -146,23 +146,23 @@ export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props
                     </g>
 
                     {/* Dashed paths below horizon */}
-                    <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.15" />
-                    <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.1" />
+                    <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2" strokeDasharray="4 4" opacity="0.15" />
+                    <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 4" opacity="0.1" />
 
                     {/* Track paths clipped to horizon */}
                     <g clipPath="url(#horizonClip)">
-                        <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2.5" opacity="0.4" />
-                        <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2.5" opacity="0.3" />
+                        <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2" opacity="0.6" />
+                        <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2" opacity="0.5" />
 
                         {/* Sun Current Position (Only visible above horizon) */}
                         <g transform={`translate(${currentSunPos.x}, ${currentSunPos.y})`} opacity={sunAlt >= 0 ? 1 : 0}>
-                            <circle cx="0" cy="0" r="12" fill="var(--background)" stroke="#facc15" strokeWidth="1" />
+                            <circle cx="0" cy="0" r="14" fill="var(--background)" stroke="#facc15" strokeWidth="1" opacity={0.8} />
                             <Sun className="w-5 h-5" color="#facc15" x="-10" y="-10" />
                         </g>
 
                         {/* Moon Current Position (Only visible above horizon) */}
                         <g transform={`translate(${currentMoonPos.x}, ${currentMoonPos.y})`} opacity={moonAlt >= 0 ? 1 : 0}>
-                            <circle cx="0" cy="0" r="12" fill="var(--background)" stroke="#60a5fa" strokeWidth="1" />
+                            <circle cx="0" cy="0" r="14" fill="var(--background)" stroke="#60a5fa" strokeWidth="1" opacity={0.8} />
                             <Moon className="w-5 h-5" color="#60a5fa" x="-10" y="-10" />
                         </g>
                     </g>
