@@ -9,6 +9,7 @@ import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { VisibilityDotScale, IlluminationArc, LunarAgeProgress, AzimuthCompass, ElongationVisual, CountdownCircle } from "@/components/BreezyVisuals";
 import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
+import { SkyDomeChart } from "@/components/SkyDomeChart";
 import { PhysicsExplanations } from "@/components/PhysicsExplanations";
 
 function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number }) {
@@ -199,16 +200,28 @@ export default function MoonPage() {
 
       <div className="container py-8 flex flex-col gap-6 relative z-10">
 
-        {/* Sun & Moon Altitude Chart (Moved to Top) */}
-        <BreezyFullCard
-          title="Sun & Moon Altitude Tracker"
-          icon={<Clock className="w-4 h-4" />}
-          className="animate-breezy-enter"
-        >
-          <div className="p-2 mt-4 w-full">
-            <SunMoonAltitudeChart date={date} location={location} />
-          </div>
-        </BreezyFullCard>
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <BreezyFullCard
+            title="Sun & Moon Altitude Tracker"
+            icon={<Clock className="w-4 h-4" />}
+            className="animate-breezy-enter h-full"
+          >
+            <div className="p-2 mt-4 w-full h-full">
+              <SunMoonAltitudeChart date={date} location={location} />
+            </div>
+          </BreezyFullCard>
+
+          <BreezyFullCard
+            title="The Sky Dome"
+            icon={<Eye className="w-4 h-4" />}
+            className="animate-breezy-enter h-full"
+          >
+            <div className="p-2 w-full h-full flex flex-col justify-center">
+              <SkyDomeChart date={date} location={location} />
+            </div>
+          </BreezyFullCard>
+        </div>
 
         {/* Times row (Ephemeris) */}
         <BreezyFullCard
