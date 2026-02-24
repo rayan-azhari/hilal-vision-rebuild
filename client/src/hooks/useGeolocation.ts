@@ -4,6 +4,7 @@ export interface GeoPosition {
     lat: number;
     lng: number;
     name?: string;
+    elevation?: number;
 }
 
 interface UseGeolocationReturn {
@@ -54,6 +55,21 @@ export function useGeolocation(autoDetect = false): UseGeolocationReturn {
                     }
                 } catch {
                     loc.name = "Your Location";
+                }
+
+                // Try fetching elevation data
+                try {
+                    const elRes = await fetch(
+                        `https://api.open-meteo.com/v1/elevation?latitude=${loc.lat}&longitude=${loc.lng}`
+                    );
+                    if (elRes.ok) {
+                        const elData = await elRes.json();
+                        if (elData.elevation && elData.elevation.length > 0) {
+                            loc.elevation = elData.elevation[0];
+                        }
+                    }
+                } catch {
+                    // Ignore elevation errors
                 }
 
                 setPosition(loc);

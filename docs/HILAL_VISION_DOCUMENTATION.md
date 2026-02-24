@@ -61,7 +61,7 @@ The application is named after the Arabic word *hilal* (هلال), which specifi
 | Database ORM | Drizzle ORM | 0.44.5 |
 | Database | MySQL (TiDB) | - |
 | Build tool | Vite | 7.1.7 |
-| Test runner | Vitest | 2.1.4 |
+| Test runner | Vitest (Unit), Playwright (E2E) | 2.1.4, 1.58.2 |
 | Package manager | pnpm | 10.4.1 |
 
 ### 2.2 Key Frontend Libraries
@@ -317,6 +317,7 @@ At each step, the function evaluates:
 - **Moon altitude** - must be above the horizon (> 0°)
 - **Sky darkness factor** - sun below -12° = 1.0 (astronomical twilight), below -6° = 0.8 (nautical), below 0° = 0.5 (civil), above horizon = 0.1
 - **Altitude factor** - penalises very low altitudes where atmospheric extinction is high (airmass ∝ 1/sin(alt))
+- **Horizon Dip (Refraction)** - observer elevation is factored in via `1.76 * Math.sqrt(elevation)` to dynamically adjust the theoretical horizon.
 
 The composite score is: `score = moonAlt × darknessFactor × altFactor`
 
@@ -356,6 +357,8 @@ The **side panel** shows the full astronomical data readout for the selected loc
 
 The globe also features a **cloud cover overlay** - a second Three.js `SphereGeometry` mesh at `r * 1.004` (slightly above the visibility sphere at `r * 1.002`) displaying real-time cloud cover data from Open-Meteo. This overlay is independently toggleable via a "Clouds" button alongside the existing "Visibility" toggle.
 
+A **High Contrast Mode** toggle is available from the main header. When active, the Web Worker dynamically generates the visibility texture utilizing a Cividis-inspired perceptual palette (Bright Yellow, Orange, Reddish Brown, Deep Blue, Dark Navy) to guarantee intelligibility for users with Color Vision Deficiency (CVD).
+
 A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window, computed by the `computeBestObservationTime()` function.
 
 ### 6.4 Visibility Map Page (`/map`)
@@ -366,9 +369,9 @@ The page features a **time slider** with 15-minute granularity covering ±24 hou
 
 A **cloud cover overlay** fetches real-time data from Open-Meteo's forecast API via a dedicated tRPC endpoint (`weather.getCloudGrid`). The sparse grid (~162 points at 15°×20° resolution) is bilinearly interpolated into a smooth canvas texture and rendered as an independent Leaflet `imageOverlay` at 35% opacity. The overlay can be toggled on/off independently from the visibility layer.
 
-A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window computed by `computeBestObservationTime()`, showing the optimal time, observation window (sunset to moonset), and moon/sun altitudes at the best moment.
+A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window computed by `computeBestObservationTime()`, showing the optimal time, observation window (sunset to moonset), and moon/sun altitudes at the best moment. This card additionally displays the observer's elevation when GPS is active.
 
-The map also supports geolocation auto-detect and shareable URLs. In Pro Mode, a methodology panel explains the Yallop and Odeh criteria in detail, and a contour label overlay shows the q-value contour lines.
+The map also supports geolocation auto-detect and shareable URLs. In Pro Mode, a methodology panel explains the Yallop and Odeh criteria in detail, and a contour label overlay shows the q-value contour lines. A high visibility color-blind accessible mapping state is also supported, instantly syncing with the globe logic when toggled.
 
 ### 6.5 Moon Phase Page (`/moon`)
 
@@ -550,7 +553,9 @@ The test suite (`server/astronomy.test.ts`) contains 21 unit tests covering the 
 
 The test suite covers six areas. The **Yallop q-value classification** tests verify that the zone boundaries (A, B, C, D, E, F) are correctly applied for representative q-values and moon altitudes. The **crescent width calculation** tests verify that the W formula produces physically reasonable values (near-zero for small elongation, increasing with elongation, semi-diameter approximately 15 arcminutes at mean lunar distance). The **Hijri calendar conversion** tests verify known date conversions (e.g., 2024-03-10 → Sha'ban/Ramadan 1445 AH). The **Yallop q-value formula** tests verify the polynomial formula against hand-computed values. The **degree/radian conversion** tests verify the utility functions with round-trip identity checks. The **best-time-to-observe** tests verify the observation window calculator returns valid windows with non-negative scores.
 
-All 21 tests pass as of the current version.
+**End-to-End (E2E) Testing:** Core application flows (Visibility Toggling, Location Selecting) and asynchronous data resolution (e.g. Best-Time computation) are automated locally utilizing Playwright in chromium environments (`pnpm test:e2e`).
+
+All tests pass as of the current version.
 
 ---
 
@@ -590,5 +595,6 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 28 | Vector Render | Refactored MapPage to generate pure mathematical SVG contours from Yallop `q-value` matrix using `d3-contours`. Removed pixelated canvas generation. Fixed Home page routing overlay issue. |
 | 29 | Global Pickers | Centralized the Date and Location selection (with Auto-Detect GPS) into the main navigation bar using `GlobalStateContext`. All dashboard modules now sync automatically to a single global source of truth. Removed redundant pickers from individual pages. |
 | 30 | Dual Criteria | Added a global Visibility Criterion switch allowing users to evaluate crescent visibility using either the traditional Yallop (1997) q-value or the modern Odeh (2004) v-value across the 3D Globe and 2D Map views simultaneously. |
+| 31 | Accessibility & Native UX | Implemented robust Playwright E2E testing framework. Built Cividis-inspired High Contrast color-blind friendly rendering mode for WebGL/SVG artifacts. Injected Open-Meteo elevation tracking to Topographical Refraction horizon dip functions. Formulated strict Capacitor.js SafeArea padding for iOS Dynamic Islands. |
 
-*Documentation updated February 24, 2026 (Round 30 - Dual Criteria). For the latest feature status, see `todo.md`.*
+*Documentation updated February 24, 2026 (Round 31 - Accessibility & Native UX). For the latest feature status, see `todo.md`.*

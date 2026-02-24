@@ -6,6 +6,7 @@ Welcome to **Hilal Vision**, a precision astronomical platform designed for pred
 
 The top navigation bar provides access to all views and includes:
 - **Global Date & Location Pickers** (Search any city or Auto-Detect GPS. Syncs across all map and dashboard views)
+- **High Contrast Toggle** (Color-blind friendly accessible palette for visibility zones)
 - **Theme Toggle** (Light/Dark mode)
 - **Report Sighting** button (golden `+` icon)
 - **Account Settings** / Sign In (Clerk authentication)
@@ -33,14 +34,14 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 - Smooth Gaussian-blurred visibility zone overlay mapped directly onto the sphere.
 - **Cloud Cover Overlay** - Real-time cloud cover from Open-Meteo rendered as a translucent sphere above the visibility layer. Toggle on/off with the "Clouds" button.
 - Play/Pause auto-rotation and toggle the visibility overlay on/off.
-- **Best Time to Observe** card - Shows the optimal crescent viewing time, observation window, and moon/sun altitudes.
+- **Best Time to Observe** card - Shows the optimal crescent viewing time, observation window, and moon/sun altitudes. Accounts for the observer's specific topographical elevation.
 - Sidebar shows live astronomical data for the selected city: Moon altitude, azimuth, elongation, ARCV, crescent width, Yallop q-value or Odeh V-value, illumination, sunset, and moonset times.
 
 ### 2D Map View
 - Leaflet map with dark/light CARTO basemaps.
-- Web Mercator–projected visibility heatmap with smooth Gaussian-blurred zone boundaries.
+- Web Mercator–projected visibility heatmap with smooth Gaussian-blurred zone boundaries. (Supports perceptual High Contrast mode dynamically).
 - **Cloud Cover Overlay** - Open-Meteo cloud data rendered as a semi-transparent layer over the map. Toggle independently from visibility using the "Cloud Cover" switch in Map Controls.
-- **Best Time to Observe** card - Automatically calculates the optimal observation window (sunset → moonset) and displays it in the sidebar.
+- **Best Time to Observe** card - Automatically calculates the optimal observation window (sunset → moonset), displaying local altitude parameters including Topographical Elevation.
 - **Click anywhere** on the map to inspect the visibility zone for that exact coordinate.
 - Crowdsourced sighting pins: 🟢 Naked Eye, 🔵 Optical Aid, ⚪ Not Seen.
 - Resolution selector: Fine (2°), Normal (4°), or Fast (6°).

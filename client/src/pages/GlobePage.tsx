@@ -42,7 +42,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     [date, hourOffset]
   );
   const hijri = useMemo(() => gregorianToHijri(date), [date]);
-  const { theme } = useTheme();
+  const { theme, highContrast } = useTheme();
 
   // Initialize globe once
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
   // Recompute textures when date/visibility/clouds change
   const effectiveDateTs = effectiveDate.getTime();
-  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility, visibilityCriterion);
+  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility, visibilityCriterion, highContrast);
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Sync loading state

@@ -92,6 +92,18 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                             {result.sunAltAtBest.toFixed(1)}°
                         </span>
                     </div>
+
+                    {/* Elevation (if available) */}
+                    {location.elevation !== undefined && (
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-white/10" title="Observer altitude adjusts horizon dip calculations">
+                            <span className="text-xs flex items-center gap-1" style={{ color: "var(--muted-foreground)" }}>
+                                Elevation <span className="text-[10px] opacity-60">(Pro)</span>
+                            </span>
+                            <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
+                                {Math.round(location.elevation)}m
+                            </span>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div

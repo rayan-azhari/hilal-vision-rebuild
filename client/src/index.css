@@ -132,6 +132,15 @@
   --zone-e: oklch(0.40 0.01 265);
 }
 
+.high-contrast {
+  /* Color-blind friendly, high-contrast zone colors (Cividis/Viridis inspired) */
+  --zone-a: oklch(0.92 0.16 95);  /* Bright Yellow */
+  --zone-b: oklch(0.75 0.14 60);  /* Orange */
+  --zone-c: oklch(0.55 0.12 25);  /* Reddish Brown */
+  --zone-d: oklch(0.35 0.10 280); /* Deep Blue/Purple */
+  --zone-e: oklch(0.18 0.05 260); /* Very Dark Navy */
+}
+
 @layer base {
   * {
     border-color: var(--border);

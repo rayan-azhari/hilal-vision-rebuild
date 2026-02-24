@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, highContrast, setHighContrast } = useTheme();
   const { t, i18n } = useTranslation();
 
   const { location, setLocation, date, setDate } = useGlobalState();
@@ -78,7 +78,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </svg>
 
       {/* Floating Command Centre Navigation */}
-      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4">
+      <div className="fixed left-0 right-0 z-50 flex justify-center pointer-events-none px-4" style={{ top: "calc(1.5rem + env(safe-area-inset-top))" }}>
         <header
           className="pointer-events-auto flex items-center justify-between px-2 md:px-4 h-14 rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
           style={{
@@ -258,6 +258,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <button
               className="p-1.5 rounded-lg transition-colors"
+              style={{ color: highContrast ? "var(--gold)" : "var(--foreground)" }}
+              onClick={() => setHighContrast(!highContrast)}
+              aria-label="Toggle high contrast mode"
+              title="High Contrast (Color-Blind) Mode"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 0 0 20Z" /></svg>
+            </button>
+
+            <button
+              className="p-1.5 rounded-lg transition-colors"
               style={{ color: "var(--foreground)" }}
               onClick={toggleTheme}
               aria-label="Toggle theme"
@@ -378,7 +388,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Footer */}
       <footer
-        className="border-t py-8"
+        className="border-t py-8 pb-[calc(2rem+env(safe-area-inset-bottom))]"
         style={{
           borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)",
           background: "var(--space-mid)",

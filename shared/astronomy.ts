@@ -20,6 +20,7 @@ export interface Location {
     lat: number;
     lng: number;
     name?: string;
+    elevation?: number; // meters above sea level
 }
 
 export interface SunMoonData {
@@ -122,6 +123,15 @@ export const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
     F: [31, 41, 55],
 };
 
+export const HIGH_CONTRAST_ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
+    A: [234, 240, 24],   /* Bright Yellow oklch(0.92 0.16 95) */
+    B: [225, 120, 30],   /* Orange oklch(0.75 0.14 60) */
+    C: [160, 60, 40],    /* Reddish Brown oklch(0.55 0.12 25) */
+    D: [60, 40, 150],    /* Deep Blue/Purple oklch(0.35 0.10 280) */
+    E: [20, 10, 60],     /* Very Dark Navy oklch(0.18 0.05 260) */
+    F: [31, 41, 55],     /* Unchanged */
+};
+
 // ─── Core Calculations ────────────────────────────────────────────────────────
 
 /** Convert degrees to radians */
@@ -213,9 +223,13 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
     const moonIllum = SunCalc.getMoonIllumination(calcTime);
     const moonTimes = SunCalc.getMoonTimes(date, loc.lat, loc.lng);
 
-    const sunAlt = toDeg(sunPos.altitude);
+    // Horizon dip due to elevation: 1.76 * sqrt(elevation_in_meters). Result is arcminutes.
+    const dipArcmin = loc.elevation ? 1.76 * Math.sqrt(loc.elevation) : 0;
+    const dipDeg = dipArcmin / 60;
+
+    const sunAlt = toDeg(sunPos.altitude) + dipDeg;
     const sunAz = toDeg(sunPos.azimuth) + 180; // SunCalc returns south=0; convert to N=0
-    const moonAlt = toDeg(moonPos.altitude);
+    const moonAlt = toDeg(moonPos.altitude) + dipDeg;
     const moonAz = toDeg(moonPos.azimuth) + 180;
 
     // Elongation (angular distance between sun and moon)

@@ -18,6 +18,7 @@ import {
     classifyYallop,
     classifyOdeh,
     ZONE_RGB,
+    HIGH_CONTRAST_ZONE_RGB,
     type VisibilityZone,
 } from "@shared/astronomy";
 import * as SunCalc from "suncalc";
@@ -67,7 +68,7 @@ function isDaylight(lat: number, lng: number, date: Date): boolean {
 // ─── Worker message handler ──────────────────────────────────────────────────
 
 self.onmessage = (e: MessageEvent) => {
-    const { dateTs, resolution, isMercator, criterion } = e.data;
+    const { dateTs, resolution, isMercator, criterion, highContrast } = e.data;
     const date = new Date(dateTs);
 
     const W = Math.floor(360 / resolution);
@@ -75,6 +76,8 @@ self.onmessage = (e: MessageEvent) => {
     const pixels = new Uint8ClampedArray(W * H * 4);
     const qValues = new Float32Array(W * H);
     const maxLat = 85.051129;
+
+    const rgbMap = highContrast ? HIGH_CONTRAST_ZONE_RGB : ZONE_RGB;
 
     for (let py = 0; py < H; py++) {
         let lat: number;
@@ -90,7 +93,7 @@ self.onmessage = (e: MessageEvent) => {
         for (let px = 0; px < W; px++) {
             const lng = -180 + (px / W) * 360;
             const { zone, value } = computeVisibilityAtPoint(date, lat, lng, criterion || "yallop");
-            const [r, g, b] = ZONE_RGB[zone];
+            const [r, g, b] = rgbMap[zone];
             const night = !isDaylight(lat, lng, date);
             const alpha = zone === "F" ? 40 : night ? 100 : 180;
 

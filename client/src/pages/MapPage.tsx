@@ -27,6 +27,15 @@ const ZONE_COLORS: Record<VisibilityZone, string> = {
   F: "#1f2937",
 };
 
+const HIGH_CONTRAST_ZONE_COLORS: Record<VisibilityZone, string> = {
+  A: "#eaf018",
+  B: "#e1781e",
+  C: "#a03c28",
+  D: "#3c2896",
+  E: "#140a3c",
+  F: "#1f2937",
+};
+
 const ZONE_HEX: Record<VisibilityZone, string> = {
   A: "rgba(74,222,128,0.45)",
   B: "rgba(250,204,21,0.45)",
@@ -48,7 +57,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const tileLayerRef = useRef<any>(null);
   const overlayRef = useRef<any>(null);
 
-  const { theme } = useTheme();
+  const { theme, highContrast } = useTheme();
   const { data: observationsResult } = trpc.telemetry.getObservations.useQuery({});
   const observations = observationsResult?.data;
 
@@ -179,7 +188,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const effectiveDateTs = effectiveDate.getTime();
 
   // Custom worker hook handles computation off main thread
-  const { qData, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility, visibilityCriterion);
+  const { qData, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility, visibilityCriterion, highContrast);
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Compute local moon data
@@ -248,7 +257,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     let svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" style="width:100%; height:100%;">`;
     contours.forEach(contour => {
       const zone = thresholdsToZone(contour.value);
-      const color = ZONE_COLORS[zone] || "#000";
+      const color = (highContrast ? HIGH_CONTRAST_ZONE_COLORS[zone] : ZONE_COLORS[zone]) || "#000";
       // Ensure lower zones have lower opacity so the stack looks correct
       const opacity = zone === "F" ? 0.35 : 0.6;
 
@@ -272,7 +281,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     }).addTo(layerGroupRef.current!);
 
     return () => { mounted = false; };
-  }, [qData, showVisibility, visibilityCriterion]);
+  }, [qData, showVisibility, visibilityCriterion, highContrast]);
 
   // Apply clouds overlay
   const cloudOverlayRef = useRef<any>(null);
@@ -376,7 +385,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
               }}
             >
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-3 h-3 rounded-sm" style={{ background: ZONE_COLORS[selectedPoint.zone] }} />
+                <div className="w-3 h-3 rounded-sm" style={{ background: highContrast ? HIGH_CONTRAST_ZONE_COLORS[selectedPoint.zone] : ZONE_COLORS[selectedPoint.zone] }} />
                 <span className="font-medium" style={{ color: "var(--foreground)" }}>
                   Zone {selectedPoint.zone} - {VISIBILITY_LABELS[selectedPoint.zone].label}
                 </span>
@@ -540,7 +549,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                 <div key={zone} className="flex items-start gap-2.5">
                   <div
                     className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
-                    style={{ background: ZONE_COLORS[zone] }}
+                    style={{ background: highContrast ? HIGH_CONTRAST_ZONE_COLORS[zone] : ZONE_COLORS[zone] }}
                   />
                   <div>
                     <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>

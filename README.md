@@ -10,7 +10,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *GPS Auto-Detect*: Instantly fly to your current position using the browser Geolocation API.
   - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
   - *Cloud Cover Overlay*: Real-time cloud cover data from Open-Meteo rendered as a translucent overlay (toggleable independently from visibility zones).
-  - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness.
+  - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness. Incorporates topographical elevation precision where available.
+  - *Accessibility*: High Contrast Color-Blind mode to ensure the visibility gradients remain intelligible for users with Color Vision Deficiency.
 - **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, Sky Dome polar visualization, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
 - **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (SunCalc), Official Umm al-Qura, and Tabular (Kuwaiti) calculations, including a celestial divergence overlay to compare civic vs. astronomical dates.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
@@ -33,7 +34,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **Rate Limiting:** Upstash Redis
 - **i18n:** react-i18next + i18next-browser-languagedetector
 - **SEO:** react-helmet-async
-- **Mobile Packaging:** Capacitor.js (iOS & Android Native)
+- **Testing:** Vitest (Unit), Playwright (E2E)
+- **Mobile Packaging:** Capacitor.js (iOS & Android Native with Safe Area optimizing)
 
 ## Recent Architecture Highlights
 
@@ -56,6 +58,10 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 17. **Sentry Error Monitoring**: `@sentry/react` with `ErrorBoundary`, API error capture, performance tracing (20% sampling), and session replays (10%), with graceful no-op when DSN is unset.
 18. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
 19. **Global Location & Date State**: A unified `GlobalStateContext` centralizes the location and date pickers into the main navigation bar. Changing your location or date instantly pushes the update to all 3D Globe, 2D Map, Moon Phase, and Horizon modules simultaneously.
+20. **Accessibility & High Contrast**: A specialized perceptual color palette ensures all scientific visibility gradients are legible for users with Color Vision Deficiency (CVD), computed via the Web Worker.
+21. **Topographical Refraction**: The application automatically fetches the observer's physical elevation (meters above sea level) via the Open-Meteo API to adjust the theoretical local horizon dip, providing precise observatory-grade calculations.
+22. **E2E Playwright Testing**: Critical user journeys, DOM sync, and rendering are safeguarded from regressions using a comprehensive Playwright automation suite.
+23. **App Store Readiness**: Mobile web views are strictly styled using `env(safe-area-inset-top)` to seamlessly accommodate iOS Dynamic Islands and Android gesture navs via Capacitor.
 
 ## Getting Started
 
@@ -103,8 +109,9 @@ See `docs/DEPLOYMENT.md` for the full Vercel deployment guide.
 ### Code Quality & Testing
 
 ```bash
-npm run test    # Unit tests (21 tests - Yallop, crescent width, Hijri calendar, best-time)
-npm run check   # TypeScript type checking
+npm run test     # Unit tests (21 tests - Yallop, crescent width, Hijri calendar, best-time)
+npm run test:e2e # Playwright End-to-End browser tests
+npm run check    # TypeScript type checking
 ```
 
 ## Documentation
