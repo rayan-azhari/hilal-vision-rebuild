@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import { lazy, Suspense } from "react";
 import { Sentry } from "@/lib/sentry";
 import CookieConsent from "./components/CookieConsent";
+import { Analytics } from "@vercel/analytics/react";
 
 // ─── Lazy-loaded pages (code splitting) ─────────────────────────────────────
 // Globe.gl + Three.js + Leaflet + D3 + Recharts are heavy.
@@ -104,6 +105,7 @@ function App() {
                   />
                   <Router />
                   <CookieConsent />
+                  <Analytics />
                 </TooltipProvider>
               </GlobalStateProvider>
             </ThemeProvider>

@@ -39,6 +39,7 @@
     "@umalqura/core": "^0.0.7",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.2",
+    "@vercel/analytics": "^1.6.1",
     "@vercel/og": "^0.8.6",
     "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
