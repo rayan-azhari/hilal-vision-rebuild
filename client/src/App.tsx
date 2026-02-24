@@ -10,6 +10,7 @@ import { GlobalStateProvider } from "./contexts/GlobalStateContext";
 import Layout from "./components/Layout";
 import { lazy, Suspense } from "react";
 import { Sentry } from "@/lib/sentry";
+import CookieConsent from "./components/CookieConsent";
 
 // ─── Lazy-loaded pages (code splitting) ─────────────────────────────────────
 // Globe.gl + Three.js + Leaflet + D3 + Recharts are heavy.
@@ -102,6 +103,7 @@ function App() {
                     }}
                   />
                   <Router />
+                  <CookieConsent />
                 </TooltipProvider>
               </GlobalStateProvider>
             </ThemeProvider>
