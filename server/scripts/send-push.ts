@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import path from "path";
-import { getDb } from "../db";
-import { pushTokens } from "../../drizzle/schema";
+import { getDb } from "../db.js";
+import { pushTokens } from "../../drizzle/schema.js";
 
 // Load service account key
 const SERVICE_ACCOUNT_PATH = path.resolve(

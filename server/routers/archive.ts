@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, router } from "../_core/trpc.js";
 // Static TS import so Vercel serverless bundler includes the data seamlessly
-import { icopData } from "../data/icop-history";
+import { icopData } from "../data/icop-history.js";
 
 export const archiveRouter = router({
     getHistoricalData: publicProcedure

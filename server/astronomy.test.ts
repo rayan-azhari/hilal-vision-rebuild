@@ -13,7 +13,7 @@ import {
   jdToHijri,
   gregorianToHijri,
   computeBestObservationTime,
-} from "../shared/astronomy";
+} from "../shared/astronomy.js";
 
 // ─── Yallop Classification ───────────────────────────────────────────────────
 

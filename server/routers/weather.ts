@@ -4,7 +4,7 @@
  * Fetches cloud cover data from Open-Meteo for a sparse global grid
  * and returns it for client-side interpolation into a cloud overlay texture.
  */
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, router } from "../_core/trpc.js";
 import { z } from "zod";
 
 // ─── In-Memory Cache ──────────────────────────────────────────────────────────

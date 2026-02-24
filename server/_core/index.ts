@@ -3,9 +3,9 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { appRouter } from "../appRouter";
-import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
+import { appRouter } from "../appRouter.js";
+import { createContext } from "./context.js";
+import { serveStatic, setupVite } from "./vite.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {

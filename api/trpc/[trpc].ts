@@ -1,6 +1,6 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "../../server/appRouter";
-import type { TrpcContext } from "../../server/_core/context";
+import { appRouter } from "../../server/appRouter.js";
+import type { TrpcContext } from "../../server/_core/context.js";
 import type { IncomingMessage, ServerResponse } from "http";
 
 /**

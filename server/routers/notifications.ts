@@ -1,7 +1,7 @@
-import { publicProcedure, router } from "../_core/trpc";
+import { publicProcedure, router } from "../_core/trpc.js";
 import { z } from "zod";
-import { getDb } from "../db";
-import { pushTokens } from "../../drizzle/schema";
+import { getDb } from "../db.js";
+import { pushTokens } from "../../drizzle/schema.js";
 import { eq } from "drizzle-orm";
 
 export const notificationsRouter = router({

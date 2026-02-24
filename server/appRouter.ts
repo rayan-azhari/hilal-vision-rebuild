@@ -1,17 +1,17 @@
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
-import { archiveRouter } from "./routers/archive";
-import { weatherRouter } from "./routers/weather";
-import { notificationsRouter } from "./routers/notifications";
+import { systemRouter } from "./_core/systemRouter.js";
+import { publicProcedure, router } from "./_core/trpc.js";
+import { archiveRouter } from "./routers/archive.js";
+import { weatherRouter } from "./routers/weather.js";
+import { notificationsRouter } from "./routers/notifications.js";
 import { z } from "zod";
-import { getDb } from "./db";
-import { observationReports } from "../drizzle/schema";
+import { getDb } from "./db.js";
+import { observationReports } from "../drizzle/schema.js";
 import { desc, count } from "drizzle-orm";
-import { computeSunMoonAtSunset } from "../shared/astronomy";
+import { computeSunMoonAtSunset } from "../shared/astronomy.js";
 
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { ENV } from "./_core/env";
+import { ENV } from "./_core/env.js";
 
 // ─── Global Redis Rate Limiter ────────────────────────────────────────────────
 let ratelimit: Ratelimit | null = null;
