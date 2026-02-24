@@ -66,7 +66,7 @@ export default function PrivacyPage() {
                     </Para>
                     <Para>
                         If you have questions, contact us at{" "}
-                        <span style={{ color: "var(--gold-dim)" }}>privacy@hilalvision.app</span>.
+                        <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>.
                     </Para>
                 </div>
 
@@ -191,7 +191,7 @@ export default function PrivacyPage() {
                 </Ul>
                 <Para>
                     To exercise any of these rights, contact{" "}
-                    <span style={{ color: "var(--gold-dim)" }}>privacy@hilalvision.app</span>. We will
+                    <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>. We will
                     respond within 30 days.
                 </Para>
 
@@ -219,7 +219,7 @@ export default function PrivacyPage() {
                         </div>
                         <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                             Email{" "}
-                            <span style={{ color: "var(--gold-dim)" }}>privacy@hilalvision.app</span>
+                            <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>
                             {" "}- Also see our{" "}
                             <Link href="/terms">
                                 <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>Terms of Service</span>
