@@ -5,20 +5,11 @@ import { Sun, Moon } from "lucide-react";
 interface Props {
     date: Date;
     location: { lat: number; lng: number };
+    minutes: number;
+    onMinutesChange: (minutes: number) => void;
 }
 
-export function SkyDomeChart({ date, location }: Props) {
-    const [minutes, setMinutes] = useState(12 * 60);
-
-    // Set initial slider to current time if today
-    useEffect(() => {
-        const now = new Date();
-        if (now.toDateString() === date.toDateString()) {
-            setMinutes(now.getHours() * 60 + now.getMinutes());
-        } else {
-            setMinutes(12 * 60);
-        }
-    }, [date]);
+export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props) {
 
     // Path generation
     const { sunPath, moonPath } = useMemo(() => {
@@ -84,7 +75,7 @@ export function SkyDomeChart({ date, location }: Props) {
     };
 
     return (
-        <div className="flex flex-col gap-6 w-full items-center">
+        <div className="flex flex-col gap-6 w-full h-full items-center">
             <div className="w-full flex items-center justify-between">
                 <div className="flex flex-col">
                     <h3 className="text-xl font-medium" style={{ color: "var(--foreground)" }}>
@@ -99,8 +90,8 @@ export function SkyDomeChart({ date, location }: Props) {
                 </div>
             </div>
 
-            <div className="relative w-full aspect-square max-h-[350px] flex items-center justify-center pt-2">
-                <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full h-full drop-shadow-xl" style={{ maxHeight: "350px", filter: "drop-shadow(0 0 20px rgba(0,0,0,0.2))" }}>
+            <div className="relative w-full h-72 flex items-center justify-center pt-2 mt-2">
+                <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full h-full drop-shadow-xl" style={{ maxHeight: "100%", filter: "drop-shadow(0 0 20px rgba(0,0,0,0.2))" }}>
                     <defs>
                         <clipPath id="horizonClip">
                             <circle cx={CX} cy={CY} r={R_HORIZON} />
@@ -196,7 +187,7 @@ export function SkyDomeChart({ date, location }: Props) {
                     min="0"
                     max="1439"
                     value={minutes}
-                    onChange={(e) => setMinutes(Number(e.target.value))}
+                    onChange={(e) => onMinutesChange(Number(e.target.value))}
                     className="w-full h-2 rounded-lg appearance-none cursor-pointer"
                     style={{ background: "var(--space-light)" }}
                 />

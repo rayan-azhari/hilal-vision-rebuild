@@ -7,20 +7,11 @@ import { Sun, Moon } from "lucide-react";
 interface Props {
     date: Date;
     location: { lat: number; lng: number };
+    minutes: number;
+    onMinutesChange: (minutes: number) => void;
 }
 
-export function SunMoonAltitudeChart({ date, location }: Props) {
-    const [minutes, setMinutes] = useState(12 * 60);
-
-    // Set initial slider to current time if today
-    useEffect(() => {
-        const now = new Date();
-        if (now.toDateString() === date.toDateString()) {
-            setMinutes(now.getHours() * 60 + now.getMinutes());
-        } else {
-            setMinutes(12 * 60);
-        }
-    }, [date]);
+export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange }: Props) {
 
     const data = useMemo(() => {
         const points = [];
@@ -58,13 +49,20 @@ export function SunMoonAltitudeChart({ date, location }: Props) {
     };
 
     return (
-        <div className="flex flex-col gap-6 w-full">
-            <div className="flex items-center gap-3">
-                <h3 className="text-xl font-medium" style={{ color: "var(--foreground)" }}>
-                    Sun & Moon Altitude - {date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </h3>
+        <div className="flex flex-col gap-6 w-full h-full">
+            <div className="w-full flex items-center justify-between">
+                <div className="flex flex-col">
+                    <h3 className="text-xl font-medium" style={{ color: "var(--foreground)" }}>
+                        Altitude Tracker
+                    </h3>
+                    <p className="text-sm mt-1" style={{ color: "var(--muted-foreground)" }}>
+                        Drag slider to change time
+                    </p>
+                </div>
+                <div className="text-right font-mono text-sm data-text" style={{ color: "var(--foreground)" }}>
+                    {formatXAxis(minutes)}
+                </div>
             </div>
-            <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>Drag slider to change time</p>
 
             {/* Chart */}
             <div className="relative h-72 w-full mt-2" style={{ background: "var(--space-mid)", borderRadius: "12px", padding: "16px 16px 0 0" }}>
@@ -111,7 +109,7 @@ export function SunMoonAltitudeChart({ date, location }: Props) {
                     min="0"
                     max="1439"
                     value={minutes}
-                    onChange={(e) => setMinutes(Number(e.target.value))}
+                    onChange={(e) => onMinutesChange(Number(e.target.value))}
                     className="w-full h-2 rounded-lg appearance-none cursor-pointer"
                     style={{ background: "var(--space-light)" }}
                 />

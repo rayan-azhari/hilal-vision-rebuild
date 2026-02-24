@@ -165,7 +165,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link href="/globe"
+              <Link href="/visibility"
                 className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105"
                 style={{
                   background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
@@ -173,11 +173,11 @@ export default function Home() {
                   boxShadow: "0 0 24px oklch(0.78 0.15 75 / 0.4)",
                 }}
               >
-                <Globe className="w-4 h-4" />
-                Explore Globe
+                <Map className="w-4 h-4" />
+                Visibility Map
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link href="/map"
+              <Link href="/moon"
                 className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-105"
                 style={{
                   background: "color-mix(in oklch, var(--space-light) 80%, transparent)",
@@ -185,8 +185,8 @@ export default function Home() {
                   border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
                 }}
               >
-                <Map className="w-4 h-4" />
-                Visibility Map
+                <Moon className="w-4 h-4" />
+                Moon Phases
               </Link>
             </div>
           </div>

@@ -156,10 +156,25 @@ export default function MoonPage() {
   const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(date, location));
   const [countdown, setCountdown] = useState("");
 
+  const [sharedMinutes, setSharedMinutes] = useState(() => {
+    const now = new Date();
+    if (now.toDateString() === date.toDateString()) {
+      return now.getHours() * 60 + now.getMinutes();
+    }
+    return 12 * 60;
+  });
+
   useEffect(() => {
     // document.title managed by <SEO> component
     setMoonInfo(getMoonPhaseInfo(date));
     setSunMoon(computeSunMoonAtSunset(date, location));
+
+    const now = new Date();
+    if (now.toDateString() === date.toDateString()) {
+      setSharedMinutes(now.getHours() * 60 + now.getMinutes());
+    } else {
+      setSharedMinutes(12 * 60);
+    }
   }, [date, location]);
 
   // Countdown to next new moon
@@ -207,8 +222,8 @@ export default function MoonPage() {
             icon={<Clock className="w-4 h-4" />}
             className="animate-breezy-enter h-full"
           >
-            <div className="p-2 mt-4 w-full h-full">
-              <SunMoonAltitudeChart date={date} location={location} />
+            <div className="p-2 mt-2 w-full h-full flex flex-col justify-center">
+              <SunMoonAltitudeChart date={date} location={location} minutes={sharedMinutes} onMinutesChange={setSharedMinutes} />
             </div>
           </BreezyFullCard>
 
@@ -217,8 +232,8 @@ export default function MoonPage() {
             icon={<Eye className="w-4 h-4" />}
             className="animate-breezy-enter h-full"
           >
-            <div className="p-2 w-full h-full flex flex-col justify-center">
-              <SkyDomeChart date={date} location={location} />
+            <div className="p-2 mt-2 w-full h-full flex flex-col justify-center">
+              <SkyDomeChart date={date} location={location} minutes={sharedMinutes} onMinutesChange={setSharedMinutes} />
             </div>
           </BreezyFullCard>
         </div>
