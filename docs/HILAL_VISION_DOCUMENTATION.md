@@ -380,6 +380,8 @@ The **30-day phase calendar strip** shows a horizontal scroll of 30 days, each w
 
 The **sun/moon altitude chart** is a Recharts area chart showing the altitude of both the sun and moon over 24 hours (288 data points at 5-minute intervals). The sun area is filled with a warm amber gradient; the moon area is filled with a cool blue gradient. A vertical time slider allows the user to inspect the exact altitude of both bodies at any time of day. Rise and set times are marked with vertical dashed lines.
 
+Alongside it, **The Sky Dome** offers a custom SVG-based polar stereographic projection that maps the spatial tracking dimension. Altitude determines the radius (Zenith at center, Horizon at edge) and Azimuth determines the angle. The tracker traces the correct daily trajectory of both bodies with a time slider synchronized to the companion linear altitude chart.
+
 In Pro Mode, the page shows extended orbital data including libration (the apparent rocking of the moon), parallax, the equation of time, and the moon's distance from Earth.
 
 ### 6.6 Hijri Calendar Page (`/calendar`)

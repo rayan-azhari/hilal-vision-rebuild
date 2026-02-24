@@ -10,7 +10,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
   - *Cloud Cover Overlay*: Real-time cloud cover data from Open-Meteo rendered as a translucent overlay (toggleable independently from visibility zones).
   - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness.
-- **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
+- **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, Sky Dome polar visualization, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
 - **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (SunCalc), Official Umm al-Qura, and Tabular (Kuwaiti) calculations, including a celestial divergence overlay to compare civic vs. astronomical dates.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
 - **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP).

@@ -48,7 +48,8 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 
 A dedicated dashboard for the lunar cycle.
 - **Location & Date Settings** - Exact same geocoding and synchronized date offsets as the Visibility map.
-- **Sun & Moon Altitude Tracker** (top of page) - Interactive chart plotting Sun and Moon altitudes throughout the day.
+- **Sun & Moon Altitude Tracker** (top of page) - Interactive linear chart plotting Sun and Moon altitudes throughout the day.
+- **The Sky Dome** - Integrated custom SVG polar stereographic projection mapping azimuth and altitude simultaneously to show physical separation of celestial bodies.
 - **Moon Illustration** - Accurate SVG rendering of the current phase with craters and terminator.
 - **Stats Grid** - Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown.
 - **Ephemeris** - Sunrise, Sunset, Moonrise, and Moonset times.
