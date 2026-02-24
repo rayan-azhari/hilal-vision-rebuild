@@ -209,9 +209,25 @@ export function SkyDomeChart({ date, location }: Props) {
                 </div>
             </div>
 
-            <p className="text-xs text-center w-full mt-2" style={{ color: "var(--muted-foreground)" }}>
-                Projected view: Zenith (90°) at center, Horizon (0°) at outer rim.
-            </p>
+            {/* Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 w-full">
+                <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #facc15 20%, var(--border))", background: "color-mix(in oklch, #facc15 2%, transparent)" }}>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Sun Alt</span>
+                    <span className="text-xl font-mono font-semibold" style={{ color: "#facc15" }}>{sunAlt.toFixed(1)}°</span>
+                </div>
+                <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #facc15 20%, var(--border))", background: "color-mix(in oklch, #facc15 2%, transparent)" }}>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Sun Az</span>
+                    <span className="text-xl font-mono font-semibold" style={{ color: "#facc15" }}>{sunAz.toFixed(1)}°</span>
+                </div>
+                <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #60a5fa 20%, var(--border))", background: "color-mix(in oklch, #60a5fa 2%, transparent)" }}>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Alt</span>
+                    <span className="text-xl font-mono font-semibold" style={{ color: "#60a5fa" }}>{moonAlt.toFixed(1)}°</span>
+                </div>
+                <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #60a5fa 20%, var(--border))", background: "color-mix(in oklch, #60a5fa 2%, transparent)" }}>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Az</span>
+                    <span className="text-xl font-mono font-semibold" style={{ color: "#60a5fa" }}>{moonAz.toFixed(1)}°</span>
+                </div>
+            </div>
         </div>
     );
 }
