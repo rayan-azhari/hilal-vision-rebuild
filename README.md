@@ -5,6 +5,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 ## Features
 
 - **🌐 Unified Visibility Page (`/visibility`)**: Toggle between an interactive 3D Globe (Globe.gl) and a 2D Leaflet Map.
+  - *Criterion Switch*: Seamlessly toggle between the Yallop (1997) and Odeh (2004) criteria to evaluate visibility zones.
   - *Hour Offset Slider*: Slide ±24 hours to see how visibility evolves over time.
   - *GPS Auto-Detect*: Instantly fly to your current position using the browser Geolocation API.
   - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
@@ -49,11 +50,12 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 11. **Dynamic SEO Engine**: Per-page meta tags, OG/Twitter cards (PNG format for social platform compatibility), and JSON-LD structured data via `react-helmet-async`, with canonical URLs and a complete sitemap.
 12. **Shared Astronomy Module**: The 843-line astronomy engine has been extracted to `shared/astronomy.ts` - a platform-agnostic module importable by the server, Web Workers, and tests without cross-boundary imports. Only `buildVisibilityTexture` (DOM-dependent) remains in the client wrapper.
 13. **Code Splitting**: All 6 heavy pages are lazy-loaded via `React.lazy` + `Suspense`, keeping Globe.gl, Three.js, Leaflet, D3, and Recharts out of the initial bundle.
-14. **Reliable Test Suite**: 21 unit tests import directly from the production `shared/astronomy.ts` module (not duplicated copies) and cover Yallop classification, crescent width, Hijri conversion, q-value formula, degree/radian conversions, and best-time-to-observe.
-55. **PWA with Service Worker**: A hand-written `sw.js` implements three caching strategies - CacheFirst for map tiles/fonts, NetworkFirst for API calls, StaleWhileRevalidate for the app shell - enabling offline functionality.
-56. **Sentry Error Monitoring**: `@sentry/react` with `ErrorBoundary`, API error capture, performance tracing (20% sampling), and session replays (10%), with graceful no-op when DSN is unset.
-57. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
-58. **Global Location & Date State**: A unified `GlobalStateContext` centralizes the location and date pickers into the main navigation bar. Changing your location or date instantly pushes the update to all 3D Globe, 2D Map, Moon Phase, and Horizon modules simultaneously.
+14. **Reliable Test Suite**: 21 unit tests import directly from the production `shared/astronomy.ts` module (not duplicated copies) and cover Yallop/Odeh classification, crescent width, Hijri conversion, q-value formula, degree/radian conversions, and best-time-to-observe.
+15. **Dual Visibility Criteria**: Users can now seamlessly toggle between the traditional Yallop (1997) q-value criterion and the modern Odeh (2004) V-value criterion across all map and globe views. The UI logic, backend calculations, and D3 contour thresholds dynamically adapt to the selected algorithm.
+16. **PWA with Service Worker**: A hand-written `sw.js` implements three caching strategies - CacheFirst for map tiles/fonts, NetworkFirst for API calls, StaleWhileRevalidate for the app shell - enabling offline functionality.
+17. **Sentry Error Monitoring**: `@sentry/react` with `ErrorBoundary`, API error capture, performance tracing (20% sampling), and session replays (10%), with graceful no-op when DSN is unset.
+18. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
+19. **Global Location & Date State**: A unified `GlobalStateContext` centralizes the location and date pickers into the main navigation bar. Changing your location or date instantly pushes the update to all 3D Globe, 2D Map, Moon Phase, and Horizon modules simultaneously.
 
 ## Getting Started
 

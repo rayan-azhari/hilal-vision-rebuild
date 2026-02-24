@@ -25,6 +25,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 ### Shared Controls (Both Views & Global Navbar)
 - **Global Date Picker** (in Navbar) - Select any Gregorian date to instantly update the map, globe, and moon phases.
 - **Global Location Selector** (in Navbar) - Dynamically search any world city via Open-Meteo geocoding, or use **Auto-Detect GPS** to fly to your current position.
+- **Visibility Criterion Switch** (in Map/Globe Sidebars) - Toggle the classification engine between the traditional Yallop (1997) criterion and the modern Odeh (2004) criterion to evaluate overlapping constraints.
 - **Hour Offset Slider** (in Map/Globe Sidebars) - Slide ±24 hours to see visibility evolve over time for the currently selected global date.
 
 ### 3D Globe View
@@ -33,7 +34,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 - **Cloud Cover Overlay** - Real-time cloud cover from Open-Meteo rendered as a translucent sphere above the visibility layer. Toggle on/off with the "Clouds" button.
 - Play/Pause auto-rotation and toggle the visibility overlay on/off.
 - **Best Time to Observe** card - Shows the optimal crescent viewing time, observation window, and moon/sun altitudes.
-- Sidebar shows live astronomical data for the selected city: Moon altitude, azimuth, elongation, ARCV, crescent width, Yallop q-value, illumination, sunset, and moonset times.
+- Sidebar shows live astronomical data for the selected city: Moon altitude, azimuth, elongation, ARCV, crescent width, Yallop q-value or Odeh V-value, illumination, sunset, and moonset times.
 
 ### 2D Map View
 - Leaflet map with dark/light CARTO basemaps.

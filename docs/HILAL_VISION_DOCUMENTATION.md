@@ -279,7 +279,7 @@ The **Odeh criterion** was developed by Mohammad Odeh in 2004 as a refinement of
 V = ARCV - (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)
 ```
 
-The Odeh criterion is displayed in Pro Mode as an alternative classification, allowing scholars to compare the two methodologies for borderline cases.
+Users can seamlessly toggle between the Yallop and Odeh criteria across the 3D Globe and 2D Map views. The active criterion dictates the color-coded contour thresholds, the Zone A–F visibility classifications, and the live astronomical data readouts, allowing researchers to evaluate borderline visual cases using both mathematical models seamlessly.
 
 ### 5.4 Hijri Calendar Conversion
 
@@ -589,5 +589,6 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 27 | Informational Pages | Added four new route pages: `/about` (mission, tools, competitor comparison, attributions), `/methodology` (full Yallop/Odeh formula reference, triple-engine calendar, ICOP, refraction), `/privacy` (GDPR-aware policy), `/terms` (acceptable use, MIT License). Linked in footer nav. All routes lazy-loaded in `App.tsx`. |
 | 28 | Vector Render | Refactored MapPage to generate pure mathematical SVG contours from Yallop `q-value` matrix using `d3-contours`. Removed pixelated canvas generation. Fixed Home page routing overlay issue. |
 | 29 | Global Pickers | Centralized the Date and Location selection (with Auto-Detect GPS) into the main navigation bar using `GlobalStateContext`. All dashboard modules now sync automatically to a single global source of truth. Removed redundant pickers from individual pages. |
+| 30 | Dual Criteria | Added a global Visibility Criterion switch allowing users to evaluate crescent visibility using either the traditional Yallop (1997) q-value or the modern Odeh (2004) v-value across the 3D Globe and 2D Map views simultaneously. |
 
-*Documentation updated February 23, 2026 (Round 28 - Vector Render). For the latest feature status, see `todo.md`.*
+*Documentation updated February 24, 2026 (Round 30 - Dual Criteria). For the latest feature status, see `todo.md`.*
