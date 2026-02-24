@@ -436,7 +436,7 @@ A rich informational page communicating Hilal Vision's mission, platform scope, 
 - **How We Compare** - Feature comparison table benchmarking Hilal Vision against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap across 14 dimensions (3D globe, weather overlay, ICOP data, Best-Time calculator, mobile app, push notifications, etc.).
 - **Technology** - Non-technical overview of the stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, Open-Meteo, Sentry).
 - **Data Sources & Attributions** - Linked credits to Yallop 1997, Odeh 2004, ICOP (IAC), SunCalc (Agafonkin), Umm al-Qura tables, and Open-Meteo.
-- **License & Contact** - MIT License notice, GitHub link, email contact, and links to Privacy/Terms pages.
+- **License & Contact** - All Rights Reserved notice, GitHub link, email contact, and links to Privacy/Terms pages.
 
 **Design:** Stars-field hero section with orbit rings, `.breezy-card` grid layout, gold accent on Hilal Vision column of the comparison table, methodology teaser CTA.
 
@@ -473,7 +473,7 @@ A clear terms document covering:
 - **Acceptable use:** No false sighting reports, no DDoS/rate-limit bypass, no impersonation.
 - **User-generated content:** Worldwide, royalty-free, irrevocable licence granted for submitted sighting reports used in the public dataset.
 - **Accuracy disclaimer:** Predictions are mathematical estimates, not religious rulings. Not suitable as the sole basis for civic or religious decisions.
-- **MIT License:** Full source code available under MIT. ICOP data and Umm al-Qura tables subject to their original terms.
+- **All Rights Reserved:** Full source code is proprietary. ICOP data and Umm al-Qura tables subject to their original terms.
 - **Limitation of liability:** No liability for indirect damages, missed observances, or incorrect predictions.
 
 ---
@@ -591,7 +591,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 24 | PWA & Monitoring | Hand-written Service Worker (`sw.js`) with CacheFirst/NetworkFirst/StaleWhileRevalidate strategies. PWA manifest + icons. Sentry error monitoring with ErrorBoundary and API error capture. |
 | 25 | Location UX | Unified geolocation: all pages auto-detect GPS on mount via `useGeolocation(true)` hook. Created shared `AutoDetectButton` component. Removed ~120 lines of duplicated geolocation code. Red Report Sighting button in navbar. |
 | 26 | Map/Globe UX | Fixed Vercel 500 error on cloud cover fetch by reducing Open-Meteo batch size to avoid URL limits. Unified Visibility Map and Cloud Cover toggles directly within the side panel controls for both MapPage and GlobePage. |
-| 27 | Informational Pages | Added four new route pages: `/about` (mission, tools, competitor comparison, attributions), `/methodology` (full Yallop/Odeh formula reference, triple-engine calendar, ICOP, refraction), `/privacy` (GDPR-aware policy), `/terms` (acceptable use, MIT License). Linked in footer nav. All routes lazy-loaded in `App.tsx`. |
+| 27 | Informational Pages | Added four new route pages: `/about` (mission, tools, competitor comparison, attributions), `/methodology` (full Yallop/Odeh formula reference, triple-engine calendar, ICOP, refraction), `/privacy` (GDPR-aware policy), `/terms` (acceptable use, All Rights Reserved). Linked in footer nav. All routes lazy-loaded in `App.tsx`. |
 | 28 | Vector Render | Refactored MapPage to generate pure mathematical SVG contours from Yallop `q-value` matrix using `d3-contours`. Removed pixelated canvas generation. Fixed Home page routing overlay issue. |
 | 29 | Global Pickers | Centralized the Date and Location selection (with Auto-Detect GPS) into the main navigation bar using `GlobalStateContext`. All dashboard modules now sync automatically to a single global source of truth. Removed redundant pickers from individual pages. |
 | 30 | Dual Criteria | Added a global Visibility Criterion switch allowing users to evaluate crescent visibility using either the traditional Yallop (1997) q-value or the modern Odeh (2004) v-value across the 3D Globe and 2D Map views simultaneously. |

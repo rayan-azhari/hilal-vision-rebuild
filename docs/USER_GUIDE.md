@@ -125,7 +125,7 @@ Hilal Vision's mission and background page.
 - **How We Compare** - Feature comparison table against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap, showing Hilal Vision's unique combination of 3D globe, weather overlay, ICOP data, and Best-Time calculator.
 - **Technology** - Brief overview of the tech stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, etc.).
 - **Data Sources & Attributions** - Linked credits for Yallop 1997, Odeh 2004, ICOP, SunCalc, Umm al-Qura tables, and Open-Meteo.
-- **Open Source / MIT License** - GitHub link and license information.
+- **Proprietary Software** - License information.
 
 ## 8. Methodology (`/methodology`)
 
@@ -149,5 +149,5 @@ Covers what data Hilal Vision collects (GPS, Clerk account, sighting reports, Se
 
 ## 10. Terms of Service (`/terms`)
 
-Covers acceptable use of the platform (no false sighting reports, no DDoS), user-generated content policy, accuracy disclaimer (predictions ≠ religious rulings), MIT License notice, limitation of liability, and governing law.
+Covers acceptable use of the platform (no false sighting reports, no DDoS), user-generated content policy, accuracy disclaimer (predictions ≠ religious rulings), All Rights Reserved notice, limitation of liability, and governing law.
 

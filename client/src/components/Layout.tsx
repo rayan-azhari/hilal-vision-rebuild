@@ -422,7 +422,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </div>
             <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Yallop & Odeh criteria · MIT License
+              Yallop & Odeh criteria · All Rights Reserved
             </div>
           </div>
         </div>

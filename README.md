@@ -21,7 +21,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **📤 Social Sharing**: Native share API (mobile) with clipboard fallback, plus a live sighting feed on the Home page.
 - **ℹ️ About Page (`/about`)**: Mission statement, platform overview, technology stack, competitor comparison table (vs Moonsighting.com, IslamicFinder, LuneSighting, HilalMap), and data attributions.
 - **🔬 Methodology Page (`/methodology`)**: Full technical reference - Yallop q-value formula derivation, Odeh V-value, triple-engine Hijri calendar algorithms, Best-Time-to-Observe scoring function, ICOP archive sourcing, atmospheric refraction physics, and peer-reviewed references.
-- **⚖️ Legal Pages (`/privacy`, `/terms`)**: Privacy Policy (GDPR-aware, covering GPS, Clerk auth, ICOP data) and Terms of Service (acceptable use, MIT License, accuracy disclaimer).
+- **⚖️ Legal Pages (`/privacy`, `/terms`)**: Privacy Policy (GDPR-aware, covering GPS, Clerk auth, ICOP data) and Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer).
 
 ## Tech Stack
 
@@ -127,8 +127,8 @@ npm run check    # TypeScript type checking
 - `/about` - Mission, tools, tech stack, competitor comparison, and attributions
 - `/methodology` - Full algorithm reference (Yallop, Odeh, Hijri calendar engines, Best-Time calculator, ICOP, refraction)
 - `/privacy` - Privacy Policy (data collection, sub-processors, GDPR rights)
-- `/terms` - Terms of Service (acceptable use, MIT License, accuracy disclaimer)
+- `/terms` - Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer)
 
 ## License
 
-MIT License
+All Rights Reserved

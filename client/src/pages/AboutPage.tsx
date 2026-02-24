@@ -605,14 +605,13 @@ export default function AboutPage() {
                                 className="text-sm font-semibold mb-1"
                                 style={{ color: "var(--foreground)" }}
                             >
-                                Open Source - MIT License
+                                Proprietary Software
                             </h3>
                             <p
                                 className="text-xs leading-relaxed mb-4"
                                 style={{ color: "var(--muted-foreground)" }}
                             >
-                                Hilal Vision is open-source software. The source code is freely available for
-                                inspection, modification, and redistribution under the MIT License.
+                                Hilal Vision is proprietary software. All rights are reserved. The source code is closed-source and protected by copyright law.
                             </p>
                             <a
                                 href="https://github.com"
