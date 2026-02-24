@@ -330,7 +330,7 @@ The function returns the time with the highest score, along with the full observ
 
 The home page serves as both a landing page and a live status dashboard. It is structured in three sections.
 
-The **hero section** occupies 94% of the viewport height. It features a radial gradient background with a star field overlay, three decorative orbit rings, and a floating animated SVG moon that renders the current phase with correct crescent geometry. The heading "Hilal Vision" uses the Cinzel serif font with a gradient text effect. Two call-to-action buttons link to the Dashboard and the 3D Globe.
+The **hero section** occupies 94% of the viewport height. It features a radial gradient background with a star field overlay, three decorative orbit rings, and a floating animated SVG moon that renders the current phase with correct crescent geometry. The heading "Hilal Vision" uses the Cinzel serif font with a gradient text effect. Two call-to-action buttons link to the Visibility Page and the Moon Phases Page.
 
 The **live status cards** section shows four glassmorphism cards in a 2×2 (mobile) or 4×1 (desktop) grid: current UTC time (updating every second), current moon phase name and illumination, current Hijri date (tabular and Umm al-Qura), and the next new moon time and days remaining.
 
@@ -380,7 +380,7 @@ The **30-day phase calendar strip** shows a horizontal scroll of 30 days, each w
 
 The **sun/moon altitude chart** is a Recharts area chart showing the altitude of both the sun and moon over 24 hours (288 data points at 5-minute intervals). The sun area is filled with a warm amber gradient; the moon area is filled with a cool blue gradient. A vertical time slider allows the user to inspect the exact altitude of both bodies at any time of day. Rise and set times are marked with vertical dashed lines.
 
-Alongside it, **The Sky Dome** offers a custom SVG-based polar stereographic projection that maps the spatial tracking dimension. Altitude determines the radius (Zenith at center, Horizon at edge) and Azimuth determines the angle. The tracker traces the correct daily trajectory of both bodies with a time slider synchronized to the companion linear altitude chart.
+Alongside it, **The Sky Dome** offers a custom SVG-based polar stereographic projection that maps the spatial tracking dimension. Altitude determines the radius (Zenith at center, Horizon at edge) and Azimuth determines the angle. The tracker traces the correct daily trajectory of both bodies. Both the companion linear altitude chart and the Sky Dome are deeply synchronized to a shared "time-of-day" slider, meaning changes in one are perfectly mirrored in the other.
 
 In Pro Mode, the page shows extended orbital data including libration (the apparent rocking of the moon), parallax, the equation of time, and the moon's distance from Earth.
 

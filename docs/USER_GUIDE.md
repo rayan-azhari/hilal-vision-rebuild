@@ -15,8 +15,8 @@ The top navigation bar provides access to all views and includes:
 ## 1. Home Dashboard (`/`)
 
 Your command center for at-a-glance astronomical data.
-- **Ephemeris Cards** - Sunrise time, sighting probability, current Hijri date, and more.
-- **Expandable Deep-Dives** - Cards with a subtle gold glow open into detailed scientific overlays when clicked.
+- **Quick Links** - Primary buttons direct you straight to the core `Visibility Map` and `Moon Phases` tools.
+- **Live Status** - Four persistent cards displaying real-time UTC Time, current Moon Phase & Illumination, today's Hijri Date (Astronomical/Civic), and the Lunar Age with a countdown to the next New Moon.
 
 ## 2. Visibility (`/visibility`)
 
@@ -49,7 +49,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 A dedicated dashboard for the lunar cycle.
 - **Location & Date Settings** - Exact same geocoding and synchronized date offsets as the Visibility map.
 - **Sun & Moon Altitude Tracker** (top of page) - Interactive linear chart plotting Sun and Moon altitudes throughout the day.
-- **The Sky Dome** - Integrated custom SVG polar stereographic projection mapping azimuth and altitude simultaneously to show physical separation of celestial bodies.
+- **The Sky Dome** - Integrated custom SVG polar stereographic projection mapping azimuth and altitude. Both the Altitude Tracker and Sky Dome share a deeply synchronized time slider—changing one instantly updates the other for perfect alignment.
 - **Moon Illustration** - Accurate SVG rendering of the current phase with craters and terminator.
 - **Stats Grid** - Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown.
 - **Ephemeris** - Sunrise, Sunset, Moonrise, and Moonset times.
