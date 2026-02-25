@@ -67,6 +67,15 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       globe.controls().autoRotate = true;
       globe.controls().autoRotateSpeed = 0.3;
 
+      // Adjust lighting to tint the dark side deep navy instead of pure black
+      const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
+      if (ambientLight) {
+        (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x0f1921);
+        (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
+      } else {
+        globe.scene().add(new THREE.AmbientLight(theme === "light" ? 0xffffff : 0x0f1921, theme === "light" ? Math.PI : Math.PI * 1.5));
+      }
+
       globeInstanceRef.current = globe;
       setTimeout(() => setIsGlobeInitialized(true), 150);
     });
@@ -90,7 +99,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     setIsLoading(isComputing || (showClouds && isCloudsLoading));
   }, [isComputing, isCloudsLoading, showClouds]);
 
-  // Update globe texture when theme changes
+  // Update globe texture and lighting when theme changes
   useEffect(() => {
     const globe = globeInstanceRef.current;
     if (!globe) return;
@@ -99,6 +108,12 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
         ? "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         : "https://unpkg.com/three-globe/example/img/earth-dark.jpg"
     );
+
+    const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
+    if (ambientLight) {
+      (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x0f1921);
+      (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
+    }
   }, [theme]);
 
   // Compute local moon data and labels
