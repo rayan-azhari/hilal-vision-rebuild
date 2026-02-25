@@ -76,9 +76,9 @@ hilal-vision/
 ├── ios/                ← Native iOS App container (Capacitor)
 ├── client/
 │   ├── src/
-│   │   ├── pages/          ← 8 page components
-│   │   ├── components/     ← Shared UI components (PageHeader, LocationSearch, AutoDetectButton, etc.)
-│   │   ├── contexts/       ← React contexts (Theme)
+│   │   ├── pages/          ← 10 page components (Home, Visibility, Moon, Calendar, Horizon, Archive, About, Methodology, Privacy, Terms, Support)
+│   │   ├── components/     ← Shared UI components (PageHeader, LocationSearch, AutoDetectButton, ProGate, UpgradeModal, etc.)
+│   │   ├── contexts/       ← React contexts (Theme, GlobalState, ProTier)
 │   │   ├── hooks/          ← Custom hooks (useVisibilityWorker, useGeolocation)
 │   │   ├── workers/        ← Web Workers (visibility.worker.ts)
 │   │   ├── lib/
@@ -595,5 +595,65 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 30 | Dual Criteria | Added a global Visibility Criterion switch allowing users to evaluate crescent visibility using either the traditional Yallop (1997) q-value or the modern Odeh (2004) v-value across the 3D Globe and 2D Map views simultaneously. |
 | 31 | Accessibility & Native UX | Implemented robust Playwright E2E testing framework. Built Cividis-inspired High Contrast color-blind friendly rendering mode for WebGL/SVG artifacts. Injected Open-Meteo elevation tracking to Topographical Refraction horizon dip functions. Formulated strict Capacitor.js SafeArea padding for iOS Dynamic Islands. |
 | 32 | SEO & Scientific Precision | Integrated `vite-plugin-sitemap` for automated `sitemap.xml` generation. Injected JSON-LD structured data (`SoftwareApplication` schema) into `SEO.tsx`. Generated AI-crafted OpenGraph preview banner (`og-default.png`). Exported `findNewMoonNear()` and added `nextNewMoonExact` to `MoonPhaseInfo` for exact conjunction times displayed to the second on the Moon Phase Dashboard. Updated dark theme background to `#233342`. |
+| 33 | Monetization | Implemented dual-billing architecture for Pro tier: **Stripe Checkout** (Web) and **RevenueCat SDK** (iOS/Android Native) with Clerk `publicMetadata` webhook synchronization. Feature gating on Visibility (Globe), Moon (Sky Dome), Calendar (Astronomical/Tabular engines), Archive (historical years). Built `/support` page with dynamic UI hiding Sadaqah rules for native App Store compliance. |
 
-*Documentation updated February 25, 2026 (Round 32 - SEO & Scientific Precision). For the latest feature status, see `todo.md`.*
+---
+
+## 11. Monetization & Pro Tier
+
+### 11.1 Strategy
+
+Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visible from Day 1, but deep interaction is gated behind a "Pro" subscription. Free users can see every feature at a glance; the upgrade prompt appears when they try to interact deeply (rotate the globe, dig into the archive, inspect scoring breakdowns).
+
+### 11.2 Technical Architecture
+
+**New files & Webhooks:**
+- `api/stripe/checkout.ts`, `api/stripe/webhook.ts` — Serverless functions driving web Stripe subscriptions/donations. Webhooks update `currUser.publicMetadata.isPro`.
+- `api/revenuecat/webhook.ts` — Captures Google Play/App Store `INITIAL_PURCHASE` and `EXPIRATION` events to sync native purchases back to the Clerk universe.
+- `client/src/contexts/ProTierContext.tsx` — React context acting as the brain. Uses `Capacitor.isNativePlatform()` to fork operations: natively initializes `Purchases.configure()`, while web relies on Clerk `publicMetadata`. Exposes `startCheckout()` and `purchaseNativePackage()`.
+- `client/src/components/ProGate.tsx` — Wrapper component rendering a blurred preview with an "Upgrade to Pro" overlay for non-premium users.
+- `client/src/components/UpgradeModal.tsx` — Reusable modal fetching localized native packages from the device store if native, or triggering Stripe checkout if web.
+- `client/src/pages/SupportPage.tsx` — Support page with Feature Access Matrix, pricing cards, and one-time donation presets. (Donations are programmatically suppressed on Native platforms to satisfy strict App Store non-profit IAP blocking rules).
+
+### 11.3 Feature Access Matrix
+
+| Feature | Free Tier | Pro Tier |
+|---------|-----------|----------|
+| 2D Visibility Map | ✅ Full access | ✅ Full access |
+| 3D Interactive Globe | 🔒 Locked | ✅ Full interactive |
+| Moon Phase (Basic) | ✅ Illumination, age, phase | ✅ Full dashboard |
+| Sky Dome & Altitude Chart | 🔒 Blurred preview | ✅ Full interactive |
+| Ephemeris Data | 🔒 Blurred preview | ✅ Full times |
+| Hijri Calendar (Umm al-Qura) | ✅ Full access | ✅ Full access |
+| Astronomical & Tabular Engines | 🔒 Locked | ✅ All 3 engines |
+| ICOP Archive (Recent) | ✅ 1463-1465 AH | ✅ Full 1438-1465 AH |
+| ICOP Archive (Historical) | 🔒 Locked | ✅ 28 years |
+| Horizon View | ✅ Full access | ✅ Full access |
+| Sighting Reports | ✅ Submit freely | ✅ Submit + Patron badge |
+| Push Notifications | ❌ None | ✅ Crescent alerts |
+| Ad-Free Experience | Ethical ads | ✅ Fully ad-free |
+
+### 11.4 Pricing
+
+| Plan | Price | Notes |
+|------|-------|-------|
+| Monthly | $2.99 | Low barrier |
+| Annual | $14.99 | Best recurring value (save 58%) |
+| Lifetime | $49.99 | One-time "Astronomer" unlock |
+
+### 11.5 Goodwill Layer
+
+- **Sadaqah Jariyah banner** on Home Dashboard — links to `/support`
+- **Dedicated Support page** with mission narrative and donation options
+- **Patron Badge** (planned) — donors ($10+ one-time) receive a golden crescent icon on sighting reports
+
+### 11.6 Future Monetization (Planned)
+
+| Item | Status | Description |
+|------|--------|-------------|
+| Push Notifications | ⏳ Planned | Pro-only crescent alerts via Capacitor + FCM/APNs |
+| Ethical Ads | ⏳ Planned | Muslim Ad Network below-fold for free tier |
+| Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
+| Developer API | 🔮 Future | REST API for visibility calculations (tiered pricing) |
+
+*Documentation updated February 25, 2026 (Round 33 - Monetization). For the latest feature status, see `todo.md`.*

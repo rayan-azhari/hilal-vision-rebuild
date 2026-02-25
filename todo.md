@@ -128,6 +128,14 @@
 - [ ] **AR Moon Finder:** Use Capacitor camera APIs + device-orientation sensors.
 - [ ] **Malay Language:** Add Malay (ms) to i18n setup.
 
+## Phase 7: Mobile Publishing & Monetization (Next Steps)
+- [x] **Android Build:** Generate signed release App Bundle (.aab).
+- [ ] **Google Play Console:** Set up App listing, Data Safety, Privacy Policy.
+- [ ] **Play Store Internal Testing:** Upload .aab and test on Android devices.
+- [ ] **RevenueCat Integration:** Configure `@revenuecat/purchases-capacitor` Native SDK for In-App Purchases (Monthly/Annual/Lifetime).
+- [ ] **Apple App Store Connect:** Set up Apple Developer account, Certificates, and Provisioning Profiles.
+- [ ] **iOS Build:** Compile Xcode Archive on macOS and submit via TestFlight.
+
 ## Improvements (Round 6 — Audit & Code Quality)
 - [x] Comprehensive code audit (7.5/10 scorecard, competitive analysis, tiered action plan)
 - [x] `robots.txt` updated with `/api/` Disallow

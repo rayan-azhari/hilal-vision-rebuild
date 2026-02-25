@@ -4,11 +4,11 @@
 
 Hilal Vision deploys to Vercel as a **hybrid application**:
 
-| Layer | Technology | Vercel Hosting |
-|-------|-----------|---------------|
-| Frontend | React 19 + Vite | Static build → CDN (`dist/public/`) |
-| API | tRPC + Express | Node.js serverless function (`api/trpc/[trpc].ts`) |
-| Database | Drizzle ORM + MySQL | External (optional - only needed for telemetry) |
+| Layer    | Technology          | Vercel Hosting                                     |
+| -------- | ------------------- | -------------------------------------------------- |
+| Frontend | React 19 + Vite     | Static build → CDN (`dist/public/`)                |
+| API      | tRPC + Express      | Node.js serverless function (`api/trpc/[trpc].ts`) |
+| Database | Drizzle ORM + MySQL | External (optional - only needed for telemetry)    |
 
 ## Quick Start
 
@@ -49,6 +49,7 @@ git add . && git commit -m "deploy" && git push
 ### `api/trpc/[trpc].ts`
 
 The serverless function wraps the existing tRPC router using `@trpc/server/adapters/fetch`. It:
+
 - Converts the incoming request to a fetch `Request`
 - Passes it through `fetchRequestHandler` with the tRPC router
 - Forwards request headers (for rate limiting by IP)
@@ -56,35 +57,82 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 
 ### `package.json` Scripts
 
-| Script | Command | Purpose |
-|--------|---------|---------|
-| `dev` | `tsx server/_core/index.ts` | Local development (Express + Vite HMR) |
-| `build` | `vite build` | Production build |
-| `vercel-build` | `npx vite build` | Vercel-specific build (uses npx) |
+| Script         | Command                     | Purpose                                |
+| -------------- | --------------------------- | -------------------------------------- |
+| `dev`          | `tsx server/_core/index.ts` | Local development (Express + Vite HMR) |
+| `build`        | `vite build`                | Production build                       |
+| `vercel-build` | `npx vite build`            | Vercel-specific build (uses npx)       |
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | No | MySQL connection string. Without it, telemetry data is not persisted. |
-| `NODE_ENV` | Auto | Set to `production` by Vercel |
-| `UPSTASH_REDIS_REST_URL` | Yes | Upstash Redis connection URL |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes | Upstash Redis token |
-| `CLERK_SECRET_KEY` | Yes | Backend secret |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Frontend public key |
+| Variable                     | Required | Description                                                           |
+| ---------------------------- | -------- | --------------------------------------------------------------------- |
+| `DATABASE_URL`               | No       | MySQL connection string. Without it, telemetry data is not persisted. |
+| `NODE_ENV`                   | Auto     | Set to `production` by Vercel                                         |
+| `UPSTASH_REDIS_REST_URL`     | Yes      | Upstash Redis connection URL                                          |
+| `UPSTASH_REDIS_REST_TOKEN`   | Yes      | Upstash Redis token                                                   |
+| `CLERK_SECRET_KEY`           | Yes      | Backend secret                                                        |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes      | Frontend public key                                                   |
 
 ## What Works on Vercel
 
-| Feature | Status |
-|---------|--------|
-| All client-side pages | ✅ Full functionality |
-| Moon phase calculations | ✅ Client-side SunCalc |
-| Hijri calendar | ✅ Conjunction-based, client-side |
-| 3D Globe + 2D Map | ✅ WebGL + Leaflet |
-| tRPC telemetry API | ✅ Serverless function |
-| Report sighting form | ✅ Uses tRPC endpoint |
-| Rate limiting | ✅ Distributed Upstash Redis |
-| Authentication | ✅ Clerk Auth |
+| Feature                 | Status                            |
+| ----------------------- | --------------------------------- |
+| All client-side pages   | ✅ Full functionality             |
+| Moon phase calculations | ✅ Client-side SunCalc            |
+| Hijri calendar          | ✅ Conjunction-based, client-side |
+| 3D Globe + 2D Map       | ✅ WebGL + Leaflet                |
+| tRPC telemetry API      | ✅ Serverless function            |
+| Report sighting form    | ✅ Uses tRPC endpoint             |
+| Rate limiting           | ✅ Distributed Upstash Redis      |
+| Authentication          | ✅ Clerk Auth                     |
+
+---
+
+## Native Mobile Deployment (Capacitor)
+
+Hilal Vision is configured to be packaged natively for iOS and Android using Capacitor.
+
+### Android Release Build
+
+1. **Prerequisites:** Install Android Studio and set `ANDROID_HOME` in your environment.
+2. **Synchronize Code:**
+
+```bash
+npm run build:cap
+npx cap sync android
+```
+
+3. **Open Android Studio:** Run the following command in terminal:
+
+```bash
+npx cap open android
+```
+
+4. **Generate App Bundle (.aab):** Follow these UI steps exactly in Android Studio:
+   - Wait for Gradle to finish syncing (progress bar at bottom).
+   - Click **Build** > **Generate Signed Bundle / APK...** from the top menu.
+   - Select **Android App Bundle** and click **Next**.
+   - Under _Key store path_, browse to `android/app/hilalvision.keystore`.
+   - Enter the passwords (default `hilal123` / alias: `hilalvision`).
+   - Click **Next**, select the **release** build variant, and click **Finish**.
+5. The Android Studio build will run. When finished, a popup will say "Locate" - clicking this will reveal the `.aab` file located in `android/app/build/outputs/bundle/release/` ready for Play Console submission.
+
+### iOS Release Build
+
+1. **Prerequisites:** You must use a macOS machine with **Xcode** installed.
+2. **Synchronize Code:**
+
+```bash
+npm run build:cap
+npx cap sync ios
+```
+
+3. **Open Xcode:** `npx cap open ios`
+4. **Build Archive:**
+   - Ensure the Target is set to "Any iOS Device (arm64)".
+   - Go to **Product** > **Archive**.
+   - Use the Xcode Organizer to Distribute the App to App Store Connect.
 
 ## Troubleshooting
 

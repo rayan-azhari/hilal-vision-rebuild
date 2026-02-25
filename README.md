@@ -22,6 +22,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **ℹ️ About Page (`/about`)**: Mission statement, platform overview, technology stack, competitor comparison table (vs Moonsighting.com, IslamicFinder, LuneSighting, HilalMap), and data attributions.
 - **🔬 Methodology Page (`/methodology`)**: Full technical reference - Yallop q-value formula derivation, Odeh V-value, triple-engine Hijri calendar algorithms, Best-Time-to-Observe scoring function, ICOP archive sourcing, atmospheric refraction physics, and peer-reviewed references.
 - **⚖️ Legal Pages (`/privacy`, `/terms`)**: Privacy Policy (GDPR-aware, covering GPS, Clerk auth, ICOP data) and Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer).
+- **💛 Support Page (`/support`)**: Sadaqah Jariyah (ongoing charity) mission narrative, Feature Access Matrix (Free vs Pro comparison), three-tier pricing (Monthly/Annual/Lifetime), one-time donation with preset amounts, and Patron badge system.
 
 ## Tech Stack
 
@@ -63,6 +64,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 22. **E2E Playwright Testing**: Critical user journeys, DOM sync, and rendering are safeguarded from regressions using a comprehensive Playwright automation suite.
 23. **App Store Readiness**: Mobile web views are strictly styled using `env(safe-area-inset-top)` to seamlessly accommodate iOS Dynamic Islands and Android gesture navs via Capacitor.
 24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass SunCalc phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
+25. **Soft Paywall Monetization (Pro Tier)**: A `ProTierContext` + `<ProGate>` component system gates deep feature interaction behind a "Pro" subscription while keeping all features visible to free users from Day 1. Gated features include the 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular calendar engines, and historical ICOP data. An `UpgradeModal` offers Monthly ($2.99), Annual ($14.99), and Lifetime ($49.99) plans (Stripe integration pending).
+26. **Goodwill & Support Page**: A dedicated `/support` page with Sadaqah Jariyah messaging, Feature Access Matrix, pricing tiers, one-time donation options, and a Patron badge system. A Sadaqah banner on the Home page links to `/support`.
 
 ## Getting Started
 
@@ -105,7 +108,26 @@ npm run build && npm run start
 # Optional: set DATABASE_URL env var for telemetry persistence
 ```
 
-See `docs/DEPLOYMENT.md` for the full Vercel deployment guide.
+```
+
+See `docs/DEPLOYMENT.md` for the full Vercel deployment guide and **Native Mobile Deployment (iOS & Android)** instructions using Capacitor.
+
+### Native Mobile Build (Capacitor)
+
+Hilal Vision compiles to native iOS and Android. To generate the release builds:
+
+```bash
+# First, synchronize the web assets with the native wrappers
+npm run build:cap
+
+# For Android (Requires Android Studio)
+npx cap open android
+# -> Generate Signed Bundle / APK -> Android App Bundle -> Use hilalvision.keystore
+
+# For iOS (Requires Mac & Xcode)
+npx cap open ios
+# -> Product -> Archive -> Distribute App
+```
 
 ### Code Quality & Testing
 
@@ -127,8 +149,25 @@ npm run check    # TypeScript type checking
 
 - `/about` - Mission, tools, tech stack, competitor comparison, and attributions
 - `/methodology` - Full algorithm reference (Yallop, Odeh, Hijri calendar engines, Best-Time calculator, ICOP, refraction)
+- `/support` - Sadaqah Jariyah mission, Feature Access Matrix (Free vs Pro), pricing tiers, one-time donation
 - `/privacy` - Privacy Policy (data collection, sub-processors, GDPR rights)
 - `/terms` - Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer)
+
+## Monetization Roadmap
+
+**Model:** Soft Paywall — all features visible from Day 1, depth gated behind Pro.
+
+| Status | Item | Description |
+|--------|------|-------------|
+| ✅ Done | Pro Infrastructure | `ProTierContext`, `<ProGate>`, `UpgradeModal` (Stripe/RevenueCat split) |
+| ✅ Done | Feature Gating | 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular engines, historical Archive |
+| ✅ Done | Support Page | `/support` with Feature Access Matrix, pricing, donation, Sadaqah banner on Home |
+| ✅ Done | Payment Gateways | Stripe checkout (Web) + RevenueCat Native SDK (iOS/Android) + Clerk webhook sync |
+| ⏳ Planned | Push Notifications | Pro-only crescent alerts via Capacitor + FCM/APNs |
+| ⏳ Planned | Ethical Ads | Muslim Ad Network below-fold for free tier, suppressed for Pro |
+| ⏳ Planned | Patron Badge | Golden crescent icon on sighting reports for $10+ donors |
+| 🔮 Future | Mosque Widget | Embeddable `<iframe>` ($10–$20/month B2B) |
+| 🔮 Future | Developer API | REST API for visibility calculations (tiered pricing) |
 
 ## License
 

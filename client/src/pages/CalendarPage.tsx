@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import ProGate from "@/components/ProGate";
+import { useProTier } from "@/contexts/ProTierContext";
 import { PageHeader } from "@/components/PageHeader";
 import {
   gregorianToHijri,
@@ -72,7 +74,9 @@ type CalendarSystem = "astronomical" | "tabular" | "ummalqura";
 export default function CalendarPage() {
   const today = useMemo(() => new Date(new Date().setHours(12, 0, 0, 0)), []);
 
-  const [calendarSystem, setCalendarSystem] = useState<CalendarSystem>("astronomical");
+  const { isPremium, setShowUpgradeModal } = useProTier();
+
+  const [calendarSystem, setCalendarSystem] = useState<CalendarSystem>("ummalqura");
 
   const [viewYear, setViewYear] = useState(() => gregorianToHijri(today).year);
   const [viewMonth, setViewMonth] = useState(() => gregorianToHijri(today).month);
@@ -188,13 +192,14 @@ export default function CalendarPage() {
         <div className="flex flex-col items-end gap-2">
           <div className="flex flex-wrap items-center mt-2 lg:mt-0 gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
             <button
-              onClick={() => setCalendarSystem("astronomical")}
-              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "astronomical"
+              onClick={() => isPremium ? setCalendarSystem("astronomical") : setShowUpgradeModal(true)}
+              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${calendarSystem === "astronomical"
                 ? "bg-[var(--gold)]/20 text-[var(--gold)]"
                 : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Astronomical
+              {!isPremium && <ProGate featureName="Astronomical Engine" inline>‎</ProGate>}
             </button>
             <button
               onClick={() => setCalendarSystem("ummalqura")}
@@ -206,13 +211,14 @@ export default function CalendarPage() {
               Umm al-Qura
             </button>
             <button
-              onClick={() => setCalendarSystem("tabular")}
-              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${calendarSystem === "tabular"
+              onClick={() => isPremium ? setCalendarSystem("tabular") : setShowUpgradeModal(true)}
+              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${calendarSystem === "tabular"
                 ? "bg-[var(--gold)]/20 text-[var(--gold)]"
                 : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               Tabular (Kuwaiti)
+              {!isPremium && <ProGate featureName="Tabular Engine" inline>‎</ProGate>}
             </button>
           </div>
         </div>

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { SEO } from "@/components/SEO";
 import GlobePage from "./GlobePage";
 import MapPage from "./MapPage";
+import { useProTier } from "@/contexts/ProTierContext";
+import ProGate from "@/components/ProGate";
 
 export interface SharedVisibilityState {
     hourOffset: number;
@@ -9,7 +11,8 @@ export interface SharedVisibilityState {
 }
 
 export default function VisibilityPage() {
-    const [view, setView] = useState<"globe" | "map">("globe");
+    const { isPremium, setShowUpgradeModal } = useProTier();
+    const [view, setView] = useState<"globe" | "map">("map");
     const [hourOffset, setHourOffset] = useState(0);
 
     const shared: SharedVisibilityState = {
@@ -33,14 +36,18 @@ export default function VisibilityPage() {
                 }}
             >
                 <button
-                    onClick={() => setView("globe")}
-                    className="px-5 py-2 text-xs font-semibold rounded-[2rem] transition-all duration-300 magnetic"
+                    onClick={() => {
+                        if (!isPremium) { setShowUpgradeModal(true); return; }
+                        setView("globe");
+                    }}
+                    className="px-5 py-2 text-xs font-semibold rounded-[2rem] transition-all duration-300 magnetic flex items-center gap-1.5"
                     style={{
                         background: view === "globe" ? "var(--foreground)" : "transparent",
                         color: view === "globe" ? "var(--background)" : "var(--muted-foreground)"
                     }}
                 >
                     3D Globe
+                    {!isPremium && <ProGate featureName="3D Globe" inline>‎</ProGate>}
                 </button>
                 <button
                     onClick={() => setView("map")}

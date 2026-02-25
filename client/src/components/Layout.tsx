@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle, Languages } from "lucide-react";
+import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle, Languages, Crown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -10,6 +10,7 @@ import { useGlobalState } from "@/contexts/GlobalStateContext";
 import { LocationSearch } from "./LocationSearch";
 import { AutoDetectButton } from "./AutoDetectButton";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { useProTier } from "@/contexts/ProTierContext";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -38,6 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const { location, setLocation, date, setDate } = useGlobalState();
   const geo = useGeolocation(true);
+  const { isPremium, togglePremium, setShowUpgradeModal } = useProTier();
 
   // Apply GPS detection result globally
   useEffect(() => {
@@ -80,7 +82,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Floating Command Centre Navigation */}
       <div className="fixed left-0 right-0 z-50 flex justify-center pointer-events-none px-4" style={{ top: "calc(1.5rem + env(safe-area-inset-top))" }}>
         <header
-          className="pointer-events-auto flex items-center justify-between px-2 md:px-4 h-14 rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+          className="pointer-events-auto flex items-center px-2 md:px-3 h-14 rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] overflow-hidden"
           style={{
             background: scrolled
               ? "color-mix(in oklch, var(--card) 60%, transparent)"
@@ -93,8 +95,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             boxShadow: scrolled
               ? "0 12px 40px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.05) inset"
               : "none",
-            width: "100%",
-            maxWidth: "900px"
+            width: "fit-content",
+            maxWidth: "calc(100vw - 2rem)"
           }}
         >
           {/* Logo */}
@@ -134,13 +136,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1.5 ml-4 mr-2">
+          <nav className="hidden lg:flex items-center gap-0.5 ml-2 mr-1">
             {navItems.map(({ href, label, icon: Icon }) => {
               const active = routePath === href;
               return (
                 <Link key={href} href={href}>
                   <div
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[13px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic"
+                    className="flex items-center gap-1 px-2 py-1.5 rounded-full text-[12px] transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] magnetic whitespace-nowrap"
                     style={{
                       color: active ? "var(--foreground)" : "var(--muted-foreground)",
                       background: active
@@ -161,8 +163,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           {/* Global Location & Date Selectors */}
-          <div className="hidden lg:flex items-center gap-2 mr-auto mx-2 flex-1 max-w-[340px]">
-            <div className="flex items-center gap-2 bg-black/10 px-1 py-1 rounded-xl border border-white/5 w-full">
+          <div className="hidden lg:flex items-center gap-1.5 mr-auto mx-1 flex-1 max-w-[280px]">
+            <div className="flex items-center gap-1.5 bg-black/10 px-1 py-1 rounded-xl border border-white/5 w-full">
               <div className="w-full relative min-w-0">
                 <LocationSearch
                   selectedCity={location}
@@ -181,32 +183,32 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
                 setDate(newDate);
               }}
-              className="px-2 py-[7px] min-w-0 rounded-lg text-[13px] font-sans text-center transition-colors"
+              className="px-2 py-[7px] min-w-0 rounded-lg text-[12px] font-sans text-center transition-colors"
               style={{
                 background: "var(--space-light)",
                 border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
                 color: "var(--foreground)",
                 colorScheme: "dark",
-                width: "125px"
+                width: "110px"
               }}
             />
           </div>
 
           {/* Actions: Theme, Lang, Clerk, Report */}
-          <div className="flex items-center gap-1 md:gap-2">
-            
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+
             {/* Desktop Only Actions */}
-            <div className="hidden lg:flex items-center gap-1 md:gap-2">
+            <div className="hidden lg:flex items-center gap-0.5">
               <button
                 onClick={() => setReportOpen(true)}
-                className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-full text-[13px] font-medium magnetic transition-colors whitespace-nowrap flex-shrink-0"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-medium magnetic transition-colors whitespace-nowrap flex-shrink-0"
                 style={{
                   background: "linear-gradient(135deg, #ef4444, #dc2626)",
                   color: "#fff",
                 }}
               >
-                <PlusCircle className="w-4 h-4 flex-shrink-0" />
-                <span>Report Sighting</span>
+                <PlusCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>Report</span>
               </button>
 
               {/* Language Switcher */}
@@ -255,6 +257,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 title="High Contrast (Color-Blind) Mode"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 0 0 0 20Z" /></svg>
+              </button>
+
+              {/* Pro Badge */}
+              <button
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+                style={{
+                  background: isPremium
+                    ? "linear-gradient(135deg, color-mix(in oklch, var(--gold) 25%, transparent), color-mix(in oklch, var(--gold) 15%, transparent))"
+                    : "transparent",
+                  border: isPremium
+                    ? "1px solid color-mix(in oklch, var(--gold) 40%, transparent)"
+                    : "1px solid color-mix(in oklch, var(--border) 50%, transparent)",
+                  color: isPremium ? "var(--gold)" : "var(--muted-foreground)",
+                }}
+                onClick={() => isPremium ? togglePremium() : setShowUpgradeModal(true)}
+                title={isPremium ? "Pro Active (click to toggle for testing)" : "Upgrade to Pro"}
+              >
+                <Crown className="w-3.5 h-3.5" />
+                <span>{isPremium ? "Pro" : "Upgrade"}</span>
               </button>
 
               <button
@@ -388,7 +409,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <span>Color-Blind</span>
                     </button>
                   </div>
-                  
+
+                  {/* Pro Badge */}
+                  <button
+                    onClick={() => isPremium ? togglePremium() : setShowUpgradeModal(true)}
+                    className="flex items-center justify-center gap-2 p-3.5 rounded-2xl transition-colors border text-[13px] font-semibold w-full"
+                    style={{
+                      background: isPremium
+                        ? "color-mix(in oklch, var(--gold) 15%, transparent)"
+                        : "var(--space-mid)",
+                      color: isPremium ? "var(--gold)" : "var(--foreground)",
+                      borderColor: isPremium ? "var(--gold)" : "transparent",
+                    }}
+                  >
+                    <Crown className="w-4 h-4" />
+                    <span>{isPremium ? "Pro Active ✓" : "Upgrade to Pro"}</span>
+                  </button>
+
                   <div className="grid grid-cols-3 gap-2">
                     {LANG_OPTIONS.map(opt => (
                       <button key={opt.code} onClick={() => { i18n.changeLanguage(opt.code); setLangOpen(false); }} className="py-2.5 rounded-xl text-sm font-bold transition-colors" style={{ color: i18n.language === opt.code ? "var(--space)" : "var(--foreground)", background: i18n.language === opt.code ? "var(--gold)" : "var(--space-mid)", border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)" }}>
@@ -404,7 +441,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav 
+      <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 z-[60] flex items-center justify-between px-3 pt-2 pb-1"
         style={{
           background: "color-mix(in oklch, var(--card) 95%, transparent)",
@@ -426,14 +463,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <span className="text-[10px] font-semibold">Moon</span>
           </div>
         </Link>
-        
+
         <div className="relative -top-7 flex flex-col items-center mx-1">
-          <button 
+          <button
             onClick={() => setReportOpen(true)}
-            className="w-14 h-14 rounded-[20px] flex items-center justify-center transition-transform active:scale-90" 
-            style={{ 
-              background: "linear-gradient(135deg, #ef4444, #b91c1c)", 
-              color: "#fff", 
+            className="w-14 h-14 rounded-[20px] flex items-center justify-center transition-transform active:scale-90"
+            style={{
+              background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+              color: "#fff",
               boxShadow: "0 8px 25px -4px rgba(239, 68, 68, 0.4), 0 0 0 4px var(--space) inset",
               border: "4px solid var(--space)"
             }}
@@ -482,6 +519,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {[
                 { href: "/about", label: "About" },
                 { href: "/methodology", label: "Methodology" },
+                { href: "/support", label: "Support" },
                 { href: "/privacy", label: "Privacy" },
                 { href: "/terms", label: "Terms" },
               ].map(({ href, label }) => (

@@ -9,4 +9,16 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   upstashRedisRestUrl: process.env.UPSTASH_REDIS_REST_URL ?? "",
   upstashRedisRestToken: process.env.UPSTASH_REDIS_REST_TOKEN ?? "",
+  // Stripe
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
+  stripePriceMonthly: process.env.STRIPE_PRICE_MONTHLY ?? "",
+  stripePriceAnnual: process.env.STRIPE_PRICE_ANNUAL ?? "",
+  stripePriceLifetime: process.env.STRIPE_PRICE_LIFETIME ?? "",
+  // Clerk backend (for updating user metadata from webhook)
+  clerkSecretKey: process.env.CLERK_SECRET_KEY ?? "",
+  // RevenueCat Native Billing
+  revenuecatGoogleKey: process.env.REVENUECAT_GOOGLE_KEY ?? "",
+  revenuecatAppleKey: process.env.REVENUECAT_APPLE_KEY ?? "",
+  revenuecatWebhookAuth: process.env.REVENUECAT_WEBHOOK_AUTH ?? "",
 };

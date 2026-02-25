@@ -151,3 +151,35 @@ Covers what data Hilal Vision collects (GPS, Clerk account, sighting reports, Se
 
 Covers acceptable use of the platform (no false sighting reports, no DDoS), user-generated content policy, accuracy disclaimer (predictions ≠ religious rulings), All Rights Reserved notice, limitation of liability, and governing law.
 
+## 11. Support (`/support`)
+
+Hilal Vision's goodwill and monetization page, framed around the Islamic concept of **Sadaqah Jariyah** (صدقة جارية — ongoing charity).
+
+- **Hero** - Mission-driven messaging with CTA buttons for Pro upgrade and one-time donation.
+- **Why Your Support Matters** - Three pillars: Keep It Running (server costs), Keep It Accurate (calibration), Keep It Ad-Free.
+- **Feature Access Matrix** - Full comparison table of 13 features across Free and Pro tiers:
+  - **Free**: 2D Map, Moon Phase basics, Umm al-Qura calendar, recent ICOP archive (1463-1465 AH), Horizon View, Sighting Reports.
+  - **Pro**: 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical & Tabular calendar engines, full ICOP archive (1438-1465 AH), Push Notifications, Ad-free.
+- **Pricing Plans** - Three tiers: Monthly ($2.99), Annual ($14.99, "Most Popular"), Lifetime ($49.99).
+- **One-Time Donation** - Preset amounts ($5, $10, $25, $50). Donors of $10+ receive a **Golden Crescent** Patron badge on their sighting reports. *(Note: Due to Apple/Google IAP charity policies, one-time donations are only available on the Web platform).*
+
+> **Billing Architecture:** Upgrading to Pro uses a split platform approach. On the web, payments are securely processed via **Stripe**. On native mobile apps, transactions use native Apple App Store or Google Play **In-App Purchases** via RevenueCat. Regardless of where you subscribe, your Pro status synchronizes across all devices via your Clerk account.
+
+## 12. Pro Tier & Feature Gating
+
+Hilal Vision uses a **soft paywall** model: all features are visible from Day 1, but deeper interaction requires a Pro subscription.
+
+### How It Works
+- `ProTierContext` manages premium status (`isPremium`) and modal visibility.
+- `<ProGate>` wraps gated content with a blurred preview and "Upgrade to Pro" prompt for free users.
+- `UpgradeModal` presents the three pricing plans.
+- A **Pro badge** in the navbar (desktop and mobile) toggles premium status during development.
+
+### Gated Features by Page
+| Page | Gated Feature | Free Default |
+|------|--------------|---------------|
+| Visibility | 3D Globe | 2D Map |
+| Moon Phase | Sky Dome, Altitude Chart, Ephemeris | Basic illumination, age, phase |
+| Calendar | Astronomical & Tabular engines | Umm al-Qura only |
+| Archive | Years before 1463 AH | 1463-1465 AH (3 most recent) |
+

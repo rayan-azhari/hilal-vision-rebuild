@@ -11,6 +11,7 @@ import { VisibilityDotScale, IlluminationArc, LunarAgeProgress, AzimuthCompass, 
 import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
 import { SkyDomeChart } from "@/components/SkyDomeChart";
 import { PhysicsExplanations } from "@/components/PhysicsExplanations";
+import ProGate from "@/components/ProGate";
 
 function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number }) {
   const r = size / 2 - 4;
@@ -217,6 +218,7 @@ export default function MoonPage() {
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Sun & Moon Altitude Tracker — Free Feature */}
           <BreezyFullCard
             title="Sun & Moon Altitude Tracker"
             icon={<Clock className="w-4 h-4" />}
@@ -227,38 +229,43 @@ export default function MoonPage() {
             </div>
           </BreezyFullCard>
 
-          <BreezyFullCard
-            title="The Sky Dome"
-            icon={<Eye className="w-4 h-4" />}
-            className="animate-breezy-enter h-full"
-          >
-            <div className="p-2 mt-2 w-full h-full flex flex-col justify-center">
-              <SkyDomeChart date={date} location={location} minutes={sharedMinutes} onMinutesChange={setSharedMinutes} />
-            </div>
-          </BreezyFullCard>
+          {/* Sky Dome — Pro Feature */}
+          <ProGate featureName="Sky Dome">
+            <BreezyFullCard
+              title="The Sky Dome"
+              icon={<Eye className="w-4 h-4" />}
+              className="animate-breezy-enter h-full"
+            >
+              <div className="p-2 mt-2 w-full h-full flex flex-col justify-center">
+                <SkyDomeChart date={date} location={location} minutes={sharedMinutes} onMinutesChange={setSharedMinutes} />
+              </div>
+            </BreezyFullCard>
+          </ProGate>
         </div>
 
-        {/* Times row (Ephemeris) */}
-        <BreezyFullCard
-          title="Ephemeris"
-          icon={<Sun />}
-          className="animate-breezy-enter"
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-            {[
-              { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
-              { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
-              { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
-              { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
-            ].map(({ label, value, icon, color }) => (
-              <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
-                <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
-                <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
-                <div className="text-sm font-mono font-semibold data-text" style={{ color: "var(--foreground)" }}>{value}</div>
-              </div>
-            ))}
-          </div>
-        </BreezyFullCard>
+        {/* Times row (Ephemeris) — Pro Feature */}
+        <ProGate featureName="Ephemeris Data">
+          <BreezyFullCard
+            title="Ephemeris"
+            icon={<Sun />}
+            className="animate-breezy-enter"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+              {[
+                { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
+                { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
+                { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
+                { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
+              ].map(({ label, value, icon, color }) => (
+                <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
+                  <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
+                  <div className="text-xs mb-0.5" style={{ color: "var(--muted-foreground)" }}>{label}</div>
+                  <div className="text-sm font-mono font-semibold data-text" style={{ color: "var(--foreground)" }}>{value}</div>
+                </div>
+              ))}
+            </div>
+          </BreezyFullCard>
+        </ProGate>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

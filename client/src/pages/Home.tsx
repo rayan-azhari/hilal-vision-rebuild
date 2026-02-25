@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { SEO } from "@/components/SEO";
-import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Star } from "lucide-react";
+import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Star, Heart, Crown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getMoonPhaseInfo, gregorianToHijri, formatTime, HIJRI_MONTHS } from "@/lib/astronomy";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
@@ -318,6 +318,50 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Sadaqah Jariyah Banner */}
+      <section className="py-12">
+        <div className="container">
+          <Link href="/support">
+            <div
+              className="relative overflow-hidden rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 cursor-pointer group transition-transform hover:-translate-y-0.5"
+              style={{
+                background: "radial-gradient(ellipse 60% 80% at 20% 50%, color-mix(in oklch, var(--gold) 8%, transparent) 0%, var(--space-mid) 70%)",
+                border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+              }}
+            >
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "color-mix(in oklch, var(--gold) 12%, transparent)" }}
+              >
+                <Heart className="w-7 h-7" style={{ color: "var(--gold)" }} />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <div className="text-xs font-semibold mb-1" style={{ color: "var(--gold)" }}>
+                  صدقة جارية — Sadaqah Jariyah
+                </div>
+                <h3 className="text-base font-medium mb-1" style={{ color: "var(--foreground)" }}>
+                  Help keep Hilal Vision accessible and ad-free
+                </h3>
+                <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                  Your support — through Pro or a one-time donation — keeps this platform running for 1.8 billion Muslims worldwide.
+                </p>
+              </div>
+              <div
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all group-hover:scale-105 flex-shrink-0"
+                style={{
+                  background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
+                  color: "var(--space)",
+                }}
+              >
+                <Crown className="w-4 h-4" />
+                Support Us
+                <ArrowRight className="w-4 h-4" />
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 

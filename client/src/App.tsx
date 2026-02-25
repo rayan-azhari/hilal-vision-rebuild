@@ -12,6 +12,8 @@ import { lazy, Suspense } from "react";
 import { Sentry } from "@/lib/sentry";
 import CookieConsent from "./components/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
+import { ProTierProvider } from "./contexts/ProTierContext";
+import UpgradeModal from "./components/UpgradeModal";
 
 // ─── Lazy-loaded pages (code splitting) ─────────────────────────────────────
 // Globe.gl + Three.js + Leaflet + D3 + Recharts are heavy.
@@ -26,6 +28,7 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const MethodologyPage = lazy(() => import("./pages/MethodologyPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -61,6 +64,7 @@ function Router() {
           <Route path="/methodology" component={MethodologyPage} />
           <Route path="/privacy" component={PrivacyPage} />
           <Route path="/terms" component={TermsPage} />
+          <Route path="/support" component={SupportPage} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
@@ -92,21 +96,24 @@ function App() {
           <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
             <ThemeProvider defaultTheme="dark" switchable>
               <GlobalStateProvider>
-                <TooltipProvider>
-                  <Toaster
-                    theme="dark"
-                    toastOptions={{
-                      style: {
-                        background: "oklch(0.10 0.018 265)",
-                        border: "1px solid oklch(0.78 0.15 75 / 0.2)",
-                        color: "oklch(0.93 0.01 80)",
-                      },
-                    }}
-                  />
-                  <Router />
-                  <CookieConsent />
-                  <Analytics />
-                </TooltipProvider>
+                <ProTierProvider>
+                  <TooltipProvider>
+                    <Toaster
+                      theme="dark"
+                      toastOptions={{
+                        style: {
+                          background: "oklch(0.10 0.018 265)",
+                          border: "1px solid oklch(0.78 0.15 75 / 0.2)",
+                          color: "oklch(0.93 0.01 80)",
+                        },
+                      }}
+                    />
+                    <Router />
+                    <UpgradeModal />
+                    <CookieConsent />
+                    <Analytics />
+                  </TooltipProvider>
+                </ProTierProvider>
               </GlobalStateProvider>
             </ThemeProvider>
           </ClerkProvider>

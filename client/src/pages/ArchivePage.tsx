@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { SEO } from "@/components/SEO";
 import { Archive, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { useProTier } from "@/contexts/ProTierContext";
+import ProGate from "@/components/ProGate";
 import { PageHeader } from "@/components/PageHeader";
 import {
   hijriToGregorian,
@@ -99,7 +101,8 @@ function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
 }
 
 export default function ArchivePage() {
-  const [selectedYear, setSelectedYear] = useState(1447);
+  const { isPremium, setShowUpgradeModal } = useProTier();
+  const [selectedYear, setSelectedYear] = useState(1465);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [monthDetail, setMonthDetail] = useState<MonthSummary | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
@@ -203,24 +206,32 @@ export default function ArchivePage() {
 
               {/* Quick year selector */}
               <div className="flex flex-wrap gap-1.5 justify-center">
-                {years.map(y => (
-                  <button
-                    key={y}
-                    onClick={() => { setSelectedYear(y); setSelectedMonth(null); setMonthDetail(null); }}
-                    className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
-                    style={{
-                      background: y === selectedYear
-                        ? "color-mix(in oklch, var(--gold) 20%, transparent)"
-                        : "var(--space-light)",
-                      border: y === selectedYear
-                        ? "1px solid color-mix(in oklch, var(--gold) 40%, transparent)"
-                        : "1px solid transparent",
-                      color: y === selectedYear ? "var(--gold)" : "var(--muted-foreground)",
-                    }}
-                  >
-                    {y}
-                  </button>
-                ))}
+                {years.map(y => {
+                  const isFree = y >= 1463; // Free users get 3 most recent years
+                  const isLocked = !isPremium && !isFree;
+                  return (
+                    <button
+                      key={y}
+                      onClick={() => {
+                        if (isLocked) { setShowUpgradeModal(true); return; }
+                        setSelectedYear(y); setSelectedMonth(null); setMonthDetail(null);
+                      }}
+                      className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
+                      style={{
+                        background: y === selectedYear
+                          ? "color-mix(in oklch, var(--gold) 20%, transparent)"
+                          : isLocked ? "var(--space-mid)" : "var(--space-light)",
+                        border: y === selectedYear
+                          ? "1px solid color-mix(in oklch, var(--gold) 40%, transparent)"
+                          : "1px solid transparent",
+                        color: y === selectedYear ? "var(--gold)" : isLocked ? "var(--muted-foreground)" : "var(--muted-foreground)",
+                        opacity: isLocked ? 0.4 : 1,
+                      }}
+                    >
+                      {y}{isLocked ? " 🔒" : ""}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
