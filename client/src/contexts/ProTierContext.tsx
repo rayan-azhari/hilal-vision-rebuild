@@ -39,7 +39,9 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
     const isPatron = isLoaded ? (meta?.isPatron === true) : false;
 
     // Use either Clerk's truth OR the local RevenueCat cache truth
-    const isPremium = clerkHasPro || nativeHasPro;
+    // Give admin bypass to moonsightinglive@gmail.com
+    const isAdmin = user?.primaryEmailAddress?.emailAddress === "moonsightinglive@gmail.com";
+    const isPremium = clerkHasPro || nativeHasPro || isAdmin;
 
     useEffect(() => {
         if (!isNative) return;

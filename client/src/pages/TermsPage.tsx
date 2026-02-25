@@ -66,7 +66,7 @@ export default function TermsPage() {
                     </Para>
                     <Para>
                         Questions? Contact us at{" "}
-                        <span style={{ color: "var(--gold-dim)" }}>contact@hilalvision.app</span>
+                        <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>
                     </Para>
                 </div>
 
@@ -194,7 +194,7 @@ export default function TermsPage() {
                         </div>
                         <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                             Email{" "}
-                            <span style={{ color: "var(--gold-dim)" }}>contact@hilalvision.app</span>
+                            <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>
                             {" "}- Also see our{" "}
                             <Link href="/privacy">
                                 <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>Privacy Policy</span>
