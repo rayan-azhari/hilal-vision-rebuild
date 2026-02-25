@@ -140,13 +140,13 @@
 |---------|:---:|:---:|:---:|:---:|:---:|
 | 3D Globe | ✅ | ❌ | ❌ | ❌ | ❌ |
 | 2D Visibility Map | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Mobile App | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Mobile App | ✅ | ❌ | ✅ | ✅ | ❌ |
 | Push Notifications | ❌ | ❌ | ✅ | ✅ | ❌ |
 | AR Moon Finder | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Photo Sightings | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Real Sighting Data | ✅ | ✅ | ❌ | ✅ | ❌ |
 | Weather Overlay | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Multi-Language | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Multi-Language | ✅ | ❌ | ✅ | ❌ | ❌ |
 | Scientific Detail | ✅ | ✅ | ❌ | ❌ | ❌ |
 | Animated Timeline | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Best-Time Calculator | ✅ | ❌ | ❌ | ❌ | ❌ |
@@ -174,7 +174,7 @@
 ### Phase 3 — Reach & Engagement (2-3 weeks)
 - [ ] Push notifications (Capacitor + FCM/APNs)
 - [ ] SEO structured data (JSON-LD), sitemap, OG social cards
-- [ ] Arabic + Urdu i18n (minimum viable)
+- [x] Arabic + Urdu i18n (minimum viable)
 - [ ] Social sharing with OG image generation
 - [ ] Real-time sighting feed on the 29th
 

@@ -470,7 +470,7 @@ export default function AboutPage() {
                                     { feature: "Crowdsourced Reports", vals: [true, false, false, true, false] },
                                     { feature: "Triple-Engine Hijri Cal.", vals: [true, false, false, false, false] },
                                     { feature: "Scientific Detail (q/V)", vals: [true, true, false, false, false] },
-                                    { feature: "Mobile App", vals: [false, false, true, true, false] },
+                                    { feature: "Mobile App", vals: [true, false, true, true, false] },
                                     { feature: "Push Notifications", vals: [false, false, true, true, false] },
                                     { feature: "Photo Sightings", vals: [false, false, false, true, false] },
                                     { feature: "AR Moon Finder", vals: [false, false, false, false, false] },
@@ -509,10 +509,10 @@ export default function AboutPage() {
                                                         </span>
                                                     ) : (
                                                         <span
-                                                            className="text-[13px]"
-                                                            style={{ color: "color-mix(in oklch, var(--muted-foreground) 40%, transparent)" }}
+                                                            className="text-[9px] uppercase font-bold tracking-widest"
+                                                            style={{ color: "color-mix(in oklch, var(--gold) 60%, transparent)" }}
                                                         >
-                                                            -
+                                                            Coming Soon
                                                         </span>
                                                     )
                                                 ) : v ? (
