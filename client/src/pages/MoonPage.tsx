@@ -52,8 +52,8 @@ function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number 
           <stop offset="100%" stopColor="oklch(0.65 0.12 75)" stopOpacity="0.7" />
         </radialGradient>
         <radialGradient id="darkSide" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="color-mix(in oklch, var(--space) 35%, black)" />
-          <stop offset="100%" stopColor="color-mix(in oklch, var(--space) 15%, black)" />
+          <stop offset="0%" stopColor="oklch(0.24 0.03 245)" />
+          <stop offset="100%" stopColor="oklch(0.18 0.02 245)" />
         </radialGradient>
         <filter id="moonShadow">
           <feGaussianBlur stdDeviation="2" result="blur" />
@@ -131,7 +131,7 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
             style={{ minWidth: "36px" }}
           >
             <svg viewBox="0 0 28 28" width={28} height={28}>
-              <circle cx={cx} cy={cy} r={r} fill="color-mix(in oklch, var(--space) 25%, black)" />
+              <circle cx={cx} cy={cy} r={r} fill="#111c24" />
               <path d={litPath} fill="oklch(0.78 0.15 75)" opacity="0.85" />
             </svg>
             <span

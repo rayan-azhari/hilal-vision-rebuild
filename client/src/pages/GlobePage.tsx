@@ -76,6 +76,13 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
         globe.scene().add(new THREE.AmbientLight(theme === "light" ? 0xffffff : 0x0f1921, theme === "light" ? Math.PI : Math.PI * 1.5));
       }
 
+      // Add base emissive glow so the black oceans on the texture don't render pure black
+      const baseMaterial = globe.globeMaterial();
+      if (baseMaterial) {
+        baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x08131c);
+        baseMaterial.emissiveIntensity = theme === "light" ? 0 : 1.0;
+      }
+
       globeInstanceRef.current = globe;
       setTimeout(() => setIsGlobeInitialized(true), 150);
     });
@@ -113,6 +120,12 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     if (ambientLight) {
       (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x0f1921);
       (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
+    }
+
+    const baseMaterial = globe.globeMaterial();
+    if (baseMaterial) {
+      baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x08131c);
+      baseMaterial.emissiveIntensity = theme === "light" ? 0 : 1.0;
     }
   }, [theme]);
 

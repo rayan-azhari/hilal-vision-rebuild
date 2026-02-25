@@ -165,6 +165,12 @@
     overflow-x: hidden;
   }
 
+  .dark .leaflet-tile-pane {
+    mix-blend-mode: screen;
+    opacity: 0.85;
+  }
+
+
   h1,
   h2,
   h3 {
