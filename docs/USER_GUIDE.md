@@ -69,7 +69,7 @@ A dedicated dashboard for the lunar cycle.
   - **Astronomical (SunCalc)**: Conjunction-based algorithm finding the actual physical new moon.
   - **Umm al-Qura**: The official civic Saudi Arabian calendar powered by KACST tables.
   - **Tabular (Kuwaiti)**: The standard arithmetic approximation.
-- **Compare to Heavens**: A visual overlay highlighting instances where civic calendar systems diverge from true astronomical reality.
+
 - Highlights significant upcoming events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid).
 - Each day shows a small moon phase icon.
 

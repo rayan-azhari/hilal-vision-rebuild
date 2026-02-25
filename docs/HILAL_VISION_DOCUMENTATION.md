@@ -291,7 +291,6 @@ The application features a **triple-engine Hijri calendar system**, supporting t
 
 3. **Tabular (Kuwaiti):** The standard arithmetic approximation commonly used in software, implemented via Julian Date conversions (`gregorianToJD`, `jdToHijri`).
 
-The UI supports a "Compare to Heavens" overlay that visually flags days where the selected civic calendar (Umm al-Qura or Tabular) diverges from the purely Astronomical reality, offering users a unique educational tool for understanding calendar discrepancies.
 
 ### 5.5 World Visibility Grid
 
@@ -391,7 +390,6 @@ In Pro Mode, the page shows extended orbital data including libration (the appar
 
 The Calendar page provides a comprehensive Hijri calendar supporting three calculation engines. Users can instantly toggle between **Astronomical**, **Umm al-Qura**, and **Tabular (Kuwaiti)** dates. 
 
-A unique **Compare to Heavens** astronomical discrepancy overlay allows users to visualise divergences. When enabled, a small red indicator badge displaying the true astronomical date will appear inside the calendar cell on days where the currently selected civic or tabular calendar diverges from the strict SunCalc astronomical calculation.
 
 The page supports dynamic year and month navigation. Each cell renders its exact local moon phase via an inline stylised SVG, and major/minor Islamic events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid, etc.) are highlighted distinctly on their respective dates.
 

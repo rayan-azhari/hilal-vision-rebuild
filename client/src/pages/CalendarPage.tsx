@@ -334,7 +334,7 @@ export default function CalendarPage() {
                 {selectedMoon && (
                   <div className="mt-3 pt-3 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                     <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                      Moon: {selectedMoon.phaseName} · {selectedMoon.illumination}% illuminated
+                      Moon: {selectedMoon.phaseName} · {Math.round(selectedMoon.illuminatedFraction * 100)}% illuminated
                     </div>
                   </div>
                 )}

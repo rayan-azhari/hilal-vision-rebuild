@@ -13,7 +13,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness. Incorporates topographical elevation precision where available.
   - *Accessibility*: High Contrast Color-Blind mode to ensure the visibility gradients remain intelligible for users with Color Vision Deficiency.
 - **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, Sky Dome polar visualization, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
-- **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (SunCalc), Official Umm al-Qura, and Tabular (Kuwaiti) calculations, including a celestial divergence overlay to compare civic vs. astronomical dates.
+- **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (SunCalc), Official Umm al-Qura, and Tabular (Kuwaiti) calculations.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
 - **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP).
 - **🌐 SEO**: Per-page dynamic meta tags, Open Graph & Twitter cards, JSON-LD structured data, sitemap.xml, robots.txt.
@@ -44,7 +44,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 3. **Clerk Authentication**: Secure user management replacing legacy custom OAuth.
 4. **Smart Telemetry Validation**: Sighting reports are algorithmically verified against astronomical reality. If a user maliciously claims to see the moon when it is physically below the horizon (Zone F), the mathematical engine rejects the payload.
 5. **Real ICOP Data Extraction**: Features an integrated scraper that autonomously pulled 1,000+ historical crescent sight reports to serve as verifiable proof-of-concept records alongside theoretical algorithms.
-6. **Triple-Engine Hijri Calendar**: Supports `SunCalc`-powered astronomical new moon detection, `@umalqura/core` for official KACST Saudi civic dates, and an arithmetic Tabular fallback. Includes a smart "Compare to Heavens" overlay to visualize divergence between civic calendars and physical astronomical reality.
+6. **Triple-Engine Hijri Calendar**: Supports `SunCalc`-powered astronomical new moon detection, `@umalqura/core` for official KACST Saudi civic dates, and an arithmetic Tabular fallback.
 7. **Production Upstash Protection**: Hardened TRPC mutation endpoints utilizing Upstash Redis sliding window token bucket rate-limiting.
 8. **Open-Meteo Cloud Cover Overlay**: Real-time cloud cover data fetched from Open-Meteo's forecast API for a sparse global grid (~162 points), bilinearly interpolated into a smooth canvas texture, and overlaid on both 2D Map (Leaflet `imageOverlay`) and 3D Globe (Three.js sphere mesh). Independently toggleable from visibility zones.
 9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
