@@ -70,16 +70,16 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       // Adjust lighting to tint the dark side deep navy instead of pure black
       const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
       if (ambientLight) {
-        (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x0f1921);
+        (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x233342);
         (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
       } else {
-        globe.scene().add(new THREE.AmbientLight(theme === "light" ? 0xffffff : 0x0f1921, theme === "light" ? Math.PI : Math.PI * 1.5));
+        globe.scene().add(new THREE.AmbientLight(theme === "light" ? 0xffffff : 0x233342, theme === "light" ? Math.PI : Math.PI * 1.5));
       }
 
       // Add base emissive glow so the black oceans on the texture don't render pure black
       const baseMaterial = globe.globeMaterial();
       if (baseMaterial) {
-        baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x08131c);
+        baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x151f28);
         baseMaterial.emissiveIntensity = theme === "light" ? 0 : 1.0;
       }
 
@@ -118,13 +118,13 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
     const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
     if (ambientLight) {
-      (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x0f1921);
+      (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x233342);
       (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
     }
 
     const baseMaterial = globe.globeMaterial();
     if (baseMaterial) {
-      baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x08131c);
+      baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x151f28);
       baseMaterial.emissiveIntensity = theme === "light" ? 0 : 1.0;
     }
   }, [theme]);

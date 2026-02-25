@@ -120,7 +120,7 @@ export const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
     C: [251, 146, 60],
     D: [248, 113, 113],
     E: [107, 114, 128],
-    F: [15, 25, 33],
+    F: [35, 51, 66],
 };
 
 export const HIGH_CONTRAST_ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
@@ -129,7 +129,7 @@ export const HIGH_CONTRAST_ZONE_RGB: Record<VisibilityZone, [number, number, num
     C: [160, 60, 40],    /* Reddish Brown oklch(0.55 0.12 25) */
     D: [60, 40, 150],    /* Deep Blue/Purple oklch(0.35 0.10 280) */
     E: [20, 10, 60],     /* Very Dark Navy oklch(0.18 0.05 260) */
-    F: [15, 25, 33],     /* Deep Navy background tone */
+    F: [35, 51, 66],     /* Deep Navy background tone */
 };
 
 // ─── Core Calculations ────────────────────────────────────────────────────────

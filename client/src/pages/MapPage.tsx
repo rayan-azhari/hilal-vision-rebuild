@@ -24,7 +24,7 @@ const ZONE_COLORS: Record<VisibilityZone, string> = {
   C: "#fb923c",
   D: "#f87171",
   E: "#6b7280",
-  F: "#1f2937",
+  F: "#233342",
 };
 
 const HIGH_CONTRAST_ZONE_COLORS: Record<VisibilityZone, string> = {
@@ -33,7 +33,7 @@ const HIGH_CONTRAST_ZONE_COLORS: Record<VisibilityZone, string> = {
   C: "#a03c28",
   D: "#3c2896",
   E: "#140a3c",
-  F: "#1f2937",
+  F: "#233342",
 };
 
 const ZONE_HEX: Record<VisibilityZone, string> = {
