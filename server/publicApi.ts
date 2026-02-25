@@ -14,22 +14,24 @@ const moonPhaseSchema = z.object({
     date: z.string().optional(),
 });
 
+import type { Request, Response } from "express";
+
 /**
  * @openapi
  * /api/v1/visibility:
  *   get:
  *     description: Get visibility data (Yallop & Odeh criteria) for a specific location and date.
  */
-publicApiRouter.get("/visibility", (req, res) => {
+publicApiRouter.get("/visibility", (req: Request, res: Response) => {
     try {
         const parsed = visibilitySchema.parse(req.query);
-        const date = parsed.date ? new Date(parsed.date) : new Date();
+        const date = parsed.date ? new Date(parsed.date as string) : new Date();
 
         if (isNaN(date.getTime())) {
             return res.status(400).json({ error: "Invalid date format" });
         }
 
-        const data = computeSunMoonAtSunset(date, { lat: parsed.lat, lng: parsed.lng });
+        const data = computeSunMoonAtSunset(date, { lat: parsed.lat as number, lng: parsed.lng as number });
 
         res.json({
             success: true,
@@ -56,7 +58,7 @@ publicApiRouter.get("/visibility", (req, res) => {
  *   get:
  *     description: Get current and upcoming moon phase information.
  */
-publicApiRouter.get("/moon-phases", (req, res) => {
+publicApiRouter.get("/moon-phases", (req: Request, res: Response) => {
     try {
         const parsed = moonPhaseSchema.parse(req.query);
         const date = parsed.date ? new Date(parsed.date) : new Date();
