@@ -21,6 +21,8 @@ export interface Location {
     lng: number;
     name?: string;
     elevation?: number; // meters above sea level
+    temperature?: number; // Celsius
+    pressure?: number; // hPa (millibars)
 }
 
 export interface SunMoonData {
@@ -227,9 +229,21 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
     const dipArcmin = loc.elevation ? 1.76 * Math.sqrt(loc.elevation) : 0;
     const dipDeg = dipArcmin / 60;
 
-    const sunAlt = toDeg(sunPos.altitude) + dipDeg;
+    // Calculate atmospheric refraction adjustment if temperature and pressure are provided
+    // SunCalc uses a standard refraction. We'll approximate the delta.
+    // Standard temp = 10C, Standard pressure = 1010 hPa
+    let refractionDelta = 0;
+    if (loc.temperature !== undefined && loc.pressure !== undefined) {
+        // True refraction R = R_std * (P / 1010) * (283 / (273 + T))
+        // Since we are looking near the horizon (sunset), typical standard refraction is ~34 arcminutes.
+        const R_std = 34 / 60; // degrees
+        const R_true = R_std * (loc.pressure / 1010) * (283 / (273 + loc.temperature));
+        refractionDelta = R_true - R_std;
+    }
+
+    const sunAlt = toDeg(sunPos.altitude) + dipDeg + refractionDelta;
     const sunAz = toDeg(sunPos.azimuth) + 180; // SunCalc returns south=0; convert to N=0
-    const moonAlt = toDeg(moonPos.altitude) + dipDeg;
+    const moonAlt = toDeg(moonPos.altitude) + dipDeg + refractionDelta;
     const moonAz = toDeg(moonPos.azimuth) + 180;
 
     // Elongation (angular distance between sun and moon)

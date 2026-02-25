@@ -51,6 +51,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
+    "exif-js": "^2.3.0",
     "express": "^4.21.2",
     "firebase": "^12.9.0",
     "firebase-admin": "^13.6.1",

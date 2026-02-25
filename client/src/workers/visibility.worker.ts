@@ -25,7 +25,7 @@ import * as SunCalc from "suncalc";
 
 // ─── Worker-specific calculation (simplified for grid performance) ────────────
 
-function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterion: "yallop" | "odeh"): { zone: VisibilityZone; value: number } {
+function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterion: "yallop" | "odeh", temperature?: number, pressure?: number): { zone: VisibilityZone; value: number } {
     const times = SunCalc.getTimes(date, lat, lng);
     const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
         ? times.sunset
@@ -35,8 +35,15 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterio
     const sunPos = SunCalc.getPosition(calcTime, lat, lng);
     const moonPos = SunCalc.getMoonPosition(calcTime, lat, lng);
 
-    const moonAlt = toDeg(moonPos.altitude);
-    const sunAlt = toDeg(sunPos.altitude);
+    let refractionDelta = 0;
+    if (temperature !== undefined && pressure !== undefined) {
+        const R_std = 34 / 60;
+        const R_true = R_std * (pressure / 1010) * (283 / (273 + temperature));
+        refractionDelta = R_true - R_std;
+    }
+
+    const moonAlt = toDeg(moonPos.altitude) + refractionDelta;
+    const sunAlt = toDeg(sunPos.altitude) + refractionDelta;
     const arcv = moonAlt - sunAlt;
 
     const elongation = toDeg(Math.acos(
@@ -68,7 +75,7 @@ function isDaylight(lat: number, lng: number, date: Date): boolean {
 // ─── Worker message handler ──────────────────────────────────────────────────
 
 self.onmessage = (e: MessageEvent) => {
-    const { dateTs, resolution, isMercator, criterion, highContrast } = e.data;
+    const { dateTs, resolution, isMercator, criterion, highContrast, temperature, pressure } = e.data;
     const date = new Date(dateTs);
 
     const W = Math.floor(360 / resolution);
@@ -92,7 +99,7 @@ self.onmessage = (e: MessageEvent) => {
 
         for (let px = 0; px < W; px++) {
             const lng = -180 + (px / W) * 360;
-            const { zone, value } = computeVisibilityAtPoint(date, lat, lng, criterion || "yallop");
+            const { zone, value } = computeVisibilityAtPoint(date, lat, lng, criterion || "yallop", temperature, pressure);
             const [r, g, b] = rgbMap[zone];
             const night = !isDaylight(lat, lng, date);
             const alpha = zone === "F" ? 40 : night ? 100 : 180;

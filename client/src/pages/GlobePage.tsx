@@ -12,6 +12,7 @@ import {
 } from "@/lib/astronomy";
 import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
+import { trpc } from "@/lib/trpc";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
@@ -31,6 +32,38 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   const [showVisibility, setShowVisibility] = useState(true);
   const [showClouds, setShowClouds] = useState(false);
 
+  // Atmospheric Overrides
+  const [tempOverride, setTempOverride] = useState<number | "">("");
+  const [pressureOverride, setPressureOverride] = useState<number | "">("");
+  const [elevationOverride, setElevationOverride] = useState<number | "">("");
+  const [autoFetchWeather, setAutoFetchWeather] = useState(true);
+
+  // Auto-fetch real-time atmospheric data from Open-Meteo (same logic as MapPage)
+  useEffect(() => {
+    if (!autoFetchWeather) return;
+
+    let isMounted = true;
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.lat}&longitude=${selectedCity.lng}&current=temperature_2m,surface_pressure&elevation=nan`);
+        if (!res.ok) throw new Error("Weather fetch failed");
+        const data = await res.json();
+
+        if (isMounted) {
+          if (data.current?.temperature_2m !== undefined) setTempOverride(data.current.temperature_2m);
+          if (data.current?.surface_pressure !== undefined) setPressureOverride(data.current.surface_pressure);
+          if (data.elevation !== undefined && !isNaN(data.elevation)) setElevationOverride(data.elevation);
+        }
+      } catch (err) {
+        console.error("Failed to fetch atmospheric overrides from Open-Meteo:", err);
+      }
+    };
+
+    fetchWeather();
+
+    return () => { isMounted = false; };
+  }, [selectedCity, autoFetchWeather]);
+
   useEffect(() => {
     if (isGlobeInitialized && globeInstanceRef.current) {
       globeInstanceRef.current.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 }, 1000);
@@ -43,6 +76,8 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   );
   const hijri = useMemo(() => gregorianToHijri(date), [date]);
   const { theme, highContrast } = useTheme();
+
+  const trpcUtils = trpc.useContext();
 
   // Initialize globe once
   useEffect(() => {
@@ -98,7 +133,16 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
   // Recompute textures when date/visibility/clouds change
   const effectiveDateTs = effectiveDate.getTime();
-  const { textureUrl, isComputing } = useVisibilityWorker(effectiveDateTs, 3, false, showVisibility, visibilityCriterion, highContrast);
+  const { textureUrl, isComputing } = useVisibilityWorker(
+    effectiveDateTs,
+    3,
+    false,
+    showVisibility,
+    visibilityCriterion,
+    highContrast,
+    typeof tempOverride === "number" ? tempOverride : undefined,
+    typeof pressureOverride === "number" ? pressureOverride : undefined
+  );
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Sync loading state
@@ -134,7 +178,33 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     const globe = globeInstanceRef.current;
     if (!globe) return;
 
-    setMoonData(computeSunMoonAtSunset(new Date(effectiveDateTs), selectedCity));
+    let isMounted = true;
+
+    const updateMoonData = async () => {
+      let localElevation = typeof elevationOverride === "number" ? elevationOverride : undefined;
+
+      if (localElevation === undefined) {
+        try {
+          const demRes = await trpcUtils.dem.getDem.fetch({ lat: selectedCity.lat, lng: selectedCity.lng });
+          if (demRes && demRes.elevation !== undefined) {
+            localElevation = demRes.elevation;
+          }
+        } catch (err) {
+          console.error("Failed to fetch DEM elevation for point", err);
+        }
+      }
+
+      if (!isMounted) return;
+
+      setMoonData(computeSunMoonAtSunset(new Date(effectiveDateTs), {
+        ...selectedCity,
+        elevation: localElevation,
+        temperature: typeof tempOverride === "number" ? tempOverride : undefined,
+        pressure: typeof pressureOverride === "number" ? pressureOverride : undefined
+      }));
+    };
+
+    updateMoonData();
 
     // City label
     globe
@@ -384,6 +454,57 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                       }}
                     />
                   </button>
+                </div>
+              </div>
+
+              {/* Atmospheric Overrides */}
+              <div className="pt-3 border-t space-y-3 mt-3" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Atmospheric Overrides</span>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={autoFetchWeather}
+                      onChange={(e) => setAutoFetchWeather(e.target.checked)}
+                      className="rounded appearance-none w-3 h-3 flex items-center justify-center bg-transparent border cursor-pointer"
+                      style={{
+                        borderColor: "var(--gold-dim)",
+                        background: autoFetchWeather ? "var(--gold)" : "transparent"
+                      }}
+                    />
+                    <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>Auto-fetch</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>Temp (°C)</label>
+                    <input
+                      type="number"
+                      value={tempOverride}
+                      onChange={(e) => {
+                        setTempOverride(e.target.value === "" ? "" : Number(e.target.value));
+                        setAutoFetchWeather(false);
+                      }}
+                      className="w-full px-2 py-1.5 rounded text-xs bg-transparent border"
+                      style={{ borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
+                      placeholder="e.g. 15"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>Pressure (hPa)</label>
+                    <input
+                      type="number"
+                      value={pressureOverride}
+                      onChange={(e) => {
+                        setPressureOverride(e.target.value === "" ? "" : Number(e.target.value));
+                        setAutoFetchWeather(false);
+                      }}
+                      className="w-full px-2 py-1.5 rounded text-xs bg-transparent border"
+                      style={{ borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
+                      placeholder="e.g. 1013"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

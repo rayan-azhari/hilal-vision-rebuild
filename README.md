@@ -10,15 +10,20 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *GPS Auto-Detect*: Instantly fly to your current position using the browser Geolocation API.
   - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
   - *Cloud Cover Overlay*: Real-time cloud cover data from Open-Meteo rendered as a translucent overlay (toggleable independently from visibility zones).
+  - *Atmospheric Overrides*: Manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides via Open-Meteo's real-time weather API. Adjusts atmospheric refraction for observatory-grade accuracy.
+  - *DEM Integration*: Digital Elevation Model data automatically fetched from Open-Meteo's Elevation API on map click, providing true terrain-aware horizon dip calculations.
+  - *Enhanced Tooltips*: Click any point on the 2D Map to see detailed lunar data - q-value, moon age, altitude, elongation, crescent width, and local terrain elevation.
   - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness. Incorporates topographical elevation precision where available.
   - *Accessibility*: High Contrast Color-Blind mode to ensure the visibility gradients remain intelligible for users with Color Vision Deficiency.
 - **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, Sky Dome polar visualization, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
 - **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (SunCalc), Official Umm al-Qura, and Tabular (Kuwaiti) calculations.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
-- **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP).
+- **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP). Includes CSV and JSON export for both ICOP observations and computed visibility tables.
 - **🌐 SEO**: Per-page dynamic meta tags, Open Graph & Twitter cards, JSON-LD structured data, sitemap.xml, robots.txt.
 - **🌍 i18n**: English, Arabic (العربية), and Urdu (اردو) with a navbar language switcher and full RTL support.
-- **📤 Social Sharing**: Native share API (mobile) with clipboard fallback, plus a live sighting feed on the Home page.
+- **📤 Social Sharing**: Native share API (mobile) with clipboard fallback, plus a live sighting feed on the Home page with CSV/JSON data export.
+- **🔌 Public REST API**: Programmatic access to visibility and moon phase data via `/api/v1/visibility` and `/api/v1/moon-phases` endpoints with Zod-validated query parameters.
+- **📸 EXIF Metadata Extraction**: Sighting report photo uploads are automatically parsed for GPS coordinates, camera model, and timestamp using the `exif-js` library.
 - **ℹ️ About Page (`/about`)**: Mission statement, platform overview, technology stack, competitor comparison table (vs Moonsighting.com, IslamicFinder, LuneSighting, HilalMap), and data attributions.
 - **🔬 Methodology Page (`/methodology`)**: Full technical reference - Yallop q-value formula derivation, Odeh V-value, triple-engine Hijri calendar algorithms, Best-Time-to-Observe scoring function, ICOP archive sourcing, atmospheric refraction physics, and peer-reviewed references.
 - **⚖️ Legal Pages (`/privacy`, `/terms`)**: Privacy Policy (GDPR-aware, covering GPS, Clerk auth, ICOP data) and Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer).
@@ -60,8 +65,13 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 18. **Unified GPS Geolocation**: All pages auto-detect the user's GPS location on mount via a shared `useGeolocation(true)` hook with reverse-geocoding. A reusable `AutoDetectButton` component provides consistent visuals across the app.
 19. **Global Location & Date State**: A unified `GlobalStateContext` centralizes the location and date pickers into the main navigation bar. Changing your location or date instantly pushes the update to all 3D Globe, 2D Map, Moon Phase, and Horizon modules simultaneously.
 20. **Accessibility & High Contrast**: A specialized perceptual color palette ensures all scientific visibility gradients are legible for users with Color Vision Deficiency (CVD), computed via the Web Worker.
-21. **Topographical Refraction**: The application automatically fetches the observer's physical elevation (meters above sea level) via the Open-Meteo API to adjust the theoretical local horizon dip, providing precise observatory-grade calculations.
+21. **Topographical Refraction & DEM Integration**: The application automatically fetches the observer's physical elevation (meters above sea level) via the Open-Meteo Elevation API (`dem.getDem` tRPC endpoint) on every map/globe click. This terrain-aware elevation adjusts the theoretical local horizon dip, providing precise observatory-grade altitude calculations for both sun and moon.
 22. **E2E Playwright Testing**: Critical user journeys, DOM sync, and rendering are safeguarded from regressions using a comprehensive Playwright automation suite.
+23. **Atmospheric Overrides**: Both MapPage and GlobePage feature a collapsible "Atmospheric Overrides" panel where users can manually set temperature (°C), pressure (hPa), and elevation (m) - or toggle "Auto-fetch" to pull real-time values from Open-Meteo's weather API based on the selected location. These parameters feed into the refraction correction formula `R = R_std × (P/1010) × (283/(273+T))` for observatory-grade precision.
+24. **Public REST API**: Express-based REST endpoints (`/api/v1/visibility?lat=...&lng=...&date=...` and `/api/v1/moon-phases?lat=...&lng=...&date=...`) with Zod input validation provide programmatic access to visibility zone classification and lunar phase data for external integrations.
+25. **Data Export**: CSV and JSON export buttons on the Archive page (both ICOP historical data and computed visibility tables) and the Sighting Feed widget, enabling researchers to download datasets for offline analysis.
+26. **EXIF Metadata Extraction**: Photo uploads in the Sighting Report form are automatically parsed for embedded GPS coordinates, camera model, and capture timestamp using the `exif-js` library, pre-filling the location and time fields for accuracy.
+27. **Enhanced Map Click Tooltips**: Clicking any point on the 2D Map displays a rich popup showing the visibility zone, q-value, moon age, altitude, azimuth, elongation, crescent width, and local DEM-sourced terrain elevation.
 23. **App Store Readiness**: Mobile web views are strictly styled using `env(safe-area-inset-top)` to seamlessly accommodate iOS Dynamic Islands and Android gesture navs via Capacitor.
 24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass SunCalc phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
 25. **Soft Paywall Monetization (Pro Tier)**: A `ProTierContext` + `<ProGate>` component system gates deep feature interaction behind a "Pro" subscription while keeping all features visible to free users from Day 1. Gated features include the 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular calendar engines, and historical ICOP data. An `UpgradeModal` offers Monthly ($2.99), Annual ($14.99), and Lifetime ($49.99) plans (Stripe integration pending).
@@ -165,7 +175,11 @@ npm run check    # TypeScript type checking
 | ✅ Done | Payment Gateways | Stripe checkout (Web) + RevenueCat Native SDK (iOS/Android) + Clerk webhook sync |
 | ⏳ Planned | Push Notifications | Pro-only crescent alerts via Capacitor + FCM/APNs |
 | ⏳ Planned | Ethical Ads | Muslim Ad Network below-fold for free tier, suppressed for Pro |
-| ⏳ Planned | Patron Badge | Golden crescent icon on sighting reports for $10+ donors |
+| ✅ Done | Public REST API | `/api/v1/visibility` and `/api/v1/moon-phases` endpoints (free, Zod-validated) |
+| ✅ Done | Data Export | CSV/JSON download for Archive page and Sighting Feed |
+| ✅ Done | Atmospheric Overrides | Auto-fetch T/P/elevation from Open-Meteo or manual input on Map/Globe |
+| ✅ Done | DEM Integration | Real terrain elevation via Open-Meteo Elevation API on map click |
+| 🔮 Future | Tiered Developer API | Rate-limited API keys with usage-based pricing |
 | 🔮 Future | Mosque Widget | Embeddable `<iframe>` ($10–$20/month B2B) |
 | 🔮 Future | Developer API | REST API for visibility calculations (tiered pricing) |
 

@@ -12,7 +12,9 @@ export function useVisibilityWorker(
     isMercator: boolean,
     enabled: boolean = true,
     criterion: "yallop" | "odeh" = "yallop",
-    highContrast: boolean = false
+    highContrast: boolean = false,
+    temperature?: number,
+    pressure?: number
 ) {
     const [textureUrl, setTextureUrl] = useState<string | null>(null);
     const [qData, setQData] = useState<VisibilityQData | null>(null);
@@ -64,9 +66,9 @@ export function useVisibilityWorker(
             setIsComputing(false);
         };
 
-        worker.postMessage({ dateTs, resolution, isMercator, criterion, highContrast });
+        worker.postMessage({ dateTs, resolution, isMercator, criterion, highContrast, temperature, pressure });
 
-    }, [dateTs, resolution, isMercator, enabled, criterion, highContrast]);
+    }, [dateTs, resolution, isMercator, enabled, criterion, highContrast, temperature, pressure]);
 
     useEffect(() => {
         return () => {

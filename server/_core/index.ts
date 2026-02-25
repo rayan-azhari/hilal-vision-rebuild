@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from "../appRouter.js";
 import { createContext } from "./context.js";
 import { serveStatic, setupVite } from "./vite.js";
+import { publicApiRouter } from "../publicApi.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -40,6 +41,9 @@ async function startServer() {
       createContext,
     })
   );
+  // Public REST API
+  app.use("/api/v1", publicApiRouter);
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);

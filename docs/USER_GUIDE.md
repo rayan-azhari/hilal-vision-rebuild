@@ -42,7 +42,9 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 - Web Mercator–projected visibility heatmap with smooth Gaussian-blurred zone boundaries. (Supports perceptual High Contrast mode dynamically).
 - **Cloud Cover Overlay** - Open-Meteo cloud data rendered as a semi-transparent layer over the map. Toggle independently from visibility using the "Cloud Cover" switch in Map Controls.
 - **Best Time to Observe** card - Automatically calculates the optimal observation window (sunset → moonset), displaying local altitude parameters including Topographical Elevation.
-- **Click anywhere** on the map to inspect the visibility zone for that exact coordinate.
+- **Atmospheric Overrides** - Collapsible panel for manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides. Toggle "Auto-fetch" to pull real-time atmospheric data from Open-Meteo's weather API based on the selected location. These corrections refine the refraction model for observatory-grade accuracy.
+- **DEM Integration** - Clicking any point automatically fetches the real terrain elevation from the Open-Meteo Elevation API (Digital Elevation Model). This elevation is used to compute accurate horizon dip corrections and is displayed in the click tooltip.
+- **Enhanced Click Tooltips** - Click anywhere on the map to see a detailed popup with: visibility zone, q-value breakdown, moon age, altitude, azimuth, elongation, crescent width, and the DEM-sourced local terrain elevation.
 - Crowdsourced sighting pins: 🟢 Naked Eye, 🔵 Optical Aid, ⚪ Not Seen.
 - Resolution selector: Fine (2°), Normal (4°), or Fast (6°).
 
@@ -83,6 +85,9 @@ A dedicated dashboard for the lunar cycle.
 
 - Explore authentic historical crescent visibility data featuring 1,000+ real sighting records scraped from the Islamic Crescents' Observation Project (ICOP) spanning 1438–1465 AH.
 - Sightings are overlaid on theoretical algorithms (Yallop/Odeh) providing a real-world verifiable dashboard of moon crescent visibility.
+- **Data Export** - Download buttons for both ICOP observation data and computed visibility tables:
+  - **CSV Export** - One-click download of tabular data (City, Country, Result, Optical Aid or City, Country, Zone, Q-Value).
+  - **JSON Export** - Full structured data download for programmatic analysis.
 
 ---
 
@@ -104,7 +109,8 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
    - **Seen with Optical Aid** - Required binoculars/telescope.
    - **Attempted, Not Seen** - This negative data is equally valuable for refining models.
 5. Add optional **Notes** (max 1000 characters).
-6. Click **Submit Sighting**.
+6. **Attach a Photo** (optional) - If the image contains EXIF metadata (GPS coordinates, camera model, timestamp), these fields are automatically extracted and pre-filled into the form.
+7. Click **Submit Sighting**.
 
 ### What Happens Behind the Scenes
 - **Authentication** - Clerk ensures bots don't pollute the data.
@@ -113,6 +119,7 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
 - **Input Bounds** - All fields are validated with strict Zod schemas (coordinate bounds, temperature ranges, etc.).
 - **Meteorological Enrichment** - The backend automatically contacts **Open-Meteo** APIs to fetch live Cloud Cover, Surface Pressure, and Aerosol Optical Depth at your exact coordinates, storing this data alongside your report.
 - **Paginated Retrieval** - Observation queries support limit/offset pagination (default 50 results).
+- **Sighting Feed Export** - The Live Sighting Feed widget includes a Download button (⬇) with options to export all visible reports as CSV or JSON for offline analysis.
 
 ---
 
@@ -182,4 +189,32 @@ Hilal Vision uses a **soft paywall** model: all features are visible from Day 1,
 | Moon Phase | Sky Dome, Altitude Chart, Ephemeris | Basic illumination, age, phase |
 | Calendar | Astronomical & Tabular engines | Umm al-Qura only |
 | Archive | Years before 1463 AH | 1463-1465 AH (3 most recent) |
+
+## 13. Public REST API
+
+Hilal Vision exposes a programmatic REST API for external integrations and developers:
+
+### Endpoints
+
+| Endpoint | Method | Parameters | Description |
+|----------|--------|------------|-------------|
+| `/api/v1/visibility` | GET | `lat`, `lng`, `date` (ISO) | Returns the crescent visibility zone (A–F), q-value, and key lunar parameters for the specified location and date. |
+| `/api/v1/moon-phases` | GET | `lat`, `lng`, `date` (ISO) | Returns moon phase data including illumination, age, altitude, azimuth, and rise/set times. |
+
+All parameters are validated with Zod schemas. Invalid or out-of-range inputs return structured error responses.
+
+## 14. Atmospheric Overrides & DEM
+
+Both the 2D Map and 3D Globe pages feature an **Atmospheric Overrides** panel:
+
+- **Temperature** (°C) - Adjusts atmospheric refraction. Standard: 10°C.
+- **Pressure** (hPa) - Adjusts atmospheric refraction. Standard: 1010 hPa.
+- **Elevation** (m) - Adjusts theoretical horizon dip via `1.76 × √elevation`.
+- **Auto-fetch Toggle** - When enabled, real-time temperature, pressure, and elevation are fetched from Open-Meteo's weather and elevation APIs for the currently selected location.
+
+The refraction correction formula applied is:
+```
+R_true = R_standard × (P / 1010) × (283 / (273 + T))
+```
+This delta is applied to both sun and moon altitude calculations, providing observatory-grade accuracy for near-horizon crescent visibility predictions.
 

@@ -32,11 +32,29 @@ if (ENV.upstashRedisRestUrl && ENV.upstashRedisRestToken) {
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 
+// Define demRouter from the existing getDem procedure
+export const demRouter = router({
+  getDem: publicProcedure
+    .input(z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }))
+    .query(async ({ input }) => {
+      try {
+        const url = `https://api.open-meteo.com/v1/elevation?latitude=${input.lat}&longitude=${input.lng}`;
+        const res = await fetch(url);
+        if (!res.ok) return { elevation: 0 };
+        const data = (await res.json()) as any;
+        return { elevation: data.elevation?.[0] ?? 0 };
+      } catch {
+        return { elevation: 0 };
+      }
+    }),
+});
+
 export const appRouter = router({
   system: systemRouter,
   archive: archiveRouter,
   weather: weatherRouter,
   notifications: notificationsRouter,
+  dem: demRouter, // Added demRouter here
   telemetry: router({
     submitObservation: publicProcedure
       .input(

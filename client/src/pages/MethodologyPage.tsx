@@ -161,8 +161,9 @@ const TOC = [
     { id: "grid", label: "6. World Visibility Grid" },
     { id: "icop", label: "7. ICOP Archive" },
     { id: "telemetry", label: "8. Crowdsourced Telemetry & Validation" },
-    { id: "refraction", label: "9. Atmospheric Refraction" },
-    { id: "refs", label: "10. References" },
+    { id: "refraction", label: "9. Atmospheric Refraction & DEM" },
+    { id: "export", label: "10. Data Export & Public API" },
+    { id: "refs", label: "11. References" },
 ];
 
 export default function MethodologyPage() {
@@ -560,7 +561,7 @@ W  = SD × (1 − cos(elongation))`}
                     <SectionDivider />
 
                     {/* ── 9. Refraction ────────────────────────────────── */}
-                    <SectionHeading id="refraction">9. Atmospheric Refraction</SectionHeading>
+                    <SectionHeading id="refraction">9. Atmospheric Refraction & DEM Integration</SectionHeading>
                     <Para>
                         Atmospheric refraction is the bending of light as it passes through layers of air with
                         increasing density near Earth's surface. At the horizon, this effect reaches approximately{" "}
@@ -583,10 +584,94 @@ R  = R₀ × (P / 1010) × (283 / (273 + T))`}
                         near-horizon sightings.
                     </Para>
 
+                    <SubHeading>Atmospheric Overrides</SubHeading>
+                    <Para>
+                        Both the 2D Map and 3D Globe pages feature a collapsible{" "}
+                        <strong style={{ color: "var(--foreground)" }}>Atmospheric Overrides</strong> panel.
+                        Users can manually set temperature (°C), pressure (hPa), and observer elevation (m),
+                        or toggle <strong style={{ color: "var(--foreground)" }}>Auto-fetch</strong> to pull
+                        real-time values from Open-Meteo's weather API based on the selected location.
+                    </Para>
+                    <Para>
+                        These parameters feed into the refraction correction formula. The delta between
+                        standard refraction (10°C, 1010 hPa) and the corrected refraction is applied to
+                        both sun and moon altitude calculations:
+                    </Para>
+                    <FormulaBlock>
+                        {`R_std = 34/60°  (standard near-horizon refraction)
+R_true = R_std × (P / 1010) × (283 / (273 + T))
+Δrefraction = R_true − R_std`}
+                    </FormulaBlock>
+
+                    <SubHeading>Digital Elevation Model (DEM)</SubHeading>
+                    <Para>
+                        The application integrates the{" "}
+                        <strong style={{ color: "var(--foreground)" }}>Open-Meteo Elevation API</strong> to
+                        fetch the true terrain elevation at any clicked point. This provides accurate horizon
+                        dip calculations via the formula:
+                    </Para>
+                    <FormulaBlock>
+                        {`dip = 1.76 × √(elevation)   [arcminutes]`}
+                    </FormulaBlock>
+                    <Para>
+                        A DEM tRPC endpoint (<code style={{ color: "var(--gold-dim)" }}>dem.getDem</code>)
+                        queries the Open-Meteo Elevation API, caching results and returning the terrain
+                        elevation in meters above sea level. This elevation is displayed in the
+                        enhanced map click tooltip and factored into all sun/moon altitude calculations.
+                    </Para>
+
+                    <SectionDivider />
+
+                    {/* ── 10. Data Export & Public API ──────────────── */}
+                    <SectionHeading id="export">10. Data Export & Public API</SectionHeading>
+
+                    <SubHeading>CSV & JSON Export</SubHeading>
+                    <Para>
+                        The Archive page provides one-click export buttons for both{" "}
+                        <strong style={{ color: "var(--foreground)" }}>ICOP observation data</strong> (City,
+                        Country, Result, Optical Aid) and{" "}
+                        <strong style={{ color: "var(--foreground)" }}>computed visibility tables</strong> (City,
+                        Country, Zone, Q-Value). The Live Sighting Feed widget also includes a download
+                        button with CSV and JSON options for exporting crowdsourced sighting reports.
+                    </Para>
+
+                    <SubHeading>Public REST API</SubHeading>
+                    <Para>
+                        Hilal Vision exposes standalone Express REST endpoints for programmatic access to
+                        astronomical data:
+                    </Para>
+                    <div className="overflow-x-auto my-4">
+                        <table className="w-full text-xs border-collapse">
+                            <thead>
+                                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Endpoint</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Parameters</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Returns</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style={{ borderBottom: "1px solid color-mix(in oklch, var(--border) 50%, transparent)" }}>
+                                    <td className="py-2 px-3 font-mono" style={{ color: "var(--gold-dim)" }}>/api/v1/visibility</td>
+                                    <td className="py-2 px-3" style={{ color: "var(--muted-foreground)" }}>lat, lng, date (ISO)</td>
+                                    <td className="py-2 px-3" style={{ color: "var(--muted-foreground)" }}>Visibility zone (A–F), q-value, ARCV, W, elongation</td>
+                                </tr>
+                                <tr style={{ borderBottom: "1px solid color-mix(in oklch, var(--border) 50%, transparent)" }}>
+                                    <td className="py-2 px-3 font-mono" style={{ color: "var(--gold-dim)" }}>/api/v1/moon-phases</td>
+                                    <td className="py-2 px-3" style={{ color: "var(--muted-foreground)" }}>lat, lng, date (ISO)</td>
+                                    <td className="py-2 px-3" style={{ color: "var(--muted-foreground)" }}>Phase, illumination, age, altitude, azimuth, rise/set times</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <Para>
+                        All inputs are validated with Zod schemas. Invalid or out-of-range parameters return
+                        structured error responses with descriptive messages.
+                    </Para>
+
                     <SectionDivider />
 
                     {/* ── 10. References ───────────────────────────────── */}
-                    <SectionHeading id="refs">10. References</SectionHeading>
+                    <SectionHeading id="refs">11. References</SectionHeading>
                     <div className="space-y-3">
                         {[
                             {

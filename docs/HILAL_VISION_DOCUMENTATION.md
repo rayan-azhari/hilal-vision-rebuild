@@ -1,6 +1,6 @@
 # Hilal Vision - Full Application Documentation
 
-**Version:** Round 21 (current)
+**Version:** Round 34 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -106,6 +106,17 @@ hilal-vision/
 ├── todo.md                 ← Feature tracking
 └── DOCUMENTATION.md        ← This file
 ```
+
+### 2.5 Public REST API
+
+In addition to the tRPC layer, standalone Express REST endpoints are mounted at `/api/v1/`:
+
+| Endpoint | Method | Parameters | Response |
+|----------|--------|------------|----------|
+| `/api/v1/visibility` | GET | `lat`, `lng`, `date` (ISO 8601) | Visibility zone (A–F), q-value, ARCV, W, elongation, moon/sun altitudes |
+| `/api/v1/moon-phases` | GET | `lat`, `lng`, `date` (ISO 8601) | Phase name, illumination, age, altitude, azimuth, rise/set times |
+
+All inputs are validated with Zod. The API is open (no auth required) and designed for external integrations, widgets, and third-party apps.
 
 ### 2.4 Routing
 
@@ -364,7 +375,13 @@ A **Best Time to Observe** card in the sidebar displays the optimal crescent vie
 
 The Map page uses Leaflet with CartoDB dark tiles to render a flat 2D world map. The crescent visibility heatmap is rendered as a canvas overlay using bilinear interpolation between the grid points, producing a smooth gradient rather than the stepped rectangular grid of earlier versions.
 
-The page features a **time slider** with 15-minute granularity covering ±24 hours from the selected date, an **animate button** that plays through the time range automatically, and a **resolution control** (2°/4°/6°) that trades computation time for grid density. Clicking any point on the map shows the visibility data for that location in a popup.
+The page features a **time slider** with 15-minute granularity covering ±24 hours from the selected date, an **animate button** that plays through the time range automatically, and a **resolution control** (2°/4°/6°) that trades computation time for grid density.
+
+**Atmospheric Overrides:** A collapsible panel allows manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides. When "Auto-fetch" is toggled, real-time atmospheric data is pulled from Open-Meteo's weather API based on the selected location. These parameters are fed into the refraction correction formula `R = R_std × (P/1010) × (283/(273+T))`, adjusting both sun and moon altitude calculations.
+
+**DEM Integration:** On map click, the application automatically fetches the real terrain elevation from the Open-Meteo Elevation API via a `dem.getDem` tRPC endpoint. This elevation adjusts the theoretical horizon dip for accurate near-horizon calculations.
+
+**Enhanced Click Tooltips:** Clicking any point on the map now displays a rich popup showing the visibility zone, q-value, moon age (days), moon altitude, moon azimuth, elongation, crescent width, and the DEM-sourced local terrain elevation (meters).
 
 A **cloud cover overlay** fetches real-time data from Open-Meteo's forecast API via a dedicated tRPC endpoint (`weather.getCloudGrid`). The sparse grid (~162 points at 15°×20° resolution) is bilinearly interpolated into a smooth canvas texture and rendered as an independent Leaflet `imageOverlay` at 35% opacity. The overlay can be toggled on/off independently from the visibility layer.
 
@@ -410,6 +427,8 @@ In Pro Mode, the canvas adds atmosphere refraction annotations, ARCV/DAZ/W measu
 The Archive page provides a historical and future record of crescent visibility. Crucially, it features over **1,000 real-world sightings** systematically scraped from the famous Islamic Crescents' Observation Project (ICOP) spanning 1438 AH to 1465 AH.
 
 For each month, the page shows a grid of major cities paired with factual sighting assertions (Seen with naked eye, seen with optical aid, not seen).
+
+**Data Export:** The Archive page includes CSV and JSON export buttons for both ICOP observation data (City, Country, Result, Optical Aid) and computed visibility tables (City, Country, Zone, Q-Value). Researchers can download entire month datasets for offline analysis.
 
 The page supports filtering by year and month. Each city cell is colour-coded by visibility zone (A–F) derived from our local calculation algorithms. The visual side-by-side verification between *theory* and *actual crowdsourced report* allows the user to see the predictive strength of the mathematical models.
 
@@ -523,6 +542,8 @@ The tRPC router (`server/routers.ts`) exposes authentication and telemetry proce
 - `telemetry.submitObservation` - Submits a crescent sighting report (public, but with advanced validation).
 - `telemetry.getObservations` - Retrieves sighting reports with pagination (public, default 50 results)
 - `archive.getHistoricalData` - Fetches the scraped ICOP sightings dataset.
+- `dem.getDem` - Fetches the terrain elevation (meters above sea level) for a given coordinate via Open-Meteo Elevation API.
+- `weather.getCloudGrid` - Fetches global cloud cover data from Open-Meteo for overlay rendering.
 
 **Smart Validation:** A key architectural component is the server-side Smart Validation during `submitObservation`. When a physical sighting is claimed, the backend mathematically computes the geometric position of the sun and moon at that precise timestamp and location. If the mathematics dictate that the moon is definitively below the horizon (Zone F), the server fundamentally rejects the claim to preserve crowdsourced data integrity.
 
@@ -596,6 +617,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 31 | Accessibility & Native UX | Implemented robust Playwright E2E testing framework. Built Cividis-inspired High Contrast color-blind friendly rendering mode for WebGL/SVG artifacts. Injected Open-Meteo elevation tracking to Topographical Refraction horizon dip functions. Formulated strict Capacitor.js SafeArea padding for iOS Dynamic Islands. |
 | 32 | SEO & Scientific Precision | Integrated `vite-plugin-sitemap` for automated `sitemap.xml` generation. Injected JSON-LD structured data (`SoftwareApplication` schema) into `SEO.tsx`. Generated AI-crafted OpenGraph preview banner (`og-default.png`). Exported `findNewMoonNear()` and added `nextNewMoonExact` to `MoonPhaseInfo` for exact conjunction times displayed to the second on the Moon Phase Dashboard. Updated dark theme background to `#233342`. |
 | 33 | Monetization | Implemented dual-billing architecture for Pro tier: **Stripe Checkout** (Web) and **RevenueCat SDK** (iOS/Android Native) with Clerk `publicMetadata` webhook synchronization. Feature gating on Visibility (Globe), Moon (Sky Dome), Calendar (Astronomical/Tabular engines), Archive (historical years). Built `/support` page with dynamic UI hiding Sadaqah rules for native App Store compliance. |
+| 34 | API & Export | Implemented **Public REST API** (`/api/v1/visibility` and `/api/v1/moon-phases`) with Zod validation. Added **CSV/JSON export** to Archive page and Sighting Feed. Integrated **Atmospheric Overrides** (manual + auto-fetch from Open-Meteo) on Map and Globe pages. Added **DEM Integration** via Open-Meteo Elevation API for terrain-aware horizon calculations. Implemented **enhanced map click tooltips** with full lunar data. Added **EXIF metadata extraction** for sighting photo uploads. |
 
 ---
 
@@ -653,7 +675,7 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 |------|--------|-------------|
 | Push Notifications | ⏳ Planned | Pro-only crescent alerts via Capacitor + FCM/APNs |
 | Ethical Ads | ⏳ Planned | Muslim Ad Network below-fold for free tier |
+| Tiered Developer API | 🔮 Future | Rate-limited API keys with usage-based pricing |
 | Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
-| Developer API | 🔮 Future | REST API for visibility calculations (tiered pricing) |
 
-*Documentation updated February 25, 2026 (Round 33 - Monetization). For the latest feature status, see `todo.md`.*
+*Documentation updated February 25, 2026 (Round 34 - API & Export). For the latest feature status, see `todo.md`.*

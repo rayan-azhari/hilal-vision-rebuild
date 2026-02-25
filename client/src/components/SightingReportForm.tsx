@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { MapPin, Loader2, CheckCircle2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { MapPin, Loader2, CheckCircle2, Upload, Camera } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useUser, SignInButton } from "@clerk/clerk-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { AutoDetectButton } from "@/components/AutoDetectButton";
+import * as EXIF from "exif-js";
 
 export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const { isSignedIn } = useUser();
@@ -24,6 +25,60 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const [visualSuccess, setVisualSuccess] = useState<"naked_eye" | "optical_aid" | "not_seen" | "">("");
     const [notes, setNotes] = useState("");
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [photoName, setPhotoName] = useState("");
+
+    // EXIF Extraction
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setPhotoName(file.name);
+
+        EXIF.getData(file as any, function (this: any) {
+            const exifData = EXIF.getAllTags(this);
+
+            // Extract GPS
+            const latRaw = EXIF.getTag(this, "GPSLatitude");
+            const latRef = EXIF.getTag(this, "GPSLatitudeRef");
+            const lngRaw = EXIF.getTag(this, "GPSLongitude");
+            const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+
+            if (latRaw && lngRaw) {
+                const convertToDecimal = (gpsData: number[], ref: string) => {
+                    const degrees = gpsData[0];
+                    const minutes = gpsData[1];
+                    const seconds = gpsData[2];
+                    let decimal = degrees + minutes / 60 + seconds / 3600;
+                    if (ref === "S" || ref === "W") decimal = decimal * -1;
+                    return decimal;
+                };
+
+                const latDec = convertToDecimal(latRaw, latRef || "N");
+                const lngDec = convertToDecimal(lngRaw, lngRef || "E");
+
+                setLat(latDec);
+                setLng(lngDec);
+                setErrors(e => ({ ...e, lat: "", lng: "" }));
+            } else {
+                setErrors(e => ({ ...e, exif: "No GPS data found in image EXIF." }));
+            }
+
+            // Extract Timestamp (DateTimeOriginal: "YYYY:MM:DD HH:MM:SS")
+            const dateTime = EXIF.getTag(this, "DateTimeOriginal");
+            if (dateTime) {
+                try {
+                    // Convert "2024:03:10 18:45:00" to "2024-03-10T18:45:00"
+                    const parts = dateTime.split(" ");
+                    const dateParts = parts[0].split(":");
+                    const formatted = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}T${parts[1].slice(0, 5)}`;
+                    setObservationTime(formatted);
+                    setErrors(e => ({ ...e, observationTime: "" }));
+                } catch (err) {
+                    console.warn("Could not parse EXIF DateTime:", dateTime);
+                }
+            }
+        });
+    };
 
     const submitMutation = trpc.telemetry.submitObservation.useMutation({
         onSuccess: () => {
@@ -95,6 +150,32 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+                <Label>Upload Photo (Optional)</Label>
+                <div className="flex gap-2 items-center">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full flex items-center justify-center border-dashed"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <Camera className="w-4 h-4 mr-2" />
+                        {photoName ? photoName : "Upload Photo & Extract Location"}
+                    </Button>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                    />
+                </div>
+                {errors.exif && (
+                    <p className="text-xs text-yellow-500 mt-1">{errors.exif}</p>
+                )}
+                <p className="text-[10px] text-muted-foreground mt-1">If available, EXIF metadata will automatically fill the location and time.</p>
+            </div>
+
             <div className="space-y-2">
                 <Label>Location Coordinates</Label>
                 <div className="flex gap-2">

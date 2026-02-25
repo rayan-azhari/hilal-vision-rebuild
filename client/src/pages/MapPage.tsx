@@ -58,14 +58,22 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const overlayRef = useRef<any>(null);
 
   const { theme, highContrast } = useTheme();
+  const trpcUtils = trpc.useContext();
   const { data: observationsResult } = trpc.telemetry.getObservations.useQuery({});
   const observations = observationsResult?.data;
 
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedPoint, setSelectedPoint] = useState<{ lat: number, lng: number, zone: VisibilityZone } | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<{ lat: number, lng: number, data: any, elevation?: number } | null>(null);
   const [resolution, setResolution] = useState(4);
   const [showVisibility, setShowVisibility] = useState(true);
   const [showClouds, setShowClouds] = useState(false);
+
+  // Atmospheric Overrides
+  const [tempOverride, setTempOverride] = useState<number | "">("");
+  const [pressureOverride, setPressureOverride] = useState<number | "">("");
+  const [elevationOverride, setElevationOverride] = useState<number | "">("");
+  const [autoFetchWeather, setAutoFetchWeather] = useState(true);
+
   const [moonData, setMoonData] = useState(() =>
     computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0])
   );
@@ -86,6 +94,32 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   useEffect(() => {
     effectiveDateRef.current = effectiveDate;
   }, [effectiveDate]);
+
+  // Auto-fetch real-time atmospheric data from Open-Meteo
+  useEffect(() => {
+    if (!autoFetchWeather) return;
+
+    let isMounted = true;
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.lat}&longitude=${selectedCity.lng}&current=temperature_2m,surface_pressure&elevation=nan`);
+        if (!res.ok) throw new Error("Weather fetch failed");
+        const data = await res.json();
+
+        if (isMounted) {
+          if (data.current?.temperature_2m !== undefined) setTempOverride(data.current.temperature_2m);
+          if (data.current?.surface_pressure !== undefined) setPressureOverride(data.current.surface_pressure);
+          if (data.elevation !== undefined && !isNaN(data.elevation)) setElevationOverride(data.elevation);
+        }
+      } catch (err) {
+        console.error("Failed to fetch atmospheric overrides from Open-Meteo:", err);
+      }
+    };
+
+    fetchWeather();
+
+    return () => { isMounted = false; };
+  }, [selectedCity, autoFetchWeather]);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -137,15 +171,35 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       layerGroupRef.current = L.layerGroup().addTo(map);
       pinsGroupRef.current = L.layerGroup().addTo(map);
 
-      map.on('click', (e: any) => {
+      map.on('click', async (e: any) => {
         let lat = e.latlng.lat;
         let lng = e.latlng.lng;
         if (lat > 90) lat = 90;
         if (lat < -90) lat = -90;
         lng = ((lng + 180) % 360 + 360) % 360 - 180;
 
-        const d = computeSunMoonAtSunset(effectiveDateRef.current, { lat, lng });
-        setSelectedPoint({ lat, lng, zone: d.visibility });
+        let localElevation = typeof elevationOverride === "number" ? elevationOverride : undefined;
+
+        // If we don't have an override, fetch the real DEM data for this point
+        if (localElevation === undefined) {
+          try {
+            const demRes = await trpcUtils.dem.getDem.fetch({ lat, lng });
+            if (demRes && demRes.elevation !== undefined) {
+              localElevation = demRes.elevation;
+            }
+          } catch (err) {
+            console.error("Failed to fetch DEM elevation for point", err);
+          }
+        }
+
+        const d = computeSunMoonAtSunset(effectiveDateRef.current, {
+          lat,
+          lng,
+          elevation: localElevation,
+          temperature: typeof tempOverride === "number" ? tempOverride : undefined,
+          pressure: typeof pressureOverride === "number" ? pressureOverride : undefined
+        });
+        setSelectedPoint({ lat, lng, data: d, elevation: localElevation });
       });
 
       leafletRef.current = map;
@@ -188,13 +242,27 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const effectiveDateTs = effectiveDate.getTime();
 
   // Custom worker hook handles computation off main thread
-  const { qData, isComputing } = useVisibilityWorker(effectiveDateTs, resolution, true, showVisibility, visibilityCriterion, highContrast);
+  const { qData, isComputing } = useVisibilityWorker(
+    effectiveDateTs,
+    resolution,
+    true,
+    showVisibility,
+    visibilityCriterion,
+    highContrast,
+    typeof tempOverride === "number" ? tempOverride : undefined,
+    typeof pressureOverride === "number" ? pressureOverride : undefined
+  );
   const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
 
   // Compute local moon data
   useEffect(() => {
-    setMoonData(computeSunMoonAtSunset(new Date(effectiveDateTs), selectedCity));
-  }, [effectiveDateTs, selectedCity]);
+    setMoonData(computeSunMoonAtSunset(new Date(effectiveDateTs), {
+      ...selectedCity,
+      elevation: typeof elevationOverride === "number" ? elevationOverride : undefined,
+      temperature: typeof tempOverride === "number" ? tempOverride : undefined,
+      pressure: typeof pressureOverride === "number" ? pressureOverride : undefined
+    }));
+  }, [effectiveDateTs, selectedCity, elevationOverride, tempOverride, pressureOverride]);
 
   // Sync loading state
   useEffect(() => {
@@ -377,28 +445,60 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
           {/* Selected point popup */}
           {selectedPoint && (
             <div
-              className="absolute top-4 left-4 z-10 p-3 rounded-xl text-xs"
+              className="absolute top-4 left-4 z-10 p-4 rounded-xl text-xs space-y-2 shadow-xl animate-in fade-in zoom-in duration-200"
               style={{
                 background: "color-mix(in oklch, var(--space-mid) 95%, transparent)",
                 border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
                 backdropFilter: "blur(12px)",
+                minWidth: "220px"
               }}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-3 h-3 rounded-sm" style={{ background: highContrast ? HIGH_CONTRAST_ZONE_COLORS[selectedPoint.zone] : ZONE_COLORS[selectedPoint.zone] }} />
-                <span className="font-medium" style={{ color: "var(--foreground)" }}>
-                  Zone {selectedPoint.zone} - {VISIBILITY_LABELS[selectedPoint.zone].label}
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                <div className="w-3 h-3 rounded-sm" style={{ background: highContrast ? HIGH_CONTRAST_ZONE_COLORS[selectedPoint.data.visibility as VisibilityZone] : ZONE_COLORS[selectedPoint.data.visibility as VisibilityZone] }} />
+                <span className="font-bold text-sm" style={{ color: "var(--foreground)" }}>
+                  Zone {selectedPoint.data.visibility}
+                </span>
+                <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                  {selectedPoint.lat.toFixed(2)}°, {selectedPoint.lng.toFixed(2)}°
                 </span>
               </div>
-              <div style={{ color: "var(--muted-foreground)" }}>
-                {selectedPoint.lat.toFixed(1)}°, {selectedPoint.lng.toFixed(1)}°
+
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--muted-foreground)" }}>q-Value</span>
+                  <span className="font-mono font-medium" style={{ color: "var(--gold)" }}>{selectedPoint.data.qValue.toFixed(4)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--muted-foreground)" }}>Age</span>
+                  <span className="font-mono">{selectedPoint.data.moonAge.toFixed(1)} h</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--muted-foreground)" }}>Moon Altitude</span>
+                  <span className="font-mono">{selectedPoint.data.moonAlt.toFixed(2)}°</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--muted-foreground)" }}>Elongation</span>
+                  <span className="font-mono">{selectedPoint.data.elongation.toFixed(2)}°</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--muted-foreground)" }}>Crescent Width</span>
+                  <span className="font-mono">{selectedPoint.data.crescent.w.toFixed(2)}'</span>
+                </div>
+                {selectedPoint.elevation !== undefined && (
+                  <div className="flex justify-between border-t pt-1 mt-1" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                    <span style={{ color: "var(--muted-foreground)" }}>Local Elevation</span>
+                    <span className="font-mono">{Math.round(selectedPoint.elevation)} m</span>
+                  </div>
+                )}
               </div>
-              <div style={{ color: "var(--muted-foreground)" }}>
-                {VISIBILITY_LABELS[selectedPoint.zone].desc}
+
+              <div className="mt-3 pt-2 text-[10px] leading-tight border-t" style={{ color: "var(--muted-foreground)", borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                {VISIBILITY_LABELS[selectedPoint.data.visibility as VisibilityZone].desc}
               </div>
+
               <button
                 onClick={() => setSelectedPoint(null)}
-                className="mt-1 text-xs"
+                className="w-full mt-3 py-1.5 rounded text-[10px] font-medium transition-colors hover:bg-white/5"
                 style={{ color: "var(--gold-dim)" }}
               >
                 ✕ Close
@@ -530,6 +630,57 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                       }}
                     />
                   </button>
+                </div>
+              </div>
+
+              {/* Atmospheric Overrides */}
+              <div className="pt-3 border-t space-y-3 mt-3" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Atmospheric Overrides</span>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={autoFetchWeather}
+                      onChange={(e) => setAutoFetchWeather(e.target.checked)}
+                      className="rounded appearance-none w-3 h-3 flex items-center justify-center bg-transparent border cursor-pointer"
+                      style={{
+                        borderColor: "var(--gold-dim)",
+                        background: autoFetchWeather ? "var(--gold)" : "transparent"
+                      }}
+                    />
+                    <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>Auto-fetch</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>Temp (°C)</label>
+                    <input
+                      type="number"
+                      value={tempOverride}
+                      onChange={(e) => {
+                        setTempOverride(e.target.value === "" ? "" : Number(e.target.value));
+                        setAutoFetchWeather(false);
+                      }}
+                      className="w-full px-2 py-1.5 rounded text-xs bg-transparent border"
+                      style={{ borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
+                      placeholder="e.g. 15"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>Pressure (hPa)</label>
+                    <input
+                      type="number"
+                      value={pressureOverride}
+                      onChange={(e) => {
+                        setPressureOverride(e.target.value === "" ? "" : Number(e.target.value));
+                        setAutoFetchWeather(false);
+                      }}
+                      className="w-full px-2 py-1.5 rounded text-xs bg-transparent border"
+                      style={{ borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
+                      placeholder="e.g. 1013"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

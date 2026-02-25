@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { SEO } from "@/components/SEO";
-import { Archive, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { Archive, ChevronLeft, ChevronRight, Info, Download } from "lucide-react";
 import { useProTier } from "@/contexts/ProTierContext";
 import ProGate from "@/components/ProGate";
 import { PageHeader } from "@/components/PageHeader";
@@ -153,6 +153,57 @@ export default function ArchivePage() {
       setMonthDetail(summary);
       setIsLoadingDetail(false);
     }, 50);
+  };
+
+  const exportIcopToCSV = () => {
+    if (!icopData || icopData.length === 0) return;
+    const headers = ["City", "Country", "Result", "Optical Aid"];
+    const rows = icopData.map((d: any) => [d.city, d.country, d.result, d.opticalAid]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.map((val: string) => `"${val}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `icop_observations_${selectedYear}_${selectedMonth}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportComputedToCSV = () => {
+    if (!monthDetail || monthDetail.cityResults.length === 0) return;
+    const headers = ["City", "Country", "Zone", "Q-Value"];
+    const rows = monthDetail.cityResults.map(d => [d.city, d.country, d.zone, d.q.toFixed(4)]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.map((val: string) => `"${val}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `computed_visibility_${selectedYear}_${selectedMonth}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToJSON = (data: any, prefix: string) => {
+    if (!data) return;
+    const jsonContent = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${prefix}_${selectedYear}_${selectedMonth}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -366,12 +417,22 @@ export default function ArchivePage() {
                     style={{ animationDelay: "100ms" }}
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <div className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
-                        Actual Observations (ICOP)
+                      <div className="flex flex-col">
+                        <div className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
+                          Actual Observations (ICOP)
+                        </div>
+                        <span className="text-xs" style={{ color: "var(--gold-dim)" }}>
+                          {icopData.length} records
+                        </span>
                       </div>
-                      <span className="text-xs" style={{ color: "var(--gold-dim)" }}>
-                        {icopData.length} records
-                      </span>
+                      <div className="flex gap-2">
+                        <button onClick={exportIcopToCSV} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to CSV">
+                          <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>CSV</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                        </button>
+                        <button onClick={() => exportToJSON(icopData, 'icop_observations')} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to JSON">
+                          <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>JSON</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
@@ -411,8 +472,18 @@ export default function ArchivePage() {
                   className="breezy-card p-5 animate-breezy-enter"
                   style={{ animationDelay: "120ms" }}
                 >
-                  <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
-                    Computed City Visibility (Theoretical)
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
+                      Computed City Visibility (Theoretical)
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={exportComputedToCSV} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to CSV">
+                        <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>CSV</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                      </button>
+                      <button onClick={() => exportToJSON(monthDetail.cityResults, 'computed_visibility')} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to JSON">
+                        <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>JSON</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                     {monthDetail.cityResults.map(({ city, country, zone, q }) => (

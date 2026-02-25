@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { Eye, MapPin, Clock, Bell } from "lucide-react";
+import { Eye, MapPin, Clock, Bell, Download } from "lucide-react";
 import { useState } from "react";
 import { requestNotificationPermission } from "@/lib/firebase";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ const SIGHTING_LABELS: Record<string, string> = {
 
 export function SightingFeed() {
     const [isSubscribing, setIsSubscribing] = useState(false);
+    const [showExportMenu, setShowExportMenu] = useState(false);
     const subscribeMutation = trpc.notifications.subscribe.useMutation({
         onSuccess: () => {
             toast.success("Successfully subscribed to notifications!");
@@ -50,6 +51,42 @@ export function SightingFeed() {
     );
 
     const sightings = data?.data;
+
+    const exportToCSV = () => {
+        if (!sightings || sightings.length === 0) return;
+        const headers = ["ID", "Latitude", "Longitude", "City", "Observation Time", "Result", "Notes", "Temperature", "Pressure", "Cloud Fraction", "PM25"];
+        const rows = sightings.map((s: any) => [
+            s.id, s.lat, s.lng, s.city || "", s.observationTime, s.visualSuccess, s.notes || "", s.temperature || "", s.pressure || "", s.cloudFraction || "", s.pm25 || ""
+        ]);
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(e => e.map((val: any) => `"${val}"`).join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `hilal_sightings_feed.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setShowExportMenu(false);
+    };
+
+    const exportToJSON = () => {
+        if (!sightings || sightings.length === 0) return;
+        const jsonContent = JSON.stringify(sightings, null, 2);
+        const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `hilal_sightings_feed.json`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setShowExportMenu(false);
+    };
 
     if (isLoading) {
         return (
@@ -119,10 +156,29 @@ export function SightingFeed() {
                 <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                     Live Sighting Feed
                 </span>
+
+                <div className="relative ml-2">
+                    <button
+                        onClick={() => setShowExportMenu(!showExportMenu)}
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                        title="Download Data"
+                    >
+                        <Download className="w-4 h-4 text-white" />
+                    </button>
+                    {showExportMenu && (
+                        <div className="absolute top-full left-0 mt-1 w-32 rounded-lg shadow-xl z-50 overflow-hidden border"
+                            style={{ background: "var(--space-mid)", borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
+                        >
+                            <button onClick={exportToCSV} className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: "var(--foreground)" }}>Export CSV</button>
+                            <button onClick={exportToJSON} className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: "var(--foreground)" }}>Export JSON</button>
+                        </div>
+                    )}
+                </div>
+
                 <button
                     onClick={handleSubscribe}
                     disabled={isSubscribing}
-                    className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                     title="Enable Notifications"
                 >
                     <Bell className="w-4 h-4 text-white" />
