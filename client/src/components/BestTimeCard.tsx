@@ -3,8 +3,9 @@
  * Uses the computeBestObservationTime function from the astronomy engine.
  */
 import { useMemo } from "react";
-import { Clock } from "lucide-react";
+import { Clock, Cloud, Thermometer } from "lucide-react";
 import { computeBestObservationTime, type Location } from "@/lib/astronomy";
+import { trpc } from "@/lib/trpc";
 
 interface BestTimeCardProps {
     date: Date;
@@ -16,6 +17,11 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
     const result = useMemo(
         () => computeBestObservationTime(date, location),
         [date.getTime(), location.lat, location.lng]
+    );
+
+    const { data: weather } = trpc.weather.getLocalWeather.useQuery(
+        { lat: location.lat, lng: location.lng },
+        { enabled: result.viable && !!location.lat && !!location.lng, staleTime: 5 * 60 * 1000 }
     );
 
     const formatT = (d: Date) =>
@@ -102,6 +108,45 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                             <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
                                 {Math.round(location.elevation)}m
                             </span>
+                        </div>
+                    )}
+
+                    {/* Weather Conditions Panel */}
+                    {weather && (
+                        <div className="mt-4 pt-3 border-t border-white/10">
+                            <div className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted-foreground)" }}>
+                                Observation Conditions
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
+                                    <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
+                                        <Cloud className="w-3 h-3 text-white/70" /> Cloud Cover
+                                    </span>
+                                    <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
+                                        {Math.round(weather.cloudCover)}%
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
+                                    <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
+                                        <Thermometer className="w-3 h-3 text-white/70" /> Temperature
+                                    </span>
+                                    <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
+                                        {Math.round(weather.temperature)}°C
+                                    </span>
+                                </div>
+
+                                <div
+                                    className="text-xs mt-2 p-2 rounded-md text-center font-medium"
+                                    style={{
+                                        color: weather.conditionColor,
+                                        background: `color-mix(in oklch, ${weather.conditionColor} 10%, transparent)`
+                                    }}
+                                >
+                                    {weather.conditionText}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

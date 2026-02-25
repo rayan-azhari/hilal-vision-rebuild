@@ -13,8 +13,9 @@ import { trpc } from "@/lib/trpc";
 function renderCloudTexture(
     data: Array<{ lat: number; lng: number; cloud_cover: number }>
 ): string {
-    const W = 512;
-    const H = 256;
+    // Halved dimensions for extreme performance on mobile (256x128)
+    const W = 256;
+    const H = 128;
 
     const canvas = document.createElement("canvas");
     canvas.width = W;
@@ -59,9 +60,12 @@ function renderCloudTexture(
             const ty = (lat - latLo) / latStep;
             const top = tl + (tr - tl) * tx;
             const bottom = bl + (br - bl) * tx;
-            const value = bottom + (top - bottom) * ty;
+            let value = bottom + (top - bottom) * ty;
 
-            // Cloud cover 0-100 → alpha 0-200 (white pixels)
+            // Optional: soften the edges mathematically instead of CSS blur
+            if (value < 15) value = 0;
+
+            // Cloud cover 0-100 -> alpha 0-200
             const alpha = Math.round((value / 100) * 180);
             const idx = (py * W + px) * 4;
             pixels[idx] = 255;     // R
@@ -73,17 +77,11 @@ function renderCloudTexture(
 
     ctx.putImageData(imageData, 0, 0);
 
-    // Upscale with blur for smooth appearance
-    const outCanvas = document.createElement("canvas");
-    outCanvas.width = 1024;
-    outCanvas.height = 512;
-    const outCtx = outCanvas.getContext("2d")!;
-    outCtx.filter = "blur(8px)";
-    outCtx.drawImage(canvas, -outCanvas.width, 0, outCanvas.width, outCanvas.height);
-    outCtx.drawImage(canvas, 0, 0, outCanvas.width, outCanvas.height);
-    outCtx.drawImage(canvas, outCanvas.width, 0, outCanvas.width, outCanvas.height);
+    // We no longer use outCtx.filter = "blur(8px)" or draw multiple times 
+    // wrapping around, as it was crashing Mobile WebKit memory.
+    // Three.js and Leaflet automatically use LinearFilter which handles the smoothing.
 
-    return outCanvas.toDataURL();
+    return canvas.toDataURL();
 }
 
 export function useCloudOverlay(dateTs: number, enabled: boolean = true) {

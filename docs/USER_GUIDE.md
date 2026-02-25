@@ -198,10 +198,12 @@ Hilal Vision exposes a programmatic REST API for external integrations and devel
 
 | Endpoint | Method | Parameters | Description |
 |----------|--------|------------|-------------|
-| `/api/v1/visibility` | GET | `lat`, `lng`, `date` (ISO) | Returns the crescent visibility zone (A–F), q-value, and key lunar parameters for the specified location and date. |
-| `/api/v1/moon-phases` | GET | `lat`, `lng`, `date` (ISO) | Returns moon phase data including illumination, age, altitude, azimuth, and rise/set times. |
+| `/api/v1/visibility` | GET | `lat`, `lng`, `date` (ISO) | Returns the crescent visibility zone (A-F), q-value, and key lunar parameters for the specified location and date. |
+| `/api/v1/moon-phases` | GET | `date` (ISO) | Returns moon phase data including illumination, age, altitude, azimuth, and exact next New Moon / Full Moon conjunction times. |
 
-All parameters are validated with Zod schemas. Invalid or out-of-range inputs return structured error responses.
+All parameters are validated with Zod schemas. Invalid or out-of-range inputs return structured HTTP 400 error responses.
+
+For full schemas, `curl` integration examples, and detailed JSON response breakdowns, please see the [**Public API Reference Guide**](PUBLIC_API_REFERENCE.md).
 
 ## 14. Atmospheric Overrides & DEM
 

@@ -116,4 +116,54 @@ export const weatherRouter = router({
 
       return { data: allResults };
     }),
+
+  getLocalWeather: publicProcedure
+    .input(
+      z.object({
+        lat: z.number(),
+        lng: z.number(),
+      })
+    )
+    .query(async ({ input }) => {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,cloud_cover&timezone=auto`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`Open-Meteo fetch failed: ${res.status}`);
+        }
+        const json = (await res.json()) as any;
+
+        const cloudCover = json.current?.cloud_cover ?? 0;
+        const temperature = json.current?.temperature_2m ?? 0;
+
+        let conditionText = "Clear Skies";
+        let conditionColor = "#4ade80"; // green
+
+        if (cloudCover > 80) {
+          conditionText = "Poor Visibility: Heavy cloud cover may obscure crescent";
+          conditionColor = "#f87171"; // red
+        } else if (cloudCover > 40) {
+          conditionText = "Fair Visibility: Partly cloudy skies";
+          conditionColor = "#facc15"; // yellow
+        } else if (cloudCover > 10) {
+          conditionText = "Good Visibility: Mostly clear";
+          conditionColor = "#a3e635"; // light green
+        }
+
+        return {
+          cloudCover,
+          temperature,
+          conditionText,
+          conditionColor
+        };
+      } catch (err) {
+        console.error("Local weather fetch error:", err);
+        return {
+          cloudCover: 0,
+          temperature: 0,
+          conditionText: "Weather Unvailable",
+          conditionColor: "#6b7280"
+        };
+      }
+    }),
 });

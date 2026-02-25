@@ -88,6 +88,11 @@
 - [x] Cleanup: removed Manus artifacts, dead routes, leaky dependencies
 - [x] Vercel deployment: `vercel.json`, serverless tRPC, `vercel-build` script
 - [x] Bug fix: infinite render loop on Map/Globe (useMemo + stable deps)
+  - [x] Push all changes to git repository branch Main.
+- [x] Phase 8: Expose Public REST API on Vercel
+  - [x] Create serverless function entrypoint for Express app (`api/v1/[...path].ts`)
+  - [x] Add `api/v1/*` routes to `vercel.json` rewrites mapped to the Express instance
+  - [x] Verify `publicApi.ts` endpoints map correctly
 - [x] Bug fix: Leaflet tiles not loading on tab switch (ResizeObserver + invalidateSize)
 
 ## Improvements (Round 4)

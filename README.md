@@ -22,7 +22,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **🌐 SEO**: Per-page dynamic meta tags, Open Graph & Twitter cards, JSON-LD structured data, sitemap.xml, robots.txt.
 - **🌍 i18n**: English, Arabic (العربية), and Urdu (اردو) with a navbar language switcher and full RTL support.
 - **📤 Social Sharing**: Native share API (mobile) with clipboard fallback, plus a live sighting feed on the Home page with CSV/JSON data export.
-- **🔌 Public REST API**: Programmatic access to visibility and moon phase data via `/api/v1/visibility` and `/api/v1/moon-phases` endpoints with Zod-validated query parameters.
+- **🔌 Public REST API**: Programmatic access to visibility and moon phase data via `/api/v1/visibility` and `/api/v1/moon-phases` endpoints with Zod-validated query parameters. See the [`docs/PUBLIC_API_REFERENCE.md`](docs/PUBLIC_API_REFERENCE.md) documentation.
 - **📸 EXIF Metadata Extraction**: Sighting report photo uploads are automatically parsed for GPS coordinates, camera model, and timestamp using the `exif-js` library.
 - **ℹ️ About Page (`/about`)**: Mission statement, platform overview, technology stack, competitor comparison table (vs Moonsighting.com, IslamicFinder, LuneSighting, HilalMap), and data attributions.
 - **🔬 Methodology Page (`/methodology`)**: Full technical reference - Yallop q-value formula derivation, Odeh V-value, triple-engine Hijri calendar algorithms, Best-Time-to-Observe scoring function, ICOP archive sourcing, atmospheric refraction physics, and peer-reviewed references.
@@ -162,6 +162,10 @@ npm run check    # TypeScript type checking
 - `/support` - Sadaqah Jariyah mission, Feature Access Matrix (Free vs Pro), pricing tiers, one-time donation
 - `/privacy` - Privacy Policy (data collection, sub-processors, GDPR rights)
 - `/terms` - Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer)
+
+### Developer Documentation
+
+- `docs/PUBLIC_API_REFERENCE.md` - Standalone documentation providing schema details and `curl` examples for interacting with the Hilal Vision backend.
 
 ## Monetization Roadmap
 

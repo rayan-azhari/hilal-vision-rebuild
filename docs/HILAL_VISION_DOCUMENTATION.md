@@ -557,12 +557,17 @@ Authentication utilizes **Clerk Auth**, integrating seamlessly with Express on t
 
 ### 8.4 Vercel Deployment
 
-The application is configured for Vercel deployment:
-
-- **Frontend**: Vite builds static assets to `dist/public/`, served from Vercel's CDN.
-- **Backend**: The tRPC API runs as a Vercel Node.js serverless function at `api/trpc/[trpc].ts`, wrapping the existing tRPC router with the `@trpc/server/adapters/fetch` adapter.
+- `npm run dev` starts the frontend and the local development backend (`server/_core/index.ts` binding to port 5000).
+- `npm run build` is used by Vercel inside `vercel.json`.
+- The tRPC AppRouter is served in production via a catch-all serverless function: `/api/trpc/[trpc].ts`.
+- The Public API (Express) is served via a separate serverless function wrapper: `/api/v1/[...path].ts`.
 - **Configuration**: `vercel.json` defines build commands, output directory, and routing rules (API rewrites + SPA fallback).
 - **Environment Variables**: `DATABASE_URL` (optional, for telemetry persistence).
+
+### 2.9 Weather & Elevation Integrations
+- `trpc.weather.getCloudGrid`: Fetches Open-Meteo sparsely separated cloud data arrays for canvas interpolation (globe/map overlays).
+- `trpc.weather.getLocalWeather`: Fetches exact temperature and cloud cover for a specific lat/lng point, displayed in the "Observation Conditions" block within the BestTimeCard.
+- `trpc.dem.getDem`: Fetches topography elevation data from Open-Meteo's DEM API. Used to adjust horizon dip and compute true atmospheric altitude.
 
 ---
 
