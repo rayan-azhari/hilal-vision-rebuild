@@ -53,7 +53,7 @@ A dedicated dashboard for the lunar cycle.
 - **Sun & Moon Altitude Tracker** (top of page) - Interactive linear chart plotting Sun and Moon altitudes throughout the day.
 - **The Sky Dome** - Integrated custom SVG polar stereographic projection mapping azimuth and altitude. Both the Altitude Tracker and Sky Dome share a deeply synchronized time slider—changing one instantly updates the other for perfect alignment.
 - **Moon Illustration** - Accurate SVG rendering of the current phase with craters and terminator.
-- **Stats Grid** - Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown.
+- **Stats Grid** - Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown with **exact conjunction time** displayed to the second.
 - **Ephemeris** - Sunrise, Sunset, Moonrise, and Moonset times.
 - **30-Day Phase Calendar** - Visual strip of tiny moon phase icons for the surrounding month.
 - **Scientific Methodology** (bottom) - Pro-level section with:

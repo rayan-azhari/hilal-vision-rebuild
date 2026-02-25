@@ -62,6 +62,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 21. **Topographical Refraction**: The application automatically fetches the observer's physical elevation (meters above sea level) via the Open-Meteo API to adjust the theoretical local horizon dip, providing precise observatory-grade calculations.
 22. **E2E Playwright Testing**: Critical user journeys, DOM sync, and rendering are safeguarded from regressions using a comprehensive Playwright automation suite.
 23. **App Store Readiness**: Mobile web views are strictly styled using `env(safe-area-inset-top)` to seamlessly accommodate iOS Dynamic Islands and Android gesture navs via Capacitor.
+24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass SunCalc phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
 
 ## Getting Started
 
