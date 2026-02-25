@@ -9,15 +9,33 @@ function generateYallopData() {
         const fW = 11.8371 - 6.3226 * W + 0.7319 * W * W - 0.1018 * W * W * W;
         data.push({
             w: W.toFixed(1),
-            "Threshold ARCV (q=0)": parseFloat(fW.toFixed(2)),
-            "Zone A (q=0.216)": parseFloat((fW + 2.16).toFixed(2)),
-            "Zone C (q=-0.16)": parseFloat((fW - 1.6).toFixed(2)),
+            "Threshold (q=0)": parseFloat(fW.toFixed(2)),
+            "Zone A (q≥0.216)": parseFloat((fW + 2.16).toFixed(2)),
+            "Zone C (q≥−0.16)": parseFloat((fW - 1.6).toFixed(2)),
+        });
+    }
+    return data;
+}
+
+// Generate points for the Odeh (2004) V-value curve
+function generateOdehData() {
+    const data = [];
+    for (let W = 0; W <= 2.5; W += 0.1) {
+        // Odeh uses same polynomial shape but different intercept: 7.1651
+        const fW = 7.1651 - 6.3226 * W + 0.7319 * W * W - 0.1018 * W * W * W;
+        data.push({
+            w: W.toFixed(1),
+            "Easily Visible (V≥5.65)": parseFloat((fW + 5.65).toFixed(2)),
+            "Visible (V≥2.0)": parseFloat((fW + 2.0).toFixed(2)),
+            "Threshold (V=0)": parseFloat(fW.toFixed(2)),
+            "Optical Aid (V≥−0.96)": parseFloat((fW - 0.96).toFixed(2)),
         });
     }
     return data;
 }
 
 const yallopData = generateYallopData();
+const odehData = generateOdehData();
 
 export function PhysicsExplanations() {
     return (
@@ -51,20 +69,59 @@ export function PhysicsExplanations() {
                 </BreezyFullCard>
 
                 <BreezyFullCard title="Yallop Threshold Curve (ARCV vs Width)" icon={<Calculator />}>
-                    <div className="p-4 h-64 w-full">
+                    <div className="p-4 h-80 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={yallopData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                            <LineChart data={yallopData} margin={{ top: 5, right: 20, bottom: 30, left: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--space-light)" />
-                                <XAxis dataKey="w" stroke="var(--muted-foreground)" fontSize={12} label={{ value: 'Crescent Width (W)', position: 'insideBottom', fill: 'var(--muted-foreground)', offset: -5 }} />
+                                <XAxis dataKey="w" stroke="var(--muted-foreground)" fontSize={12} label={{ value: 'Crescent Width (W)', position: 'insideBottom', fill: 'var(--muted-foreground)', offset: -15 }} />
                                 <YAxis stroke="var(--muted-foreground)" fontSize={12} label={{ value: 'Arc of Vision (ARCV)', angle: -90, position: 'insideLeft', fill: 'var(--muted-foreground)' }} />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: 'var(--space-mid)', borderColor: 'var(--gold-dim)', borderRadius: '8px' }}
                                     itemStyle={{ fontSize: '12px' }}
                                 />
-                                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                                <Line type="monotone" dataKey="Zone A (q=0.216)" stroke="#4ade80" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="Threshold ARCV (q=0)" stroke="var(--gold)" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                                <Line type="monotone" dataKey="Zone C (q=-0.16)" stroke="#fb923c" strokeWidth={2} dot={false} />
+                                <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: '11px', paddingBottom: '8px' }} />
+                                <Line type="monotone" dataKey="Zone A (q≥0.216)" stroke="#4ade80" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="Threshold (q=0)" stroke="var(--gold)" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                                <Line type="monotone" dataKey="Zone C (q≥−0.16)" stroke="#fb923c" strokeWidth={2} dot={false} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </BreezyFullCard>
+
+                <BreezyFullCard title="The Odeh (2004) Criterion" icon={<BookOpen />}>
+                    <div className="p-4 space-y-4 text-sm" style={{ color: "var(--muted-foreground)" }}>
+                        <p>
+                            The <strong>Odeh (2004) criterion</strong> was developed by Mohammad Sh. Odeh of the Islamic Crescents' Observation Project (ICOP),
+                            refining Yallop's model with 737 observations including modern CCD and telescopic sightings.
+                        </p>
+                        <div className="p-4 rounded-xl font-mono text-xs" style={{ background: "var(--space-dark)", color: "var(--gold)" }}>
+                            V = ARCV - (7.1651 - 6.3226W + 0.7319W² - 0.1018W³)
+                        </div>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li><strong>V ≥ 5.65</strong>: Crescent easily visible to the naked eye.</li>
+                            <li><strong>V ≥ 2.00</strong>: Visible under perfect atmospheric conditions.</li>
+                            <li><strong>V ≥ −0.96</strong>: May need optical aid to locate the crescent.</li>
+                            <li><strong>V &lt; −0.96</strong>: Not visible, even with optical aid.</li>
+                        </ul>
+                    </div>
+                </BreezyFullCard>
+
+                <BreezyFullCard title="Odeh Threshold Curve (ARCV vs Width)" icon={<Calculator />}>
+                    <div className="p-4 h-80 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={odehData} margin={{ top: 5, right: 20, bottom: 30, left: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--space-light)" />
+                                <XAxis dataKey="w" stroke="var(--muted-foreground)" fontSize={12} label={{ value: 'Crescent Width (W)', position: 'insideBottom', fill: 'var(--muted-foreground)', offset: -15 }} />
+                                <YAxis stroke="var(--muted-foreground)" fontSize={12} label={{ value: 'Arc of Vision (ARCV)', angle: -90, position: 'insideLeft', fill: 'var(--muted-foreground)' }} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: 'var(--space-mid)', borderColor: 'var(--gold-dim)', borderRadius: '8px' }}
+                                    itemStyle={{ fontSize: '12px' }}
+                                />
+                                <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: '11px', paddingBottom: '8px' }} />
+                                <Line type="monotone" dataKey="Easily Visible (V≥5.65)" stroke="#4ade80" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="Visible (V≥2.0)" stroke="#facc15" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey="Threshold (V=0)" stroke="var(--gold)" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                                <Line type="monotone" dataKey="Optical Aid (V≥−0.96)" stroke="#fb923c" strokeWidth={2} dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
