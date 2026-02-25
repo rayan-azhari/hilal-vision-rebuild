@@ -64,6 +64,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.2.1(@types/react@19.2.1))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@revenuecat/purchases-capacitor':
+        specifier: ^12.2.0
+        version: 12.2.0(@capacitor/core@8.1.0)
       '@sentry/react':
         specifier: ^10.39.0
         version: 10.39.0(react@19.2.1)
@@ -1710,6 +1713,14 @@ packages:
   '@resvg/resvg-wasm@2.4.0':
     resolution: {integrity: sha512-C7c51Nn4yTxXFKvgh2txJFNweaVcfUPQxwEUFw4aWsCmfiBDJsTSwviIF8EcwjQ6k8bPyMWCl1vw4BdxE569Cg==}
     engines: {node: '>= 10'}
+
+  '@revenuecat/purchases-capacitor@12.2.0':
+    resolution: {integrity: sha512-6lOfs1sXTM3M1sbptKAUeHDIkwk6XBGl5IFyfnCtkA/+xecxOM+bq3pwBrO2mAzBCG9lysQi66CFG5tzqQi6lA==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@revenuecat/purchases-typescript-internal-esm@17.41.1':
+    resolution: {integrity: sha512-GduNxWNKRL6cpQcR1Xv7KJp0JJMusjCcp+lSsAiowSkTvLTZvYRTepyIt8gqKBHWh71KDykzOkFT0Hejgx+XXQ==}
 
   '@rolldown/pluginutils@1.0.0-beta.38':
     resolution: {integrity: sha512-N/ICGKleNhA5nc9XXQG/kkKHJ7S55u0x0XUJbbkmdCnFuoRkM1Il12q9q0eX19+M7KKUEPw/daUPIRnxhcxAIw==}
@@ -7114,6 +7125,13 @@ snapshots:
       react-dom: 19.2.1(react@19.2.1)
 
   '@resvg/resvg-wasm@2.4.0': {}
+
+  '@revenuecat/purchases-capacitor@12.2.0(@capacitor/core@8.1.0)':
+    dependencies:
+      '@capacitor/core': 8.1.0
+      '@revenuecat/purchases-typescript-internal-esm': 17.41.1
+
+  '@revenuecat/purchases-typescript-internal-esm@17.41.1': {}
 
   '@rolldown/pluginutils@1.0.0-beta.38': {}
 
