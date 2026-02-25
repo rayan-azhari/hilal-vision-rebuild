@@ -38,17 +38,26 @@ function renderCloudTexture(
             const lng = -180 + (px / W) * 360;
 
             // Find surrounding grid points for bilinear interpolation
-            const latLo = Math.floor(lat / latStep) * latStep;
-            const latHi = latLo + latStep;
-            const lngLo = Math.floor(lng / lngStep) * lngStep;
-            const lngHi = lngLo + lngStep;
+            // Fix -0 JS bug which causes Map misses
+            let latLo = Math.floor(lat / latStep) * latStep;
+            if (latLo === 0) latLo = 0;
+            let latHi = latLo + latStep;
+            if (latHi === 0) latHi = 0;
+
+            let lngLo = Math.floor(lng / lngStep) * lngStep;
+            if (lngLo === 0) lngLo = 0;
+            let lngHi = lngLo + lngStep;
+            if (lngHi === 0) lngHi = 0;
 
             // Clamp to grid bounds
-            const clampLat = (l: number) => Math.max(-60, Math.min(60, l));
+            const clampLat = (l: number) => {
+                const c = Math.max(-60, Math.min(60, l));
+                return c === 0 ? 0 : c;
+            };
             const clampLng = (l: number) => {
-                if (l >= 180) return l - 360;
-                if (l < -180) return l + 360;
-                return l;
+                if (l >= 180) l -= 360;
+                if (l < -180) l += 360;
+                return l === 0 ? 0 : l;
             };
 
             const tl = gridMap.get(`${clampLat(latHi)},${clampLng(lngLo)}`) ?? 0;
@@ -60,21 +69,35 @@ function renderCloudTexture(
             const ty = (lat - latLo) / latStep;
             const top = tl + (tr - tl) * tx;
             const bottom = bl + (br - bl) * tx;
-            let value = bottom + (top - bottom) * ty;
+            const rawValue = bottom + (top - bottom) * ty;
 
-            // Optional: soften the edges slightly but keep strong core
-            if (value < 5) value = 0;
+            let norm = rawValue / 100;
+            if (norm < 0) norm = 0;
+            if (norm > 1) norm = 1;
 
-            // Dramatic contrast mapping
-            // Values above 40% cloud cover become almost solid opaque white
-            // Values below 40% taper off quickly
-            let alpha = 0;
-            if (value > 0) {
-                alpha = Math.min(255, Math.round(Math.pow(value / 100, 0.7) * 255 * 1.8));
+            // Generate organic fractal noise using screen coordinates
+            // This breaks up the blocky bilinear interpolation diamonds
+            const scale1 = 0.15;
+            const scale2 = 0.3;
+            // noise ranges roughly -1.0 to 1.0
+            const noise = Math.sin(px * scale1) * Math.cos(py * scale1) +
+                Math.sin((px + py) * scale2) * 0.5;
+
+            // Perturb the normalized cloud value slightly
+            if (norm > 0) {
+                norm += noise * 0.15 * norm;
             }
 
+            // Smoothstep curve for contrast
+            norm = norm * norm * (3 - 2 * norm);
+
+            // Cloud edge threshold
+            if (norm < 0.1) norm = 0;
+
+            const alpha = Math.min(240, Math.floor(norm * 255));
+
             const idx = (py * W + px) * 4;
-            // High contrast pure white for maximum visibility against the dark map/globe
+            // Pure white clouds across both dark and light themes
             pixels[idx] = 255;     // R
             pixels[idx + 1] = 255; // G
             pixels[idx + 2] = 255; // B

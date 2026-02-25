@@ -165,7 +165,7 @@
     overflow-x: hidden;
   }
 
-  .dark .leaflet-tile-pane {
+  .dark .leaflet-tile-pane .leaflet-layer {
     mix-blend-mode: screen;
     opacity: 0.85;
   }
