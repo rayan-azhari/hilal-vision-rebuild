@@ -62,12 +62,19 @@ function renderCloudTexture(
             const bottom = bl + (br - bl) * tx;
             let value = bottom + (top - bottom) * ty;
 
-            // Optional: soften the edges mathematically instead of CSS blur
-            if (value < 15) value = 0;
+            // Optional: soften the edges slightly but keep strong core
+            if (value < 5) value = 0;
 
-            // Cloud cover 0-100 -> alpha 0-200
-            const alpha = Math.round((value / 100) * 180);
+            // Dramatic contrast mapping
+            // Values above 40% cloud cover become almost solid opaque white
+            // Values below 40% taper off quickly
+            let alpha = 0;
+            if (value > 0) {
+                alpha = Math.min(255, Math.round(Math.pow(value / 100, 0.7) * 255 * 1.8));
+            }
+
             const idx = (py * W + px) * 4;
+            // High contrast pure white for maximum visibility against the dark map/globe
             pixels[idx] = 255;     // R
             pixels[idx + 1] = 255; // G
             pixels[idx + 2] = 255; // B

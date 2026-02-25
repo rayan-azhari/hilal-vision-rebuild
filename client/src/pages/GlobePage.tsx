@@ -259,7 +259,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
         new THREE.MeshPhongMaterial({
           map: texture,
           transparent: true,
-          opacity: 0.8,
+          opacity: 0.9,
           side: THREE.DoubleSide,
         })
       );

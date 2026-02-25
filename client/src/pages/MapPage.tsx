@@ -149,8 +149,13 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       const map = L.map(mapRef.current!, {
         center: [20, 30],
         zoom: 2,
-        minZoom: 1,
+        minZoom: 2,
         maxZoom: 6,
+        maxBounds: [
+          [-90, -180],
+          [90, 180]
+        ],
+        maxBoundsViscosity: 1.0,
         zoomControl: true,
         attributionControl: false,
       });
@@ -364,8 +369,9 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
         cloudOverlayRef.current.setUrl(cloudsUrl);
       } else {
         cloudOverlayRef.current = L.imageOverlay(cloudsUrl, bounds, {
-          opacity: 0.35,
+          opacity: 0.9,
           zIndex: 15,
+          className: "cloud-overlay-layer",
           interactive: false,
         }).addTo(leafletRef.current);
       }
