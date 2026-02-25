@@ -173,9 +173,9 @@
 
 ### Phase 3 — Reach & Engagement (2-3 weeks)
 - [ ] Push notifications (Capacitor + FCM/APNs)
-- [ ] SEO structured data (JSON-LD), sitemap, OG social cards
+- [x] SEO structured data (JSON-LD), sitemap, OG social cards
 - [x] Arabic + Urdu i18n (minimum viable)
-- [ ] Social sharing with OG image generation
+- [x] Social sharing with OG image generation
 - [ ] Real-time sighting feed on the 29th
 
 ### Phase 4 — Visual Differentiation (3-4 weeks)

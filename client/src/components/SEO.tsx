@@ -39,6 +39,23 @@ export function SEO({
             <meta property="og:site_name" content={SITE_NAME} />
             <meta property="og:locale" content="en_US" />
 
+            {/* JSON-LD Structured Data */}
+            <script type="application/ld+json">
+                {JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": type === "article" ? "TechArticle" : "SoftwareApplication",
+                    "name": fullTitle,
+                    "description": description,
+                    "applicationCategory": "EducationalApplication",
+                    "operatingSystem": "Web",
+                    "url": canonicalUrl,
+                    "author": {
+                        "@type": "Organization",
+                        "name": SITE_NAME
+                    }
+                })}
+            </script>
+
             {/* Twitter Card */}
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={fullTitle} />
