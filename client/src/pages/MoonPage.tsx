@@ -202,8 +202,8 @@ export default function MoonPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Moon Phase - ${moonInfo.phaseName} (${moonInfo.illumination}%)`}
-        description={`Current lunar phase: ${moonInfo.phaseName}, ${moonInfo.illumination}% illuminated, ${moonInfo.age.toFixed(1)} days old. View lunar data and astronomical details.`}
+        title={`Moon Phase - ${moonInfo.phaseName} (${Math.round(moonInfo.illuminatedFraction * 100)}%)`}
+        description={`Current lunar phase: ${moonInfo.phaseName}, ${Math.round(moonInfo.illuminatedFraction * 100)}% illuminated, ${(moonInfo.moonAge / 24).toFixed(1)} days old. View lunar data and astronomical details.`}
         path="/moon"
       />
       {/* Header */}
@@ -281,6 +281,11 @@ export default function MoonPage() {
               >
                 {moonInfo.phaseName}
               </div>
+              {moonInfo && (
+                <p className="mt-2 text-sm text-muted-foreground animate-breezy-enter" style={{ animationDelay: '200ms' }}>
+                  {Math.round(moonInfo.illuminatedFraction * 100)}% illuminated • {(moonInfo.moonAge / 24).toFixed(1)} days old
+                </p>
+              )}
               <div className="text-sm font-arabic mb-3" style={{ color: "var(--gold-dim)" }}>
                 {moonInfo.phaseArabic}
               </div>
@@ -309,8 +314,8 @@ export default function MoonPage() {
             <BreezyDetailCard
               title="Illumination"
               icon={<Moon />}
-              decorativeVisual={<IlluminationArc illumination={moonInfo.illumination} />}
-              primaryValue={moonInfo.illumination}
+              decorativeVisual={<IlluminationArc illumination={moonInfo.illuminatedFraction * 100} />}
+              primaryValue={Math.round(moonInfo.illuminatedFraction * 100).toString()}
               primaryUnit="%"
               statusLabel={moonInfo.phaseName}
               className="animate-breezy-enter"
@@ -319,8 +324,8 @@ export default function MoonPage() {
             <BreezyDetailCard
               title="Lunar Age"
               icon={<Clock />}
-              decorativeVisual={<LunarAgeProgress age={moonInfo.age} />}
-              primaryValue={moonInfo.age.toFixed(1)}
+              decorativeVisual={<LunarAgeProgress age={(moonInfo.moonAge / 24)} />}
+              primaryValue={(moonInfo.moonAge / 24).toFixed(1)}
               primaryUnit="Days"
               statusLabel={`Phase Angle: ${(moonInfo.phase * 360).toFixed(1)}°`}
               className="animate-breezy-enter"
@@ -361,7 +366,12 @@ export default function MoonPage() {
               icon={<Moon />}
               decorativeVisual={<CountdownCircle daysLeft={parseInt(countdown.split(' ')[0]) || 0} totalDays={29.53} />}
               primaryValue={countdown.split(' ')[0] || "0d"}
-              statusLabel={moonInfo.nextNewMoon.toLocaleDateString("en-GB")}
+              statusLabel={
+                <div className="flex flex-col items-center">
+                  <span>{moonInfo.nextNewMoon.toLocaleDateString("en-GB")}</span>
+                  <span className="text-[10px] opacity-75">{moonInfo.nextNewMoonExact.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                </div>
+              }
               className="animate-breezy-enter"
             />
 

@@ -62,11 +62,11 @@ export interface MoonPhaseInfo {
     phase: number;        // 0–1
     phaseName: string;
     phaseArabic: string;
-    illumination: number; // 0–100 %
-    age: number;          // days since last new moon
-    nextNewMoon: Date;
-    nextFullMoon: Date;
-    lastNewMoon: Date;
+    illuminatedFraction: number; // 0–1
+    moonAge: number;      // hours since new moon
+    nextNewMoon: Date;    // approximate date of next new moon
+    nextNewMoonExact: Date; // exact time of next conjunction down to the second
+    nextFullMoon: Date;   // approximate date of next full moon
 }
 
 export interface HijriDate {
@@ -308,21 +308,36 @@ export function generateVisibilityGrid(
 export function getMoonPhaseInfo(date: Date): MoonPhaseInfo {
     const illum = SunCalc.getMoonIllumination(date);
     const phase = illum.phase;
-    const illumination = Math.round(illum.fraction * 100);
+    const illuminatedFraction = illum.fraction;
 
     // Moon age in days (approximate)
     const LUNAR_CYCLE = 29.53058867;
-    const age = phase * LUNAR_CYCLE;
+    const ageDays = phase * LUNAR_CYCLE;
+    const moonAge = ageDays * 24; // hours
 
     const phaseName = getPhaseName(phase);
     const phaseArabic = getPhaseArabic(phase);
 
     // Find next new moon (phase crosses 0)
-    const nextNewMoon = findNextPhase(date, 0);
-    const nextFullMoon = findNextPhase(date, 0.5);
-    const lastNewMoon = findLastNewMoon(date);
+    const nextNewMoon = findNextPhase(date, 0); // Approximate
+    const nextFullMoon = findNextPhase(date, 0.5); // Approximate
 
-    return { phase, phaseName, phaseArabic, illumination, age, nextNewMoon, nextFullMoon, lastNewMoon };
+    // Find exact next new moon
+    let approxNewMoonSearchStart = new Date(date.getTime());
+    // Search up to 31 days forward to find an approximate new moon day
+    for (let i = 0; i < 31; i++) {
+        let testDate = new Date(date.getTime() + i * 24 * 3600 * 1000);
+        let currentPhase = SunCalc.getMoonIllumination(testDate).phase;
+        // If phase is near 0 or 1, it's a new moon day
+        if (currentPhase < 0.033 || currentPhase > 0.967) {
+            approxNewMoonSearchStart = testDate;
+            break;
+        }
+    }
+    const exactNextNewMoon = findNewMoonNear(approxNewMoonSearchStart);
+
+
+    return { phase, phaseName, phaseArabic, illuminatedFraction, moonAge, nextNewMoon, nextNewMoonExact: exactNextNewMoon, nextFullMoon };
 }
 
 function getPhaseName(phase: number): string {
@@ -387,7 +402,7 @@ const SYNODIC_MS = 29.53058867 * 24 * 3600 * 1000;
  * Find the precise moment of the new moon (conjunction) nearest to `approx`.
  * Searches in 6-hour steps for the phase minimum (phase crosses 0/1).
  */
-function findNewMoonNear(approx: Date): Date {
+export function findNewMoonNear(approx: Date): Date {
     // Coarse search: 6-hour steps over ±15 days
     const start = approx.getTime() - 15 * 24 * 3600 * 1000;
     let bestT = start;
