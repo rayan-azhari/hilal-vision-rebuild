@@ -216,7 +216,7 @@ export default function Home() {
               <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                 {moonInfo.phaseName}
               </div>
-              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>{moonInfo.illumination}% illuminated</div>
+              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>{Math.round(moonInfo.illuminatedFraction * 100)}% illuminated</div>
             </div>
             {/* Hijri date */}
             <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.3s' }}>
@@ -231,8 +231,9 @@ export default function Home() {
             {/* Moon age */}
             <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.4s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Lunar Age</div>
-              <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
-                {moonInfo.age.toFixed(1)} days
+              <div className="flex justify-between items-center px-2">
+                <span className="text-muted-foreground">Age</span>
+                <span className="font-medium text-foreground">{(moonInfo.moonAge / 24).toFixed(1)} days</span>
               </div>
               <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>
                 New: {formatTime(moonInfo.nextNewMoon)}
