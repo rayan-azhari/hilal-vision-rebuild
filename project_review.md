@@ -11,11 +11,11 @@
 | **Visual Design** | 10/10 | "Clinical Aerospace" & "Deep Space" themes implemented. Precision typography and component scaling applied. Breezy design elevated to "instrument-grade". |
 | **Scientific Accuracy** | 8/10 | Yallop/Odeh criteria solid. Hijri now conjunction-based. Best-time-to-observe engine added. SunCalc is good but not VSOP87. |
 | **Data Completeness** | 8/10 | Real ICOP sighting data (1,028+ records, 1440–1446 AH). Cloud cover overlay integrated via Open-Meteo. |
-| **Mobile Experience** | 5/10 | Responsive layout works. Capacitor.js configured for Android/iOS builds. No offline or push. |
+| **Mobile Experience** | 8/10 | Responsive layout works beautifully with new mobile bottom drawer navigation and safe-areas. Capacitor.js configured for Android/iOS builds. No offline or push. |
 | **Performance** | 8/10 | Visibility grid offloaded to Web Worker. Smooth 60FPS UI. No SSR. |
 | **SEO & Reach** | 5/10 | Dynamic titles added. No structured data, no sitemap, no social cards. |
 | **Community** | 4/10 | Sighting form exists with Clerk auth, smart validation (Zone F rejection). No photo uploads. |
-| **Backend** | 7/10 | tRPC API works. Clerk auth integrated. Upstash Redis rate limiting. Public endpoints fixed. |
+| **Backend** | 8/10 | tRPC API works. Vercel TRPC crashes fixed. Clerk auth integrated. Upstash Redis rate limiting. E2E Playwright testing active. |
 
 ---
 
@@ -96,7 +96,7 @@
 | **Integrate ICOP database** — 1,000+ real historical sighting records from the Islamic Crescents' Observation Project | 🔴 High | Medium |
 | **Upgrade to VSOP87/ELP2000** — Higher-accuracy planetary theory (replace SunCalc for critical calculations) | 🟡 Med | High |
 | **Add South African Astronomical Observatory (SAAO) criteria** — Used by many African countries | 🟡 Med | Low |
-| **Topocentric correction** — Account for observer's elevation and atmospheric refraction more precisely | 🟡 Med | Medium |
+| ~~**Topocentric correction**~~ | ✅ Done | ✅ Account for observer's elevation and atmospheric refraction via Elevation API precisely |
 | ~~**Best-time-to-observe calculator**~~ | ✅ Done | ✅ `computeBestObservationTime()` scans sunset→moonset in 5-min steps |
 | **Conjunction times** — Show exact new moon (conjunction) time to the second, not just the day | 🔴 High | Low |
 

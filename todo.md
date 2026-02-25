@@ -156,3 +156,12 @@
 - [x] Add Cloud Cover and Visibility toggles to 2D Map (`MapPage.tsx`)
 - [x] Unify overlay toggles on Globe + Map into the Map Controls sidebar
 - [x] Replace stepped visibility grid on 2D map with smooth mathematical SVG contour curves (`d3-contour`)
+
+## Improvements & Fixes (Round 9)
+- [x] E2E Testing suite setup with Playwright
+- [x] Color-blind accessibility mode (High Contrast perceptual palette)
+- [x] Topographical refraction adjustments via Open-Meteo Elevation API
+- [x] App Store Readiness (Capacitor UI viewport safe-areas & splash screen lock)
+- [x] Mobile UI/UX overhaul (Bottom navigation + Drawer for side panels)
+- [x] Resolving Vercel TRPCClientError 500 crashes
+- [x] Deep Navy theme refinements (Globe night shading and Moon SVGs)
