@@ -39,7 +39,7 @@
             "destination": "/api/trpc/[trpc]"
         },
         {
-            "source": "/((?!.*\\\\.).*)",
+            "source": "/((?!api/).*)",
             "destination": "/index.html"
         }
     ]
