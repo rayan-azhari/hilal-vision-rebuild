@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useClerk } from "@clerk/clerk-react";
 import { Capacitor } from "@capacitor/core";
 import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
 
@@ -29,6 +29,7 @@ const ProTierContext = createContext<ProTierContextType | undefined>(undefined);
 
 export function ProTierProvider({ children }: { children: ReactNode }) {
     const { user, isLoaded } = useUser();
+    const { openSignIn } = useClerk();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [nativeHasPro, setNativeHasPro] = useState(false);
@@ -82,6 +83,11 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
     const startCheckout = async (opts: { planId?: string; donationAmount?: string }) => {
         if (isNative) {
             console.warn("startCheckout called on native platform. Use purchaseNativePackage instead.");
+            return;
+        }
+
+        if (!user) {
+            openSignIn({ redirectUrl: window.location.href });
             return;
         }
 

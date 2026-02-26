@@ -3,7 +3,17 @@
  * it into a canvas texture URL for map/globe overlay.
  */
 import { useMemo } from "react";
-import { trpc } from "@/lib/trpc";
+import { useQuery } from "@tanstack/react-query";
+
+function generateGridPoints(): Array<{ lat: number; lng: number }> {
+    const points: Array<{ lat: number; lng: number }> = [];
+    for (let lat = -60; lat <= 60; lat += 15) {
+        for (let lng = -180; lng < 180; lng += 20) {
+            points.push({ lat, lng });
+        }
+    }
+    return points;
+}
 
 /**
  * Bilinear interpolation of sparse grid data into a full canvas texture.
@@ -117,10 +127,58 @@ function renderCloudTexture(
 export function useCloudOverlay(dateTs: number, enabled: boolean = true) {
     const dateStr = new Date(dateTs).toISOString().slice(0, 10);
 
-    const { data, isLoading } = trpc.weather.getCloudGrid.useQuery(
-        { date: dateStr },
-        { enabled, staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false }
-    );
+    const { data, isLoading } = useQuery({
+        queryKey: ["cloudGrid", dateStr],
+        queryFn: async () => {
+            const gridPoints = generateGridPoints();
+            const BATCH_SIZE = 25;
+            const allResults: Array<{ lat: number; lng: number; cloud_cover: number }> = [];
+
+            for (let i = 0; i < gridPoints.length; i += BATCH_SIZE) {
+                const batch = gridPoints.slice(i, i + BATCH_SIZE);
+                const lats = batch.map((p) => p.lat).join(",");
+                const lngs = batch.map((p) => p.lng).join(",");
+
+                try {
+                    if (i > 0) await new Promise(r => setTimeout(r, 100));
+
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&hourly=cloud_cover&forecast_days=1&timezone=auto`;
+                    const res = await fetch(url);
+
+                    if (!res.ok) {
+                        batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
+                        continue;
+                    }
+
+                    const json = (await res.json()) as any;
+                    const locations = Array.isArray(json) ? json : [json];
+
+                    for (let j = 0; j < batch.length; j++) {
+                        const locData = locations[j];
+                        if (!locData?.hourly?.cloud_cover) {
+                            allResults.push({ ...batch[j], cloud_cover: 0 });
+                            continue;
+                        }
+
+                        const hourlyCloud = locData.hourly.cloud_cover as number[];
+                        const sunsetHourIdx = Math.min(18, hourlyCloud.length - 1);
+                        allResults.push({
+                            lat: batch[j].lat,
+                            lng: batch[j].lng,
+                            cloud_cover: hourlyCloud[sunsetHourIdx] ?? 0,
+                        });
+                    }
+                } catch (err) {
+                    batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
+                }
+            }
+
+            return { data: allResults };
+        },
+        enabled,
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
+    });
 
     const cloudTextureUrl = useMemo(() => {
         if (!data?.data || data.data.length === 0) return null;
