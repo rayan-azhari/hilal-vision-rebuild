@@ -128,12 +128,12 @@ npx cap open android
    - Click **Next**, select the **release** build variant, and click **Finish**.
 5. The Android Studio build will run. When finished, a popup will say "Locate" - clicking this will reveal the `.aab` file located in `android/app/build/outputs/bundle/release/` ready for Play Console submission.
 
-> **Version Code:** Google Play requires a unique `versionCode` for every AAB upload. Before each new build, increment `versionCode` and `versionName` in `android/app/build.gradle`:
+> **Version Code:** Google Play requires a unique `versionCode` for every AAB upload. **Before every Play Store build**, increment `versionCode` and `versionName` in `android/app/build.gradle`:
 > ```groovy
-> versionCode 3    // Increment this every upload (3 → 4 → 5...)
-> versionName "1.0.2"  // Human-readable version string
+> versionCode 4    // Current — increment this every upload (4 → 5 → 6...)
+> versionName "1.0.3"  // Human-readable version string
 > ```
-> **Important:** The `versionCode` is an integer that must strictly increase. Google Play rejects uploads with a previously used code.
+> **Rule: bump versionCode before every `git push` that targets a Play Store AAB build.** The `versionCode` is an integer that must strictly increase. Google Play rejects uploads with a previously used code. Forgetting this causes "Version code X has already been used" errors in Play Console.
 
 > **Capacitor Native URL:** The Android app's WebView uses `Capacitor.isNativePlatform()` in `client/src/main.tsx` to route tRPC calls to the absolute production URL (`https://moon-dashboard-one.vercel.app`) instead of the relative `/api/trpc` path (which would resolve to `https://localhost/api/trpc` in the WebView). Always run `npx cap sync` before building to bundle the latest frontend code.
 

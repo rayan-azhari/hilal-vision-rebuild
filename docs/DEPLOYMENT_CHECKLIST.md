@@ -19,6 +19,21 @@ npx pnpm install --no-frozen-lockfile
 > [!CAUTION]
 > **NEVER use `npm install <pkg>` in this project.** It creates `package-lock.json` conflicts and desyncs `pnpm-lock.yaml`. Always use `npx pnpm add <pkg>` (or `npx pnpm add -D <pkg>` for devDependencies).
 
+### Android Play Store — Additional Pre-Build Step
+
+> [!IMPORTANT]
+> **If this push is for a Play Store AAB build, you MUST increment the Android version code first.**
+>
+> Edit `android/app/build.gradle` before building:
+> ```groovy
+> versionCode 5    // ← always +1 from last upload (current: 4)
+> versionName "1.0.4"  // ← bump patch version to match
+> ```
+>
+> Google Play rejects any AAB whose `versionCode` was already used. There is no way to reuse a code — it must strictly increase with every upload. Forgetting this causes the "Version code X has already been used" error in Play Console.
+>
+> **Current version:** `versionCode 4` / `versionName "1.0.3"` (bumped Round 39)
+
 ---
 
 ## Known Error Patterns
