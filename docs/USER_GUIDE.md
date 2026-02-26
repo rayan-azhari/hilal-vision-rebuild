@@ -185,7 +185,10 @@ Hilal Vision uses a **soft paywall** model: all features are visible from Day 1,
 ### Gated Features by Page
 | Page | Gated Feature | Free Default |
 |------|--------------|---------------|
-| Visibility | 3D Globe | 2D Map |
+| Visibility (Globe + Map) | 3D Globe | 2D Map (always free) |
+| Visibility (Globe + Map) | Cloud Cover Overlay | Toggle visible, locked on click |
+| Visibility (Globe + Map) | Atmospheric Overrides (Temp/Pressure) | Blurred ProGate overlay |
+| Visibility (Globe + Map) | Best Time to Observe | Blurred ProGate overlay |
 | Moon Phase | Sky Dome, Altitude Chart, Ephemeris | Basic illumination, age, phase |
 | Calendar | Astronomical & Tabular engines | Umm al-Qura only |
 | Archive | Years before 1463 AH | 1463-1465 AH (3 most recent) |
@@ -205,9 +208,9 @@ All parameters are validated with Zod schemas. Invalid or out-of-range inputs re
 
 For full schemas, `curl` integration examples, and detailed JSON response breakdowns, please see the [**Public API Reference Guide**](PUBLIC_API_REFERENCE.md).
 
-## 14. Atmospheric Overrides & DEM
+## 14. Atmospheric Overrides & DEM *(Pro Feature)*
 
-Both the 2D Map and 3D Globe pages feature an **Atmospheric Overrides** panel:
+Both the 2D Map and 3D Globe pages feature an **Atmospheric Overrides** panel. This panel is gated behind the Pro tier — free users see a blurred preview with an upgrade prompt.
 
 - **Temperature** (°C) - Adjusts atmospheric refraction. Standard: 10°C.
 - **Pressure** (hPa) - Adjusts atmospheric refraction. Standard: 1010 hPa.

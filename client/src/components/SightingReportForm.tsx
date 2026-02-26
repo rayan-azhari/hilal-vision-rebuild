@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useUser, SignInButton } from "@clerk/clerk-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { AutoDetectButton } from "@/components/AutoDetectButton";
-import * as EXIF from "exif-js";
+import { parse as parseExif } from "exifr";
 
 export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const { isSignedIn } = useUser();
@@ -29,55 +29,44 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const [photoName, setPhotoName] = useState("");
 
     // EXIF Extraction
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setPhotoName(file.name);
 
-        EXIF.getData(file as any, function (this: any) {
-            const exifData = EXIF.getAllTags(this);
+        try {
+            const exif = await parseExif(file, {
+                gps: true,
+                tiff: true,
+                exif: true,
+                ifd0: true,
+            });
 
-            // Extract GPS
-            const latRaw = EXIF.getTag(this, "GPSLatitude");
-            const latRef = EXIF.getTag(this, "GPSLatitudeRef");
-            const lngRaw = EXIF.getTag(this, "GPSLongitude");
-            const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+            if (!exif) {
+                setErrors(prev => ({ ...prev, exif: "No EXIF data found in image." }));
+                return;
+            }
 
-            if (latRaw && lngRaw) {
-                const convertToDecimal = (gpsData: number[], ref: string) => {
-                    const degrees = gpsData[0];
-                    const minutes = gpsData[1];
-                    const seconds = gpsData[2];
-                    let decimal = degrees + minutes / 60 + seconds / 3600;
-                    if (ref === "S" || ref === "W") decimal = decimal * -1;
-                    return decimal;
-                };
-
-                const latDec = convertToDecimal(latRaw, latRef || "N");
-                const lngDec = convertToDecimal(lngRaw, lngRef || "E");
-
-                setLat(latDec);
-                setLng(lngDec);
-                setErrors(e => ({ ...e, lat: "", lng: "" }));
+            // Extract GPS — exifr returns decimal degrees directly
+            if (exif.latitude != null && exif.longitude != null) {
+                setLat(exif.latitude);
+                setLng(exif.longitude);
+                setErrors(prev => ({ ...prev, lat: "", lng: "" }));
             } else {
-                setErrors(e => ({ ...e, exif: "No GPS data found in image EXIF." }));
+                setErrors(prev => ({ ...prev, exif: "No GPS data found in image EXIF." }));
             }
 
-            // Extract Timestamp (DateTimeOriginal: "YYYY:MM:DD HH:MM:SS")
-            const dateTime = EXIF.getTag(this, "DateTimeOriginal");
-            if (dateTime) {
-                try {
-                    // Convert "2024:03:10 18:45:00" to "2024-03-10T18:45:00"
-                    const parts = dateTime.split(" ");
-                    const dateParts = parts[0].split(":");
-                    const formatted = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}T${parts[1].slice(0, 5)}`;
-                    setObservationTime(formatted);
-                    setErrors(e => ({ ...e, observationTime: "" }));
-                } catch (err) {
-                    console.warn("Could not parse EXIF DateTime:", dateTime);
-                }
+            // Extract Timestamp
+            if (exif.DateTimeOriginal instanceof Date) {
+                const d = exif.DateTimeOriginal;
+                const formatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+                setObservationTime(formatted);
+                setErrors(prev => ({ ...prev, observationTime: "" }));
             }
-        });
+        } catch (err) {
+            console.warn("EXIF extraction failed:", err);
+            setErrors(prev => ({ ...prev, exif: "Could not read image metadata." }));
+        }
     };
 
     const submitMutation = trpc.telemetry.submitObservation.useMutation({

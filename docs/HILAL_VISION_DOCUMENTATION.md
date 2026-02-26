@@ -1,6 +1,6 @@
 # Hilal Vision - Full Application Documentation
 
-**Version:** Round 34 (current)
+**Version:** Round 36 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -622,7 +622,9 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 31 | Accessibility & Native UX | Implemented robust Playwright E2E testing framework. Built Cividis-inspired High Contrast color-blind friendly rendering mode for WebGL/SVG artifacts. Injected Open-Meteo elevation tracking to Topographical Refraction horizon dip functions. Formulated strict Capacitor.js SafeArea padding for iOS Dynamic Islands. |
 | 32 | SEO & Scientific Precision | Integrated `vite-plugin-sitemap` for automated `sitemap.xml` generation. Injected JSON-LD structured data (`SoftwareApplication` schema) into `SEO.tsx`. Generated AI-crafted OpenGraph preview banner (`og-default.png`). Exported `findNewMoonNear()` and added `nextNewMoonExact` to `MoonPhaseInfo` for exact conjunction times displayed to the second on the Moon Phase Dashboard. Updated dark theme background to `#233342`. |
 | 33 | Monetization | Implemented dual-billing architecture for Pro tier: **Stripe Checkout** (Web) and **RevenueCat SDK** (iOS/Android Native) with Clerk `publicMetadata` webhook synchronization. Feature gating on Visibility (Globe), Moon (Sky Dome), Calendar (Astronomical/Tabular engines), Archive (historical years). Built `/support` page with dynamic UI hiding Sadaqah rules for native App Store compliance. |
-| 34 | API & Export | Implemented **Public REST API** (`/api/v1/visibility` and `/api/v1/moon-phases`) with Zod validation. Added **CSV/JSON export** to Archive page and Sighting Feed. Integrated **Atmospheric Overrides** (manual + auto-fetch from Open-Meteo) on Map and Globe pages. Added **DEM Integration** via Open-Meteo Elevation API for terrain-aware horizon calculations. Implemented **enhanced map click tooltips** with full lunar data. Added **EXIF metadata extraction** for sighting photo uploads. |
+| 34 | API & Export | Implemented **Public REST API** (`/api/v1/visibility` and `/api/v1/moon-phases`) with Zod validation. Added **CSV/JSON export** to Archive page and Sighting Feed. Integrated **Atmospheric Overrides** (manual + auto-fetch from Open-Meteo) on Map and Globe pages. Added **DEM Integration** via Open-Meteo Elevation API for terrain-aware horizon calculations. Implemented **enhanced map click tooltips** with full lunar data. Added **EXIF metadata extraction** for sighting photo uploads. Fixed TypeScript strict typing for Vercel serverless functions. Increased Vite chunk size warning limit for WebGL app. |
+| 35 | Pro Tier Expansion | Gated Cloud Cover overlay, Atmospheric Overrides panel, and Best Time to Observe card behind Pro tier on both Globe and Map pages. Fixed guest checkout bug (sign-in required before payment). Moved Stripe to **live mode** (`sk_live_...`). Updated UpgradeModal feature list to reflect all 6 gated features. |
+| 36 | Production Bug Fixes | Fixed Sentry-reported `TRPCClientError` — `api/trpc/[trpc].ts` had no error handling, causing Vercel to return plain-text on failures which broke the tRPC JSON parser; added try/catch returning structured JSON. Replaced `exif-js` (unmaintained, crashes on Android Chrome 145 with `ReferenceError: n is not defined` in image onload callback) with `exifr` (modern Promise-based EXIF library). Added THREE.js geometry/material disposal cleanup to `GlobePage.tsx` texture overlay effects to prevent WebGL resource leaks on navigation. |
 
 ---
 
@@ -648,6 +650,9 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 |---------|-----------|----------|
 | 2D Visibility Map | ✅ Full access | ✅ Full access |
 | 3D Interactive Globe | 🔒 Locked | ✅ Full interactive |
+| Cloud Cover Overlay | 🔒 Locked | ✅ Real-time Open-Meteo layer |
+| Atmospheric Overrides | 🔒 Locked | ✅ Temp, Pressure, Elevation |
+| Best Time to Observe | 🔒 Locked | ✅ Optimal window + conditions |
 | Moon Phase (Basic) | ✅ Illumination, age, phase | ✅ Full dashboard |
 | Sky Dome & Altitude Chart | 🔒 Blurred preview | ✅ Full interactive |
 | Ephemeris Data | 🔒 Blurred preview | ✅ Full times |
@@ -683,4 +688,4 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 | Tiered Developer API | 🔮 Future | Rate-limited API keys with usage-based pricing |
 | Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
 
-*Documentation updated February 25, 2026 (Round 34 - API & Export). For the latest feature status, see `todo.md`.*
+*Documentation updated February 26, 2026 (Round 36 - Production Bug Fixes). For the latest feature status, see `todo.md`.*

@@ -17,10 +17,13 @@ import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
 import { BestTimeCard } from "@/components/BestTimeCard";
+import ProGate from "@/components/ProGate";
+import { useProTier } from "@/contexts/ProTierContext";
 
 export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
   const { hourOffset, setHourOffset } = shared;
   const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
+  const { isPremium, setShowUpgradeModal } = useProTier();
   const globeRef = useRef<HTMLDivElement>(null);
   const globeInstanceRef = useRef<any>(null);
   const [moonData, setMoonData] = useState(() =>
@@ -236,6 +239,12 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
       globe.customLayerData([{}])
         .customThreeObject(() => overlayMesh);
+
+      return () => {
+        globe.customLayerData([]);
+        geometry.dispose();
+        material.dispose();
+      };
     } else {
       globe.customLayerData([]);
     }
@@ -254,8 +263,9 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     if (showClouds && cloudsUrl) {
       const texture = new THREE.TextureLoader().load(cloudsUrl);
       const r = globe.getGlobeRadius();
+      const geometry = new THREE.SphereGeometry(r * 1.004, 64, 64);
       const cloudMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(r * 1.004, 64, 64),
+        geometry,
         new THREE.MeshPhongMaterial({
           map: texture,
           transparent: true,
@@ -265,6 +275,11 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       );
       cloudMesh.name = "clouds-layer";
       scene.add(cloudMesh);
+
+      return () => {
+        scene.remove(cloudMesh);
+        geometry.dispose();
+      };
     }
   }, [cloudsUrl, showClouds]);
 
@@ -442,7 +457,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                 <div className="flex items-center justify-between text-xs py-1">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Cloud className="w-3.5 h-3.5" /> Cloud Cover</span>
                   <button
-                    onClick={() => setShowClouds(!showClouds)}
+                    onClick={() => isPremium ? setShowClouds(!showClouds) : setShowUpgradeModal(true)}
                     className={`w-8 h-4 rounded-full transition-colors relative`}
                     style={{ background: showClouds ? "var(--gold)" : "var(--muted)" }}
                   >
@@ -458,6 +473,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
               </div>
 
               {/* Atmospheric Overrides */}
+              <ProGate featureName="Atmospheric Overrides">
               <div className="pt-3 border-t space-y-3 mt-3" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Atmospheric Overrides</span>
@@ -507,12 +523,15 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                   </div>
                 </div>
               </div>
+              </ProGate>
             </div>
 
             {/* Best Time to Observe */}
+            <ProGate featureName="Best Time to Observe">
             <div className="animate-breezy-enter" style={{ animationDelay: "75ms" }}>
               <BestTimeCard date={effectiveDate} location={selectedCity} />
             </div>
+            </ProGate>
 
             {/* Moon data */}
             <div className="breezy-card space-y-3 p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>

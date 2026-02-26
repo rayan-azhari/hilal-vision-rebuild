@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useProTier } from "@/contexts/ProTierContext";
-import { X, Crown, Check, Sparkles, Globe, Cloud, Archive, Bell, Loader2 } from "lucide-react";
+import { X, Crown, Check, Sparkles, Globe, Cloud, Archive, Bell, Loader2, Clock, Wind } from "lucide-react";
 
 const PRO_FEATURES = [
     { icon: Globe, label: "Interactive 3D Globe" },
     { icon: Cloud, label: "Live Cloud Cover Overlay" },
+    { icon: Wind, label: "Atmospheric Overrides (Temp, Pressure)" },
+    { icon: Clock, label: "Best Time to Observe" },
     { icon: Archive, label: "Full ICOP Archive (1438–1465 AH)" },
     { icon: Bell, label: "Crescent Visibility Alerts (coming soon)" },
 ];

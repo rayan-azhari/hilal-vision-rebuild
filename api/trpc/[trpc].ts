@@ -33,11 +33,18 @@ export default async function handler(
         path = req.url.slice(1).split("?")[0].replace(/^api\/trpc\//, "");
     }
 
-    return nodeHTTPRequestHandler({
-        router: appRouter,
-        req,
-        res,
-        path,
-        createContext: createContext as any,
-    });
+    try {
+        return await nodeHTTPRequestHandler({
+            router: appRouter,
+            req,
+            res,
+            path,
+            createContext: createContext as any,
+        });
+    } catch (err: any) {
+        console.error("[tRPC handler] Unhandled error:", err);
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: { message: err?.message ?? "Internal server error", code: "INTERNAL_SERVER_ERROR" } }));
+    }
 }

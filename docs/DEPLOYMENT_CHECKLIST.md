@@ -39,7 +39,7 @@ npx pnpm add <missing-package>
 
 **Prevention:** After importing any new library, immediately install it with `npx pnpm add`.
 
-**Example (Round 34):** `exif-js` was imported in code but never installed → Rollup crash.
+**Example (Round 34):** `exif-js` was imported in code but never installed → Rollup crash. (Note: `exif-js` has since been removed and replaced with `exifr` — see Error 6 for context.)
 
 ---
 
@@ -63,7 +63,7 @@ git push
 
 **Prevention:** Always use `npx pnpm add <pkg>` to install. If you accidentally used npm, run `npx pnpm install --no-frozen-lockfile` before pushing.
 
-**Example (Round 34):** `exif-js` installed via `npm install --legacy-peer-deps` → lockfile desync → Vercel deploy failure.
+**Example (Round 34):** `exif-js` installed via `npm install --legacy-peer-deps` → lockfile desync → Vercel deploy failure. (Note: `exif-js` has since been replaced with `exifr`, installed correctly via `npx pnpm add exifr`.)
 
 ---
 
@@ -106,7 +106,56 @@ import { publicProcedure, router } from "./_core/trpc.js";
 
 ---
 
-### 5. PowerShell `&&` Chaining
+### 5. tRPC Handler Returns Plain Text (JSON Parse Error)
+
+**Symptom (Sentry):**
+```
+TRPCClientError: Unexpected token 'A', "A server e"... is not valid JSON
+```
+
+**Root Cause:** `api/trpc/[trpc].ts` had no `try/catch` around `nodeHTTPRequestHandler`. When the handler threw an unhandled exception, Vercel returned the plain-text string `"A server error occurred"` instead of JSON, breaking the tRPC client's parser.
+
+**Fix:** Wrap `nodeHTTPRequestHandler` in a try/catch that responds with a JSON error body:
+```typescript
+try {
+    return await nodeHTTPRequestHandler({ ... });
+} catch (err: any) {
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: { message: err?.message ?? "Internal server error", code: "INTERNAL_SERVER_ERROR" } }));
+}
+```
+
+**Prevention:** Always ensure the tRPC serverless handler has an outer try/catch. Vercel's default fallback is not JSON-compatible.
+
+**Example (Round 36):** `api/trpc/[trpc].ts` — missing error handler → Sentry crash on `/visibility` route.
+
+---
+
+### 6. `exif-js` Crash on Android Chrome (`ReferenceError: n is not defined`)
+
+**Symptom (Sentry):**
+```
+ReferenceError: n is not defined
+  at V.onload (SightingReportForm.tsx — minified)
+```
+
+**Root Cause:** `exif-js` is an unmaintained legacy library (~2014) that creates a hidden `new Image()` element and sets an `.onload` callback. On Android Chrome 145+ with certain JPEG formats (especially from modern phones), this callback crashes with a `ReferenceError` on a minified internal variable. The crash propagates as an unhandled error and takes down the page.
+
+**Fix:** Replace `exif-js` with `exifr`:
+```bash
+npx pnpm remove exif-js
+npx pnpm add exifr
+```
+`exifr` is Promise-based, actively maintained, and handles GPS + timestamp extraction correctly on all platforms. It returns decimal-degree coordinates directly and `DateTimeOriginal` as a native `Date` object.
+
+**Prevention:** Do not use `exif-js`. Use `exifr` for all EXIF parsing.
+
+**Example (Round 36):** `SightingReportForm.tsx` — user uploaded a phone photo → Android Chrome crash → Sentry report.
+
+---
+
+### 7. PowerShell `&&` Chaining
 
 **Symptom:**
 ```
@@ -138,8 +187,22 @@ The token '&&' is not a valid statement separator in this version.
 - Output directory is `dist/public`
 - API routes live in `api/trpc/[trpc].ts` (serverless function)
 - ICOP data is served statically from `client/public/` to avoid serverless size limits
-- Environment variables needed: `DATABASE_URL` (optional), `CLERK_*`, `UPSTASH_*`
+- Environment variables needed: `DATABASE_URL` (optional), `CLERK_*`, `UPSTASH_*`, `STRIPE_*`
+
+### Stripe Production Config (Live Mode)
+
+| Variable | Description |
+|---|---|
+| `STRIPE_SECRET_KEY` | Live Stripe secret key — set in Vercel env vars only, **never in `.env` or committed to git** |
+| `STRIPE_WEBHOOK_SECRET` | Live webhook signing secret — from Stripe Dashboard → Webhooks |
+| `STRIPE_PRICE_MONTHLY` | Live Price ID for monthly plan |
+| `STRIPE_PRICE_ANNUAL` | Live Price ID for annual plan |
+| `STRIPE_PRICE_LIFETIME` | Live Price ID for lifetime plan |
+
+Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
+
+> **Switching to test mode:** Replace all `STRIPE_*` vars in Vercel with `sk_test_...` equivalents and redeploy.
 
 ---
 
-*Last updated: February 25, 2026 (Round 34)*
+*Last updated: February 26, 2026 (Round 36)*

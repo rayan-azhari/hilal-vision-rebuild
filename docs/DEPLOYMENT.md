@@ -73,6 +73,14 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 | `UPSTASH_REDIS_REST_TOKEN`   | Yes      | Upstash Redis token                                                   |
 | `CLERK_SECRET_KEY`           | Yes      | Backend secret                                                        |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Yes      | Frontend public key                                                   |
+| `STRIPE_SECRET_KEY`          | Yes      | Stripe secret key (`sk_live_...` for production, `sk_test_...` for test) |
+| `STRIPE_WEBHOOK_SECRET`      | Yes      | Stripe webhook signing secret (`whsec_...`) — from Stripe Dashboard → Developers → Webhooks |
+| `STRIPE_PRICE_MONTHLY`       | Yes      | Stripe Price ID for the monthly Pro plan (`price_...`)               |
+| `STRIPE_PRICE_ANNUAL`        | Yes      | Stripe Price ID for the annual Pro plan (`price_...`)                |
+| `STRIPE_PRICE_LIFETIME`      | Yes      | Stripe Price ID for the lifetime Pro plan (`price_...`)              |
+
+> **Stripe webhook endpoint:** `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
+> Events to listen for: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
 
 ## What Works on Vercel
 
@@ -86,6 +94,8 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 | Report sighting form    | ✅ Uses tRPC endpoint             |
 | Rate limiting           | ✅ Distributed Upstash Redis      |
 | Authentication          | ✅ Clerk Auth                     |
+| Stripe Payments (Pro)   | ✅ Live mode active               |
+| One-time Donations      | ✅ Live mode active               |
 
 ---
 

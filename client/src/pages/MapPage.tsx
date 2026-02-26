@@ -17,6 +17,8 @@ import type { SharedVisibilityState } from "./VisibilityPage";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
 import { BestTimeCard } from "@/components/BestTimeCard";
+import ProGate from "@/components/ProGate";
+import { useProTier } from "@/contexts/ProTierContext";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
   A: "#4ade80",
@@ -50,6 +52,7 @@ const ZONE_HEX: Record<VisibilityZone, string> = {
 export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const { hourOffset, setHourOffset } = shared;
   const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
+  const { isPremium, setShowUpgradeModal } = useProTier();
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
@@ -624,7 +627,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                 <div className="flex items-center justify-between text-xs py-1">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Cloud className="w-3.5 h-3.5" /> Cloud Cover</span>
                   <button
-                    onClick={() => setShowClouds(!showClouds)}
+                    onClick={() => isPremium ? setShowClouds(!showClouds) : setShowUpgradeModal(true)}
                     className={`w-8 h-4 rounded-full transition-colors relative`}
                     style={{ background: showClouds ? "var(--gold)" : "var(--muted)" }}
                   >
@@ -640,6 +643,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
               </div>
 
               {/* Atmospheric Overrides */}
+              <ProGate featureName="Atmospheric Overrides">
               <div className="pt-3 border-t space-y-3 mt-3" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Atmospheric Overrides</span>
@@ -689,13 +693,16 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                   </div>
                 </div>
               </div>
+              </ProGate>
             </div>
           </div>
 
           {/* Best Time to Observe */}
+          <ProGate featureName="Best Time to Observe">
           <div className="animate-breezy-enter" style={{ animationDelay: "45ms" }}>
             <BestTimeCard date={effectiveDate} location={selectedCity} />
           </div>
+          </ProGate>
 
           <div className="breezy-card p-4 animate-breezy-enter" style={{ animationDelay: "50ms" }}>
             <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>
