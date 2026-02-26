@@ -13,21 +13,33 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { ENV } from "./_core/env.js";
 
-// ─── Global Redis Rate Limiter ────────────────────────────────────────────────
-let ratelimit: Ratelimit | null = null;
-if (ENV.upstashRedisRestUrl && ENV.upstashRedisRestToken) {
-  const redis = new Redis({
-    url: ENV.upstashRedisRestUrl,
-    token: ENV.upstashRedisRestToken,
-  });
-  // Limit to 5 requests per minute per IP
-  ratelimit = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(5, "1 m"),
-    analytics: true,
-  });
-} else {
-  console.warn("[RateLimiter] Upstash Redis credentials not found. Telemetry endpoint is not rate-limited.");
+// ─── Lazy Redis Rate Limiter (deferred to avoid cold-start crashes) ──────────
+let _ratelimit: Ratelimit | null = null;
+let _ratelimitInitialized = false;
+
+function getRateLimiter(): Ratelimit | null {
+  if (_ratelimitInitialized) return _ratelimit;
+  _ratelimitInitialized = true;
+
+  if (!ENV.upstashRedisRestUrl || !ENV.upstashRedisRestToken) {
+    console.warn("[RateLimiter] Upstash Redis credentials not found. Telemetry endpoint is not rate-limited.");
+    return null;
+  }
+  try {
+    const redis = new Redis({
+      url: ENV.upstashRedisRestUrl,
+      token: ENV.upstashRedisRestToken,
+    });
+    _ratelimit = new Ratelimit({
+      redis: redis,
+      limiter: Ratelimit.slidingWindow(5, "1 m"),
+      analytics: true,
+    });
+  } catch (err) {
+    console.error("[RateLimiter] Failed to initialize Upstash Redis:", err);
+    _ratelimit = null;
+  }
+  return _ratelimit;
 }
 
 // ─── Router ───────────────────────────────────────────────────────────────────
@@ -72,6 +84,7 @@ export const appRouter = router({
       )
       .mutation(async ({ input, ctx }) => {
         // Rate limit by IP using Upstash
+        const ratelimit = getRateLimiter();
         if (ratelimit) {
           let ip = "unknown";
           if (ctx.req && "headers" in ctx.req) {

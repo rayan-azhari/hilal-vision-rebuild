@@ -9,7 +9,7 @@
  * - Weather API: Network-first (30-min cache)
  */
 
-const CACHE_NAME = "hilal-vision-v1";
+const CACHE_NAME = "hilal-vision-v2";
 const STATIC_CACHE = "hilal-static-v1";
 const API_CACHE = "hilal-api-v1";
 const TILES_CACHE = "hilal-tiles-v1";
@@ -124,7 +124,14 @@ async function networkFirst(request, cacheName, timeoutMs) {
         return response;
     } catch {
         const cached = await caches.match(request);
-        return cached || new Response('{"error":"offline"}', {
+        if (cached) return cached;
+
+        // Return a valid tRPC batch error so superjson.deserialize() succeeds on the client
+        const isApiCall = new URL(request.url).pathname.startsWith("/api/");
+        const body = isApiCall
+            ? JSON.stringify([{ error: { json: { message: "You appear to be offline. Please check your connection.", code: -32603, data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 503, path: null } } } }])
+            : '{"error":"offline"}';
+        return new Response(body, {
             status: 503,
             headers: { "Content-Type": "application/json" },
         });
