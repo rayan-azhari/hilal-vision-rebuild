@@ -4,6 +4,7 @@ initSentry();
 
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
+import { Capacitor } from "@capacitor/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
@@ -13,6 +14,13 @@ import { getLoginUrl } from "./const";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
 import "@/lib/i18n";
+
+// On native (Android/iOS) the WebView origin is capacitor://localhost,
+// so relative URLs like /api/trpc would resolve to https://localhost/api/trpc.
+// Use the absolute production URL instead.
+const API_BASE = Capacitor.isNativePlatform()
+  ? "https://moon-dashboard-one.vercel.app"
+  : "";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +56,7 @@ queryClient.getMutationCache().subscribe(event => {
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
-      url: "/api/trpc",
+      url: `${API_BASE}/api/trpc`,
       transformer: superjson,
       fetch(input, init) {
         return globalThis.fetch(input, {

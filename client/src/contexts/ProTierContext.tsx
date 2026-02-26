@@ -44,7 +44,12 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
     // Use either Clerk's truth OR the local RevenueCat cache truth
     // Give admin bypass to moonsightinglive@gmail.com
     const isAdmin = user?.primaryEmailAddress?.emailAddress === "moonsightinglive@gmail.com";
-    const isPremium = clerkHasPro || nativeHasPro || isAdmin;
+
+    // ⚠️ TESTING MODE — Pro gating disabled (all users treated as Premium)
+    // TODO: Remove this line before final release / after testing is complete
+    const TESTING_DISABLE_PRO_GATE = true;
+
+    const isPremium = TESTING_DISABLE_PRO_GATE || clerkHasPro || nativeHasPro || isAdmin;
 
     useEffect(() => {
         if (!isNative) return;
