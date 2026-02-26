@@ -260,7 +260,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
     typeof tempOverride === "number" ? tempOverride : undefined,
     typeof pressureOverride === "number" ? pressureOverride : undefined
   );
-  const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds);
+  const { cloudTextureUrl: cloudsUrl, isLoading: isCloudsLoading } = useCloudOverlay(effectiveDateTs, showClouds, "mercator");
 
   // Compute local moon data
   useEffect(() => {

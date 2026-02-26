@@ -18,10 +18,14 @@ function generateGridPoints(): Array<{ lat: number; lng: number }> {
 /**
  * Bilinear interpolation of sparse grid data into a full canvas texture.
  * Input: sparse grid points with `cloud_cover` (0-100).
- * Output: base64 data URL of a 1024×512 RGBA canvas (white = cloudy, transparent = clear).
+ * Output: base64 data URL of a 256×128 RGBA canvas (white = cloudy, transparent = clear).
+ *
+ * @param projection "equirectangular" for 3D globe (linear lat spacing),
+ *                   "mercator" for 2D Leaflet map (Web Mercator lat spacing).
  */
 function renderCloudTexture(
-    data: Array<{ lat: number; lng: number; cloud_cover: number }>
+    data: Array<{ lat: number; lng: number; cloud_cover: number }>,
+    projection: "equirectangular" | "mercator" = "equirectangular"
 ): string {
     // Halved dimensions for extreme performance on mobile (256x128)
     const W = 256;
@@ -43,7 +47,15 @@ function renderCloudTexture(
     }
 
     for (let py = 0; py < H; py++) {
-        const lat = 90 - (py / H) * 180;
+        // Equirectangular: linear lat spacing (correct for sphere UV mapping)
+        // Mercator: non-linear lat spacing (correct for Leaflet's Web Mercator tiles)
+        let lat: number;
+        if (projection === "mercator") {
+            const mercatorY = Math.PI * (1 - 2 * py / H);
+            lat = (2 * Math.atan(Math.exp(mercatorY)) - Math.PI / 2) * 180 / Math.PI;
+        } else {
+            lat = 90 - (py / H) * 180;
+        }
         for (let px = 0; px < W; px++) {
             const lng = -180 + (px / W) * 360;
 
@@ -124,7 +136,7 @@ function renderCloudTexture(
     return canvas.toDataURL();
 }
 
-export function useCloudOverlay(dateTs: number, enabled: boolean = true) {
+export function useCloudOverlay(dateTs: number, enabled: boolean = true, projection: "equirectangular" | "mercator" = "equirectangular") {
     const dateStr = new Date(dateTs).toISOString().slice(0, 10);
 
     const { data, isLoading } = useQuery({
@@ -182,8 +194,8 @@ export function useCloudOverlay(dateTs: number, enabled: boolean = true) {
 
     const cloudTextureUrl = useMemo(() => {
         if (!data?.data || data.data.length === 0) return null;
-        return renderCloudTexture(data.data);
-    }, [data]);
+        return renderCloudTexture(data.data, projection);
+    }, [data, projection]);
 
     return { cloudTextureUrl, isLoading };
 }
