@@ -1,6 +1,6 @@
 # Hilal Vision - Full Application Documentation
 
-**Version:** Round 37 (current)
+**Version:** Round 38 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -626,6 +626,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 35 | Pro Tier Expansion | Gated Cloud Cover overlay, Atmospheric Overrides panel, and Best Time to Observe card behind Pro tier on both Globe and Map pages. Fixed guest checkout bug (sign-in required before payment). Moved Stripe to **live mode** (`sk_live_...`). Updated UpgradeModal feature list to reflect all 6 gated features. |
 | 36 | Production Bug Fixes | Fixed Sentry-reported `TRPCClientError` — `api/trpc/[trpc].ts` had no error handling, causing Vercel to return plain-text on failures which broke the tRPC JSON parser; added try/catch returning structured JSON. Replaced `exif-js` (unmaintained, crashes on Android Chrome 145 with `ReferenceError: n is not defined` in image onload callback) with `exifr` (modern Promise-based EXIF library). Added THREE.js geometry/material disposal cleanup to `GlobePage.tsx` texture overlay effects to prevent WebGL resource leaks on navigation. |
 | 37 | UX & Rendering Fixes | Fixed 3D globe cloud overlay appearing as chrome-ball: switched from `MeshPhongMaterial` (lighting-aware, creating specular highlights) to `MeshBasicMaterial` with `depthWrite: false` (unlit overlay, correct transparency). Integrated DEM terrain elevation into Horizon View via `trpc.dem.getDem` — feeds real elevation into `computeSunMoonAtSunset`, adds a faint "geometric 0°" reference line on the canvas, and shows Terrain Elevation + Horizon Dip rows in the side panel. Added "I saw the moon!" CTA text and pulsing red ring/dot animation to the Report Sighting button (desktop + mobile) to improve user engagement. |
+| 38 | Android Play Store & Production Stability | **Android Play Store prep:** Generated all mipmap icons/splash screens via `@capacitor/assets`, patched RevenueCat ProGuard error, fixed Capacitor WebView tRPC URL (relative `/api/trpc` → absolute production URL via `Capacitor.isNativePlatform()` check in `main.tsx`). **Serverless stability:** Deferred Upstash Redis/Ratelimit initialization from module-level to lazy getter with try-catch — prevents Vercel cold-start crashes when Upstash is temporarily unreachable. Fixed tRPC catch block to return valid batch array format `[{error:{json:{...}}}]` instead of plain JSON (fixes superjson deserialization failures). **Service Worker:** Offline fallback now returns tRPC-compatible batch error for `/api/` calls instead of `{"error":"offline"}`. Bumped SW cache to v2. **Cloud cover alignment:** Fixed 3D globe cloud overlay ~90° longitude offset — applied `rotation.y = -Math.PI/2` to match `three-globe`'s internal globe rotation. Added Mercator projection mode to `renderCloudTexture()` so 2D Leaflet map gets correctly projected cloud texture (equirectangular for globe, Mercator for map). |
 
 ---
 
@@ -689,4 +690,4 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 | Tiered Developer API | 🔮 Future | Rate-limited API keys with usage-based pricing |
 | Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
 
-*Documentation updated February 26, 2026 (Round 37 - UX & Rendering Fixes). For the latest feature status, see `todo.md`.*
+*Documentation updated February 26, 2026 (Round 38 - Android Play Store & Production Stability). For the latest feature status, see `todo.md`.*

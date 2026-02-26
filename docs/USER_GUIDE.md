@@ -32,7 +32,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 ### 3D Globe View
 - Interactive Globe.gl sphere with day/night terminator.
 - Smooth Gaussian-blurred visibility zone overlay mapped directly onto the sphere.
-- **Cloud Cover Overlay** - Real-time cloud cover from Open-Meteo rendered as a translucent sphere above the visibility layer. Toggle on/off with the "Clouds" button.
+- **Cloud Cover Overlay** - Real-time cloud cover from Open-Meteo rendered as a translucent sphere above the visibility layer, geographically aligned with the earth texture. Toggle on/off with the "Clouds" button.
 - Play/Pause auto-rotation and toggle the visibility overlay on/off.
 - **Best Time to Observe** card - Shows the optimal crescent viewing time, observation window, and moon/sun altitudes. Accounts for the observer's specific topographical elevation.
 - Sidebar shows live astronomical data for the selected city: Moon altitude, azimuth, elongation, ARCV, crescent width, Yallop q-value or Odeh V-value, illumination, sunset, and moonset times.
@@ -40,7 +40,7 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 ### 2D Map View
 - Leaflet map with dark/light CARTO basemaps.
 - Web Mercator–projected visibility heatmap with smooth Gaussian-blurred zone boundaries. (Supports perceptual High Contrast mode dynamically).
-- **Cloud Cover Overlay** - Open-Meteo cloud data rendered as a semi-transparent layer over the map. Toggle independently from visibility using the "Cloud Cover" switch in Map Controls.
+- **Cloud Cover Overlay** - Open-Meteo cloud data rendered as a Mercator-projected semi-transparent layer over the map, geographically aligned with the 3D globe view. Toggle independently from visibility using the "Cloud Cover" switch in Map Controls.
 - **Best Time to Observe** card - Automatically calculates the optimal observation window (sunset → moonset), displaying local altitude parameters including Topographical Elevation.
 - **Atmospheric Overrides** - Collapsible panel for manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides. Toggle "Auto-fetch" to pull real-time atmospheric data from Open-Meteo's weather API based on the selected location. These corrections refine the refraction model for observatory-grade accuracy.
 - **DEM Integration** - Clicking any point automatically fetches the real terrain elevation from the Open-Meteo Elevation API (Digital Elevation Model). This elevation is used to compute accurate horizon dip corrections and is displayed in the click tooltip.
@@ -114,7 +114,7 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
 
 ### What Happens Behind the Scenes
 - **Authentication** - Clerk ensures bots don't pollute the data.
-- **Rate Limiting** - The server enforces a limit of 5 submissions per minute per IP using an Upstash Redis global database to prevent DDoS attacks.
+- **Rate Limiting** - The server enforces a limit of 5 submissions per minute per IP using a lazily-initialized Upstash Redis global database to prevent DDoS attacks (gracefully degrades if Redis is temporarily unavailable).
 - **Smart Validation** - The system algorithmically calculates the sun & moon geometric position at the precise time of sighting. If you claim to see the moon when it is physically below the horizon (Zone F), the mathematical engine rejects the payload immediately.
 - **Input Bounds** - All fields are validated with strict Zod schemas (coordinate bounds, temperature ranges, etc.).
 - **Meteorological Enrichment** - The backend automatically contacts **Open-Meteo** APIs to fetch live Cloud Cover, Surface Pressure, and Aerosol Optical Depth at your exact coordinates, storing this data alongside your report.

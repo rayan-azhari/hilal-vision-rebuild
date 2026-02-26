@@ -106,29 +106,138 @@ import { publicProcedure, router } from "./_core/trpc.js";
 
 ---
 
-### 5. tRPC Handler Returns Plain Text (JSON Parse Error)
+### 5. tRPC Handler Returns Non-Batch JSON (superjson Parse Error)
+
+**Symptom (Sentry):**
+```
+TRPCClientError: Unable to transform response from server
+TRPCClientError: Unexpected token 'A', "A server e"... is not valid JSON
+```
+
+**Root Cause:** `api/trpc/[trpc].ts` catch block returned `{"error":{...}}` — a plain JSON object. The tRPC v11 client with `httpBatchLink` + `superjson` expects a **JSON array** in batch format: `[{"error":{"json":{...}}}]`. The plain object causes `superjson.deserialize()` to fail.
+
+**Fix:** The catch block must return a valid tRPC batch error array:
+```typescript
+} catch (err: any) {
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify([{
+        error: {
+            json: {
+                message: err?.message ?? "Internal server error",
+                code: -32603,
+                data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 500, path: path || null }
+            }
+        }
+    }]));
+}
+```
+
+**Prevention:** Always return `[{error:{json:{...}}}]` (array with `json` wrapper) from tRPC error handlers when using `httpBatchLink` + `superjson`.
+
+**Example (Round 36–38):** Initially no catch → plain text. Then catch returned non-batch JSON → "Unable to transform". Final fix: proper batch array format.
+
+---
+
+### 9. Vercel Cold-Start Crash from Module-Level Redis Initialization
 
 **Symptom (Sentry):**
 ```
 TRPCClientError: Unexpected token 'A', "A server e"... is not valid JSON
 ```
+(Vercel returns its default plain-text 500 "A server error has occurred" — the serverless function failed before the handler ran.)
 
-**Root Cause:** `api/trpc/[trpc].ts` had no `try/catch` around `nodeHTTPRequestHandler`. When the handler threw an unhandled exception, Vercel returned the plain-text string `"A server error occurred"` instead of JSON, breaking the tRPC client's parser.
+**Root Cause:** `server/appRouter.ts` created `@upstash/redis` Redis and `@upstash/ratelimit` Ratelimit instances at **module load time** (top-level `if` block). If Upstash was briefly unreachable during a Vercel cold start, the entire module failed to import, crashing the function before the tRPC handler or catch block could execute.
 
-**Fix:** Wrap `nodeHTTPRequestHandler` in a try/catch that responds with a JSON error body:
+**Fix:** Defer initialization to a lazy getter function:
 ```typescript
-try {
-    return await nodeHTTPRequestHandler({ ... });
-} catch (err: any) {
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: { message: err?.message ?? "Internal server error", code: "INTERNAL_SERVER_ERROR" } }));
+let _ratelimit: Ratelimit | null = null;
+let _ratelimitInitialized = false;
+
+function getRateLimiter(): Ratelimit | null {
+  if (_ratelimitInitialized) return _ratelimit;
+  _ratelimitInitialized = true;
+  try {
+    _ratelimit = new Ratelimit({ redis: new Redis({...}), ... });
+  } catch (err) {
+    console.error("[RateLimiter] Init failed:", err);
+    _ratelimit = null;
+  }
+  return _ratelimit;
 }
 ```
 
-**Prevention:** Always ensure the tRPC serverless handler has an outer try/catch. Vercel's default fallback is not JSON-compatible.
+**Prevention:** Never create network-dependent objects (Redis, DB connections, HTTP clients) at module top-level in serverless functions. Use lazy initialization with try-catch.
 
-**Example (Round 36):** `api/trpc/[trpc].ts` — missing error handler → Sentry crash on `/visibility` route.
+**Example (Round 38):** `server/appRouter.ts` — module-level `new Redis()` crashed on cold start → Vercel plain-text 500.
+
+---
+
+### 10. Service Worker Offline Fallback Breaks tRPC Client
+
+**Symptom (Sentry — especially Safari):**
+```
+TRPCClientError: The string did not match the expected pattern.
+```
+
+**Root Cause:** `client/public/sw.js` `networkFirst()` returned `{"error":"offline"}` when offline — a plain JSON object, not a tRPC batch array. Safari reports this as "The string did not match the expected pattern" (its JSON structure mismatch error).
+
+**Fix:** Return a valid tRPC batch error for API calls:
+```javascript
+const isApiCall = new URL(request.url).pathname.startsWith("/api/");
+const body = isApiCall
+    ? JSON.stringify([{ error: { json: { message: "You appear to be offline.", code: -32603, data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 503, path: null } } } }])
+    : '{"error":"offline"}';
+```
+
+Also bump `CACHE_NAME` version to propagate the updated SW to existing users.
+
+**Prevention:** Any offline/error fallback response for `/api/` routes must match the tRPC batch format expected by the client.
+
+**Example (Round 38):** `sw.js` — offline fallback broke Safari tRPC parsing.
+
+---
+
+### 11. 3D Globe Cloud Overlay Geographic Offset (~90° Longitude)
+
+**Symptom:**
+Cloud cover patterns on the 3D globe appear shifted ~90° in longitude compared to the 2D Leaflet map. Cloud gaps over Europe on 2D appear over the US on 3D.
+
+**Root Cause:** `three-globe` internally applies `globeObj.rotation.y = -Math.PI / 2` to face the Prime Meridian along the Z-axis. The cloud mesh was added via `scene.add(cloudMesh)` (bypassing this rotation), while the visibility overlay used `globe.customLayerData().customThreeObject()` (which inherits the rotation).
+
+**Fix:** Apply the same rotation to the cloud mesh:
+```typescript
+cloudMesh.rotation.y = -Math.PI / 2; // Match three-globe's internal globe rotation
+scene.add(cloudMesh);
+```
+
+**Prevention:** Any Three.js mesh added directly to the globe scene must apply `rotation.y = -Math.PI / 2` to align with three-globe's internal coordinate system. Alternatively, use `globe.customLayerData().customThreeObject()` which handles this automatically.
+
+**Example (Round 38):** `GlobePage.tsx` — cloud sphere was unrotated → 90° offset from earth texture.
+
+---
+
+### 12. Cloud Cover Vertical Mismatch (Equirectangular vs Mercator)
+
+**Symptom:**
+Cloud patterns align horizontally between 3D globe and 2D map, but are shifted vertically (features appear further north on 2D map).
+
+**Root Cause:** The cloud texture was rendered in equirectangular projection (linear latitude spacing), which is correct for the 3D globe's sphere UV mapping but wrong for Leaflet's Web Mercator tiles. `L.imageOverlay` stretches the equirectangular image into Mercator pixel space, distorting latitude positions.
+
+**Fix:** Added a `projection` parameter to `renderCloudTexture()` in `useCloudOverlay.ts`:
+```typescript
+if (projection === "mercator") {
+    const mercatorY = Math.PI * (1 - 2 * py / H);
+    lat = (2 * Math.atan(Math.exp(mercatorY)) - Math.PI / 2) * 180 / Math.PI;
+} else {
+    lat = 90 - (py / H) * 180; // equirectangular
+}
+```
+GlobePage uses default `"equirectangular"`, MapPage passes `"mercator"`.
+
+**Prevention:** When overlaying equirectangular textures on Mercator maps, always re-project to Mercator first. Sphere-based renderers (Three.js) use equirectangular natively.
+
+**Example (Round 38):** `useCloudOverlay.ts` / `MapPage.tsx` — equirectangular texture on Mercator map → vertical distortion.
 
 ---
 
@@ -227,4 +336,4 @@ Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 
 ---
 
-*Last updated: February 26, 2026 (Round 37)*
+*Last updated: February 26, 2026 (Round 38)*
