@@ -45,6 +45,16 @@ export default async function handler(
         console.error("[tRPC handler] Unhandled error:", err);
         res.statusCode = 500;
         res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ error: { message: err?.message ?? "Internal server error", code: "INTERNAL_SERVER_ERROR" } }));
+        // Return a valid tRPC batch response so superjson.deserialize() succeeds on the client.
+        // A plain { error: ... } object causes "Unable to transform response from server".
+        res.end(JSON.stringify([{
+            error: {
+                json: {
+                    message: err?.message ?? "Internal server error",
+                    code: -32603,
+                    data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 500, path: path || null }
+                }
+            }
+        }]));
     }
 }
