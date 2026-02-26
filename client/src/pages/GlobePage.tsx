@@ -274,6 +274,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
         })
       );
       cloudMesh.name = "clouds-layer";
+      cloudMesh.rotation.y = -Math.PI / 2; // Match three-globe's internal globe rotation
       scene.add(cloudMesh);
 
       return () => {
