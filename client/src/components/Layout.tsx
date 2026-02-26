@@ -199,17 +199,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             {/* Desktop Only Actions */}
             <div className="hidden lg:flex items-center gap-0.5">
-              <button
-                onClick={() => setReportOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-medium magnetic transition-colors whitespace-nowrap flex-shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, #ef4444, #dc2626)",
-                  color: "#fff",
-                }}
-              >
-                <PlusCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>Report</span>
-              </button>
+              <div className="relative">
+                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 pointer-events-none">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-400" />
+                </span>
+                <button
+                  onClick={() => setReportOpen(true)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-medium magnetic transition-colors whitespace-nowrap flex-shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                    color: "#fff",
+                  }}
+                >
+                  <PlusCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>I saw the moon!</span>
+                </button>
+              </div>
 
               {/* Language Switcher */}
               <div className="relative">
@@ -465,18 +471,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </Link>
 
         <div className="relative -top-7 flex flex-col items-center mx-1">
-          <button
-            onClick={() => setReportOpen(true)}
-            className="w-14 h-14 rounded-[20px] flex items-center justify-center transition-transform active:scale-90"
-            style={{
-              background: "linear-gradient(135deg, #ef4444, #b91c1c)",
-              color: "#fff",
-              boxShadow: "0 8px 25px -4px rgba(239, 68, 68, 0.4), 0 0 0 4px var(--space) inset",
-              border: "4px solid var(--space)"
-            }}
-          >
-            <PlusCircle className="w-6 h-6" />
-          </button>
+          <div className="relative">
+            <span className="absolute inset-0 rounded-[20px] animate-ping bg-red-400/25 pointer-events-none" />
+            <button
+              onClick={() => setReportOpen(true)}
+              className="relative w-14 h-14 rounded-[20px] flex items-center justify-center transition-transform active:scale-90"
+              style={{
+                background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+                color: "#fff",
+                boxShadow: "0 8px 25px -4px rgba(239, 68, 68, 0.4), 0 0 0 4px var(--space) inset",
+                border: "4px solid var(--space)"
+              }}
+            >
+              <PlusCircle className="w-6 h-6" />
+            </button>
+          </div>
+          <span className="text-[9px] font-semibold mt-1.5" style={{ color: "#ef4444" }}>I saw it!</span>
         </div>
 
         <Link href="/calendar">

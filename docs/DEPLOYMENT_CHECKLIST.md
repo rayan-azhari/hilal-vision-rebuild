@@ -155,6 +155,28 @@ npx pnpm add exifr
 
 ---
 
+### 8. Globe Cloud Overlay Renders as Chrome Ball (`MeshPhongMaterial`)
+
+**Symptom:**
+Cloud cover layer on the 3D globe looks like a shiny metallic sphere — bright specular highlights on one side, dark shadows on the other, obscuring the earth underneath.
+
+**Root Cause:** `MeshPhongMaterial` is a physically lit material. The scene's directional light (simulating the sun) bounces off the pure-white cloud texture, creating Phong specular highlights. The result is a chrome-ball appearance instead of transparent white clouds.
+
+**Fix:** Switch to `MeshBasicMaterial` with `depthWrite: false`:
+```typescript
+// ❌ Wrong — physically lit, creates chrome-ball effect
+new THREE.MeshPhongMaterial({ map: texture, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+
+// ✅ Correct — unlit overlay, texture alpha controls transparency
+new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 1, depthWrite: false })
+```
+
+**Prevention:** For any transparent overlay mesh added to the globe scene (visibility, clouds, etc.) always use `MeshBasicMaterial`. `MeshPhongMaterial` / `MeshStandardMaterial` are for physical objects that should respond to scene lighting.
+
+**Example (Round 37):** `GlobePage.tsx` clouds-layer mesh — `MeshPhongMaterial` → chrome sphere. Fixed by switching to `MeshBasicMaterial + depthWrite: false`.
+
+---
+
 ### 7. PowerShell `&&` Chaining
 
 **Symptom:**
@@ -205,4 +227,4 @@ Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 
 ---
 
-*Last updated: February 26, 2026 (Round 36)*
+*Last updated: February 26, 2026 (Round 37)*

@@ -10,13 +10,15 @@ import {
   formatTime,
   type SunMoonData,
 } from "@/lib/astronomy";
+import { trpc } from "@/lib/trpc";
 import * as SunCalc from "suncalc";
 
 function drawHorizon(
   canvas: HTMLCanvasElement,
   data: SunMoonData,
   date: Date,
-  loc: { lat: number; lng: number }
+  loc: { lat: number; lng: number },
+  dipDeg: number
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -44,7 +46,7 @@ function drawHorizon(
   ctx.fillStyle = ground;
   ctx.fillRect(0, H * 0.75, W, H * 0.25);
 
-  // Horizon line
+  // Apparent horizon line (adjusted for observer elevation / dip)
   ctx.strokeStyle = "rgba(200,160,80,0.3)";
   ctx.lineWidth = 1;
   ctx.setLineDash([4, 8]);
@@ -53,6 +55,24 @@ function drawHorizon(
   ctx.lineTo(W, H * 0.75);
   ctx.stroke();
   ctx.setLineDash([]);
+
+  // Geometric 0° reference (only when elevation creates meaningful dip)
+  if (dipDeg > 0.05) {
+    const altToYLocal = (alt: number) => H * 0.75 - (alt / 45) * H * 0.5;
+    const geoY = altToYLocal(dipDeg);
+    ctx.strokeStyle = "rgba(150,150,150,0.25)";
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 10]);
+    ctx.beginPath();
+    ctx.moveTo(0, geoY);
+    ctx.lineTo(W, geoY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "9px Inter, sans-serif";
+    ctx.fillStyle = "rgba(150,150,150,0.4)";
+    ctx.textAlign = "left";
+    ctx.fillText("geometric 0°", 4, geoY - 2);
+  }
 
   // Stars
   const rng = (seed: number) => {
@@ -246,15 +266,23 @@ export default function HorizonPage() {
   const { date, location: loc } = useGlobalState();
   const [data, setData] = useState<SunMoonData | null>(null);
 
+  // Fetch real terrain elevation from Open-Meteo DEM API
+  const demQuery = trpc.dem.getDem.useQuery(
+    { lat: loc.lat, lng: loc.lng },
+    { staleTime: Infinity }
+  );
+  const elevation = demQuery.data?.elevation ?? 0;
+  const dipDeg = (1.76 * Math.sqrt(elevation)) / 60; // arcmin → degrees
+
   // Set document title
   useEffect(() => {
     // document.title managed by <SEO> component
   }, [loc.name]);
 
   useEffect(() => {
-    const d = computeSunMoonAtSunset(date, loc);
+    const d = computeSunMoonAtSunset(date, { ...loc, elevation });
     setData(d);
-  }, [date, loc.lat, loc.lng]);
+  }, [date, loc.lat, loc.lng, elevation]);
 
   useEffect(() => {
     if (!canvasRef.current || !data) return;
@@ -263,8 +291,8 @@ export default function HorizonPage() {
     canvas.height = canvas.offsetHeight * window.devicePixelRatio;
     const ctx = canvas.getContext("2d");
     if (ctx) ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    drawHorizon(canvas, data, date, loc);
-  }, [data, date]);
+    drawHorizon(canvas, data, date, loc, dipDeg);
+  }, [data, date, dipDeg]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -274,11 +302,11 @@ export default function HorizonPage() {
       canvas.height = canvas.offsetHeight * window.devicePixelRatio;
       const ctx = canvas.getContext("2d");
       if (ctx) ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      drawHorizon(canvas, data, date, loc);
+      drawHorizon(canvas, data, date, loc, dipDeg);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [data, date]);
+  }, [data, date, dipDeg]);
 
   const hijri = gregorianToHijri(date);
 
@@ -364,6 +392,8 @@ export default function HorizonPage() {
                   { label: "Elongation", value: `${data.elongation.toFixed(2)}°` },
                   { label: "Crescent Width", value: `${data.crescent.w.toFixed(3)}'` },
                   { label: "Yallop q", value: data.qValue.toFixed(4) },
+                  { label: "Terrain Elevation", value: elevation > 0 ? `${elevation.toFixed(0)} m` : "—" },
+                  { label: "Horizon Dip", value: dipDeg > 0.01 ? `${(dipDeg * 60).toFixed(1)}'` : "—" },
                   { label: "Sunset", value: formatTime(data.sunset) },
                   { label: "Maghrib", value: formatTime(data.maghrib) },
                   { label: "Moonset", value: formatTime(data.moonset) },

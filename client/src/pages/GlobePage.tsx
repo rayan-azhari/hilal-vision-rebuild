@@ -266,11 +266,11 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
       const geometry = new THREE.SphereGeometry(r * 1.004, 64, 64);
       const cloudMesh = new THREE.Mesh(
         geometry,
-        new THREE.MeshPhongMaterial({
+        new THREE.MeshBasicMaterial({
           map: texture,
           transparent: true,
-          opacity: 0.9,
-          side: THREE.DoubleSide,
+          opacity: 1,
+          depthWrite: false,
         })
       );
       cloudMesh.name = "clouds-layer";
