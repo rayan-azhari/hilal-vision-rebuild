@@ -121,36 +121,43 @@ import { publicProcedure, router } from "./_core/trpc.js";
 
 ---
 
-### 5. tRPC Handler Returns Non-Batch JSON (superjson Parse Error)
+### 5. tRPC Handler Returns Non-Batch JSON (superjson Parse Error / "Missing result")
 
 **Symptom (Sentry):**
 ```
 TRPCClientError: Unable to transform response from server
 TRPCClientError: Unexpected token 'A', "A server e"... is not valid JSON
+TRPCClientError: Missing result
 ```
 
-**Root Cause:** `api/trpc/[trpc].ts` catch block returned `{"error":{...}}` — a plain JSON object. The tRPC v11 client with `httpBatchLink` + `superjson` expects a **JSON array** in batch format: `[{"error":{"json":{...}}}]`. The plain object causes `superjson.deserialize()` to fail.
+**Root Cause:** Two related issues in `api/trpc/[trpc].ts`:
 
-**Fix:** The catch block must return a valid tRPC batch error array:
+1. Catch block returned `{"error":{...}}` — a plain JSON object. tRPC v11 with `httpBatchLink` + `superjson` expects a **JSON array**: `[{"error":{"json":{...}}}]`. Plain object causes `superjson.deserialize()` to fail → "Unable to transform".
+2. Catch block always returned a **single-element array**, even for multi-procedure batch requests (URL: `/api/trpc/proc1,proc2`). When a batch of N procedures fails, returning only 1 result means N−1 procedures find no entry → "Missing result".
+
+**Fix:** The catch block must return one error entry **per procedure** in the batch:
 ```typescript
 } catch (err: any) {
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify([{
+    // path may be "proc1,proc2" for batched requests
+    const procedures = path ? path.split(",") : [""];
+    const errorEntry = (proc: string) => ({
         error: {
             json: {
                 message: err?.message ?? "Internal server error",
                 code: -32603,
-                data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 500, path: path || null }
+                data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 500, path: proc || null }
             }
         }
-    }]));
+    });
+    res.end(JSON.stringify(procedures.map(errorEntry)));
 }
 ```
 
-**Prevention:** Always return `[{error:{json:{...}}}]` (array with `json` wrapper) from tRPC error handlers when using `httpBatchLink` + `superjson`.
+**Prevention:** Always return an array with one entry **per procedure** in the batch. Split `path` on commas to get the count. Never return a single-element array for a multi-procedure batch.
 
-**Example (Round 36–38):** Initially no catch → plain text. Then catch returned non-batch JSON → "Unable to transform". Final fix: proper batch array format.
+**Example (Round 36–38):** Initially no catch → plain text. Then catch returned non-batch JSON → "Unable to transform". Then catch returned single-element array → "Missing result" for extra procedures. Fixed in Round 39.
 
 ---
 
@@ -301,6 +308,31 @@ new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 1, depth
 
 ---
 
+### 13. Android Native "You appear to be offline" (CORS + credentials violation)
+
+**Symptom (Sentry — Android Capacitor app only):**
+```
+TRPCClientError: You appear to be offline. Please check your connection.
+  browser = Chrome Mobile WebView
+  url = https://localhost/...
+```
+
+**Root Cause:** In the Capacitor Android WebView the page origin is `https://localhost`. When the tRPC client makes cross-origin requests to `https://moon-dashboard-one.vercel.app/api/trpc`, it sends `credentials: "include"`. The server responds with `Access-Control-Allow-Origin: *`. The CORS spec **forbids** wildcard origins with credentialed requests — the browser blocks every request before it leaves the device, producing a `TypeError: Failed to fetch` which tRPC converts to "You appear to be offline."
+
+**Fix:** Use `credentials: "omit"` when running on a native Capacitor platform. Native apps use Clerk token/header auth, not browser session cookies, so omitting credentials loses nothing:
+```typescript
+// client/src/main.tsx
+credentials: Capacitor.isNativePlatform() ? "omit" : "include",
+```
+
+**Prevention:** Any cross-origin fetch from a Capacitor WebView (`https://localhost` origin) that targets `Allow-Origin: *` must NOT set `credentials: "include"`. If per-user auth is needed on native, pass the Clerk JWT as an `Authorization` header instead of relying on cookies.
+
+> **Note:** After this fix, a new Android AAB build and Play Store upload is required because `main.tsx` is bundled inside the APK — it is not fetched at runtime from the server.
+
+**Example (Round 39):** Samsung Galaxy S25 (Android 16, Chrome WebView 145) + older device (Chrome WebView 90) — all tRPC calls silently blocked by CORS on launch.
+
+---
+
 ### 7. PowerShell `&&` Chaining
 
 **Symptom:**
@@ -351,4 +383,4 @@ Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 
 ---
 
-*Last updated: February 26, 2026 (Round 38)*
+*Last updated: February 27, 2026 (Round 39)*

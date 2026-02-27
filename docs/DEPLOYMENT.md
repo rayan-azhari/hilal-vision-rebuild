@@ -135,7 +135,11 @@ npx cap open android
 > ```
 > **Rule: bump versionCode before every `git push` that targets a Play Store AAB build.** The `versionCode` is an integer that must strictly increase. Google Play rejects uploads with a previously used code. Forgetting this causes "Version code X has already been used" errors in Play Console.
 
-> **Capacitor Native URL:** The Android app's WebView uses `Capacitor.isNativePlatform()` in `client/src/main.tsx` to route tRPC calls to the absolute production URL (`https://moon-dashboard-one.vercel.app`) instead of the relative `/api/trpc` path (which would resolve to `https://localhost/api/trpc` in the WebView). Always run `npx cap sync` before building to bundle the latest frontend code.
+> **Capacitor Native URL & CORS:** The Android WebView origin is `https://localhost`. Two things must be true in `client/src/main.tsx`:
+> 1. `API_BASE` is set to the absolute production URL via `Capacitor.isNativePlatform()` so tRPC calls go to `https://moon-dashboard-one.vercel.app/api/trpc` instead of resolving to `https://localhost/api/trpc`.
+> 2. `credentials` is set to `"omit"` on native. The server uses `Access-Control-Allow-Origin: *`; combining a wildcard origin with `credentials: "include"` is a CORS spec violation — the browser blocks every request before it leaves the device, causing "You appear to be offline" errors for all users on Android. Native auth uses Clerk tokens/headers, not browser cookies, so `"omit"` is correct.
+>
+> Always run `npx cap sync` before building to bundle the latest frontend code.
 
 ### iOS Release Build
 
