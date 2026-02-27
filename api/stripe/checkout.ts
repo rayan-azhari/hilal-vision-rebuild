@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { createClerkClient } from "@clerk/backend";
+import { createClerkClient, verifyToken } from "@clerk/backend";
 import { setCorsHeaders } from "../_cors.js";
 import type { IncomingMessage, ServerResponse } from "http";
 
@@ -67,7 +67,7 @@ export default async function handler(req: IncomingMessage & { body?: any; url?:
         try {
             const clerk = createClerkClient({ secretKey: clerkSecretKey });
             const token = authHeader.slice(7);
-            const { sub } = await clerk.verifyToken(token);
+            const { sub } = await verifyToken(token, { secretKey: clerkSecretKey });
             if (sub) {
                 userId = sub;
                 const clerkUser = await clerk.users.getUser(sub);
