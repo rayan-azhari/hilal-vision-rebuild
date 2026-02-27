@@ -2,7 +2,7 @@
 
 The Hilal Vision Public REST API provides programmatic access to precision astronomical calculations for Islamic crescent moon visibility and lunar phases.
 
-**Base URL (Production):** `https://your-domain.com` (replace with actual production domain)
+**Base URL (Production):** `https://moon-dashboard-one.vercel.app`
 **Base Path:** `/api/v1`
 
 ---
@@ -23,7 +23,7 @@ Computes the sun and moon geometric positions at sunset for a specific location 
 
 #### Example Request
 ```bash
-curl "https://your-domain.com/api/v1/visibility?lat=21.4225&lng=39.8262&date=2024-03-10"
+curl "https://moon-dashboard-one.vercel.app/api/v1/visibility?lat=21.4225&lng=39.8262&date=2024-03-10"
 ```
 
 #### Example Response (200 OK)
@@ -71,7 +71,7 @@ Retrieves the current lunar phase, illumination details, and exact conjunction (
 
 #### Example Request
 ```bash
-curl "https://your-domain.com/api/v1/moon-phases?date=2024-03-10"
+curl "https://moon-dashboard-one.vercel.app/api/v1/moon-phases?date=2024-03-10"
 ```
 
 #### Example Response (200 OK)

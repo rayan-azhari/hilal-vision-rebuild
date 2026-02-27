@@ -33,18 +33,32 @@ git add . && git commit -m "deploy" && git push
 
 ```json
 {
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "npx vite build",
   "outputDirectory": "dist/public",
+  "framework": null,
+  "functions": {
+    "api/trpc/[trpc].ts":        { "includeFiles": "server/**" },
+    "api/stripe/checkout.ts":    { "includeFiles": "server/**" },
+    "api/stripe/webhook.ts":     { "includeFiles": "server/**" },
+    "api/revenuecat/webhook.ts": { "includeFiles": "server/**" },
+    "api/v1/[...path].ts":       { "includeFiles": "server/**" }
+  },
   "rewrites": [
-    { "source": "/api/trpc/:path*", "destination": "/api/trpc" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/api/stripe/checkout",  "destination": "/api/stripe/checkout" },
+    { "source": "/api/stripe/webhook",   "destination": "/api/stripe/webhook" },
+    { "source": "/api/revenuecat/webhook", "destination": "/api/revenuecat/webhook" },
+    { "source": "/api/trpc/:path*",      "destination": "/api/trpc/[trpc]" },
+    { "source": "/api/v1/:path*",        "destination": "/api/v1/[...path]" },
+    { "source": "/api/v1",               "destination": "/api/v1/[...path]" },
+    { "source": "/((?!api/).*)",         "destination": "/index.html" }
   ]
 }
 ```
 
 - **Build**: Runs `npx vite build` to generate static assets
 - **Output**: Serves from `dist/public/`
-- **Rewrites**: Routes `/api/trpc/*` to the serverless function; all other routes fall back to `index.html` for SPA routing
+- **Functions**: 5 serverless functions — tRPC API, Stripe checkout + webhook, RevenueCat webhook, and public REST API v1
+- **Rewrites**: Each `/api/*` route maps to its serverless function; all other routes fall back to `index.html` for SPA routing
 
 ### `api/trpc/[trpc].ts`
 
@@ -78,6 +92,9 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 | `STRIPE_PRICE_MONTHLY`       | Yes      | Stripe Price ID for the monthly Pro plan (`price_...`)               |
 | `STRIPE_PRICE_ANNUAL`        | Yes      | Stripe Price ID for the annual Pro plan (`price_...`)                |
 | `STRIPE_PRICE_LIFETIME`      | Yes      | Stripe Price ID for the lifetime Pro plan (`price_...`)              |
+| `REVENUECAT_WEBHOOK_AUTH`    | Yes      | Bearer token for RevenueCat webhook auth (`api/revenuecat/webhook.ts`) |
+| `VITE_REVENUECAT_APPLE_KEY`  | Yes (iOS) | RevenueCat Apple/iOS SDK key (client-side, Vite env var)           |
+| `VITE_REVENUECAT_GOOGLE_KEY` | Yes (Android) | RevenueCat Google/Android SDK key (client-side, Vite env var) |
 
 > **Stripe webhook endpoint:** `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 > Events to listen for: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
@@ -130,9 +147,11 @@ npx cap open android
 
 > **Version Code:** Google Play requires a unique `versionCode` for every AAB upload. **Before every Play Store build**, increment `versionCode` and `versionName` in `android/app/build.gradle`:
 > ```groovy
-> versionCode 4    // Current — increment this every upload (4 → 5 → 6...)
-> versionName "1.0.3"  // Human-readable version string
+> versionCode 6    // Current is 5 — increment before every upload (5 → 6 → 7...)
+> versionName "1.0.5"  // Human-readable version string
 > ```
+> **Current:** `versionCode 5` / `versionName "1.0.4"` (bumped Round 39)
+>
 > **Rule: bump versionCode before every `git push` that targets a Play Store AAB build.** The `versionCode` is an integer that must strictly increase. Google Play rejects uploads with a previously used code. Forgetting this causes "Version code X has already been used" errors in Play Console.
 
 > **Capacitor Native URL & CORS:** The Android WebView origin is `https://localhost`. Two things must be true in `client/src/main.tsx`:
@@ -152,7 +171,12 @@ npx cap sync ios
 ```
 
 3. **Open Xcode:** `npx cap open ios`
-4. **Build Archive:**
+4. **Sync iOS Version** ⚠️ — Before archiving, update the version in Xcode to match Android:
+   - Select the **App** target → **General** → **Identity**
+   - Set **Version** (MARKETING_VERSION) to match Android `versionName` (e.g. `1.0.4`)
+   - Set **Build** (CURRENT_PROJECT_VERSION) to match Android `versionCode` (e.g. `5`)
+   - **Current state:** iOS is at `1.0` / build `1`; Android is `1.0.4` / `5`. These must be aligned.
+5. **Build Archive:**
    - Ensure the Target is set to "Any iOS Device (arm64)".
    - Go to **Product** > **Archive**.
    - Use the Xcode Organizer to Distribute the App to App Store Connect.

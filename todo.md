@@ -114,32 +114,83 @@
 - [x] `useCloudOverlay` hook with bilinear interpolation canvas texture
 - [x] Fixed CSS @import ordering for Vite hot-reload
 
-## Feature Backlog
-- [ ] Server-side visibility grid precomputation
-- [ ] Educational "How to Sight the Moon" content
-- [ ] AR Moon Finder (Capacitor camera + WebGL)
-- [ ] Push notifications for sighting alerts
-- [x] Multi-language UI (Arabic, Urdu) — English, Arabic, Urdu with RTL support
-- [ ] Multi-language UI (Malay)
-- [ ] Photo upload for sighting reports
-- [ ] VSOP87/ELP2000 high-accuracy planetary theory
+## Completed (Rounds 10–39)
 
-## Phase 5: Advanced Astronomy & Telemetry
-- [ ] **Photo Uploads:** Allowing users to attach photos of the crescent to their sighting reports, integrating with cloud storage.
-- [ ] **Planetary Theory Upgrade:** Replacing SunCalc with ultra-high precision VSOP87/ELP2000 algorithms.
-- [ ] **Server-Side Grid Precomputation:** Setup cron job to precompute global grids on the backend.
+### Rounds 10–20: Pro Tier Infrastructure & Feature Gating
+- [x] `ProTierContext`, `ProGate`, `UpgradeModal` — full soft paywall system
+- [x] Feature gating: 3D Globe (click intercept), Cloud Cover toggle, Atmospheric Overrides (ProGate blur), Best Time to Observe (ProGate blur)
+- [x] Feature gating: Sky Dome + Ephemeris (MoonPage ProGate)
+- [x] Feature gating: Astronomical & Tabular calendar engines (CalendarPage)
+- [x] Feature gating: Archive years < 1463 AH (ArchivePage)
+- [x] Admin bypass: `moonsightinglive@gmail.com` always isPremium
+- [x] `/support` page with Sadaqah Jariyah framing, Feature Access Matrix, and 3-tier pricing cards
+- [x] i18n: English, Arabic, Urdu with full RTL direction support
+- [x] High Contrast accessibility color-blind mode (perceptual palette)
+- [x] Social sharing (ShareButton — Web Share API + clipboard fallback)
+- [x] JSON-LD structured data (`SoftwareApplication` schema), `sitemap.xml` via `vite-plugin-sitemap`
+- [x] `/about`, `/methodology`, `/privacy`, `/terms` informational pages
+- [x] Global Visibility Criterion switch (Yallop 1997 / Odeh 2004) across Globe + Map
 
-## Phase 6: Deep Mobile Integration (Capacitor)
-- [ ] **AR Moon Finder:** Use Capacitor camera APIs + device-orientation sensors.
-- [ ] **Malay Language:** Add Malay (ms) to i18n setup.
+### Rounds 21–35: Payments, Native Mobile & Pro Launch
+- [x] Stripe integration — Live mode (`sk_live_...`) for monthly, annual, lifetime plans + one-time donations ($5/$10/$25/$50)
+- [x] Stripe webhook (`api/stripe/webhook.ts`) — grants/revokes `isPro` in Clerk `publicMetadata`
+- [x] RevenueCat native billing (`@revenuecat/purchases-capacitor`) for iOS App Store / Google Play
+- [x] RevenueCat webhook (`api/revenuecat/webhook.ts`) — syncs INITIAL_PURCHASE, RENEWAL, CANCELLATION, EXPIRATION to Clerk
+- [x] Donations $10+ → `isPatron` Patron badge via webhook
+- [x] Sign-in required for checkout (prevents guest payment bug)
+- [x] Android App Bundle (.aab) — signed with `hilalvision.keystore`
+- [x] Capacitor native URL fix — `API_BASE` set to absolute Vercel URL on native
+- [x] Pro tier fully live (Round 35): all 6 gated features active
 
-## Phase 7: Mobile Publishing & Monetization (Next Steps)
-- [x] **Android Build:** Generate signed release App Bundle (.aab).
-- [ ] **Google Play Console:** Set up App listing, Data Safety, Privacy Policy.
-- [ ] **Play Store Internal Testing:** Upload .aab and test on Android devices.
-- [ ] **RevenueCat Integration:** Configure `@revenuecat/purchases-capacitor` Native SDK for In-App Purchases (Monthly/Annual/Lifetime).
-- [ ] **Apple App Store Connect:** Set up Apple Developer account, Certificates, and Provisioning Profiles.
-- [ ] **iOS Build:** Compile Xcode Archive on macOS and submit via TestFlight.
+### Round 36: Bug Fixes
+- [x] `exif-js` → `exifr` migration (fixes Android Chrome crash on photo upload)
+- [x] tRPC batch error fix — return one error entry **per procedure** in batch (fixed "Missing result")
+
+### Round 37: Globe Polish
+- [x] Cloud overlay chrome-ball fix — switched from `MeshPhongMaterial` to `MeshBasicMaterial` (no more specular sphere effect)
+- [x] Globe cloud mesh rotation fix — apply `rotation.y = -Math.PI / 2` for geographic alignment
+
+### Round 38: Stability & Service Worker Fixes
+- [x] Service Worker offline fallback fixed — return valid tRPC batch error array for `/api/` calls (fixes Safari "string did not match" error)
+- [x] Redis cold-start crash fixed — lazy getter pattern for `Ratelimit` + `Redis` initialization
+- [x] Cloud projection fix — `equirectangular` for globe (Three.js), `mercator` for 2D map (Leaflet)
+
+### Round 39: Android CORS & tRPC (Current)
+- [x] Android CORS fix — `credentials: Capacitor.isNativePlatform() ? "omit" : "include"` in `main.tsx`
+- [x] tRPC error handler final fix — split batch `path` on commas, return one error per procedure
+- [x] Android versionCode bumped to **5** / versionName **"1.0.4"**
+
+---
+
+## Future Backlog (as of Round 39)
+
+### Release Preparation
+- [ ] **Set `TESTING_DISABLE_PRO_GATE = false`** in `client/src/contexts/ProTierContext.tsx` before public release
+- [ ] **Sync iOS version in Xcode** — update MARKETING_VERSION to `1.0.4` and CURRENT_PROJECT_VERSION to `5` (currently at `1.0` / `1`)
+
+### Mobile & Monetization
+- [ ] Push Notifications (FCM + APNs) — `push_tokens` DB schema exists; Capacitor + Firebase wiring needed
+- [ ] Google Play Console — finalise Data Safety form, screenshots, store listing
+- [ ] Play Store Internal Testing → Open Testing → Production launch
+- [ ] iOS TestFlight → App Store Connect review submission
+- [ ] Subscription revocation pipeline — map `stripeCustomerId` → Clerk user ID in DB for `customer.subscription.deleted` webhook
+
+### Features
+- [ ] Photo uploads for sighting reports — form UI exists, no cloud storage backend
+- [ ] Real-time 29th-night feed — push trigger on the 29th of each Islamic month
+- [ ] Educational "How to Sight the Moon" content section
+- [ ] AR Moon Finder (Capacitor camera + device orientation sensors)
+
+### Scientific Accuracy
+- [ ] VSOP87 / ELP2000 high-accuracy planetary theory (replace SunCalc, ~0.3° precision → <1 arcsecond)
+- [ ] Server-side visibility grid precomputation (cron job → Redis cache → instant texture serving)
+
+### i18n
+- [ ] Malay language (4th i18n locale after EN/AR/UR)
+
+### Business
+- [ ] Tiered Developer API — rate-limited API keys with usage-based pricing
+- [ ] Mosque Widget — embeddable iframe for mosques ($10–$20/month B2B)
 
 ## Improvements (Round 6 — Audit & Code Quality)
 - [x] Comprehensive code audit (7.5/10 scorecard, competitive analysis, tiered action plan)

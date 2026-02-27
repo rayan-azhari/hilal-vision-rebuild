@@ -16,6 +16,9 @@ npm run build
 npx pnpm install --no-frozen-lockfile
 ```
 
+> [!WARNING]
+> **Before any public release or Play Store / App Store build, verify `TESTING_DISABLE_PRO_GATE = false` in `client/src/contexts/ProTierContext.tsx`.** When set to `true` (the current dev default), ALL users are treated as Pro/Premium and all paywalls are bypassed. This must be `false` for production monetization to work.
+
 > [!CAUTION]
 > **NEVER use `npm install <pkg>` in this project.** It creates `package-lock.json` conflicts and desyncs `pnpm-lock.yaml`. Always use `npx pnpm add <pkg>` (or `npx pnpm add -D <pkg>` for devDependencies).
 
@@ -26,13 +29,13 @@ npx pnpm install --no-frozen-lockfile
 >
 > Edit `android/app/build.gradle` before building:
 > ```groovy
-> versionCode 5    // ← always +1 from last upload (current: 4)
-> versionName "1.0.4"  // ← bump patch version to match
+> versionCode 6    // ← always +1 from last upload (current: 5)
+> versionName "1.0.5"  // ← bump patch version to match
 > ```
 >
 > Google Play rejects any AAB whose `versionCode` was already used. There is no way to reuse a code — it must strictly increase with every upload. Forgetting this causes the "Version code X has already been used" error in Play Console.
 >
-> **Current version:** `versionCode 4` / `versionName "1.0.3"` (bumped Round 39)
+> **Current version:** `versionCode 5` / `versionName "1.0.4"` (bumped Round 39)
 
 ---
 
@@ -333,6 +336,23 @@ credentials: Capacitor.isNativePlatform() ? "omit" : "include",
 
 ---
 
+### 14. iOS Version Out of Sync with Android
+
+**Symptom:**
+App Store Connect rejects the archive or users see `v1.0` on iOS while the Android Play Store shows `v1.0.4`. Inconsistent version display across platforms.
+
+**Root Cause:** The iOS `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `ios/App/App.xcodeproj/project.pbxproj` are not automatically updated when the Android `versionCode`/`versionName` in `android/app/build.gradle` is bumped. They must be updated manually in Xcode.
+
+**Fix:** Before every iOS App Store build, open Xcode (`npx cap open ios`), select the App target, go to **General** → **Identity**, and update:
+- **Version** (MARKETING_VERSION) — set to match Android `versionName` (e.g. `1.0.4`)
+- **Build** (CURRENT_PROJECT_VERSION) — set to match Android `versionCode` (e.g. `5`)
+
+**Current state:** iOS shows `1.0` / build `1`; Android is `1.0.4` / versionCode `5`. These need to be aligned before the next iOS App Store submission.
+
+**Prevention:** Add "Sync iOS version in Xcode" as a step in your iOS release checklist alongside the Android build step.
+
+---
+
 ### 7. PowerShell `&&` Chaining
 
 **Symptom:**
@@ -365,7 +385,7 @@ The token '&&' is not a valid statement separator in this version.
 - Output directory is `dist/public`
 - API routes live in `api/trpc/[trpc].ts` (serverless function)
 - ICOP data is served statically from `client/public/` to avoid serverless size limits
-- Environment variables needed: `DATABASE_URL` (optional), `CLERK_*`, `UPSTASH_*`, `STRIPE_*`
+- Environment variables needed: `DATABASE_URL` (optional), `CLERK_*`, `UPSTASH_*`, `STRIPE_*`, `REVENUECAT_WEBHOOK_AUTH`
 
 ### Stripe Production Config (Live Mode)
 

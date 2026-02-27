@@ -52,11 +52,11 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 
 A dedicated dashboard for the lunar cycle.
 - **Location & Date Settings** - Exact same geocoding and synchronized date offsets as the Visibility map.
-- **Sun & Moon Altitude Tracker** (top of page) - Interactive linear chart plotting Sun and Moon altitudes throughout the day.
-- **The Sky Dome** - Integrated custom SVG polar stereographic projection mapping azimuth and altitude. Both the Altitude Tracker and Sky Dome share a deeply synchronized time slider—changing one instantly updates the other for perfect alignment.
+- **Sun & Moon Altitude Tracker** *(Free)* (top of page) - Interactive linear chart plotting Sun and Moon altitudes throughout the day.
+- **The Sky Dome** *(Pro)* - Integrated custom SVG polar stereographic projection mapping azimuth and altitude. Both the Altitude Tracker and Sky Dome share a deeply synchronized time slider—changing one instantly updates the other for perfect alignment.
 - **Moon Illustration** - Accurate SVG rendering of the current phase with craters and terminator.
 - **Stats Grid** - Illumination, Lunar Age, Visibility Zone, Moon Altitude, Elongation, Next New Moon countdown with **exact conjunction time** displayed to the second.
-- **Ephemeris** - Sunrise, Sunset, Moonrise, and Moonset times.
+- **Ephemeris** *(Pro)* - Sunrise, Sunset, Moonrise, and Moonset times.
 - **30-Day Phase Calendar** - Visual strip of tiny moon phase icons for the surrounding month.
 - **Scientific Methodology** (bottom) - Pro-level section with:
   - **Yallop (1997) Criterion** explanation and formula
@@ -166,7 +166,7 @@ Hilal Vision's goodwill and monetization page, framed around the Islamic concept
 - **Why Your Support Matters** - Three pillars: Keep It Running (server costs), Keep It Accurate (calibration), Keep It Ad-Free.
 - **Feature Access Matrix** - Full comparison table of 13 features across Free and Pro tiers:
   - **Free**: 2D Map, Moon Phase basics, Umm al-Qura calendar, recent ICOP archive (1463-1465 AH), Horizon View, Sighting Reports.
-  - **Pro**: 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical & Tabular calendar engines, full ICOP archive (1438-1465 AH), Push Notifications, Ad-free.
+  - **Pro**: 3D Globe, Sky Dome, Ephemeris, Astronomical & Tabular calendar engines, full ICOP archive (1438-1465 AH), Push Notifications, Ad-free.
 - **Pricing Plans** - Three tiers: Monthly ($2.99), Annual ($14.99, "Most Popular"), Lifetime ($49.99).
 - **One-Time Donation** - Preset amounts ($5, $10, $25, $50). Donors of $10+ receive a **Golden Crescent** Patron badge on their sighting reports. *(Note: Due to Apple/Google IAP charity policies, one-time donations are only available on the Web platform).*
 
@@ -189,7 +189,7 @@ Hilal Vision uses a **soft paywall** model: all features are visible from Day 1,
 | Visibility (Globe + Map) | Cloud Cover Overlay | Toggle visible, locked on click |
 | Visibility (Globe + Map) | Atmospheric Overrides (Temp/Pressure) | Blurred ProGate overlay |
 | Visibility (Globe + Map) | Best Time to Observe | Blurred ProGate overlay |
-| Moon Phase | Sky Dome, Altitude Chart, Ephemeris | Basic illumination, age, phase |
+| Moon Phase | Sky Dome, Ephemeris | Altitude Chart (free) + basic illumination, age, phase |
 | Calendar | Astronomical & Tabular engines | Umm al-Qura only |
 | Archive | Years before 1463 AH | 1463-1465 AH (3 most recent) |
 

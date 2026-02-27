@@ -1,6 +1,6 @@
 # Hilal Vision - Full Application Documentation
 
-**Version:** Round 38 (current)
+**Version:** Round 39 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -656,7 +656,8 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 | Atmospheric Overrides | 🔒 Locked | ✅ Temp, Pressure, Elevation |
 | Best Time to Observe | 🔒 Locked | ✅ Optimal window + conditions |
 | Moon Phase (Basic) | ✅ Illumination, age, phase | ✅ Full dashboard |
-| Sky Dome & Altitude Chart | 🔒 Blurred preview | ✅ Full interactive |
+| Sun & Moon Altitude Chart | ✅ Free (full access) | ✅ Full interactive |
+| Sky Dome | 🔒 Blurred preview | ✅ Full interactive |
 | Ephemeris Data | 🔒 Blurred preview | ✅ Full times |
 | Hijri Calendar (Umm al-Qura) | ✅ Full access | ✅ Full access |
 | Astronomical & Tabular Engines | 🔒 Locked | ✅ All 3 engines |
@@ -690,4 +691,4 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 | Tiered Developer API | 🔮 Future | Rate-limited API keys with usage-based pricing |
 | Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
 
-*Documentation updated February 26, 2026 (Round 38 - Android Play Store & Production Stability). For the latest feature status, see `todo.md`.*
+*Documentation updated February 27, 2026 (Round 39 - Android CORS fix, tRPC batch error per-procedure fix, Android versionCode 5 / 1.0.4). For the latest feature status, see `todo.md`.*
