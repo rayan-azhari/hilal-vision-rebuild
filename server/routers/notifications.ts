@@ -40,7 +40,7 @@ export const notificationsRouter = router({
                 return { success: true };
             } catch (error) {
                 console.error("[Push] Failed to save token:", error);
-                throw new Error("Failed to save push token");
+                throw new Error("Failed to save push token", { cause: error });
             }
         }),
 });

@@ -40,7 +40,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 tiff: true,
                 exif: true,
                 ifd0: true,
-            });
+            } as any);
 
             if (!exif) {
                 setErrors(prev => ({ ...prev, exif: "No EXIF data found in image." }));
