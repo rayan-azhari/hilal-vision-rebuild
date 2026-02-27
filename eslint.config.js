@@ -42,7 +42,8 @@ export default tseslint.config(
       "no-new-func": "error",
 
       // Catch common bugs
-      eqeqeq: ["error", "always"],
+      // null: "ignore" allows the idiomatic `!= null` check (catches both null and undefined)
+      eqeqeq: ["error", "always", { null: "ignore" }],
       "no-var": "error",
       "prefer-const": "warn",
     },
@@ -58,10 +59,12 @@ export default tseslint.config(
   },
 
   // Relax rules for server/API files (console needed for operational logging)
+  // no-explicit-any is off because API/server code legitimately handles untyped JSON at HTTP boundaries
   {
     files: ["server/**", "api/**"],
     rules: {
       "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 

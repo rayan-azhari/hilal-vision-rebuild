@@ -73,7 +73,7 @@ export default async function handler(req: IncomingMessage & { body?: any; url?:
                 const clerkUser = await clerk.users.getUser(sub);
                 userEmail = clerkUser.emailAddresses?.[0]?.emailAddress;
             }
-        } catch (err) {
+        } catch {
             console.error("[Stripe Checkout] Failed to verify Clerk token");
         }
     }

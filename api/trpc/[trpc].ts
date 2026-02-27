@@ -18,7 +18,7 @@ export default async function handler(
     if (setCorsHeaders(req, res, { allowHeaders: "Content-Type, Authorization" })) return;
 
     // Extract TRPC path from Vercel query or URL
-    let path = "";
+    let path: string;
     if (req.query && req.query.trpc) {
         path = Array.isArray(req.query.trpc) ? req.query.trpc.join("/") : req.query.trpc;
     } else {

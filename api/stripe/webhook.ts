@@ -51,7 +51,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     try {
         const rawBody = await getRawBody(req);
         event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    } catch (err: any) {
+    } catch {
         console.error("[Stripe Webhook] Signature verification failed");
         res.statusCode = 400;
         res.end("Webhook signature verification failed");
