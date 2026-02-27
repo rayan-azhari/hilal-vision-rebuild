@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useUser, useClerk } from "@clerk/clerk-react";
+import { useUser, useClerk, useAuth } from "@clerk/clerk-react";
 import { Capacitor } from "@capacitor/core";
 import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
 
@@ -30,6 +30,7 @@ const ProTierContext = createContext<ProTierContextType | undefined>(undefined);
 export function ProTierProvider({ children }: { children: ReactNode }) {
     const { user, isLoaded } = useUser();
     const { openSignIn } = useClerk();
+    const { getToken } = useAuth();
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
     const [nativeHasPro, setNativeHasPro] = useState(false);
@@ -98,9 +99,13 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
 
         setCheckoutLoading(true);
         try {
+            const sessionToken = await getToken();
             const res = await fetch("/api/stripe/checkout", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+                },
                 body: JSON.stringify({
                     planId: opts.planId,
                     donationAmount: opts.donationAmount,

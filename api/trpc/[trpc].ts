@@ -1,6 +1,7 @@
 import { nodeHTTPRequestHandler } from "@trpc/server/adapters/node-http";
 import { appRouter } from "../../server/appRouter.js";
 import { createContext } from "../../server/_core/context.js";
+import { setCorsHeaders } from "../_cors.js";
 import type { IncomingMessage, ServerResponse } from "http";
 
 export const config = {
@@ -13,17 +14,8 @@ export default async function handler(
     req: IncomingMessage & { url: string; query?: { trpc?: string | string[] } },
     res: ServerResponse
 ) {
-    // Enable CORS
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Request-Method", "*");
-    res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
-    res.setHeader("Access-Control-Allow-Headers", "*");
-
-    if (req.method === "OPTIONS") {
-        res.statusCode = 200;
-        res.end();
-        return;
-    }
+    // CORS with origin whitelisting
+    if (setCorsHeaders(req, res, { allowHeaders: "Content-Type, Authorization" })) return;
 
     // Extract TRPC path from Vercel query or URL
     let path = "";

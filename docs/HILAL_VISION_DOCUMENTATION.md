@@ -1,6 +1,6 @@
 # Hilal Vision - Full Application Documentation
 
-**Version:** Round 39 (current)
+**Version:** Round 40 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -573,13 +573,48 @@ Authentication utilizes **Clerk Auth**, integrating seamlessly with Express on t
 
 ## 9. Testing
 
-The test suite (`server/astronomy.test.ts`) contains 21 unit tests covering the core astronomical calculation functions. Tests import directly from the production `shared/astronomy.ts` module - not duplicated inline copies - ensuring tests validate the actual production code. Tests are written with Vitest and run with `pnpm test`.
+### 9.1 Unit Tests (Vitest)
 
-The test suite covers six areas. The **Yallop q-value classification** tests verify that the zone boundaries (A, B, C, D, E, F) are correctly applied for representative q-values and moon altitudes. The **crescent width calculation** tests verify that the W formula produces physically reasonable values (near-zero for small elongation, increasing with elongation, semi-diameter approximately 15 arcminutes at mean lunar distance). The **Hijri calendar conversion** tests verify known date conversions (e.g., 2024-03-10 → Sha'ban/Ramadan 1445 AH). The **Yallop q-value formula** tests verify the polynomial formula against hand-computed values. The **degree/radian conversion** tests verify the utility functions with round-trip identity checks. The **best-time-to-observe** tests verify the observation window calculator returns valid windows with non-negative scores.
+The unit test suite covers 89 tests across 4 test files. All tests import directly from the production source modules — not duplicated inline copies — ensuring tests validate actual production code. Run with `pnpm test`.
 
-**End-to-End (E2E) Testing:** Core application flows (Visibility Toggling, Location Selecting) and asynchronous data resolution (e.g. Best-Time computation) are automated locally utilizing Playwright in chromium environments (`pnpm test:e2e`).
+| Test File | Tests | Coverage Area |
+|---|---|---|
+| `server/astronomy.test.ts` | 21 | Yallop Q-value, crescent width, Hijri conversion, degree/radian, best-time |
+| `server/calendar.test.ts` | 20 | All 3 Hijri calendar engines, cross-engine consistency, Umm al-Qura, month names |
+| `server/visibility.test.ts` | 38 | Sunset computation, Yallop/Odeh classification boundaries, visibility grid, moon phase, new-moon finder |
+| `api/_cors.test.ts` | 10 | CORS origin whitelisting — allowed origins, blocked origins, Capacitor, preflight |
 
-All tests pass as of the current version.
+**Astronomy Test Details:**
+- **Yallop classification** — all zone boundaries (A≥0.216, B≥-0.014, C≥-0.160, D≥-0.232, E<-0.232, F=moon below horizon) tested with representative q-values
+- **Odeh classification** — zone boundaries tested at known V-values
+- **Crescent width** — monotonically increases with elongation; semi-diameter is ~15 arcmin at mean distance; zero at zero elongation
+- **Calendar engines** — all 3 engines (astronomical, tabular/Meeus, Umm al-Qura) cross-validated against each other; all 12 month names tested; round-trip Hijri↔Gregorian
+- **Visibility grid** — correct zone distribution; Odeh/Yallop modes; finer resolution produces more grid points
+- **CORS** — wildcard origin blocked; known Vercel/Capacitor/localhost origins pass; preflight returns 204
+
+### 9.2 End-to-End Tests (Playwright)
+
+E2E tests run against a locally served development build (`pnpm test:e2e`). Tests run in Chromium.
+
+| Test File | Tests | Coverage Area |
+|---|---|---|
+| `e2e/visibility.spec.ts` | 2 | Leaflet map loads, Yallop/Odeh criteria toggle |
+| `e2e/astronomy.spec.ts` | 1 | Best Time to Observe card renders |
+| `e2e/navigation.spec.ts` | 8 | Page routing, responsive viewports (mobile/tablet), dark mode |
+
+### 9.3 Running Tests
+
+```bash
+pnpm test          # Unit tests (Vitest)
+pnpm test:e2e      # E2E tests (Playwright — requires dev server)
+pnpm lint          # ESLint
+pnpm check         # TypeScript type check
+pnpm ci            # Full pipeline: lint → type-check → test → build
+```
+
+### 9.4 CI/CD
+
+A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push and pull request to `main`. It runs four parallel jobs: **Lint**, **Type Check**, **Unit Tests**, and **Build** (conditional on all three passing). The pipeline uses `pnpm@10` and Node 20.
 
 ---
 
@@ -627,6 +662,8 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 36 | Production Bug Fixes | Fixed Sentry-reported `TRPCClientError` — `api/trpc/[trpc].ts` had no error handling, causing Vercel to return plain-text on failures which broke the tRPC JSON parser; added try/catch returning structured JSON. Replaced `exif-js` (unmaintained, crashes on Android Chrome 145 with `ReferenceError: n is not defined` in image onload callback) with `exifr` (modern Promise-based EXIF library). Added THREE.js geometry/material disposal cleanup to `GlobePage.tsx` texture overlay effects to prevent WebGL resource leaks on navigation. |
 | 37 | UX & Rendering Fixes | Fixed 3D globe cloud overlay appearing as chrome-ball: switched from `MeshPhongMaterial` (lighting-aware, creating specular highlights) to `MeshBasicMaterial` with `depthWrite: false` (unlit overlay, correct transparency). Integrated DEM terrain elevation into Horizon View via `trpc.dem.getDem` — feeds real elevation into `computeSunMoonAtSunset`, adds a faint "geometric 0°" reference line on the canvas, and shows Terrain Elevation + Horizon Dip rows in the side panel. Added "I saw the moon!" CTA text and pulsing red ring/dot animation to the Report Sighting button (desktop + mobile) to improve user engagement. |
 | 38 | Android Play Store & Production Stability | **Android Play Store prep:** Generated all mipmap icons/splash screens via `@capacitor/assets`, patched RevenueCat ProGuard error, fixed Capacitor WebView tRPC URL (relative `/api/trpc` → absolute production URL via `Capacitor.isNativePlatform()` check in `main.tsx`). **Serverless stability:** Deferred Upstash Redis/Ratelimit initialization from module-level to lazy getter with try-catch — prevents Vercel cold-start crashes when Upstash is temporarily unreachable. Fixed tRPC catch block to return valid batch array format `[{error:{json:{...}}}]` instead of plain JSON (fixes superjson deserialization failures). **Service Worker:** Offline fallback now returns tRPC-compatible batch error for `/api/` calls instead of `{"error":"offline"}`. Bumped SW cache to v2. **Cloud cover alignment:** Fixed 3D globe cloud overlay ~90° longitude offset — applied `rotation.y = -Math.PI/2` to match `three-globe`'s internal globe rotation. Added Mercator projection mode to `renderCloudTexture()` so 2D Leaflet map gets correctly projected cloud texture (equirectangular for globe, Mercator for map). |
+| 39 | Android CORS Fix & tRPC Batch Error Hardening | Fixed Android native "You appear to be offline" error caused by `credentials: "include"` with `Access-Control-Allow-Origin: *` violating CORS spec in Capacitor WebView (`https://localhost` origin). Fix: `credentials: Capacitor.isNativePlatform() ? "omit" : "include"` in `main.tsx`. Hardened tRPC batch error handler to return one error entry per procedure name in the batch — a single-element array for an N-procedure batch caused "Missing result" on the client. |
+| 40 | Security Hardening & Quality Infrastructure | **Phase 1 — Security:** Replaced wildcard CORS (`*`) with origin whitelist (`api/_cors.ts`) covering moonsighting.live, Vercel preview, Capacitor iOS/Android origins, local dev. RevenueCat webhook now fails closed (503) if `REVENUECAT_WEBHOOK_AUTH` not set. Stripe subscription revocation implemented — `customer.subscription.deleted` + `invoice.payment_failed` now search Clerk users by `stripeCustomerId` and revoke Pro (lifetime plans skipped). Added `adminProcedure` middleware (checks `OWNER_OPEN_ID`) gating `notifyOwner`. Stripe checkout now verifies Clerk session token server-side from `Authorization` header — userId no longer trusted from request body. Rate limiter now fails closed (throws) if Upstash credentials missing. Security headers added via `vercel.json` (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`). Express body limit reduced 50MB → 10MB. PII sanitized from all webhook/checkout production logs. **Phase 2 — Quality:** Added ESLint flat config (`eslint.config.js`) with `typescript-eslint`, `react-hooks`, `prettier` compat, `no-console` enforcement. Added `.prettierrc` + `.prettierignore`. Added GitHub Actions CI pipeline (lint → type-check → test → build). Expanded test suite from 21 → **89 tests** across 4 files: calendar engine tests (20), visibility computation tests (38), CORS utility tests (10). Added `e2e/navigation.spec.ts` (8 Playwright tests for routing, responsive viewports, dark mode). |
 
 ---
 

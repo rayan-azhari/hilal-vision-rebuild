@@ -1,0 +1,7 @@
+dist/
+node_modules/
+android/
+ios/
+pnpm-lock.yaml
+patches/
+*.md

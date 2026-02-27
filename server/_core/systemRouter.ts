@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { notifyOwner } from "./notification.js";
-import { protectedProcedure, publicProcedure, router } from "./trpc.js";
+import { adminProcedure, publicProcedure, router } from "./trpc.js";
 
 export const systemRouter = router({
   health: publicProcedure
@@ -13,7 +13,7 @@ export const systemRouter = router({
       ok: true,
     })),
 
-  notifyOwner: protectedProcedure
+  notifyOwner: adminProcedure
     .input(
       z.object({
         title: z.string().min(1, "title is required"),

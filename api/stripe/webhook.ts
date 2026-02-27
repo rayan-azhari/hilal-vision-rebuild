@@ -52,9 +52,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         const rawBody = await getRawBody(req);
         event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (err: any) {
-        console.error("[Stripe Webhook] Signature verification failed:", err.message);
+        console.error("[Stripe Webhook] Signature verification failed");
         res.statusCode = 400;
-        res.end(`Webhook signature error: ${err.message}`);
+        res.end("Webhook signature verification failed");
         return;
     }
 
@@ -66,7 +66,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
                 const userId = session.client_reference_id;
                 const meta = session.metadata ?? {};
 
-                console.log(`[Stripe Webhook] checkout.session.completed — userId=${userId}, type=${meta.type}, plan=${meta.plan}`);
+                console.log(`[Stripe Webhook] checkout.session.completed — type=${meta.type}, plan=${meta.plan}`);
 
                 if (userId && clerkSecretKey) {
                     const clerk = createClerkClient({ secretKey: clerkSecretKey });
@@ -81,7 +81,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
                                 proGrantedAt: new Date().toISOString(),
                             },
                         });
-                        console.log(`[Stripe Webhook] Granted Pro to Clerk user ${userId} (plan: ${meta.plan})`);
+                        console.log(`[Stripe Webhook] Granted Pro (plan: ${meta.plan})`);
                     } else if (meta.type === "donation" && Number(meta.amount?.replace("$", "")) >= 10) {
                         // $10+ donation → grant Patron badge
                         await clerk.users.updateUserMetadata(userId, {
@@ -90,7 +90,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
                                 patronSince: new Date().toISOString(),
                             },
                         });
-                        console.log(`[Stripe Webhook] Granted Patron badge to Clerk user ${userId}`);
+                        console.log(`[Stripe Webhook] Granted Patron badge`);
                     }
                 } else {
                     console.warn("[Stripe Webhook] No userId or Clerk key — skipping metadata update");
@@ -98,31 +98,55 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
                 break;
             }
 
-            case "customer.subscription.deleted": {
-                // Subscription cancelled / expired
-                const subscription = event.data.object as Stripe.Subscription;
-                const customerId = subscription.customer as string;
-
-                console.log(`[Stripe Webhook] Subscription deleted for customer ${customerId}`);
-
-                if (clerkSecretKey) {
-                    const clerk = createClerkClient({ secretKey: clerkSecretKey });
-                    // Find user by stripeCustomerId in publicMetadata
-                    const users = await clerk.users.getUserList({ limit: 1 });
-                    // Note: In production you'd store a userId→customerId mapping in DB for efficient lookup.
-                    // For now, if you have a small user base, iterate. Better: store in DB at checkout time.
-                    console.warn(
-                        `[Stripe Webhook] Subscription deleted for Stripe customer ${customerId}. ` +
-                        `Revocation requires stripeCustomerId->clerkUserId lookup. Implement DB mapping for production.`
-                    );
-                }
-                break;
-            }
-
+            case "customer.subscription.deleted":
             case "invoice.payment_failed": {
-                const invoice = event.data.object as Stripe.Invoice;
-                console.warn(`[Stripe Webhook] Payment failed for customer ${invoice.customer}`);
-                // Same caveat as above — needs customer→clerk user mapping
+                // Subscription cancelled/expired or payment failed — revoke Pro
+                const obj = event.data.object as any;
+                const customerId = (obj.customer ?? obj.customer_id) as string;
+
+                console.log(`[Stripe Webhook] ${event.type} for Stripe customer`);
+
+                if (clerkSecretKey && customerId) {
+                    const clerk = createClerkClient({ secretKey: clerkSecretKey });
+
+                    // Search Clerk users — stripeCustomerId is stored in publicMetadata at checkout
+                    // Paginate through users to find the match (Clerk doesn't support metadata search)
+                    let found = false;
+                    let offset = 0;
+                    const PAGE_SIZE = 100;
+
+                    while (!found) {
+                        const users = await clerk.users.getUserList({ limit: PAGE_SIZE, offset });
+                        if (users.data.length === 0) break;
+
+                        for (const user of users.data) {
+                            const meta = user.publicMetadata as any;
+                            if (meta?.stripeCustomerId === customerId && meta?.isPro === true) {
+                                // Only revoke if they are on a subscription plan (not lifetime)
+                                if (meta.plan === "lifetime") {
+                                    console.log(`[Stripe Webhook] Skipping revocation — user has lifetime plan`);
+                                } else {
+                                    await clerk.users.updateUserMetadata(user.id, {
+                                        publicMetadata: {
+                                            isPro: false,
+                                            proRevokedAt: new Date().toISOString(),
+                                        },
+                                    });
+                                    console.log(`[Stripe Webhook] Revoked Pro — subscription ended`);
+                                }
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (users.data.length < PAGE_SIZE) break;
+                        offset += PAGE_SIZE;
+                    }
+
+                    if (!found) {
+                        console.warn(`[Stripe Webhook] Could not find Clerk user for Stripe customer`);
+                    }
+                }
                 break;
             }
 
@@ -134,7 +158,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ received: true }));
     } catch (err: any) {
-        console.error("[Stripe Webhook] Handler error:", err);
+        console.error("[Stripe Webhook] Handler error:", err?.message ?? "unknown");
         res.statusCode = 500;
         res.end("Webhook handler error");
     }

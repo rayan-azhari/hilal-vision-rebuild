@@ -22,16 +22,19 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
         return;
     }
 
-    // Verify RevenueCat webhook authorization header
-    if (revenuecatWebhookAuth) {
-        const authHeader = req.headers["authorization"];
-        if (authHeader !== `Bearer ${revenuecatWebhookAuth}`) {
-            res.statusCode = 401;
-            res.end(JSON.stringify({ error: "Unauthorized" }));
-            return;
-        }
-    } else {
-        console.warn("[RevenueCat Webhook] Warning: REVENUECAT_WEBHOOK_AUTH not set. Endpoint is unsecured.");
+    // Verify RevenueCat webhook authorization header (fail closed)
+    if (!revenuecatWebhookAuth) {
+        console.error("[RevenueCat Webhook] REVENUECAT_WEBHOOK_AUTH not configured. Rejecting request.");
+        res.statusCode = 503;
+        res.end(JSON.stringify({ error: "Webhook auth not configured" }));
+        return;
+    }
+
+    const authHeader = req.headers["authorization"];
+    if (authHeader !== `Bearer ${revenuecatWebhookAuth}`) {
+        res.statusCode = 401;
+        res.end(JSON.stringify({ error: "Unauthorized" }));
+        return;
     }
 
     let body: any;
@@ -52,7 +55,7 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
 
     const { type, app_user_id, entitlements } = event;
 
-    console.log(`[RevenueCat Webhook] Received ${type} for user ${app_user_id}`);
+    console.log(`[RevenueCat Webhook] Received ${type}`);
 
     if (!app_user_id) {
         res.statusCode = 400;
@@ -79,7 +82,7 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
                             proGrantedAt: new Date().toISOString()
                         },
                     });
-                    console.log(`[RevenueCat Webhook] Granted Pro to Clerk user ${app_user_id}`);
+                    console.log(`[RevenueCat Webhook] Granted Pro`);
                 }
                 break;
             }
@@ -95,7 +98,7 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
                         proSource: null
                     },
                 });
-                console.log(`[RevenueCat Webhook] Revoked Pro from Clerk user ${app_user_id}`);
+                console.log(`[RevenueCat Webhook] Revoked Pro`);
                 break;
             }
 

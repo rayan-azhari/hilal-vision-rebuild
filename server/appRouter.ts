@@ -83,21 +83,23 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        // Rate limit by IP using Upstash
+        // Rate limit by IP using Upstash (fail closed if not configured)
         const ratelimit = getRateLimiter();
-        if (ratelimit) {
-          let ip = "unknown";
-          if (ctx.req && "headers" in ctx.req) {
-            const reqAny = ctx.req as any;
-            ip = typeof reqAny.headers?.get === "function"
-              ? (reqAny.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown")
-              : (reqAny.headers["x-forwarded-for"]?.toString().split(",")[0] ?? reqAny.socket?.remoteAddress ?? "unknown");
-          }
+        if (!ratelimit) {
+          throw new Error("Rate limiting is not configured. Submissions are temporarily unavailable.");
+        }
 
-          const { success } = await ratelimit.limit(ip);
-          if (!success) {
-            throw new Error("Rate limit exceeded. Please wait before submitting again.");
-          }
+        let ip = "unknown";
+        if (ctx.req && "headers" in ctx.req) {
+          const reqAny = ctx.req as any;
+          ip = typeof reqAny.headers?.get === "function"
+            ? (reqAny.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown")
+            : (reqAny.headers["x-forwarded-for"]?.toString().split(",")[0] ?? reqAny.socket?.remoteAddress ?? "unknown");
+        }
+
+        const { success } = await ratelimit.limit(ip);
+        if (!success) {
+          throw new Error("Rate limit exceeded. Please wait before submitting again.");
         }
 
         const db = await getDb();

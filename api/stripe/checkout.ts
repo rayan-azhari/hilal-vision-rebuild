@@ -1,4 +1,6 @@
 import Stripe from "stripe";
+import { createClerkClient } from "@clerk/backend";
+import { setCorsHeaders } from "../_cors.js";
 import type { IncomingMessage, ServerResponse } from "http";
 
 export const config = {
@@ -22,16 +24,8 @@ const DONATION_AMOUNTS: Record<string, number> = {
 };
 
 export default async function handler(req: IncomingMessage & { body?: any; url?: string }, res: ServerResponse) {
-    // CORS headers
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-    if (req.method === "OPTIONS") {
-        res.statusCode = 200;
-        res.end();
-        return;
-    }
+    // CORS with origin whitelisting
+    if (setCorsHeaders(req, res, { allowHeaders: "Content-Type, Authorization" })) return;
 
     if (req.method !== "POST") {
         res.statusCode = 405;
@@ -61,8 +55,36 @@ export default async function handler(req: IncomingMessage & { body?: any; url?:
         return;
     }
 
-    const { planId, donationAmount, userId, userEmail } = body;
-    const origin = req.headers.origin ?? req.headers.referer ?? "https://hilalvision.com";
+    const { planId, donationAmount } = body;
+
+    // Extract userId from Clerk session token (server-side verification)
+    let userId: string | undefined;
+    let userEmail: string | undefined;
+    const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+    const authHeader = req.headers.authorization as string | undefined;
+
+    if (clerkSecretKey && authHeader?.startsWith("Bearer ")) {
+        try {
+            const clerk = createClerkClient({ secretKey: clerkSecretKey });
+            const token = authHeader.slice(7);
+            const { sub } = await clerk.verifyToken(token);
+            if (sub) {
+                userId = sub;
+                const clerkUser = await clerk.users.getUser(sub);
+                userEmail = clerkUser.emailAddresses?.[0]?.emailAddress;
+            }
+        } catch (err) {
+            console.error("[Stripe Checkout] Failed to verify Clerk token");
+        }
+    }
+
+    // Fallback to body for backwards compatibility (e.g. during migration)
+    if (!userId) {
+        userId = body.userId;
+        userEmail = body.userEmail;
+    }
+
+    const origin = req.headers.origin ?? req.headers.referer ?? "https://moonsighting.live";
 
     try {
         let session: Stripe.Checkout.Session;
@@ -128,8 +150,8 @@ export default async function handler(req: IncomingMessage & { body?: any; url?:
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ url: session.url }));
     } catch (err: any) {
-        console.error("[Stripe Checkout]", err);
+        console.error("[Stripe Checkout] Error:", err?.type ?? "unknown", err?.code ?? "");
         res.statusCode = 500;
-        res.end(JSON.stringify({ error: err.message ?? "Stripe error" }));
+        res.end(JSON.stringify({ error: "Checkout failed. Please try again." }));
     }
 }

@@ -9,8 +9,14 @@ A reference for avoiding build and deployment failures. Every item here was lear
 Run these **before every `git push`**:
 
 ```bash
-# 1. Build check (catches TypeScript errors, missing imports, Rollup failures)
-npm run build
+# 1. Full CI pipeline (lint + type-check + unit tests + build)
+pnpm ci
+
+# Or individually:
+pnpm lint          # ESLint (must pass — no errors)
+pnpm check         # TypeScript type check
+pnpm test          # Unit tests (89 tests must pass)
+pnpm vercel-build  # Vite build check
 
 # 2. Verify pnpm lockfile is in sync (Vercel uses frozen-lockfile by default)
 npx pnpm install --no-frozen-lockfile
@@ -18,6 +24,21 @@ npx pnpm install --no-frozen-lockfile
 
 > [!WARNING]
 > **Before any public release or Play Store / App Store build, verify `TESTING_DISABLE_PRO_GATE = false` in `client/src/contexts/ProTierContext.tsx`.** When set to `true` (the current dev default), ALL users are treated as Pro/Premium and all paywalls are bypassed. This must be `false` for production monetization to work.
+
+### Security Pre-Release Checklist (Round 40+)
+
+The following must be confirmed before every store submission or major deployment:
+
+- [ ] `TESTING_DISABLE_PRO_GATE = false` in `ProTierContext.tsx`
+- [ ] `REVENUECAT_WEBHOOK_AUTH` is set in Vercel environment variables
+- [ ] `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set (rate limiter fails closed without them)
+- [ ] `OWNER_OPEN_ID` is set to the correct Clerk user ID (gates `notifyOwner`)
+- [ ] Stripe webhook endpoint is active and `STRIPE_WEBHOOK_SECRET` matches Stripe Dashboard
+- [ ] No API keys or secrets appear in source code or committed `.env` files
+- [ ] `pnpm lint` passes with zero errors
+- [ ] `pnpm test` shows 89 tests passing
+
+See `docs/SECURITY.md` for the full security reference.
 
 > [!CAUTION]
 > **NEVER use `npm install <pkg>` in this project.** It creates `package-lock.json` conflicts and desyncs `pnpm-lock.yaml`. Always use `npx pnpm add <pkg>` (or `npx pnpm add -D <pkg>` for devDependencies).
@@ -403,4 +424,4 @@ Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 
 ---
 
-*Last updated: February 27, 2026 (Round 39)*
+*Last updated: February 27, 2026 (Round 40)*
