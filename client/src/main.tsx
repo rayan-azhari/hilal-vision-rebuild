@@ -61,7 +61,11 @@ const trpcClient = trpc.createClient({
       fetch(input, init) {
         return globalThis.fetch(input, {
           ...(init ?? {}),
-          credentials: "include",
+          // Native WebView origin is https://localhost, which is cross-origin vs the
+          // Vercel API. "include" + "Allow-Origin: *" is a CORS violation that causes
+          // every request to fail with "You appear to be offline". Native auth goes
+          // through Clerk tokens/headers, not browser cookies, so "omit" is correct.
+          credentials: Capacitor.isNativePlatform() ? "omit" : "include",
         });
       },
     }),

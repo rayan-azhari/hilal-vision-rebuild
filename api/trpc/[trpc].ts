@@ -45,16 +45,19 @@ export default async function handler(
         console.error("[tRPC handler] Unhandled error:", err);
         res.statusCode = 500;
         res.setHeader("Content-Type", "application/json");
-        // Return a valid tRPC batch response so superjson.deserialize() succeeds on the client.
-        // A plain { error: ... } object causes "Unable to transform response from server".
-        res.end(JSON.stringify([{
+        // Build one error entry per procedure in the batch.
+        // path may be "proc1,proc2" for batched requests; a single-element array
+        // for a multi-procedure batch causes "Missing result" on the client side.
+        const procedures = path ? path.split(",") : [""];
+        const errorEntry = (proc: string) => ({
             error: {
                 json: {
                     message: err?.message ?? "Internal server error",
                     code: -32603,
-                    data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 500, path: path || null }
+                    data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 500, path: proc || null }
                 }
             }
-        }]));
+        });
+        res.end(JSON.stringify(procedures.map(errorEntry)));
     }
 }
