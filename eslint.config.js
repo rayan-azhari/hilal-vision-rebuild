@@ -16,10 +16,15 @@ export default tseslint.config(
   // TypeScript handles undefined variable checking — disable JS-level no-undef
   { rules: { "no-undef": "off" } },
 
-  // React hooks rules
+  // React hooks rules — explicitly list only the classic v4 rules.
+  // eslint-plugin-react-hooks v5+ adds react-compiler rules (setState-in-effect, etc.)
+  // that require the React Compiler transform, which this project does not use.
   {
     plugins: { "react-hooks": reactHooks },
-    rules: reactHooks.configs.recommended.rules,
+    rules: {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+    },
   },
 
   // Project-specific rules for all TS/TSX files
