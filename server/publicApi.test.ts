@@ -28,9 +28,9 @@ beforeEach(() => {
 // ─── GET /api/v1/visibility ───────────────────────────────────────────────────
 
 describe("GET /api/v1/visibility", () => {
-    it("returns 200 with correct shape for a valid Mecca location", () => {
+    it("returns 200 with correct shape for a valid Mecca location", async () => {
         const res = mockRes();
-        visibilityHandler(
+        await visibilityHandler(
             mockGetReq({ lat: "21.39", lng: "39.86", date: "2026-02-28" }),
             res
         );
@@ -42,25 +42,25 @@ describe("GET /api/v1/visibility", () => {
         expect(body.data.location).toEqual({ lat: 21.39, lng: 39.86 });
     });
 
-    it("uses today's date when date param is omitted", () => {
+    it("uses today's date when date param is omitted", async () => {
         const res = mockRes();
-        visibilityHandler(mockGetReq({ lat: "21.39", lng: "39.86" }), res);
+        await visibilityHandler(mockGetReq({ lat: "21.39", lng: "39.86" }), res);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
         expect(res.status).not.toHaveBeenCalled();
     });
 
-    it("returns 400 for an invalid date string", () => {
+    it("returns 400 for an invalid date string", async () => {
         const res = mockRes();
-        visibilityHandler(
+        await visibilityHandler(
             mockGetReq({ lat: "21.39", lng: "39.86", date: "not-a-date" }),
             res
         );
         expect(res.status).toHaveBeenCalledWith(400);
     });
 
-    it("returns 400 for a date more than 50 years in the future", () => {
+    it("returns 400 for a date more than 50 years in the future", async () => {
         const res = mockRes();
-        visibilityHandler(
+        await visibilityHandler(
             mockGetReq({ lat: "21.39", lng: "39.86", date: "2100-01-01" }),
             res
         );
@@ -69,24 +69,24 @@ describe("GET /api/v1/visibility", () => {
         expect(body.error).toMatch(/out of supported range/i);
     });
 
-    it("returns 400 for a date more than 50 years in the past", () => {
+    it("returns 400 for a date more than 50 years in the past", async () => {
         const res = mockRes();
-        visibilityHandler(
+        await visibilityHandler(
             mockGetReq({ lat: "21.39", lng: "39.86", date: "1900-01-01" }),
             res
         );
         expect(res.status).toHaveBeenCalledWith(400);
     });
 
-    it("returns 400 when lat is out of range", () => {
+    it("returns 400 when lat is out of range", async () => {
         const res = mockRes();
-        visibilityHandler(mockGetReq({ lat: "200", lng: "39.86" }), res);
+        await visibilityHandler(mockGetReq({ lat: "200", lng: "39.86" }), res);
         expect(res.status).toHaveBeenCalledWith(400);
     });
 
-    it("returns 400 when lng is missing", () => {
+    it("returns 400 when lng is missing", async () => {
         const res = mockRes();
-        visibilityHandler(mockGetReq({ lat: "21.39" }), res);
+        await visibilityHandler(mockGetReq({ lat: "21.39" }), res);
         expect(res.status).toHaveBeenCalledWith(400);
     });
 });
@@ -94,9 +94,9 @@ describe("GET /api/v1/visibility", () => {
 // ─── GET /api/v1/moon-phases ──────────────────────────────────────────────────
 
 describe("GET /api/v1/moon-phases", () => {
-    it("returns 200 with phase info for a valid date", () => {
+    it("returns 200 with phase info for a valid date", async () => {
         const res = mockRes();
-        moonPhasesHandler(mockGetReq({ date: "2026-02-28" }), res);
+        await moonPhasesHandler(mockGetReq({ date: "2026-02-28" }), res);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
         const body = res.body as any;
         expect(body.data).toHaveProperty("phaseName");
@@ -104,23 +104,23 @@ describe("GET /api/v1/moon-phases", () => {
         expect(body.data).toHaveProperty("nextNewMoon");
     });
 
-    it("returns 200 with today's data when date is omitted", () => {
+    it("returns 200 with today's data when date is omitted", async () => {
         const res = mockRes();
-        moonPhasesHandler(mockGetReq({}), res);
+        await moonPhasesHandler(mockGetReq({}), res);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
     });
 
-    it("returns 400 for a date more than 50 years away", () => {
+    it("returns 400 for a date more than 50 years away", async () => {
         const res = mockRes();
-        moonPhasesHandler(mockGetReq({ date: "1800-01-01" }), res);
+        await moonPhasesHandler(mockGetReq({ date: "1800-01-01" }), res);
         expect(res.status).toHaveBeenCalledWith(400);
         const body = res.body as any;
         expect(body.error).toMatch(/out of supported range/i);
     });
 
-    it("returns 400 for an invalid date string", () => {
+    it("returns 400 for an invalid date string", async () => {
         const res = mockRes();
-        moonPhasesHandler(mockGetReq({ date: "bad-date" }), res);
+        await moonPhasesHandler(mockGetReq({ date: "bad-date" }), res);
         expect(res.status).toHaveBeenCalledWith(400);
     });
 });
