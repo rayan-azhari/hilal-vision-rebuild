@@ -15,28 +15,31 @@ pnpm ci
 # Or individually:
 pnpm lint          # ESLint (must pass — no errors)
 pnpm check         # TypeScript type check
-pnpm test          # Unit tests (89 tests must pass)
+pnpm test          # Unit tests (133 tests must pass)
 pnpm vercel-build  # Vite build check
 
 # 2. Verify pnpm lockfile is in sync (Vercel uses frozen-lockfile by default)
 npx pnpm install --no-frozen-lockfile
 ```
 
-> [!WARNING]
-> **Before any public release or Play Store / App Store build, verify `TESTING_DISABLE_PRO_GATE = false` in `client/src/contexts/ProTierContext.tsx`.** When set to `true` (the current dev default), ALL users are treated as Pro/Premium and all paywalls are bypassed. This must be `false` for production monetization to work.
+> [!NOTE]
+> **`TESTING_DISABLE_PRO_GATE` is now `false` in production (set in Phase 8a).** All paywalls are active. If you need to bypass gating for local development, set it to `true` temporarily — but **never commit `true` to `main`**.
 
 ### Security Pre-Release Checklist (Round 40+)
 
 The following must be confirmed before every store submission or major deployment:
 
-- [ ] `TESTING_DISABLE_PRO_GATE = false` in `ProTierContext.tsx`
+- [x] `TESTING_DISABLE_PRO_GATE = false` in `ProTierContext.tsx` ✅ done — Phase 8a
 - [ ] `REVENUECAT_WEBHOOK_AUTH` is set in Vercel environment variables
 - [ ] `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set (rate limiter fails closed without them)
 - [ ] `OWNER_OPEN_ID` is set to the correct Clerk user ID (gates `notifyOwner`)
 - [ ] Stripe webhook endpoint is active and `STRIPE_WEBHOOK_SECRET` matches Stripe Dashboard
 - [ ] No API keys or secrets appear in source code or committed `.env` files
 - [ ] `pnpm lint` passes with zero errors
-- [ ] `pnpm test` shows 89 tests passing
+- [ ] `pnpm test` shows 133 tests passing
+- [x] Content Security Policy (CSP) active in `vercel.json` ✅ done — Phase 6f / Phase 8 bugfix
+- [ ] Admin account has `{ "isAdmin": true }` set in **Clerk Dashboard → User → Public Metadata** (hardcoded email bypass was removed in Phase 8e)
+- [ ] `VITE_CLERK_PUBLISHABLE_KEY` is set as a **GitHub Secret** (`Settings → Secrets and variables → Actions`) for E2E CI to pass
 
 See `docs/SECURITY.md` for the full security reference.
 
@@ -374,6 +377,31 @@ App Store Connect rejects the archive or users see `v1.0` on iOS while the Andro
 
 ---
 
+### 15. CSP Blocking External Scripts or Fonts
+
+**Symptom:**
+Sign-in button missing; Clerk modal doesn't appear; Google Fonts not loading. Browser console shows:
+```
+Refused to load the script 'https://...clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js'
+because it violates the following Content Security Policy directive: "script-src 'self'"
+```
+
+**Root Cause:** `vercel.json` CSP `script-src` directive doesn't include the domain serving the blocked resource. Clerk loads `clerk-js` dynamically from `*.clerk.accounts.dev`. Google Fonts uses `fonts.googleapis.com` (stylesheet) + `fonts.gstatic.com` (font files).
+
+**Fix:** Add the missing domain to the appropriate CSP directive in `vercel.json`:
+```json
+"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev"
+"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
+"font-src 'self' https://fonts.gstatic.com"
+"frame-src https://*.clerk.accounts.dev"
+```
+
+**Prevention:** After adding any third-party script, font, or iframe, check whether its domain needs to be added to the CSP in `vercel.json`.
+
+**Example (Round 40):** Phase 6 CSP was too restrictive — Clerk's dynamically loaded `clerk.browser.js` was blocked, making the sign-in button disappear entirely. Fixed by adding `https://*.clerk.accounts.dev` to `script-src` and adding `font-src` + `frame-src` directives.
+
+---
+
 ### 7. PowerShell `&&` Chaining
 
 **Symptom:**
@@ -424,4 +452,4 @@ Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 
 ---
 
-*Last updated: February 27, 2026 (Round 40)*
+*Last updated: February 28, 2026 (Round 40 — all phases complete)*

@@ -13,17 +13,51 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { ENV } from "./_core/env.js";
 
+export interface RateLimitResult {
+  success: boolean;
+}
+
+export interface IRateLimiter {
+  limit(ip: string): Promise<RateLimitResult>;
+}
+
+class LocalRateLimiter implements IRateLimiter {
+  private cache = new Map<string, { count: number; resetTime: number }>();
+  private maxRequests = 5;
+  private windowMs = 60 * 1000;
+
+  async limit(ip: string): Promise<RateLimitResult> {
+    const now = Date.now();
+    const record = this.cache.get(ip);
+
+    if (!record || now > record.resetTime) {
+      this.cache.set(ip, { count: 1, resetTime: now + this.windowMs });
+      return { success: true };
+    }
+
+    if (record.count >= this.maxRequests) {
+      return { success: false };
+    }
+
+    record.count += 1;
+    return { success: true };
+  }
+}
+
+const localFallbackLimiter = new LocalRateLimiter();
+
 // ─── Lazy Redis Rate Limiter (deferred to avoid cold-start crashes) ──────────
-let _ratelimit: Ratelimit | null = null;
+let _ratelimit: IRateLimiter | null = null;
 let _ratelimitInitialized = false;
 
-function getRateLimiter(): Ratelimit | null {
-  if (_ratelimitInitialized) return _ratelimit;
+function getRateLimiter(): IRateLimiter {
+  if (_ratelimitInitialized && _ratelimit) return _ratelimit;
   _ratelimitInitialized = true;
 
   if (!ENV.upstashRedisRestUrl || !ENV.upstashRedisRestToken) {
-    console.warn("[RateLimiter] Upstash Redis credentials not found. Telemetry endpoint is not rate-limited.");
-    return null;
+    console.warn("[RateLimiter] Upstash Redis credentials not found. Using local memory fallback.");
+    _ratelimit = localFallbackLimiter;
+    return _ratelimit;
   }
   try {
     const redis = new Redis({
@@ -36,10 +70,25 @@ function getRateLimiter(): Ratelimit | null {
       analytics: true,
     });
   } catch (err) {
-    console.error("[RateLimiter] Failed to initialize Upstash Redis:", err);
-    _ratelimit = null;
+    console.error("[RateLimiter] Failed to initialize Upstash Redis. Using local memory fallback:", err);
+    _ratelimit = localFallbackLimiter;
   }
-  return _ratelimit;
+  return _ratelimit || localFallbackLimiter;
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+async function fetchWithTimeout(url: string, timeoutMs = 2000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
 }
 
 // ─── Router ───────────────────────────────────────────────────────────────────
@@ -83,11 +132,8 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        // Rate limit by IP using Upstash (fail closed if not configured)
+        // Rate limit by IP using Upstash (fallback to local map if not configured or failed)
         const ratelimit = getRateLimiter();
-        if (!ratelimit) {
-          throw new Error("Rate limiting is not configured. Submissions are temporarily unavailable.");
-        }
 
         let ip = "unknown";
         if (ctx.req && "headers" in ctx.req) {
@@ -97,7 +143,16 @@ export const appRouter = router({
             : (reqAny.headers["x-forwarded-for"]?.toString().split(",")[0] ?? reqAny.socket?.remoteAddress ?? "unknown");
         }
 
-        const { success } = await ratelimit.limit(ip);
+        let success = true;
+        try {
+          const result = await ratelimit.limit(ip);
+          success = result.success;
+        } catch (err) {
+          console.error("Upstash Redis error during limit check, falling back to local:", err);
+          const result = await localFallbackLimiter.limit(ip);
+          success = result.success;
+        }
+
         if (!success) {
           throw new Error("Rate limit exceeded. Please wait before submitting again.");
         }
@@ -120,10 +175,10 @@ export const appRouter = router({
           throw new Error("Validation Failed: Astronomical data indicates the moon was below the horizon or not yet born at this location.");
         }
 
-        // Autonomously fetch meteorological snap from Open-Meteo if not provided
+        // Autonomously fetch meteorological snap from Open-Meteo if not provided (2s strict timeout)
         try {
           const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,surface_pressure,cloud_cover`;
-          const weatherRes = await fetch(weatherUrl);
+          const weatherRes = await fetchWithTimeout(weatherUrl, 2000);
           if (weatherRes.ok) {
             const data = (await weatherRes.json()) as any;
             if (input.temperature === undefined) input.temperature = data.current?.temperature_2m;
@@ -132,19 +187,24 @@ export const appRouter = router({
           }
 
           const aodUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${input.lat}&longitude=${input.lng}&current=aerosol_optical_depth`;
-          const aodRes = await fetch(aodUrl);
+          const aodRes = await fetchWithTimeout(aodUrl, 2000);
           if (aodRes.ok) {
             const aodData = (await aodRes.json()) as any;
             if (input.pm25 === undefined) input.pm25 = aodData.current?.aerosol_optical_depth;
           }
         } catch (err) {
-          console.error("Open-Meteo fetch failed during submission:", err);
+          console.error("Open-Meteo fetch failed or timed out:", err);
         }
+
+        // Apply Privacy Jitter (round to ~2 decimal places, adding slight deterministic noise)
+        // 0.01 degrees is roughly 1.1km. This prevents storing exact home addresses.
+        const jitterLat = Math.round((input.lat + (Math.random() * 0.01 - 0.005)) * 100) / 100;
+        const jitterLng = Math.round((input.lng + (Math.random() * 0.01 - 0.005)) * 100) / 100;
 
         await db.insert(observationReports).values({
           userId: ctx.user?.id,
-          lat: input.lat.toString(),
-          lng: input.lng.toString(),
+          lat: jitterLat.toString(),
+          lng: jitterLng.toString(),
           observationTime: obsDate,
           temperature: input.temperature?.toString(),
           pressure: input.pressure?.toString(),

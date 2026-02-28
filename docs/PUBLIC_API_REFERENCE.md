@@ -113,3 +113,42 @@ All endpoints use `Zod` validation. Invalid inputs will return a `400 Bad Reques
   ]
 }
 ```
+
+---
+
+## Rate Limiting
+
+The public API is rate-limited to **10 requests per minute per IP address** using a sliding window (Upstash Redis).
+
+### Rate Limit Response Headers
+
+Every response from `/api/v1/*` includes these headers:
+
+| Header | Description |
+|--------|-------------|
+| `X-RateLimit-Limit` | Maximum requests allowed per window (10) |
+| `X-RateLimit-Remaining` | Requests remaining in the current window |
+| `X-RateLimit-Reset` | Unix timestamp (seconds) when the window resets |
+
+### 429 Too Many Requests
+
+When the rate limit is exceeded, the API returns:
+
+```http
+HTTP/1.1 429 Too Many Requests
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1709301060
+```
+
+```json
+{
+  "error": "Too many requests. Please wait before retrying."
+}
+```
+
+> **Note:** Rate limiting is gracefully skipped in local/development environments where Upstash credentials (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) are not set. All requests succeed without headers in that case.
+
+---
+
+*Last updated: February 28, 2026 (Round 40 — all phases complete)*

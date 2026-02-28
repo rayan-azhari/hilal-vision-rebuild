@@ -13,9 +13,9 @@ This document records all security decisions, fixes, and guidelines for the Hila
 | CORS | Origin whitelist via `api/_cors.ts` | ✅ Fixed (Round 40) |
 | Payments | Stripe webhook signature verification | ✅ Active |
 | Native Payments | RevenueCat webhook Bearer auth (fail-closed) | ✅ Fixed (Round 40) |
-| Rate Limiting | Upstash Redis sliding window (5 req/min, fail-closed) | ✅ Fixed (Round 40) |
-| Security Headers | `vercel.json` HTTP headers | ✅ Added (Round 40) |
-| Pro Tier Gate | `TESTING_DISABLE_PRO_GATE` flag — **must be `false` for release** | ⚠️ Intentionally off during dev |
+| Rate Limiting | Upstash Redis sliding window — 5 req/min (tRPC), 10 req/min (public API) | ✅ Fixed (Round 40) |
+| Security Headers | `vercel.json` HTTP headers + CSP | ✅ Active (Round 40) |
+| Pro Tier Gate | `TESTING_DISABLE_PRO_GATE = false` | ✅ Production (Phase 8a) |
 
 ---
 
@@ -58,7 +58,7 @@ Currently gated behind `adminProcedure`:
 
 The Stripe checkout endpoint (`api/stripe/checkout.ts`) verifies the caller's identity using the Clerk session token from the `Authorization: Bearer <token>` header. The userId is **not** trusted from the request body. The client sends the token via `useAuth().getToken()`.
 
-If the Clerk token is missing or invalid, the endpoint falls back to the body-supplied `userId` for backwards compatibility during the migration window. This fallback will be removed once the token-based flow is confirmed stable.
+If the Clerk token is missing for a subscription plan, the endpoint returns **401 Unauthorized**. The `userId` body fallback was removed in Phase 8b. Anonymous donations (no `planId`) are still permitted without authentication.
 
 ---
 
@@ -91,11 +91,16 @@ The webhook requires a `Bearer` token in the `Authorization` header matching the
 
 ## Rate Limiting
 
-Observation submissions (`telemetry.submitObservation`) are rate-limited to **5 requests per minute per IP** using Upstash Redis + `@upstash/ratelimit` sliding window.
+Two rate-limiting layers are active:
 
-**Fail-closed:** If Upstash credentials (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) are not set, the endpoint **throws** rather than accepting unbounded submissions.
+**tRPC (`telemetry.submitObservation`):** 5 requests per minute per IP. Fail-closed — throws if Upstash credentials are absent.
 
-Required environment variables:
+**Public REST API (`/api/v1/*`):** 10 requests per minute per IP (sliding window). Fail-open — skipped gracefully if Upstash credentials are absent (allows local dev without Upstash). Returns `429 Too Many Requests` with headers:
+- `X-RateLimit-Limit`
+- `X-RateLimit-Remaining`
+- `X-RateLimit-Reset`
+
+Both use Upstash Redis + `@upstash/ratelimit`. Required environment variables:
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
@@ -112,8 +117,28 @@ Set globally via `vercel.json` for all routes (`/(.*)`):
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer leakage on cross-origin navigation |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(self)` | Restricts browser feature access to first-party only |
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | Enforces HTTPS for 2 years, eligible for HSTS preload list |
+| `Content-Security-Policy` | See below | Restricts script/style/font/frame sources — implemented Phase 6f, tuned Phase 8 |
 
-> **Note:** A Content Security Policy (CSP) is not yet set — this would require careful enumeration of all CDN and inline script sources (Clerk, Sentry, Globe.gl, etc.). Recommended as a future hardening step.
+### Content Security Policy
+
+The following CSP is active in `vercel.json`:
+
+```
+default-src 'self';
+script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev;
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src 'self' https://fonts.gstatic.com;
+img-src 'self' data: blob: https:;
+connect-src 'self' https:;
+worker-src 'self' blob:;
+frame-src https://*.clerk.accounts.dev;
+frame-ancestors 'none'
+```
+
+- `https://*.clerk.accounts.dev` is required in `script-src` and `frame-src` — Clerk loads `clerk.browser.js` dynamically from this CDN and renders the sign-in modal in an iframe.
+- `https://fonts.googleapis.com` is required in `style-src` — Google Fonts stylesheets.
+- `https://fonts.gstatic.com` is required in `font-src` — Google Fonts webfont files.
+- `frame-ancestors 'none'` prevents this app from being embedded in any external iframe (clickjacking prevention, supplements `X-Frame-Options: DENY`).
 
 ---
 
@@ -146,14 +171,16 @@ Set globally via `vercel.json` for all routes (`/(.*)`):
 
 Before every public release or App Store / Play Store build:
 
-- [ ] `TESTING_DISABLE_PRO_GATE = false` in `client/src/contexts/ProTierContext.tsx`
+- [x] `TESTING_DISABLE_PRO_GATE = false` in `ProTierContext.tsx` ✅ done — Phase 8a
 - [ ] `REVENUECAT_WEBHOOK_AUTH` set in Vercel env vars
 - [ ] `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` set in Vercel env vars
 - [ ] `OWNER_OPEN_ID` set to correct Clerk user ID
 - [ ] Stripe webhook endpoint registered and `STRIPE_WEBHOOK_SECRET` matches
 - [ ] No secrets in source code or committed `.env` files
-- [ ] Run `pnpm lint` — no `no-eval` or `eqeqeq` errors
-- [ ] Run `pnpm test` — all 89 tests pass
+- [ ] Run `pnpm lint` — no errors
+- [ ] Run `pnpm test` — all 133 tests pass
+- [x] CSP header active in `vercel.json` ✅ done — Phase 6f / Phase 8 bugfix
+- [ ] Admin account has `{ "isAdmin": true }` in Clerk Dashboard public metadata (hardcoded email bypass removed — Phase 8e)
 
 ---
 
@@ -163,10 +190,8 @@ Before every public release or App Store / Play Store build:
 |---|------|----------|
 | 1 | Stripe customer ID → Clerk user ID mapping in DB (for O(1) revocation) | High |
 | 2 | Webhook event deduplication (prevent double-grant on retry) | High |
-| 3 | Content Security Policy (CSP) header | Medium |
-| 4 | No rate limiting on public REST API `/api/v1/*` | Medium |
-| 5 | OWASP ZAP scan against staging environment | Medium |
+| 3 | OWASP ZAP scan against staging environment | Medium |
 
 ---
 
-*Last updated: February 27, 2026 (Round 40)*
+*Last updated: February 28, 2026 (Round 40 — all phases complete)*

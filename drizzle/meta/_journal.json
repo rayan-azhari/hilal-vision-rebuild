@@ -15,6 +15,13 @@
       "when": 1772215488467,
       "tag": "0001_closed_christian_walker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1772293787459,
+      "tag": "0002_cool_mandrill",
+      "breakpoints": true
     }
   ]
 }

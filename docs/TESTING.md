@@ -1,6 +1,6 @@
 # Hilal Vision — Testing Reference
 
-This document describes the test infrastructure, how to run tests, and what is covered. The test suite was expanded in **Round 40** from 21 to 89 unit tests.
+This document describes the test infrastructure, how to run tests, and what is covered. The test suite was expanded in **Round 40** from 21 to **133 unit tests** across 8 test files.
 
 ---
 
@@ -44,9 +44,11 @@ pnpm format:check  # Prettier check (no write)
 
 Tests live in `server/**/*.test.ts` and `api/**/*.test.ts` and run in a Node environment via Vitest. No browser, no network requests.
 
+**Total: 133 unit tests** across 8 files.
+
 ### Test Files
 
-#### `server/astronomy.test.ts` — 21 tests
+#### `server/astronomy.test.ts` — 31 tests
 
 Original test suite covering the core astronomical primitives:
 
@@ -72,7 +74,7 @@ All three Islamic calendar engines and cross-engine validation:
 | `Umm al-Qura calendar engine` | 4 | Valid date for today, 29/30 day months, valid month start, all 12 months of 1445 |
 | `Cross-engine consistency` | 2 | All 3 engines agree on Hijri year; agree within 1 month for recent dates |
 
-#### `server/visibility.test.ts` — 38 tests
+#### `server/visibility.test.ts` — 41 tests
 
 Comprehensive coverage of the visibility computation pipeline:
 
@@ -107,6 +109,35 @@ CORS origin whitelisting security tests:
 | Non-OPTIONS returns false | GET continues to handler |
 | Vercel preview domain allowed | `moon-dashboard-one.vercel.app` passes |
 
+#### `server/routers/weather.test.ts` — Phase 5 expansion
+
+Router-level tests for the weather tRPC procedure. Covers location input validation, error handling, and response shape.
+
+#### `server/routers/sightings.test.ts` — Phase 5 expansion
+
+Router-level tests for crescent sighting submission and retrieval, including auth checks and data validation.
+
+#### `server/routers/notifications.test.ts` — Phase 5 expansion
+
+Router-level tests for push notification registration/unregistration and ownership checks.
+
+#### `server/publicApi.test.ts` — 11 tests
+
+Public REST API handler tests for `/api/v1/visibility` and `/api/v1/moon-phases`:
+
+| Test | What it verifies |
+|---|---|
+| `visibilityHandler` returns 200 with grid | Happy path: valid date/resolution |
+| `visibilityHandler` returns 400 missing date | Required param validation |
+| `visibilityHandler` returns 400 invalid resolution | Must be `low`/`medium`/`high` |
+| `visibilityHandler` returns 400 negative lat | Lat/lng bounds validation |
+| `moonPhasesHandler` returns 200 with phases | Happy path: valid year/month |
+| `moonPhasesHandler` returns 400 missing year | Required param validation |
+| `moonPhasesHandler` returns 400 invalid month | Month must be 1–12 |
+| Rate limit test (×4) | 429 returned after exceeding 10/min |
+
+> **Important:** Both handlers are `async` (Upstash rate limiting added in Phase 8c). All test callbacks must be `async` and handler calls must be `await`ed — otherwise assertions run before the handler body executes.
+
 ---
 
 ## End-to-End Tests (`pnpm test:e2e`)
@@ -126,7 +157,7 @@ E2E tests use Playwright and test the running application in a real Chromium bro
 
 | Test | What it verifies |
 |---|---|
-| Best Time to Observe card renders | Side panel shows optimal time data |
+| Best Time to Observe card renders | Side panel shows "Optimal Time" (Pro) or "Upgrade\|Pro" prompt (free tier) — both valid |
 
 #### `e2e/navigation.spec.ts`
 
@@ -141,6 +172,8 @@ E2E tests use Playwright and test the running application in a real Chromium bro
 | Mobile viewport (375×812) | Page renders on iPhone X size |
 | Tablet viewport (768×1024) | Leaflet map renders on iPad size |
 | Dark color scheme | Page renders in dark mode |
+
+> **CI requirement:** E2E tests require `VITE_CLERK_PUBLISHABLE_KEY` set as a **GitHub Secret** (`Settings → Secrets and variables → Actions`). Without it, `App.tsx` throws at module load (missing Clerk key) and all tests except the static `<title>` check fail. The secret is injected via `env:` in the E2E job in `.github/workflows/ci.yml`.
 
 ---
 
@@ -171,11 +204,14 @@ Ignored: `dist/`, `node_modules/`, `android/`, `ios/`, `client/public/`, `script
 ```
 push/PR to main
     │
-    ├── lint job (pnpm lint)
-    ├── typecheck job (pnpm check)
-    └── test job (pnpm test)
+    ├── lint job       (pnpm lint)
+    ├── typecheck job  (pnpm check)
+    └── test job       (pnpm test — 133 unit tests)
               │
-              └── build job (pnpm vercel-build) ← only runs if all 3 above pass
+              └── build job  (pnpm vercel-build) ← only runs if all 3 above pass
+                        │
+                        └── e2e job  (pnpm test:e2e — Playwright Chromium)
+                              env: VITE_CLERK_PUBLISHABLE_KEY (GitHub Secret)
 ```
 
 - **Concurrency:** Only one run per branch at a time (previous run cancelled)
@@ -224,4 +260,4 @@ test("my page feature works", async ({ page }) => {
 
 ---
 
-*Last updated: February 27, 2026 (Round 40)*
+*Last updated: February 28, 2026 (Round 40 — all phases complete)*

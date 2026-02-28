@@ -209,6 +209,19 @@
     cursor: pointer;
   }
 
+  /* Accessibility: Minimum Touch Targets for Mobile Users */
+  @media (pointer: coarse) {
+    button,
+    [role="button"],
+    a[href],
+    input[type="checkbox"],
+    input[type="radio"],
+    select {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
   /* Global Noise Overlay Effect */
   .noise-overlay {
     position: fixed;

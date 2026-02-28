@@ -108,12 +108,12 @@ export const HIJRI_MONTHS = [
 ];
 
 export const VISIBILITY_LABELS: Record<VisibilityZone, { label: string; color: string; desc: string }> = {
-    A: { label: "Easily Visible", color: "#4ade80", desc: "Naked eye sighting highly probable" },
-    B: { label: "Visible", color: "#facc15", desc: "Visible under good conditions" },
-    C: { label: "Optical Aid Helpful", color: "#fb923c", desc: "Binoculars may be needed" },
-    D: { label: "Optical Aid Only", color: "#f87171", desc: "Only visible with telescope" },
-    E: { label: "Not Visible", color: "#6b7280", desc: "Below visibility threshold" },
-    F: { label: "Below Horizon", color: "#374151", desc: "Moon sets before or with sun" },
+    A: { label: "Easily Visible", color: "#4ade80", desc: "The moon is high and thick enough at sunset that seeing it with the naked eye is highly probable." },
+    B: { label: "Visible", color: "#facc15", desc: "Sightings are possible with the naked eye, but usually require perfect weather conditions." },
+    C: { label: "Optical Aid Helpful", color: "#fb923c", desc: "You will likely need binoculars or a telescope to find the moon initially." },
+    D: { label: "Optical Aid Only", color: "#f87171", desc: "The moon is too faint or low; telescopes or binoculars are strictly required to see it." },
+    E: { label: "Not Visible", color: "#6b7280", desc: "Slightly above the horizon, but below the threshold of human or optical visibility." },
+    F: { label: "Below Horizon", color: "#374151", desc: "Moon sets before or simultaneously with the sun, or conjunction hasn't occurred yet." },
 };
 
 export const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {

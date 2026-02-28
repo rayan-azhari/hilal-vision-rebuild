@@ -41,6 +41,11 @@ export function useGeolocation(autoDetect = false): UseGeolocationReturn {
                     lng: pos.coords.longitude,
                 };
 
+                // If the device GPS has hardware altitude (e.g. mobile phones), use it natively.
+                if (pos.coords.altitude !== null) {
+                    loc.elevation = pos.coords.altitude;
+                }
+
                 // Try reverse-geocoding the position for a human-readable name
                 try {
                     const res = await fetch(
@@ -57,19 +62,21 @@ export function useGeolocation(autoDetect = false): UseGeolocationReturn {
                     loc.name = "Your Location";
                 }
 
-                // Try fetching elevation data
-                try {
-                    const elRes = await fetch(
-                        `https://api.open-meteo.com/v1/elevation?latitude=${loc.lat}&longitude=${loc.lng}`
-                    );
-                    if (elRes.ok) {
-                        const elData = await elRes.json();
-                        if (elData.elevation && elData.elevation.length > 0) {
-                            loc.elevation = elData.elevation[0];
+                // Try fetching elevation data as a fallback if hardware altitude is missing
+                if (loc.elevation === undefined) {
+                    try {
+                        const elRes = await fetch(
+                            `https://api.open-meteo.com/v1/elevation?latitude=${loc.lat}&longitude=${loc.lng}`
+                        );
+                        if (elRes.ok) {
+                            const elData = await elRes.json();
+                            if (elData.elevation && elData.elevation.length > 0) {
+                                loc.elevation = elData.elevation[0];
+                            }
                         }
+                    } catch {
+                        // Ignore elevation errors
                     }
-                } catch {
-                    // Ignore elevation errors
                 }
 
                 setPosition(loc);

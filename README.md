@@ -11,7 +11,8 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *Custom Geocoding Search*: Search any city worldwide via Open-Meteo integration.
   - *Cloud Cover Overlay*: Real-time cloud cover data from Open-Meteo rendered as a translucent overlay (toggleable independently from visibility zones).
   - *Atmospheric Overrides*: Manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides via Open-Meteo's real-time weather API. Adjusts atmospheric refraction for observatory-grade accuracy.
-  - *DEM Integration*: Digital Elevation Model data automatically fetched from Open-Meteo's Elevation API on map click, providing true terrain-aware horizon dip calculations.
+  - *GPS Altitude Engine*: Leverages native hardware `navigator.geolocation.coords.altitude` where available for true terrestrial precision.
+  - *DEM Integration*: Digital Elevation Model data automatically fetched from Open-Meteo's Elevation API on map click as a fallback.
   - *Enhanced Tooltips*: Click any point on the 2D Map to see detailed lunar data - q-value, moon age, altitude, elongation, crescent width, and local terrain elevation.
   - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness. Incorporates topographical elevation precision where available.
   - *Accessibility*: High Contrast Color-Blind mode to ensure the visibility gradients remain intelligible for users with Color Vision Deficiency.
@@ -49,8 +50,10 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 2. **Capacitor Mobile Native**: The identical codebase compiles beautifully into native iOS and Android applications.
 3. **Clerk Authentication**: Secure user management replacing legacy custom OAuth.
 4. **Smart Telemetry Validation**: Sighting reports are algorithmically verified against astronomical reality. If a user maliciously claims to see the moon when it is physically below the horizon (Zone F), the mathematical engine rejects the payload.
-5. **Real ICOP Data Extraction**: Features an integrated scraper that autonomously pulled 1,000+ historical crescent sight reports to serve as verifiable proof-of-concept records alongside theoretical algorithms.
-6. **Triple-Engine Hijri Calendar**: Supports `SunCalc`-powered astronomical new moon detection, `@umalqura/core` for official KACST Saudi civic dates, and an arithmetic Tabular fallback.
+5. **Fail-Open Resilience**: External dependencies like the Upstash Redis rate limiter and Open-Meteo API fetchers are wrapped in strict cache-fallbacks and `AbortController` timeouts to ensure telemetry submissions never hard-crash if third-party services degrade.
+6. **Data Privacy Jitter**: Submitted user coordinates are securely obfuscated (jittered by ~1.1km) server-side before persisting to the DB, ensuring that home locations from backyard observation reports are perfectly anonymized in the public Sighting Feed.
+7. **Real ICOP Data Extraction**: Features an integrated scraper that autonomously pulled 1,000+ historical crescent sight reports to serve as verifiable proof-of-concept records alongside theoretical algorithms.
+8. **Triple-Engine Hijri Calendar**: Supports `SunCalc`-powered astronomical new moon detection, `@umalqura/core` for official KACST Saudi civic dates, and an arithmetic Tabular fallback.
 7. **Production Upstash Protection**: Hardened TRPC mutation endpoints utilizing Upstash Redis sliding window token bucket rate-limiting.
 8. **Open-Meteo Cloud Cover Overlay**: Real-time cloud cover data fetched from Open-Meteo's forecast API for a sparse global grid (~162 points), bilinearly interpolated into a smooth canvas texture, and overlaid on both 2D Map (Leaflet `imageOverlay`) and 3D Globe (Three.js sphere mesh). Independently toggleable from visibility zones.
 9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
@@ -76,6 +79,9 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass SunCalc phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
 25. **Soft Paywall Monetization (Pro Tier)**: A `ProTierContext` + `<ProGate>` component system gates deep feature interaction behind a "Pro" subscription while keeping all features visible to free users from Day 1. Gated features include the 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular calendar engines, and historical ICOP data. An `UpgradeModal` offers Monthly ($2.99), Annual ($14.99), and Lifetime ($49.99) plans (Stripe integration pending).
 26. **Goodwill & Support Page**: A dedicated `/support` page with Sadaqah Jariyah messaging, Feature Access Matrix, pricing tiers, one-time donation options, and a Patron badge system. A Sadaqah banner on the Home page links to `/support`.
+27. **Gamified Engagement Mechanics**: Added an `observerBadge` progression system (Novice → Master) and `sightingCount` tracker to the Drizzle user schema to incentivize crowdsourced telemetry reporting.
+28. **Accessibility & Responsive Design Pass**: Enforced a strict >44px `min-height` and `min-width` on all touch targets via `@media (pointer: coarse)` CSS queries, ensuring rigorous mobile usability standards.
+29. **Component Modularity**: Refactored massive page components (like MapPage) into focused, maintainable micro-components (`MapControlsPanel`, `MapLegendPanels`).
 
 ## Getting Started
 

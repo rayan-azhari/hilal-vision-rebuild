@@ -1,0 +1,2 @@
+ALTER TABLE `users` ADD `observerBadge` enum('Novice','Tracker','Astronomer','Master') DEFAULT 'Novice' NOT NULL;--> statement-breakpoint
+ALTER TABLE `users` ADD `sightingCount` int DEFAULT 0 NOT NULL;

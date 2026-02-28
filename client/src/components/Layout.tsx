@@ -401,6 +401,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
 
+              {/* Account */}
+              <div className="flex flex-col gap-3">
+                <label className="text-xs uppercase font-bold tracking-widest pl-1" style={{ color: "var(--gold-dim)" }}>Account</label>
+                <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col gap-4">
+                  <SignedIn>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>Manage Profile</span>
+                      <UserButton appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }} />
+                    </div>
+                  </SignedIn>
+                  <SignedOut>
+                    <SignInButton mode="modal">
+                      <button
+                        className="py-3.5 rounded-2xl text-[13px] font-bold transition-colors w-full flex items-center justify-center"
+                        style={{ color: "var(--space)", background: "var(--gold)" }}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        Sign In / Register
+                      </button>
+                    </SignInButton>
+                  </SignedOut>
+                </div>
+              </div>
+
               {/* Preferences */}
               <div className="flex flex-col gap-3">
                 <label className="text-xs uppercase font-bold tracking-widest pl-1" style={{ color: "var(--gold-dim)" }}>Preferences</label>

@@ -36,28 +36,35 @@ git add . && git commit -m "deploy" && git push
   "buildCommand": "npx vite build",
   "outputDirectory": "dist/public",
   "framework": null,
+  "crons": [
+    { "path": "/api/cron/moonAlerts", "schedule": "0 8 * * *" }
+  ],
   "functions": {
     "api/trpc/[trpc].ts":        { "includeFiles": "server/**" },
     "api/stripe/checkout.ts":    { "includeFiles": "server/**" },
     "api/stripe/webhook.ts":     { "includeFiles": "server/**" },
     "api/revenuecat/webhook.ts": { "includeFiles": "server/**" },
-    "api/v1/[...path].ts":       { "includeFiles": "server/**" }
+    "api/v1/[...path].ts":       { "includeFiles": "server/**" },
+    "api/push/send.ts":          { "includeFiles": "server/**" },
+    "api/cron/moonAlerts.ts":    { "includeFiles": "server/**" }
   },
   "rewrites": [
-    { "source": "/api/stripe/checkout",  "destination": "/api/stripe/checkout" },
-    { "source": "/api/stripe/webhook",   "destination": "/api/stripe/webhook" },
-    { "source": "/api/revenuecat/webhook", "destination": "/api/revenuecat/webhook" },
-    { "source": "/api/trpc/:path*",      "destination": "/api/trpc/[trpc]" },
-    { "source": "/api/v1/:path*",        "destination": "/api/v1/[...path]" },
-    { "source": "/api/v1",               "destination": "/api/v1/[...path]" },
-    { "source": "/((?!api/).*)",         "destination": "/index.html" }
+    { "source": "/api/stripe/checkout",      "destination": "/api/stripe/checkout" },
+    { "source": "/api/stripe/webhook",       "destination": "/api/stripe/webhook" },
+    { "source": "/api/revenuecat/webhook",   "destination": "/api/revenuecat/webhook" },
+    { "source": "/api/push/send",            "destination": "/api/push/send" },
+    { "source": "/api/cron/moonAlerts",      "destination": "/api/cron/moonAlerts" },
+    { "source": "/api/trpc/:path*",          "destination": "/api/trpc/[trpc]" },
+    { "source": "/api/v1/:path*",            "destination": "/api/v1/[...path]" },
+    { "source": "/api/v1",                   "destination": "/api/v1/[...path]" },
+    { "source": "/((?!api/).*)",             "destination": "/index.html" }
   ]
 }
 ```
 
 - **Build**: Runs `npx vite build` to generate static assets
 - **Output**: Serves from `dist/public/`
-- **Functions**: 5 serverless functions — tRPC API, Stripe checkout + webhook, RevenueCat webhook, and public REST API v1
+- **Functions**: 7 serverless functions — tRPC API, Stripe checkout + webhook, RevenueCat webhook, public REST API v1, push notifications, and Vercel cron
 - **Rewrites**: Each `/api/*` route maps to its serverless function; all other routes fall back to `index.html` for SPA routing
 
 ### `api/trpc/[trpc].ts`
@@ -95,9 +102,52 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 | `REVENUECAT_WEBHOOK_AUTH`    | Yes      | Bearer token for RevenueCat webhook auth (`api/revenuecat/webhook.ts`) |
 | `VITE_REVENUECAT_APPLE_KEY`  | Yes (iOS) | RevenueCat Apple/iOS SDK key (client-side, Vite env var)           |
 | `VITE_REVENUECAT_GOOGLE_KEY` | Yes (Android) | RevenueCat Google/Android SDK key (client-side, Vite env var) |
+| `FIREBASE_ADMIN_CREDENTIALS` | Yes      | Firebase service account JSON (full JSON string) — required for push notifications |
+| `CRON_SECRET`                | Yes      | Shared secret for cron → `api/push/send` auth; sent as `x-cron-secret` header |
 
 > **Stripe webhook endpoint:** `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 > Events to listen for: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
+
+---
+
+## Push Notifications (Firebase Cloud Messaging)
+
+Push notifications are sent via Firebase Admin SDK (`firebase-admin 13.6.1`).
+
+### Setup
+
+1. Go to [Firebase Console](https://console.firebase.google.com) → your project → **Project Settings** → **Service Accounts** tab
+2. Click **Generate new private key** → download the JSON file
+3. Paste the **entire JSON content** as a single string into the `FIREBASE_ADMIN_CREDENTIALS` environment variable in Vercel
+
+### Serverless Functions
+
+| Function | Purpose |
+|---|---|
+| `api/push/send.ts` | FCM broadcast endpoint. Accepts a list of FCM tokens and a notification payload. Sends in 500-token batches and cleans up stale/invalid tokens automatically. Protected by `CRON_SECRET` via `x-cron-secret` header. |
+| `api/cron/moonAlerts.ts` | Daily cron job (08:00 UTC). Queries all subscribed FCM tokens from DB and calls `api/push/send` with the appropriate alert. |
+
+### Vercel Cron
+
+The `moonAlerts` cron runs automatically at **08:00 UTC daily** via Vercel Cron (configured in `vercel.json`):
+
+```json
+"crons": [{ "path": "/api/cron/moonAlerts", "schedule": "0 8 * * *" }]
+```
+
+Alert types sent:
+- **29th Hijri night** — crescent watch reminder
+- **Full Moon**
+- **Blue Moon** (second full moon in a Gregorian month)
+- **Lunar Eclipse** — total, partial, or penumbral (from `shared/astronomy.ts:predictLunarEclipse()`)
+
+**To test manually:**
+```bash
+curl -X POST https://moon-dashboard-one.vercel.app/api/cron/moonAlerts \
+  -H "x-cron-secret: <CRON_SECRET>"
+```
+
+---
 
 ## What Works on Vercel
 

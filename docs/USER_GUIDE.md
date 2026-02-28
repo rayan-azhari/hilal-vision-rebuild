@@ -8,7 +8,7 @@ The top navigation bar provides access to all views and includes:
 - **Global Date & Location Pickers** (Search any city or Auto-Detect GPS. Syncs across all map and dashboard views)
 - **High Contrast Toggle** (Color-blind friendly accessible palette for visibility zones)
 - **Theme Toggle** (Light/Dark mode)
-- **Report Sighting** button (golden `+` icon)
+- **Report Sighting** button (golden `+` icon) - Submit crowdsourced telemetry and earn Observer Badges (Novice to Master).
 - **Account Settings** / Sign In (Clerk authentication)
 
 ---
@@ -43,10 +43,12 @@ A **unified page** with a floating toggle to switch between **3D Globe** and **2
 - **Cloud Cover Overlay** - Open-Meteo cloud data rendered as a Mercator-projected semi-transparent layer over the map, geographically aligned with the 3D globe view. Toggle independently from visibility using the "Cloud Cover" switch in Map Controls.
 - **Best Time to Observe** card - Automatically calculates the optimal observation window (sunset → moonset), displaying local altitude parameters including Topographical Elevation.
 - **Atmospheric Overrides** - Collapsible panel for manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides. Toggle "Auto-fetch" to pull real-time atmospheric data from Open-Meteo's weather API based on the selected location. These corrections refine the refraction model for observatory-grade accuracy.
+- **GPS Native Altitude** - The auto-detect location feature now pulls hardware altitude (`coords.altitude`) directly from your mobile device's GPS chip when available, providing true terrestrial precision before falling back to DEM APIs.
 - **DEM Integration** - Clicking any point automatically fetches the real terrain elevation from the Open-Meteo Elevation API (Digital Elevation Model). This elevation is used to compute accurate horizon dip corrections and is displayed in the click tooltip.
 - **Enhanced Click Tooltips** - Click anywhere on the map to see a detailed popup with: visibility zone, q-value breakdown, moon age, altitude, azimuth, elongation, crescent width, and the DEM-sourced local terrain elevation.
 - Crowdsourced sighting pins: 🟢 Naked Eye, 🔵 Optical Aid, ⚪ Not Seen.
 - Resolution selector: Fine (2°), Normal (4°), or Fast (6°).
+- **Mobile Touch Accessibility** - All controls, selectors, and checkboxes adhere to strict mobile spacing rules (minimum 44px) for comfortable use on smartphones.
 
 ## 3. Moon Phase (`/moon`)
 

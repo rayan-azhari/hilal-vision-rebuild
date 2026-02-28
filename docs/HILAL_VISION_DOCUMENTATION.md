@@ -469,11 +469,12 @@ A comprehensive technical reference page written for astronomers, Islamic calend
 5. Best-Time-to-Observe Calculator - 5-minute scanning algorithm from sunset to moonset, composite scoring formula (`score = moonAlt × darknessFactor × altFactor`), and viability flag logic.
 6. World Visibility Grid - Three resolution levels (8°/900pts, 4°/3,600pts, 2°/14,400pts), Web Worker offloading, LRU texture cache (24 entries, keyed by date+resolution).
 7. ICOP Historical Archive - What ICOP is, how 1,000+ records were sourced, and how theory-vs-observation comparison enables model validation.
-8. Crowdsourced Telemetry & Validation - Zone F rejection algorithm, Upstash Redis rate limiting (5 req/IP/min), Open-Meteo meteorological enrichment.
-9. Atmospheric Refraction - Saemundsson inverse formula with temperature (T°C) and pressure (P hPa) corrections for observatory-grade horizon accuracy.
-10. References - Yallop 1997, Odeh 2004, Meeus 1998, SunCalc, ICOP, Umm al-Qura.
+8. Crowdsourced Telemetry & Validation - Zone F rejection algorithm, Upstash Redis rate limiting (fall-open to local memory cache), Open-Meteo meteorological enrichment (with strict 2s timeouts), and Data Privacy Jitter (~1.1km obfuscation for home addresses).
+9. Atmospheric Refraction - Saemundsson inverse formula with temperature (T°C) and pressure (P hPa) corrections for observatory-grade horizon accuracy. Native GPS altitude (`coords.altitude`) integration for precise terrestrial modelling.
+10. Gamification & Engagement - Observer Badge progression system tracked in the user database schema to encourage persistent crowdsourcing telemetry.
+11. References - Yallop 1997, Odeh 2004, Meeus 1998, SunCalc, ICOP, Umm al-Qura.
 
-**Design:** Fixed Table of Contents sidebar (desktop), `FormulaBlock` monospace display components, coloured zone tables, and anchor-linked headings.
+**Design:** Fixed Table of Contents sidebar (desktop), Mobile 44px touch targets minimum, `FormulaBlock` monospace display components, coloured zone tables, and anchor-linked headings.
 
 ### 6.12 Privacy Policy (`/privacy`)
 
@@ -547,7 +548,11 @@ The tRPC router (`server/routers.ts`) exposes authentication and telemetry proce
 
 **Smart Validation:** A key architectural component is the server-side Smart Validation during `submitObservation`. When a physical sighting is claimed, the backend mathematically computes the geometric position of the sun and moon at that precise timestamp and location. If the mathematics dictate that the moon is definitively below the horizon (Zone F), the server fundamentally rejects the claim to preserve crowdsourced data integrity.
 
-**Upstash Redis Rate Limiting:** Global rate limiting is handled by Upstash utilizing a Redis store. Submissions are strictly limited to 5 requests per IP address, averting DDoS payload fatigue and securing the integrity of the data stream.
+**Data Privacy Jitter:** Before any sighting report is inserted into the public database, the user's exact latitude and longitude are obfuscated. The server applies deterministic noise (rounding to 2 decimal places with a slight mathematical randomizer), shifting the coordinate by ~1.1km. This ensures that users submitting observations from their backyards do not expose their exact home addresses in the public Sighting Feed.
+
+**Fail-Open Rate Limiting:** Global rate limiting is handled by Upstash utilizing a Redis store (5 requests per IP address). To prevent complete telemetry failure during Serverless cold starts or Redis degradation, the router implements a fail-open `LocalRateLimiter` using a native Node.js `Map` cache fallback.
+
+**API Timeout Protection:** External meteorological enrichment calls to Open-Meteo are strictly wrapped in a `Promise.race` with an `AbortController` (2000ms timeout). If the external weather API stalls, the mutation silently drops the weather enrichment and proceeds to save the core astronomical report, preventing Vercel function timeouts.
 
 All astronomical calculations are performed client-side. The telemetry endpoints store crowdsourced sighting data and automatically enrich reports with Open-Meteo weather data (cloud cover, surface pressure, aerosol optical depth).
 

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add client/src/contexts/ProTierContext.tsx client/src/hooks/useCloudOverlay.ts server/publicApi.ts vite.config.ts)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
