@@ -31,13 +31,26 @@ class ErrorBoundary extends Component<Props, State> {
               className="text-destructive mb-6 flex-shrink-0"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
-
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
-            </div>
+            {this.state.error?.message?.includes("Clerk") || this.state.error?.message?.includes("clerk.browser.js") ? (
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-amber-500 mb-2">Authentication Blocked</h2>
+                <p className="text-muted-foreground">
+                  Our authentication service (Clerk) could not be loaded. This is usually caused by an <strong>ad-blocker</strong>, privacy extension, or network firewall.
+                </p>
+                <p className="text-muted-foreground mt-2">
+                  Please disable your ad-blocker for <strong>moonsighting.live</strong> and reload the page to continue.
+                </p>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+                <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
+                  <pre className="text-sm text-muted-foreground whitespace-break-spaces">
+                    {this.state.error?.stack}
+                  </pre>
+                </div>
+              </>
+            )}
 
             <button
               onClick={() => window.location.reload()}
