@@ -21,4 +21,8 @@ export const ENV = {
   revenuecatGoogleKey: process.env.REVENUECAT_GOOGLE_KEY ?? "",
   revenuecatAppleKey: process.env.REVENUECAT_APPLE_KEY ?? "",
   revenuecatWebhookAuth: process.env.REVENUECAT_WEBHOOK_AUTH ?? "",
+  // Firebase Admin (for sending push notifications)
+  firebaseAdminCredentials: process.env.FIREBASE_ADMIN_CREDENTIALS ?? "",
+  // Cron secret (shared between Vercel cron → /api/push/send)
+  cronSecret: process.env.CRON_SECRET ?? "",
 };

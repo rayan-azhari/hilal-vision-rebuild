@@ -8,8 +8,10 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { GlobalStateProvider } from "./contexts/GlobalStateContext";
 import Layout from "./components/Layout";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Sentry } from "@/lib/sentry";
+import { onForegroundMessage } from "@/lib/firebase";
+import { toast } from "sonner";
 import CookieConsent from "./components/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
 import { ProTierProvider } from "./contexts/ProTierContext";
@@ -73,6 +75,17 @@ function Router() {
   );
 }
 
+function ForegroundPushListener() {
+  useEffect(() => {
+    return onForegroundMessage((payload) => {
+      toast(payload.notification?.title ?? "Hilal Vision", {
+        description: payload.notification?.body,
+      });
+    });
+  }, []);
+  return null;
+}
+
 function App() {
   return (
     <Sentry.ErrorBoundary
@@ -108,6 +121,7 @@ function App() {
                         },
                       }}
                     />
+                    <ForegroundPushListener />
                     <Router />
                     <UpgradeModal />
                     <CookieConsent />

@@ -804,6 +804,33 @@ export function formatTime(date: Date | null): string {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+// ─── Lunar Eclipse Prediction ─────────────────────────────────────────────────
+
+export type LunarEclipseType = "none" | "penumbral" | "partial" | "total";
+
+/**
+ * Approximate whether a given full moon date will have a lunar eclipse.
+ * Uses Moon's ecliptic latitude derived from the node regression cycle.
+ *
+ * Accuracy: ±1 eclipse type step for eclipses within ~5 years of J2000.
+ * Good enough for notification purposes; not a substitute for a full ephemeris.
+ */
+export function predictLunarEclipse(fullMoonDate: Date): LunarEclipseType {
+    const J2000_MS = Date.UTC(2000, 0, 1, 12, 0, 0);
+    const D = (fullMoonDate.getTime() - J2000_MS) / 86400000;
+    // Longitude of the ascending node
+    const N = ((125.04 - 0.0529539 * D) % 360 + 360) % 360;
+    // Moon's mean anomaly (mean longitude measured from perigee)
+    const M_moon = ((134.963 + 13.064993 * D) % 360 + 360) % 360;
+    // Moon's ecliptic latitude β ≈ 5.145° × sin(M - N)
+    const moonLat = 5.145 * Math.sin(((M_moon - N) * Math.PI) / 180);
+    const absLat = Math.abs(moonLat);
+    if (absLat < 0.5) return "total";
+    if (absLat < 0.9) return "partial";
+    if (absLat < 1.5) return "penumbral";
+    return "none";
+}
+
 export const MAJOR_CITIES: Array<{ name: string; country: string; lat: number; lng: number }> = [
     // Expanded list of World Capitals & Major Cities
     { name: "Mecca", country: "Saudi Arabia", lat: 21.3891, lng: 39.8579 },

@@ -2,10 +2,27 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import Sitemap from "vite-plugin-sitemap";
 import path from "node:path";
+import fs from "node:fs";
 import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
+    // Inject VITE_FIREBASE_* env vars into the FCM service worker at build time.
+    // Vite doesn't process files in publicDir through its module graph, so we
+    // replace the __VITE_*__ placeholders as a post-build step.
+    {
+      name: "firebase-sw-env",
+      closeBundle() {
+        const swPath = path.resolve(import.meta.dirname, "dist/public/firebase-messaging-sw.js");
+        if (fs.existsSync(swPath)) {
+          let content = fs.readFileSync(swPath, "utf-8");
+          content = content
+            .replace(/__VITE_FIREBASE_API_KEY__/g, process.env.VITE_FIREBASE_API_KEY ?? "")
+            .replace(/__VITE_FIREBASE_APP_ID__/g, process.env.VITE_FIREBASE_APP_ID ?? "");
+          fs.writeFileSync(swPath, content);
+        }
+      },
+    },
     react(),
     tailwindcss(),
     Sitemap({

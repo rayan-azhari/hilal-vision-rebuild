@@ -15,6 +15,9 @@
             ]
         }
     ],
+    "crons": [
+        { "path": "/api/cron/moonAlerts", "schedule": "0 8 * * *" }
+    ],
     "functions": {
         "api/trpc/[trpc].ts": {
             "includeFiles": "server/**"
@@ -30,12 +33,26 @@
         },
         "api/v1/[...path].ts": {
             "includeFiles": "server/**"
+        },
+        "api/push/send.ts": {
+            "includeFiles": "server/**"
+        },
+        "api/cron/moonAlerts.ts": {
+            "includeFiles": "server/**"
         }
     },
     "rewrites": [
         {
             "source": "/api/og",
             "destination": "/api/og"
+        },
+        {
+            "source": "/api/push/send",
+            "destination": "/api/push/send"
+        },
+        {
+            "source": "/api/cron/moonAlerts",
+            "destination": "/api/cron/moonAlerts"
         },
         {
             "source": "/api/stripe/checkout",

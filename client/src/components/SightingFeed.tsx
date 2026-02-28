@@ -1,6 +1,6 @@
 import { trpc } from "@/lib/trpc";
-import { Eye, MapPin, Clock, Bell, Download } from "lucide-react";
-import { useState } from "react";
+import { Eye, MapPin, Clock, Bell, Download, Pause, Play } from "lucide-react";
+import { useState, useEffect } from "react";
 import { requestNotificationPermission } from "@/lib/firebase";
 import { toast } from "sonner";
 
@@ -19,6 +19,9 @@ const SIGHTING_LABELS: Record<string, string> = {
 export function SightingFeed() {
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [showExportMenu, setShowExportMenu] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState(() => new Date());
+    const [secondsAgo, setSecondsAgo] = useState(0);
     const subscribeMutation = trpc.notifications.subscribe.useMutation({
         onSuccess: () => {
             toast.success("Successfully subscribed to notifications!");
@@ -45,10 +48,23 @@ export function SightingFeed() {
     const { data, isLoading } = trpc.telemetry.getObservations.useQuery(
         { limit: 10, offset: 0 },
         {
-            refetchInterval: 30_000, // Auto-refresh every 30 seconds
-            refetchOnWindowFocus: true,
+            refetchInterval: isPaused ? false : 30_000,
+            refetchOnWindowFocus: !isPaused,
         }
     );
+
+    // Track when data last refreshed
+    useEffect(() => {
+        if (data) setLastUpdated(new Date());
+    }, [data]);
+
+    // Increment the "X seconds ago" counter every second
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSecondsAgo(Math.floor((Date.now() - lastUpdated.getTime()) / 1000));
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [lastUpdated]);
 
     const sightings = data?.data;
 
@@ -183,10 +199,20 @@ export function SightingFeed() {
                 >
                     <Bell className="w-4 h-4 text-white" />
                 </button>
-                <span className="ml-auto flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="ml-auto flex items-center gap-1.5">
+                    <button
+                        onClick={() => setIsPaused((p) => !p)}
+                        className="w-5 h-5 flex items-center justify-center rounded hover:bg-white/10 transition-colors"
+                        title={isPaused ? "Resume auto-refresh" : "Pause auto-refresh"}
+                    >
+                        {isPaused
+                            ? <Play className="w-3 h-3" style={{ color: "var(--muted-foreground)" }} />
+                            : <Pause className="w-3 h-3" style={{ color: "var(--muted-foreground)" }} />
+                        }
+                    </button>
+                    <span className={`w-2 h-2 rounded-full ${isPaused ? "bg-gray-500" : "bg-green-400 animate-pulse"}`} />
                     <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                        Live · {sightings.length} reports
+                        {isPaused ? `Paused · ${sightings.length}` : `${secondsAgo}s ago · ${sightings.length}`}
                     </span>
                 </span>
             </div>
