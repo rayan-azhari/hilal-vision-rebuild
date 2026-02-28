@@ -226,6 +226,10 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     const globe = globeInstanceRef.current;
     if (!globe) return;
 
+    const scene = globe.scene();
+    const existing = scene.children.find((c: any) => c.name === "visibility-layer");
+    if (existing) scene.remove(existing);
+
     if (showVisibility && textureUrl) {
       const r = globe.getGlobeRadius();
       const geometry = new THREE.SphereGeometry(r * 1.002, 72, 72);
@@ -236,17 +240,15 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
         depthWrite: false, // Prevents z-fighting
       });
       const overlayMesh = new THREE.Mesh(geometry, material);
-
-      globe.customLayerData([{}])
-        .customThreeObject(() => overlayMesh);
+      overlayMesh.name = "visibility-layer";
+      overlayMesh.rotation.y = -Math.PI / 2; // Match three-globe's internal globe rotation
+      scene.add(overlayMesh);
 
       return () => {
-        globe.customLayerData([]);
+        scene.remove(overlayMesh);
         geometry.dispose();
         material.dispose();
       };
-    } else {
-      globe.customLayerData([]);
     }
   }, [showVisibility, textureUrl]);
 

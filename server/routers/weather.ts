@@ -126,43 +126,63 @@ export const weatherRouter = router({
     )
     .query(async ({ input }) => {
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,cloud_cover&timezone=auto`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,cloud_cover,relative_humidity_2m,wind_speed_10m,visibility&timezone=auto`;
         const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`Open-Meteo fetch failed: ${res.status}`);
         }
         const json = (await res.json()) as any;
 
-        const cloudCover = json.current?.cloud_cover ?? 0;
-        const temperature = json.current?.temperature_2m ?? 0;
+        const cloudCover: number = json.current?.cloud_cover ?? 0;
+        const temperature: number = json.current?.temperature_2m ?? 0;
+        const humidity: number = json.current?.relative_humidity_2m ?? 0;
+        const windSpeed: number = json.current?.wind_speed_10m ?? 0; // km/h
+        const visibilityKm: number = Math.round((json.current?.visibility ?? 24000) / 1000);
 
-        let conditionText = "Clear Skies";
-        let conditionColor = "#4ade80"; // green
+        // Composite conditions score (0–100) weighted by observational impact
+        const cloudScore = cloudCover <= 10 ? 50 : cloudCover <= 40 ? 35 : cloudCover <= 70 ? 15 : 0;
+        const humidityScore = humidity <= 50 ? 20 : humidity <= 75 ? 10 : 0;
+        const windScore = windSpeed <= 20 ? 15 : windSpeed <= 40 ? 8 : 0;
+        const visScore = visibilityKm >= 20 ? 15 : visibilityKm >= 10 ? 8 : 0;
+        const conditionsScore = cloudScore + humidityScore + windScore + visScore;
 
-        if (cloudCover > 80) {
-          conditionText = "Poor Visibility: Heavy cloud cover may obscure crescent";
-          conditionColor = "#f87171"; // red
-        } else if (cloudCover > 40) {
-          conditionText = "Fair Visibility: Partly cloudy skies";
-          conditionColor = "#facc15"; // yellow
-        } else if (cloudCover > 10) {
-          conditionText = "Good Visibility: Mostly clear";
+        let conditionText: string;
+        let conditionColor: string;
+        if (conditionsScore >= 70) {
+          conditionText = "Excellent — ideal viewing conditions";
+          conditionColor = "#4ade80"; // green
+        } else if (conditionsScore >= 45) {
+          conditionText = "Good — some interference possible";
           conditionColor = "#a3e635"; // light green
+        } else if (conditionsScore >= 25) {
+          conditionText = "Fair — conditions may affect sighting";
+          conditionColor = "#facc15"; // yellow
+        } else {
+          conditionText = "Poor — weather may prevent observation";
+          conditionColor = "#f87171"; // red
         }
 
         return {
           cloudCover,
           temperature,
+          humidity,
+          windSpeed,
+          visibilityKm,
+          conditionsScore,
           conditionText,
-          conditionColor
+          conditionColor,
         };
       } catch (err) {
         console.error("Local weather fetch error:", err);
         return {
           cloudCover: 0,
           temperature: 0,
-          conditionText: "Weather Unvailable",
-          conditionColor: "#6b7280"
+          humidity: 0,
+          windSpeed: 0,
+          visibilityKm: 0,
+          conditionsScore: 0,
+          conditionText: "Weather unavailable",
+          conditionColor: "#6b7280",
         };
       }
     }),

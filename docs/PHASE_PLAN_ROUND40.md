@@ -90,39 +90,23 @@ Add comment at line 309 explaining the ±80° limit (SunCalc accuracy degrades a
 
 ---
 
-## ⏳ Phase 5 — Testing Expansion
-_Priority: MEDIUM-HIGH — router layer is 0% tested; blocks confident refactoring._
+## ✅ Phase 5 — Testing Expansion (DONE — Round 40, commit ff32f7a)
+_Completed this session._
 
-### 5a. tRPC router unit tests
-New test files:
-- `server/routers/archive.test.ts` — test `getHistoricalData` with mock DB
-- `server/routers/weather.test.ts` — test `getCloudGrid` with mock fetch
-- `server/routers/notifications.test.ts` — test `saveToken`, `deleteToken`
-- `server/appRouter.test.ts` — test `submitObservation` Zone-F rejection logic
-
-Target: 60%+ router coverage (from 0%).
-
-### 5b. Public API integration tests
-New file: `api/v1.test.ts` — test `/api/v1/visibility` and `/api/v1/moon-phases` with:
-- Valid inputs (known city + date → expected zone)
-- Invalid date format → 400
-- Out-of-range date → 400
-- Missing required params → 422
-
-### 5c. E2E test expansion (`e2e/`)
-Add to existing Playwright suite:
-- Calendar: assert Ramadan 1445 = March 2024 in Gregorian view
-- Pro gating: assert non-pro user sees blur overlay on cloud toggle
-- Archive: assert rows load for 1463 AH
-- Sighting form: assert Zone-F submission is rejected
-
-### 5d. Add E2E to CI pipeline
-Add `pnpm test:e2e` step to `.github/workflows/ci.yml` (separate job, runs after `build`).
-
-**Files:** `server/routers/*.test.ts` (new), `api/v1.test.ts` (new), `e2e/*.spec.ts`, `.github/workflows/ci.yml`
-**Effort:** ~1 day
+- [x] `server/_core/trpc.ts` — export `createCallerFactory`
+- [x] `server/routers/archive.test.ts` — 7 tests (pure in-memory icopData)
+- [x] `server/routers/weather.test.ts` — 4 tests (fetch mock, cache, error fallback)
+- [x] `server/routers/notifications.test.ts` — 4 tests (DB upsert dedup, null DB, short token)
+- [x] `server/appRouter.test.ts` — 5 tests (Zone-F rejection, rate limit, vi.hoisted)
+- [x] `server/publicApi.ts` — refactored to named exports (visibilityHandler, moonPhasesHandler)
+- [x] `server/publicApi.test.ts` — 11 tests (mock req/res factory)
+- [x] `e2e/features.spec.ts` — 2 E2E scenarios (Calendar Hijri months, Archive ICOP data)
+- [x] `playwright.config.ts` — PORT=5173 env var for CI webServer
+- [x] `.github/workflows/ci.yml` — e2e job added (needs: build)
+- **Result:** 102 → 133 unit tests; 5-job CI pipeline (lint→typecheck→test→build→e2e)
 
 ---
+
 
 ## ⏳ Phase 6 — UX Polish & Bug Fixes
 _Priority: MEDIUM — affects daily usability and user trust._
@@ -163,8 +147,43 @@ Add tooltip on lock icon: "Years before 1463 AH · Unlock with Pro".
 ### 6i. Map click debounce
 Add 300ms debounce to map click handler to prevent DEM fetch spam.
 
-**Files:** `client/src/i18n/` (new), `client/src/App.tsx`, `GlobePage.tsx`, `MapPage.tsx`, `client/src/contexts/`, `vercel.json`, `ProTierContext.tsx`, `ArchivePage.tsx`
-**Effort:** ~1.5 days
+### 6j. Best Time to Observe — richer weather conditions _(user-requested)_
+**Current state:** `BestTimeCard.tsx` already shows cloud cover + temperature from `getLocalWeather`, but weather is informational only and doesn't influence the algorithm.
+
+**Add to `server/routers/weather.ts → getLocalWeather()`:**
+- `relative_humidity_2m` — high humidity = poor atmospheric seeing
+- `wind_speed_10m` — turbulence indicator
+- `visibility` — meteorological visibility in meters (fog/haze detection)
+
+**Add to `BestTimeCard.tsx`:**
+- Composite **Conditions Score** (0–100) from all 4 weather factors, colour-coded green/amber/red
+- Warning banner when `conditionsScore < 30`: _"Poor weather tonight — viewing may be impaired"_
+
+**Files:** `server/routers/weather.ts`, `client/src/components/BestTimeCard.tsx`
+
+### 6k. Countdown to Ramadan, Eid al-Fitr, Eid al-Adha _(user-requested)_
+New component `client/src/components/IslamicCountdown.tsx`:
+- Uses existing `getUmmAlQuraMonthStart(year, month)` from `shared/astronomy.ts` to get Gregorian date of each event
+- Shows 3 cards: Ramadan (month 9 day 1), Eid al-Fitr (month 10 day 1), Eid al-Adha (month 12 day 10)
+- Days-remaining label: "X days away" / "Tomorrow" / "Today!"
+- Auto-advances to next Hijri year once event has passed
+- Added to `CalendarPage.tsx` above the month grid, no Pro gate
+
+**Files:** `client/src/components/IslamicCountdown.tsx` (new), `client/src/pages/CalendarPage.tsx`
+
+### 6l. Fix visibility layer misalignment on 2D map and 3D globe _(user-reported bug, HIGH priority)_
+**Root causes:**
+1. **3D globe (confirmed):** Visibility overlay `Three.js` mesh does not apply `rotation.y = -Math.PI/2`, unlike the cloud overlay mesh which correctly does so at `GlobePage.tsx:277`. This shifts the entire green zone ~90° east of the correct position.
+2. **2D map + 3D globe (grid offset):** Grid points in `visibility.worker.ts` are sampled at cell **corners** (top-left), not centers. Shifting by `+0.5` per axis centers each sample point in its cell, correcting ~1.5–2° of drift depending on resolution.
+
+**Fixes:**
+- `client/src/pages/GlobePage.tsx` — after creating `overlayMesh`, add `overlayMesh.rotation.y = -Math.PI / 2;`
+- `client/src/workers/visibility.worker.ts` — shift `py → py + 0.5` and `px → px + 0.5` before lat/lng computation (both Mercator and equirectangular branches)
+
+**Files:** `client/src/pages/GlobePage.tsx`, `client/src/workers/visibility.worker.ts`
+
+**Files:** `client/src/i18n/` (new), `client/src/App.tsx`, `GlobePage.tsx`, `MapPage.tsx`, `client/src/contexts/`, `vercel.json`, `ProTierContext.tsx`, `ArchivePage.tsx`, `client/src/components/BestTimeCard.tsx`, `server/routers/weather.ts`, `client/src/components/IslamicCountdown.tsx` (new), `client/src/workers/visibility.worker.ts`
+**Effort:** ~2 days
 
 ---
 
@@ -197,8 +216,31 @@ _Priority: MEDIUM — `push_tokens` schema and `notifications` tRPC router exist
 - Add toggle to pause/resume auto-refresh in `SightingFeed.tsx`
 - Show "last updated X seconds ago" instead of silently polling
 
-**Files:** `api/push/send.ts` (new), `client/public/sw.js`, `SightingFeed.tsx`, `SightingReportForm.tsx`, `server/routers/notifications.ts`, `drizzle/schema.ts`, Vercel env vars
-**Effort:** ~3 days
+### 7f. Moon event notifications — Full Moon, Blue Moon, Lunar Eclipse _(user-requested)_
+**Infrastructure needed first:** Firebase Admin SDK on server, `FIREBASE_SERVICE_ACCOUNT_JSON` env var, Vercel Cron.
+
+**7f-i. Full Moon alert**
+- Daily cron `api/cron/moonAlerts.ts` at 08:00 UTC
+- If `getMoonPhaseInfo(today).nextFullMoon` is today → send FCM to all subscribed push tokens
+- Message: _"🌕 Full Moon tonight — crescent season ends, next Hilal in ~15 days"_
+
+**7f-ii. Blue Moon alert**
+- Blue moon = second full moon in the same Gregorian calendar month
+- Detect by finding the previous full moon (walk back ~29 days from `nextFullMoon`) and checking if it's in the same calendar month
+- Message: _"🌕 Blue Moon tonight! Two full moons in one month"_
+
+**7f-iii. Lunar Eclipse (basic detection)**
+- Lunar eclipses occur at full moon when the Moon is near a node
+- New function `predictLunarEclipse(fullMoonDate: Date): 'none' | 'penumbral' | 'partial' | 'total'` in `shared/astronomy.ts`
+- Detection: check Moon's ecliptic latitude at full moon — within ±1.5° → penumbral, ±0.9° → partial, ±0.5° → total
+- Message: _"🌑 Lunar Eclipse tonight — [type] shadow on the Moon"_
+
+**Note:** Solar eclipses are out of scope (require path-of-totality computation).
+
+**Files:** `api/cron/moonAlerts.ts` (new), `shared/astronomy.ts` (add `predictLunarEclipse`), `vercel.json` (cron config), `server/routers/notifications.ts` (sendNotification helper), Vercel env: `FIREBASE_SERVICE_ACCOUNT_JSON`
+
+**Files:** `api/push/send.ts` (new), `client/public/sw.js`, `SightingFeed.tsx`, `SightingReportForm.tsx`, `server/routers/notifications.ts`, `drizzle/schema.ts`, Vercel env vars, `api/cron/moonAlerts.ts` (new), `shared/astronomy.ts`
+**Effort:** ~4 days
 
 ---
 
@@ -252,13 +294,13 @@ In `ProTierContext.tsx`, throw (or warn loudly) if `VITE_REVENUECAT_APPLE_KEY` /
 | 1 | Security Hardening | ✅ Done | — | — |
 | 2 | Quality Infrastructure | ✅ Done | — | — |
 | 3 | Database & Backend Polish | ✅ Done | — | — |
-| **4** | **Scientific Accuracy Fixes** | ⏳ Next | 🔴 High | ~4h |
-| **5** | **Testing Expansion** | ⏳ | 🟠 High | ~1 day |
-| **6** | **UX Polish & Bug Fixes** | ⏳ | 🟠 High | ~1.5 days |
-| **7** | **Push Notifications & Community** | ⏳ | 🟡 Medium | ~3 days |
+| 4 | Scientific Accuracy Fixes | ✅ Done | — | — |
+| 5 | Testing Expansion | ✅ Done | — | — |
+| **6** | **UX Polish & Bug Fixes** (+6j weather, 6k countdown, 6l alignment fix) | ⏳ Next | 🔴 High | ~2 days |
+| **7** | **Push Notifications & Community** (+7f moon events) | ⏳ | 🟡 Medium | ~4 days |
 | **8** | **Production Hardening & Launch** | ⏳ | 🔴 Must-do | ~2 days |
 
-**Recommended order:** 4 → 6 → 5 → 7 → 8 (science bugs are fast wins; UX unblocks engagement; tests give confidence before launch)
+**Recommended order:** 6 → 7 → 8 (6l alignment fix is highest priority; countdown and weather are fast wins; notifications before launch)
 
 ---
 

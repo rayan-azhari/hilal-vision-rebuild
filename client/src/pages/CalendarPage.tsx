@@ -16,6 +16,7 @@ import {
   getUmmAlQuraMonthStart,
   type HijriDate
 } from "@/lib/astronomy";
+import { IslamicCountdown } from "@/components/IslamicCountdown";
 
 const ISLAMIC_EVENTS: Array<{ month: number; day: number; name: string; nameAr: string; type: "major" | "minor" }> = [
   { month: 1, day: 1, name: "Islamic New Year", nameAr: "رأس السنة الهجرية", type: "major" },
@@ -225,6 +226,7 @@ export default function CalendarPage() {
       </PageHeader>
 
       <div className="container py-8">
+        <IslamicCountdown />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="breezy-card lg:col-span-2 overflow-hidden animate-breezy-enter p-0 pb-2">
             <div

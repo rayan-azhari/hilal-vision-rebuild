@@ -3,7 +3,7 @@
  * Uses the computeBestObservationTime function from the astronomy engine.
  */
 import { useMemo } from "react";
-import { Clock, Cloud, Thermometer } from "lucide-react";
+import { Clock, Cloud, Thermometer, Droplets, Wind, Eye } from "lucide-react";
 import { computeBestObservationTime, type Location } from "@/lib/astronomy";
 import { trpc } from "@/lib/trpc";
 
@@ -114,17 +114,71 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                     {/* Weather Conditions Panel */}
                     {weather && (
                         <div className="mt-4 pt-3 border-t border-white/10">
-                            <div className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--muted-foreground)" }}>
-                                Observation Conditions
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>
+                                    Viewing Conditions
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <div
+                                        className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                                        style={{
+                                            color: weather.conditionColor,
+                                            background: `color-mix(in oklch, ${weather.conditionColor} 12%, transparent)`,
+                                        }}
+                                    >
+                                        {weather.conditionsScore}/100
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
+                            {/* Poor conditions warning banner */}
+                            {weather.conditionsScore < 30 && (
+                                <div
+                                    className="text-xs mb-2 px-2 py-1.5 rounded-md font-medium flex items-center gap-1.5"
+                                    style={{
+                                        color: "#f87171",
+                                        background: "color-mix(in oklch, #f87171 10%, transparent)",
+                                        border: "1px solid color-mix(in oklch, #f87171 20%, transparent)",
+                                    }}
+                                >
+                                    ⚠ Poor weather tonight — viewing may be impaired
+                                </div>
+                            )}
+
+                            <div className="space-y-1.5">
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
                                     <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
                                         <Cloud className="w-3 h-3 text-white/70" /> Cloud Cover
                                     </span>
                                     <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
                                         {Math.round(weather.cloudCover)}%
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
+                                    <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
+                                        <Droplets className="w-3 h-3 text-white/70" /> Humidity
+                                    </span>
+                                    <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
+                                        {Math.round(weather.humidity)}%
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
+                                    <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
+                                        <Wind className="w-3 h-3 text-white/70" /> Wind
+                                    </span>
+                                    <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
+                                        {Math.round(weather.windSpeed)} km/h
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
+                                    <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
+                                        <Eye className="w-3 h-3 text-white/70" /> Visibility
+                                    </span>
+                                    <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
+                                        {weather.visibilityKm} km
                                     </span>
                                 </div>
 
@@ -138,7 +192,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                                 </div>
 
                                 <div
-                                    className="text-xs mt-2 p-2 rounded-md text-center font-medium"
+                                    className="text-xs mt-1 p-2 rounded-md text-center font-medium"
                                     style={{
                                         color: weather.conditionColor,
                                         background: `color-mix(in oklch, ${weather.conditionColor} 10%, transparent)`

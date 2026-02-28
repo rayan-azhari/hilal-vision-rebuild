@@ -93,16 +93,17 @@ self.onmessage = (e: MessageEvent) => {
     for (let py = 0; py < H; py++) {
         let lat: number;
         if (isMercator) {
-            const mercY = Math.PI - (py / H) * 2 * Math.PI;
+            // +0.5 centers the sample in the grid cell (vs sampling at the top-left corner)
+            const mercY = Math.PI - ((py + 0.5) / H) * 2 * Math.PI;
             lat = (2 * Math.atan(Math.exp(mercY)) - Math.PI / 2) * (180 / Math.PI);
             if (lat > maxLat) lat = maxLat;
             if (lat < -maxLat) lat = -maxLat;
         } else {
-            lat = 90 - (py / H) * 180;
+            lat = 90 - ((py + 0.5) / H) * 180;
         }
 
         for (let px = 0; px < W; px++) {
-            const lng = -180 + (px / W) * 360;
+            const lng = -180 + ((px + 0.5) / W) * 360;
             const { zone, value } = computeVisibilityAtPoint(date, lat, lng, criterion || "yallop", temperature, pressure);
             const [r, g, b] = rgbMap[zone];
             const night = !isDaylight(lat, lng, date);
