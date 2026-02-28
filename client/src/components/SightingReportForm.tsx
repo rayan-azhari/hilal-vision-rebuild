@@ -27,12 +27,21 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [photoName, setPhotoName] = useState("");
+    const [imageBase64, setImageBase64] = useState<string>("");
 
     // EXIF Extraction
     const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setPhotoName(file.name);
+
+        // Convert the image to Base64 to attach to the submission payload
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const result = reader.result as string;
+            setImageBase64(result);
+        };
+        reader.readAsDataURL(file);
 
         try {
             const exif = await parseExif(file, {
@@ -107,6 +116,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
             observationTime: new Date(observationTime).toISOString(),
             visualSuccess: visualSuccess as "naked_eye" | "optical_aid" | "not_seen",
             notes: notes || undefined,
+            imageBase64: imageBase64 ? imageBase64 : undefined,
         });
     };
 

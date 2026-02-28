@@ -58,9 +58,7 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
         <div className="flex flex-col gap-6 w-full h-full">
             <div className="w-full flex items-center justify-between">
                 <div className="flex flex-col">
-                    <h3 className="text-xl font-medium" style={{ color: "var(--foreground)" }}>
-                        Altitude Tracker
-                    </h3>
+
                     <p className="text-sm mt-1" style={{ color: "var(--muted-foreground)" }}>
                         Drag slider to change time
                     </p>

@@ -1,0 +1,1 @@
+ALTER TABLE `observation_reports` ADD `imageUrl` varchar(2048);

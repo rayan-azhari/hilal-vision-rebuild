@@ -507,7 +507,20 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                 )}
               </div>
 
-              <div className="mt-3 pt-2 text-[10px] leading-tight border-t" style={{ color: "var(--muted-foreground)", borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+              {selectedPoint.data.imageUrl && (
+                <div className="mt-3 overflow-hidden rounded-md border border-white/10 relative">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-10" />
+                  <img
+                    src={selectedPoint.data.imageUrl}
+                    alt="Sighting Photograph"
+                    className="w-full h-32 object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute bottom-1 right-2 text-[8px] text-white/70 z-20">Attached Photo</div>
+                </div>
+              )}
+
+              <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] leading-tight border-t" style={{ color: "var(--muted-foreground)", borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 {VISIBILITY_LABELS[selectedPoint.data.visibility as VisibilityZone].desc}
               </div>
 

@@ -66,7 +66,7 @@ The application is named after the Arabic word *hilal* (هلال), which specifi
 
 ### 2.2 Key Frontend Libraries
 
-The application uses several specialised libraries beyond the core stack. **SunCalc** (`suncalc@1.9.0`) provides the foundational sun and moon position calculations. **globe.gl** (`globe.gl@2.45.0`) renders the interactive 3D globe using WebGL via Three.js. **Leaflet** (`leaflet@1.9.4`) with **react-leaflet** provides the flat 2D world map. **D3** (`d3@7.9.0`) is available for custom data visualisations. **Recharts** (`recharts@2.15.2`) renders the sun/moon altitude charts. **Framer Motion** (`framer-motion@12.23.22`) handles page transitions and micro-animations. **Three.js** (`three@0.183.0`) is used directly for the custom visibility overlay mesh on the globe.
+The application uses several specialised libraries beyond the core stack. **astronomy-engine** (`astronomy-engine@2.1.19`) provides the foundational sun and moon position calculations. **globe.gl** (`globe.gl@2.45.0`) renders the interactive 3D globe using WebGL via Three.js. **Leaflet** (`leaflet@1.9.4`) with **react-leaflet** provides the flat 2D world map. **D3** (`d3@7.9.0`) is available for custom data visualisations. **Recharts** (`recharts@2.15.2`) renders the sun/moon altitude charts. **Framer Motion** (`framer-motion@12.23.22`) handles page transitions and micro-animations. **Three.js** (`three@0.183.0`) is used directly for the custom visibility overlay mesh on the globe.
 
 ### 2.3 File Structure
 
@@ -451,8 +451,8 @@ A rich informational page communicating Hilal Vision's mission, platform scope, 
 - **Who Is It For?** - Three audience cards: Muslim communities (simplified predictions), astronomers/researchers (raw q-values, ICOP data), and Islamic calendar scholars (multi-engine Hijri calendar comparison).
 - **Platform Tools** - Clickable card grid for all six tools (Globe, Map, Moon Phase, Hijri Calendar, Horizon, Archive) with descriptions.
 - **How We Compare** - Feature comparison table benchmarking Hilal Vision against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap across 14 dimensions (3D globe, weather overlay, ICOP data, Best-Time calculator, mobile app, push notifications, etc.).
-- **Technology** - Non-technical overview of the stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, Open-Meteo, Sentry).
-- **Data Sources & Attributions** - Linked credits to Yallop 1997, Odeh 2004, ICOP (IAC), SunCalc (Agafonkin), Umm al-Qura tables, and Open-Meteo.
+- **Technology** - Non-technical overview of the stack (React, astronomy-engine, Globe.gl, tRPC, Clerk, Capacitor, Open-Meteo, Sentry).
+- **Data Sources & Attributions** - Linked credits to Yallop 1997, Odeh 2004, ICOP (IAC), astronomy-engine (CosmicAmoeba), Umm al-Qura tables, and Open-Meteo.
 - **License & Contact** - All Rights Reserved notice, GitHub link, email contact, and links to Privacy/Terms pages.
 
 **Design:** Stars-field hero section with orbit rings, `.breezy-card` grid layout, gold accent on Hilal Vision column of the comparison table, methodology teaser CTA.
@@ -465,14 +465,14 @@ A comprehensive technical reference page written for astronomers, Islamic calend
 1. The Crescent Visibility Problem - Why single-parameter models (age, lag time) are unreliable; the need for bi-parametric polynomial criteria.
 2. Yallop (1997) Criterion - Complete q-value derivation, crescent width formula (SD, elongation), Best-Time definition (4/9 × lag time), and full Zone A–F classification table.
 3. Odeh (2004) Criterion - V-value formula, dataset differences from Yallop, and four-zone classification table.
-4. Triple-Engine Hijri Calendar - Astronomical (SunCalc two-pass conjunction search with 1446 AH epoch), Umm al-Qura (KACST tables via `@umalqura/core`), and Tabular/Kuwaiti (Julian Date arithmetic) engines with their trade-offs.
+4. Triple-Engine Hijri Calendar - Astronomical (astronomy-engine two-pass conjunction search with 1446 AH epoch), Umm al-Qura (KACST tables via `@umalqura/core`), and Tabular/Kuwaiti (Julian Date arithmetic) engines with their trade-offs.
 5. Best-Time-to-Observe Calculator - 5-minute scanning algorithm from sunset to moonset, composite scoring formula (`score = moonAlt × darknessFactor × altFactor`), and viability flag logic.
 6. World Visibility Grid - Three resolution levels (8°/900pts, 4°/3,600pts, 2°/14,400pts), Web Worker offloading, LRU texture cache (24 entries, keyed by date+resolution).
 7. ICOP Historical Archive - What ICOP is, how 1,000+ records were sourced, and how theory-vs-observation comparison enables model validation.
 8. Crowdsourced Telemetry & Validation - Zone F rejection algorithm, Upstash Redis rate limiting (fall-open to local memory cache), Open-Meteo meteorological enrichment (with strict 2s timeouts), and Data Privacy Jitter (~1.1km obfuscation for home addresses).
 9. Atmospheric Refraction - Saemundsson inverse formula with temperature (T°C) and pressure (P hPa) corrections for observatory-grade horizon accuracy. Native GPS altitude (`coords.altitude`) integration for precise terrestrial modelling.
 10. Gamification & Engagement - Observer Badge progression system tracked in the user database schema to encourage persistent crowdsourcing telemetry.
-11. References - Yallop 1997, Odeh 2004, Meeus 1998, SunCalc, ICOP, Umm al-Qura.
+11. References - Yallop 1997, Odeh 2004, Meeus 1998, astronomy-engine, ICOP, Umm al-Qura.
 
 **Design:** Fixed Table of Contents sidebar (desktop), Mobile 44px touch targets minimum, `FormulaBlock` monospace display components, coloured zone tables, and anchor-linked headings.
 
@@ -647,7 +647,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 12 | Ramadan | Ramadan start predictor page (1447–1456 AH), city-by-city comparison |
 | 13 | Bug fixes | Countdown logic fix, dashboard map width fix, moon phase curve density fix |
 | 14 | Hardening | Manus artifact removal, dead route cleanup, telemetry rate limiting, Zod validation |
-| 15 | Accuracy | Conjunction-based Hijri calendar (SunCalc), moon phase chart verification |
+| 15 | Accuracy | Conjunction-based Hijri calendar (astronomy-engine), moon phase chart verification |
 | 16 | Reach | SEO (dynamic titles), geolocation auto-detect (Horizon page), Vercel deployment |
 | 17 | Bug fixes | Infinite render loop fix (useMemo), Leaflet tile fix (ResizeObserver) |
 | 18 | Auth & Security | Implemented Clerk Auth and Upstash Redis rate limiting |
@@ -666,7 +666,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 31 | Accessibility & Native UX | Implemented robust Playwright E2E testing framework. Built Cividis-inspired High Contrast color-blind friendly rendering mode for WebGL/SVG artifacts. Injected Open-Meteo elevation tracking to Topographical Refraction horizon dip functions. Formulated strict Capacitor.js SafeArea padding for iOS Dynamic Islands. |
 | 32 | SEO & Scientific Precision | Integrated `vite-plugin-sitemap` for automated `sitemap.xml` generation. Injected JSON-LD structured data (`SoftwareApplication` schema) into `SEO.tsx`. Generated AI-crafted OpenGraph preview banner (`og-default.png`). Exported `findNewMoonNear()` and added `nextNewMoonExact` to `MoonPhaseInfo` for exact conjunction times displayed to the second on the Moon Phase Dashboard. Updated dark theme background to `#233342`. |
 | 33 | Monetization | Implemented dual-billing architecture for Pro tier: **Stripe Checkout** (Web) and **RevenueCat SDK** (iOS/Android Native) with Clerk `publicMetadata` webhook synchronization. Feature gating on Visibility (Globe), Moon (Sky Dome), Calendar (Astronomical/Tabular engines), Archive (historical years). Built `/support` page with dynamic UI hiding Sadaqah rules for native App Store compliance. |
-| 34 | API & Export | Implemented **Public REST API** (`/api/v1/visibility` and `/api/v1/moon-phases`) with Zod validation. Added **CSV/JSON export** to Archive page and Sighting Feed. Integrated **Atmospheric Overrides** (manual + auto-fetch from Open-Meteo) on Map and Globe pages. Added **DEM Integration** via Open-Meteo Elevation API for terrain-aware horizon calculations. Implemented **enhanced map click tooltips** with full lunar data. Added **EXIF metadata extraction** for sighting photo uploads. Fixed TypeScript strict typing for Vercel serverless functions. Increased Vite chunk size warning limit for WebGL app. |
+| 34 | API & Export | Implemented **Public REST API** (`/api/v1/visibility` and `/api/v1/moon-phases`) with Zod validation. Added **CSV/JSON export** to Archive page and Sighting Feed. Integrated **Atmospheric Overrides** (manual + auto-fetch from Open-Meteo) on Map and Globe pages. Added **DEM Integration** via Open-Meteo Elevation API for terrain-aware horizon calculations. Implemented **enhanced map click tooltips** with full lunar data. Added **photo uploads via backend S3 and EXIF metadata extraction**. Fixed TypeScript strict typing for Vercel serverless functions. Increased Vite chunk size warning limit for WebGL app. |
 | 35 | Pro Tier Expansion | Gated Cloud Cover overlay, Atmospheric Overrides panel, and Best Time to Observe card behind Pro tier on both Globe and Map pages. Fixed guest checkout bug (sign-in required before payment). Moved Stripe to **live mode** (`sk_live_...`). Updated UpgradeModal feature list to reflect all 6 gated features. |
 | 36 | Production Bug Fixes | Fixed Sentry-reported `TRPCClientError` — `api/trpc/[trpc].ts` had no error handling, causing Vercel to return plain-text on failures which broke the tRPC JSON parser; added try/catch returning structured JSON. Replaced `exif-js` (unmaintained, crashes on Android Chrome 145 with `ReferenceError: n is not defined` in image onload callback) with `exifr` (modern Promise-based EXIF library). Added THREE.js geometry/material disposal cleanup to `GlobePage.tsx` texture overlay effects to prevent WebGL resource leaks on navigation. |
 | 37 | UX & Rendering Fixes | Fixed 3D globe cloud overlay appearing as chrome-ball: switched from `MeshPhongMaterial` (lighting-aware, creating specular highlights) to `MeshBasicMaterial` with `depthWrite: false` (unlit overlay, correct transparency). Integrated DEM terrain elevation into Horizon View via `trpc.dem.getDem` — feeds real elevation into `computeSunMoonAtSunset`, adds a faint "geometric 0°" reference line on the canvas, and shows Terrain Elevation + Horizon Dip rows in the side panel. Added "I saw the moon!" CTA text and pulsing red ring/dot animation to the Report Sighting button (desktop + mobile) to improve user engagement. |

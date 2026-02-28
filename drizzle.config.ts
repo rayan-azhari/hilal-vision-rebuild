@@ -1,3 +1,5 @@
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 import { defineConfig } from "drizzle-kit";
 
 // DATABASE_URL is only required for push/migrate (needs a live DB connection).

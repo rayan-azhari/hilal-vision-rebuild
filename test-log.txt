@@ -1,0 +1,37 @@
+﻿
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ e2e\navigation.spec.ts:46:5 ÔÇ║ Responsive Design ÔÇ║ works on tablet viewport
+[1A[2K[chromium] ÔÇ║ e2e\navigation.spec.ts:46:5 ÔÇ║ Responsive Design ÔÇ║ works on tablet viewport
+PAGE ERROR: [Error [SyntaxError]: The requested module '/@fs/C:/Users/rayan/Desktop/Antigravity workspaces/Moon-dashboard/node_modules/.vite/deps/astronomy-engine.js?v=ad94ba92' does not provide an export named 'default']
+
+[1A[2KDEBUG DOM for MAP: 
+
+[1A[2K  1) [chromium] ÔÇ║ e2e\navigation.spec.ts:46:5 ÔÇ║ Responsive Design ÔÇ║ works on tablet viewport ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('.leaflet-container')
+    Expected: visible
+    Timeout: 25000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 25000ms[22m
+    [2m  - waiting for locator('.leaflet-container')[22m
+
+
+      50 |         await page.goto("/map");
+      51 |         console.log("DEBUG DOM for MAP:", await page.locator("body").innerText());
+    > 52 |         await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 25000 });
+         |                                                          ^
+      53 |     });
+      54 | });
+      55 |
+        at C:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\e2e\navigation.spec.ts:52:58
+
+
+[1A[2K  1 failed
+    [chromium] ÔÇ║ e2e\navigation.spec.ts:46:5 ÔÇ║ Responsive Design ÔÇ║ works on tablet viewport ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+[36m  Serving HTML report at http://localhost:62641. Press Ctrl+C to quit.[39m

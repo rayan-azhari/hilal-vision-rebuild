@@ -40,6 +40,7 @@ export const observationReports = mysqlTable("observation_reports", {
   pm25: decimal("pm25", { precision: 6, scale: 2 }),
   visualSuccess: mysqlEnum("visualSuccess", ["naked_eye", "optical_aid", "not_seen"]).notNull(),
   notes: text("notes"),
+  imageUrl: varchar("imageUrl", { length: 2048 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 }, (table) => [
   index("obs_userId_idx").on(table.userId),

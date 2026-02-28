@@ -70,7 +70,7 @@ A dedicated dashboard for the lunar cycle.
 
 - View the current Gregorian month mapped against Hijri dates.
 - **Triple-Engine Calendar**: Choose between three distinct calculation algorithms:
-  - **Astronomical (SunCalc)**: Conjunction-based algorithm finding the actual physical new moon.
+  - **Astronomical (astronomy-engine)**: Conjunction-based algorithm finding the actual physical new moon.
   - **Umm al-Qura**: The official civic Saudi Arabian calendar powered by KACST tables.
   - **Tabular (Kuwaiti)**: The standard arithmetic approximation.
 
@@ -111,7 +111,7 @@ Every page sets a dynamic `document.title` for better search engine discoverabil
    - **Seen with Optical Aid** - Required binoculars/telescope.
    - **Attempted, Not Seen** - This negative data is equally valuable for refining models.
 5. Add optional **Notes** (max 1000 characters).
-6. **Attach a Photo** (optional) - If the image contains EXIF metadata (GPS coordinates, camera model, timestamp), these fields are automatically extracted and pre-filled into the form.
+6. **Attach a Photo** (optional) - The image is securely uploaded to our cloud storage backend to provide verifying photographic evidence on the visibility map. If the image contains EXIF metadata (GPS coordinates, camera model, timestamp), these fields are automatically extracted and pre-filled into the form.
 7. Click **Submit Sighting**.
 
 ### What Happens Behind the Scenes
@@ -132,8 +132,8 @@ Hilal Vision's mission and background page.
 - **Mission statement** - Why this platform exists and who it is for.
 - **Platform tools** - Clickable overview of all six tools (Globe, Map, Moon, Calendar, Horizon, Archive).
 - **How We Compare** - Feature comparison table against Moonsighting.com, IslamicFinder, LuneSighting, and HilalMap, showing Hilal Vision's unique combination of 3D globe, weather overlay, ICOP data, and Best-Time calculator.
-- **Technology** - Brief overview of the tech stack (React, SunCalc, Globe.gl, tRPC, Clerk, Capacitor, etc.).
-- **Data Sources & Attributions** - Linked credits for Yallop 1997, Odeh 2004, ICOP, SunCalc, Umm al-Qura tables, and Open-Meteo.
+- **Technology** - Brief overview of the tech stack (React, astronomy-engine, Globe.gl, tRPC, Clerk, Capacitor, etc.).
+- **Data Sources & Attributions** - Linked credits for Yallop 1997, Odeh 2004, ICOP, astronomy-engine, Umm al-Qura tables, and Open-Meteo.
 - **Proprietary Software** - License information.
 
 ## 8. Methodology (`/methodology`)
@@ -144,13 +144,13 @@ A full technical reference for scientists, Islamic calendar scholars, and astron
 - **The Crescent Visibility Problem** - Why bi-parametric criteria are necessary; limits of age/lag-time models.
 - **Yallop (1997) Criterion** - Complete q-value formula, crescent width derivation (SD, elongation), and zone classification table (A–F).
 - **Odeh (2004) Criterion** - V-value formula and four-zone classification table.
-- **Triple-Engine Hijri Calendar** - Astronomical (SunCalc conjunction search), Umm al-Qura (KACST tables), and Tabular (Kuwaiti Julian Date) engines explained.
+- **Triple-Engine Hijri Calendar** - Astronomical (astronomy-engine conjunction search), Umm al-Qura (KACST tables), and Tabular (Kuwaiti Julian Date) engines explained.
 - **Best-Time-to-Observe Calculator** - 5-minute scanning algorithm, darkness/altitude scoring formula.
 - **World Visibility Grid** - Resolution levels (8°/4°/2°), Web Worker offloading, texture caching.
 - **ICOP Archive** - How 1,000+ records were sourced and how theory and observation are compared.
 - **Crowdsourced Telemetry & Validation** - Zone F rejection, Upstash rate limiting, Open-Meteo enrichment.
 - **Atmospheric Refraction** - Saemundsson formula with temperature and pressure correction.
-- **References** - Yallop 1997, Odeh 2004, Meeus, SunCalc, ICOP, Umm al-Qura.
+- **References** - Yallop 1997, Odeh 2004, Meeus, astronomy-engine, ICOP, Umm al-Qura.
 
 ## 9. Privacy Policy (`/privacy`)
 
