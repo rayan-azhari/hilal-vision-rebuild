@@ -202,14 +202,7 @@ export default function Home() {
       {/* Live Status Bar */}
       <section className="py-6 relative z-10 -mt-8">
         <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Current time */}
-            <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.1s' }}>
-              <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>UTC Time</div>
-              <div className="text-lg font-mono font-semibold" style={{ color: "var(--gold)" }}>
-                {time.toUTCString().slice(17, 25)}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Moon phase */}
             <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.2s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Phase</div>

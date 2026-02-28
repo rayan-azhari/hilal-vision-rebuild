@@ -17,7 +17,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
   - *Best-Time-to-Observe Calculator*: Automatically computes the optimal observation window between sunset and moonset, scoring by moon altitude and sky darkness. Incorporates topographical elevation precision where available.
   - *Accessibility*: High Contrast Color-Blind mode to ensure the visibility gradients remain intelligible for users with Color Vision Deficiency.
 - **🌔 Moon Phase Dashboard (`/moon`)**: Current lunar phase, age, illumination, Sun & Moon Altitude chart, Sky Dome polar visualization, and interactive scientific charts (Yallop/Danjon limits). Includes auto-geolocation and hour-offset.
-- **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (SunCalc), Official Umm al-Qura, and Tabular (Kuwaiti) calculations.
+- **📅 Hijri Calendar (`/calendar`)**: Triple-engine Hijri calendar featuring true Astronomical (astronomy-engine), Official Umm al-Qura, and Tabular (Kuwaiti) calculations.
 - **🌅 Horizon View (`/horizon`)**: Local horizon simulator showing the moon's position relative to the setting sun.
 - **📁 Archive (`/archive`)**: Authentic historical crescent visibility data featuring 1,000+ real sighting records from the Islamic Crescents' Observation Project (ICOP). Includes CSV and JSON export for both ICOP observations and computed visibility tables.
 - **🌐 SEO**: Per-page dynamic meta tags, Open Graph & Twitter cards, JSON-LD structured data, sitemap.xml, robots.txt.
@@ -34,7 +34,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 
 - **Frontend:** React 19, Vite 7, Tailwind CSS v4, Radix UI, Recharts
 - **Design System:** Breezy Weather Design (`.breezy-card`, Space-Navy/Gold themes)
-- **Mapping & Scientific Viz:** Leaflet, Globe.gl, Three.js, SunCalc
+- **Mapping & Scientific Viz:** Leaflet, Globe.gl, Three.js, astronomy-engine
 - **Backend:** Node.js, Express, tRPC (Type-safe API)
 - **Database:** Drizzle ORM (MySQL - `observation_reports` table)
 - **Authentication:** Clerk
@@ -53,7 +53,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 5. **Fail-Open Resilience**: External dependencies like the Upstash Redis rate limiter and Open-Meteo API fetchers are wrapped in strict cache-fallbacks and `AbortController` timeouts to ensure telemetry submissions never hard-crash if third-party services degrade.
 6. **Data Privacy Jitter**: Submitted user coordinates are securely obfuscated (jittered by ~1.1km) server-side before persisting to the DB, ensuring that home locations from backyard observation reports are perfectly anonymized in the public Sighting Feed.
 7. **Real ICOP Data Extraction**: Features an integrated scraper that autonomously pulled 1,000+ historical crescent sight reports to serve as verifiable proof-of-concept records alongside theoretical algorithms.
-8. **Triple-Engine Hijri Calendar**: Supports `SunCalc`-powered astronomical new moon detection, `@umalqura/core` for official KACST Saudi civic dates, and an arithmetic Tabular fallback.
+8. **Triple-Engine Hijri Calendar**: Supports `astronomy-engine`-powered astronomical new moon detection, `@umalqura/core` for official KACST Saudi civic dates, and an arithmetic Tabular fallback.
 7. **Production Upstash Protection**: Hardened TRPC mutation endpoints utilizing Upstash Redis sliding window token bucket rate-limiting.
 8. **Open-Meteo Cloud Cover Overlay**: Real-time cloud cover data fetched from Open-Meteo's forecast API for a sparse global grid (~162 points), bilinearly interpolated into a smooth canvas texture, and overlaid on both 2D Map (Leaflet `imageOverlay`) and 3D Globe (Three.js sphere mesh). Independently toggleable from visibility zones.
 9. **Best-Time-to-Observe Engine**: A `computeBestObservationTime()` function in the astronomy engine scans sunset→moonset in 5-minute steps, scoring each moment by moon altitude, sky darkness (civil/nautical twilight), and atmospheric extinction. Results displayed in a Breezy-styled sidebar card on both views.
@@ -76,7 +76,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 26. **EXIF Metadata Extraction**: Photo uploads in the Sighting Report form are automatically parsed for embedded GPS coordinates, camera model, and capture timestamp using the `exif-js` library, pre-filling the location and time fields for accuracy.
 27. **Enhanced Map Click Tooltips**: Clicking any point on the 2D Map displays a rich popup showing the visibility zone, q-value, moon age, altitude, azimuth, elongation, crescent width, and local DEM-sourced terrain elevation.
 23. **App Store Readiness**: Mobile web views are strictly styled using `env(safe-area-inset-top)` to seamlessly accommodate iOS Dynamic Islands and Android gesture navs via Capacitor.
-24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass SunCalc phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
+24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass astronomy-engine phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
 25. **Soft Paywall Monetization (Pro Tier)**: A `ProTierContext` + `<ProGate>` component system gates deep feature interaction behind a "Pro" subscription while keeping all features visible to free users from Day 1. Gated features include the 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular calendar engines, and historical ICOP data. An `UpgradeModal` offers Monthly ($2.99), Annual ($14.99), and Lifetime ($49.99) plans (Stripe integration pending).
 26. **Goodwill & Support Page**: A dedicated `/support` page with Sadaqah Jariyah messaging, Feature Access Matrix, pricing tiers, one-time donation options, and a Patron badge system. A Sadaqah banner on the Home page links to `/support`.
 27. **Gamified Engagement Mechanics**: Added an `observerBadge` progression system (Novice → Master) and `sightingCount` tracker to the Drizzle user schema to incentivize crowdsourced telemetry reporting.

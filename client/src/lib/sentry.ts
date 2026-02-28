@@ -47,6 +47,10 @@ export function initSentry(): void {
             "Failed to fetch",
             "Load failed",
             "NetworkError",
+            // Clerk Adblocker failures
+            "Clerk",
+            "clerk.browser.js",
+            "failed to load script",
         ],
 
         // Don't send PII

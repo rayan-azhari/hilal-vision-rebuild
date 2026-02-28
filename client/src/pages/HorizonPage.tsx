@@ -11,7 +11,7 @@ import {
   type SunMoonData,
 } from "@/lib/astronomy";
 import { trpc } from "@/lib/trpc";
-import * as SunCalc from "suncalc";
+import * as Astronomy from "astronomy-engine";
 
 function drawHorizon(
   canvas: HTMLCanvasElement,
@@ -190,16 +190,15 @@ function drawHorizon(
     ctx.fill();
 
     // Lit portion (simple crescent)
-    const illum = SunCalc.getMoonIllumination(date);
-    const phase = illum.phase;
-    const isWaxing = phase <= 0.5;
-    const k = phase * 2;
+    const phaseNormal = Astronomy.MoonPhase(date) / 360.0;
+    const isWaxing = phaseNormal <= 0.5;
+    const k = phaseNormal * 2;
     const rx = Math.abs(mr * Math.cos(Math.PI * k));
     const baseSweep = isWaxing ? 1 : 0;
     let termSweep;
-    if (phase <= 0.25) termSweep = 0;
-    else if (phase <= 0.5) termSweep = 1;
-    else if (phase <= 0.75) termSweep = 0;
+    if (phaseNormal <= 0.25) termSweep = 0;
+    else if (phaseNormal <= 0.5) termSweep = 1;
+    else if (phaseNormal <= 0.75) termSweep = 0;
     else termSweep = 1;
 
     ctx.fillStyle = "rgba(220,200,120,0.9)";

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from "recharts";
-import * as SunCalc from "suncalc";
+import * as Astronomy from "astronomy-engine";
 import { formatAzimuth } from "@/lib/astronomy";
 import { Sun, Moon } from "lucide-react";
 
@@ -15,32 +15,38 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
 
     const data = useMemo(() => {
         const points = [];
+        const obs = new Astronomy.Observer(location.lat, location.lng, 0);
         // Generate data for every 15 minutes
         for (let m = 0; m < 24 * 60; m += 15) {
             const t = new Date(date.getFullYear(), date.getMonth(), date.getDate(), Math.floor(m / 60), m % 60);
-            const sunP = SunCalc.getPosition(t, location.lat, location.lng);
-            const moonP = SunCalc.getMoonPosition(t, location.lat, location.lng);
+            const eqSun = Astronomy.Equator(Astronomy.Body.Sun, t, obs, true, true);
+            const eqMoon = Astronomy.Equator(Astronomy.Body.Moon, t, obs, true, true);
+            const hcSun = Astronomy.Horizon(t, obs, eqSun.ra, eqSun.dec, "normal");
+            const hcMoon = Astronomy.Horizon(t, obs, eqMoon.ra, eqMoon.dec, "normal");
 
             points.push({
                 time: m,
                 timeStr: `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`,
-                sunAlt: (sunP.altitude * 180) / Math.PI,
-                sunAz: (sunP.azimuth * 180) / Math.PI + 180,
-                moonAlt: (moonP.altitude * 180) / Math.PI,
-                moonAz: (moonP.azimuth * 180) / Math.PI + 180,
+                sunAlt: hcSun.altitude,
+                sunAz: hcSun.azimuth,
+                moonAlt: hcMoon.altitude,
+                moonAz: hcMoon.azimuth,
             });
         }
         return points;
     }, [date, location]);
 
     const currentT = new Date(date.getFullYear(), date.getMonth(), date.getDate(), Math.floor(minutes / 60), minutes % 60);
-    const currentSun = SunCalc.getPosition(currentT, location.lat, location.lng);
-    const currentMoon = SunCalc.getMoonPosition(currentT, location.lat, location.lng);
+    const obsCurrent = new Astronomy.Observer(location.lat, location.lng, 0);
+    const eqSunCurr = Astronomy.Equator(Astronomy.Body.Sun, currentT, obsCurrent, true, true);
+    const eqMoonCurr = Astronomy.Equator(Astronomy.Body.Moon, currentT, obsCurrent, true, true);
+    const hcSunCurr = Astronomy.Horizon(currentT, obsCurrent, eqSunCurr.ra, eqSunCurr.dec, "normal");
+    const hcMoonCurr = Astronomy.Horizon(currentT, obsCurrent, eqMoonCurr.ra, eqMoonCurr.dec, "normal");
 
-    const sunAlt = (currentSun.altitude * 180) / Math.PI;
-    const sunAz = (currentSun.azimuth * 180) / Math.PI + 180;
-    const moonAlt = (currentMoon.altitude * 180) / Math.PI;
-    const moonAz = (currentMoon.azimuth * 180) / Math.PI + 180;
+    const sunAlt = hcSunCurr.altitude;
+    const sunAz = hcSunCurr.azimuth;
+    const moonAlt = hcMoonCurr.altitude;
+    const moonAz = hcMoonCurr.azimuth;
 
     const formatXAxis = (tickItem: number) => {
         const hrs = Math.floor(tickItem / 60);

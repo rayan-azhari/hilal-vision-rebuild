@@ -22,6 +22,24 @@ import { useProTier } from "@/contexts/ProTierContext";
 import { MapControlsPanel } from "@/components/MapControlsPanel";
 import { MapInfoPanel, MapTimePanel, MapCrowdsourceLegend } from "@/components/MapLegendPanels";
 
+const ZONE_COLORS: Record<VisibilityZone, string> = {
+  A: "#4ade80",
+  B: "#facc15",
+  C: "#fb923c",
+  D: "#f87171",
+  E: "#6b7280",
+  F: "#233342",
+};
+
+const HIGH_CONTRAST_ZONE_COLORS: Record<VisibilityZone, string> = {
+  A: "#eaf018",
+  B: "#e1781e",
+  C: "#a03c28",
+  D: "#3c2896",
+  E: "#140a3c",
+  F: "#233342",
+};
+
 export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
   const { hourOffset, setHourOffset } = shared;
   const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
@@ -419,40 +437,14 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
               </div>
             </ProGate>
 
-            {/* Moon data (Globe-specific rendering due to visibility string vs full object) */}
-            <div className="breezy-card space-y-3 p-4 animate-breezy-enter" style={{ animationDelay: "100ms" }}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Visibility Zones</span>
-              </div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{
-                    background: `var(--gold-dim)`,
-                    color: "var(--background)",
-                  }}
-                >
-                  Zone {moonData.visibility} - {VISIBILITY_LABELS[moonData.visibility].label}
-                </span>
-              </div>
+            <MapInfoPanel
+              visibilityCriterion={visibilityCriterion}
+              highContrast={highContrast}
+              zoneColors={ZONE_COLORS}
+              highContrastZoneColors={HIGH_CONTRAST_ZONE_COLORS}
+            />
 
-              {[
-                { label: "Moon Altitude", value: `${moonData.moonAlt.toFixed(2)}°` },
-                { label: "Moon Azimuth", value: `${moonData.moonAz.toFixed(1)}°` },
-                { label: "Elongation", value: `${moonData.elongation.toFixed(2)}°` },
-                { label: "Arc of Vision", value: `${moonData.arcv.toFixed(2)}°` },
-                { label: "Crescent Width", value: `${moonData.crescent.w.toFixed(3)}'` },
-                { label: visibilityCriterion === "yallop" ? "Yallop q" : "Odeh V", value: visibilityCriterion === "yallop" ? moonData.qValue.toFixed(4) : moonData.odehCriterion.toFixed(4) },
-                { label: "Illumination", value: `${(moonData.illumination * 100).toFixed(1)}%` },
-                { label: "Sunset", value: moonData.sunset ? moonData.sunset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-" },
-                { label: "Moonset", value: moonData.moonset ? moonData.moonset.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "-" },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-center">
-                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-                  <span className="text-xs font-mono font-medium" style={{ color: "var(--foreground)" }}>{value}</span>
-                </div>
-              ))}
-            </div>
+            <MapTimePanel effectiveDate={effectiveDate} />
 
             <MapCrowdsourceLegend />
           </div>

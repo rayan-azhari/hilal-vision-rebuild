@@ -295,7 +295,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <SignedIn>
-              <div className="flex items-center justify-center p-1 rounded-full border border-white/10 ml-1">
+              <div className="flex items-center justify-center p-1 rounded-full border border-white/10 mx-1">
                 <UserButton
                   appearance={{
                     elements: {
@@ -307,18 +307,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </SignedIn>
 
             <SignedOut>
-              <SignInButton mode="modal">
-                <button
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ml-1 whitespace-nowrap flex-shrink-0"
-                  style={{
-                    background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
-                    color: "var(--foreground)",
-                  }}
-                >
-                  Sign In
-                </button>
-              </SignInButton>
+              <div className="hidden sm:block">
+                <SignInButton mode="modal">
+                  <button
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all mx-1 whitespace-nowrap flex-shrink-0"
+                    style={{
+                      background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
+                      color: "var(--foreground)",
+                    }}
+                  >
+                    Sign In
+                  </button>
+                </SignInButton>
+              </div>
             </SignedOut>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className="lg:hidden p-1.5 ml-1 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
+              style={{ color: "var(--foreground)" }}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
         </header>
 

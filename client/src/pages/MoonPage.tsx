@@ -4,7 +4,7 @@ import { Moon, Sun, ArrowRight, Clock, Eye, MapPin } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { getMoonPhaseInfo, computeSunMoonAtSunset, MAJOR_CITIES, formatTime } from "@/lib/astronomy";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
-import * as SunCalc from "suncalc";
+import * as Astronomy from "astronomy-engine";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
 import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { VisibilityDotScale, IlluminationArc, LunarAgeProgress, AzimuthCompass, ElongationVisual, CountdownCircle } from "@/components/BreezyVisuals";
@@ -101,8 +101,9 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
   const days = Array.from({ length: 30 }, (_, i) => {
     const d = new Date(baseDate);
     d.setDate(d.getDate() + i);
-    const illum = SunCalc.getMoonIllumination(d);
-    return { date: d, phase: illum.phase, fraction: illum.fraction };
+    const phaseNormal = Astronomy.MoonPhase(d) / 360.0;
+    const illum = Astronomy.Illumination(Astronomy.Body.Moon, d);
+    return { date: d, phase: phaseNormal, fraction: illum.phase_fraction };
   });
 
   const today = new Date();

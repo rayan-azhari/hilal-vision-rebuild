@@ -252,7 +252,7 @@ The client-side wrapper (`client/src/lib/astronomy.ts`) re-exports everything fr
 
 ### 5.1 Data Dependencies
 
-All position calculations use the **SunCalc** library, which implements Jean Meeus's astronomical algorithms for sun and moon positions. SunCalc provides: sun altitude and azimuth at any time and location, moon altitude, azimuth, and distance at any time and location, moon illumination fraction and phase angle, and rise/set times for both sun and moon.
+All position calculations use the **astronomy-engine** library, which implements rigorous astronomical algorithms based on Novas and JPL DE405/DE431 models for sun and moon positions. astronomy-engine provides: sun altitude and azimuth at any time and location, moon altitude, azimuth, and distance at any time and location, moon illumination fraction and phase angle, and rise/set times for both sun and moon.
 
 ### 5.2 Yallop (1997) Criterion
 
@@ -296,7 +296,7 @@ Users can seamlessly toggle between the Yallop and Odeh criteria across the 3D G
 
 The application features a **triple-engine Hijri calendar system**, supporting three distinct methodologies for converting Gregorian dates to Hijri dates:
 
-1. **Astronomical (SunCalc):** The default engine uses an astronomical conjunction-based algorithm. `findNewMoonNear()` uses SunCalc's `getMoonIllumination()` to search for the physical phase minimum in two passes (6-hour coarse sweep, 30-minute fine sweep). Dates are cached relative to an epoch (1 Muharram 1446 AH ≈ July 7, 2024). This provides the true physical commencement of the lunar cycle.
+1. **Astronomical (astronomy-engine):** The default engine uses an astronomical conjunction-based algorithm. `findNewMoonNear()` uses astronomy-engine's phase calculations to search for the physical phase minimum in two passes (6-hour coarse sweep, 30-minute fine sweep). Dates are cached relative to an epoch (1 Muharram 1446 AH ≈ July 7, 2024). This provides the true physical commencement of the lunar cycle.
 
 2. **Umm al-Qura:** The official civic calendar of Saudi Arabia, powered by the pre-computed KACST tables via the `@umalqura/core` package. This acts as the standard for civic/administrative date conversions. A set of wrapper functions (`getUmmAlQuraHijri`, `getUmmAlQuraDaysInMonth`, `getUmmAlQuraMonthStart`) within `shared/astronomy.ts` normalises the package's output to match the application's `HijriDate` interface.
 
@@ -315,7 +315,7 @@ The `getTerminatorPoints()` function computes the day/night boundary (the termin
 
 ### 5.7 Moon Phase Calculation
 
-The `getMoonPhaseInfo()` function returns a complete moon phase description for any date. The phase value (0–1, where 0 = new moon, 0.5 = full moon) comes from SunCalc's `getMoonIllumination()`. The moon age in days is computed as `phase × 29.53058867`. The next new moon and next full moon are found by iterating forward in 12-hour steps until the phase value is within 0.02 of the target phase.
+The `getMoonPhaseInfo()` function returns a complete moon phase description for any date. The phase value (0–1, where 0 = new moon, 0.5 = full moon) comes from astronomy-engine's `MoonPhase()`. The moon age in days is computed as `phase × 29.53058867`. The next new moon and next full moon are found by iterating forward in 12-hour steps until the phase value is within 0.02 of the target phase.
 
 Phase names are provided in both English and Arabic, covering all 8 standard phases from New Moon (المحاق) through Waxing Crescent (الهلال المتزايد), First Quarter (التربيع الأول), Waxing Gibbous (الأحدب المتزايد), Full Moon (البدر), Waning Gibbous (الأحدب المتناقص), Last Quarter (التربيع الأخير), and Waning Crescent (الهلال المتناقص).
 

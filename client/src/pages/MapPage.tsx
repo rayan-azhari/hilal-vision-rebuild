@@ -524,15 +524,15 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
         {/* Legend sidebar */}
         <div
-          className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l overflow-y-auto relative z-50"
+          className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l overflow-y-auto relative z-50 flex flex-col"
           style={{
             borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
             background: "var(--space-mid)",
+            height: "100%",
           }}
         >
-          <div className="p-5 space-y-5">
+          <div className="p-5 space-y-5 flex-1">
 
-            {/* Controls */}
             {/* Controls */}
             <MapControlsPanel
               isLoading={isLoading}

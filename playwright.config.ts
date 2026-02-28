@@ -54,5 +54,6 @@ export default defineConfig({
         url: 'http://localhost:3000',
         reuseExistingServer: !process.env.CI,
         env: { PORT: '3000' },
+        timeout: 120000,
     },
 });

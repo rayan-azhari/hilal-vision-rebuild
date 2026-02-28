@@ -27,8 +27,11 @@ export default function ProGate({ children, featureName, fallback, inline }: Pro
     // ── Inline mode: small badge next to a label ──────────────────────────
     if (inline) {
         return (
-            <button
-                onClick={() => setShowUpgradeModal(true)}
+            <span
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setShowUpgradeModal(true);
+                }}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full
           bg-gradient-to-r from-amber-500/15 to-amber-400/10
           border border-amber-400/25 text-amber-400 text-xs font-medium
@@ -37,7 +40,7 @@ export default function ProGate({ children, featureName, fallback, inline }: Pro
             >
                 <Crown className="w-3 h-3" />
                 <span>Pro</span>
-            </button>
+            </span>
         );
     }
 

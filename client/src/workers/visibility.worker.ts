@@ -21,19 +21,22 @@ import {
     HIGH_CONTRAST_ZONE_RGB,
     type VisibilityZone,
 } from "@shared/astronomy";
-import * as SunCalc from "suncalc";
+import * as Astronomy from "astronomy-engine";
 
 // ─── Worker-specific calculation (simplified for grid performance) ────────────
 
-function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterion: "yallop" | "odeh", temperature?: number, pressure?: number): { zone: VisibilityZone; value: number } {
-    const times = SunCalc.getTimes(date, lat, lng);
-    const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
-        ? times.sunset
-        : null;
-    const calcTime = sunset ?? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
+function computeVisibilityAtPoint(startOfDay: Date, lat: number, lng: number, criterion: "yallop" | "odeh", temperature?: number, pressure?: number): { zone: VisibilityZone; value: number } {
+    const obs = new Astronomy.Observer(lat, lng, 0);
+    const sunsetResult = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, -1, startOfDay, 1);
 
-    const sunPos = SunCalc.getPosition(calcTime, lat, lng);
-    const moonPos = SunCalc.getMoonPosition(calcTime, lat, lng);
+    // Fallback time to 18:00 if no sunset (circumpolar regions)
+    const calcTime = sunsetResult ? sunsetResult.date : new Date(startOfDay.getFullYear(), startOfDay.getMonth(), startOfDay.getDate(), 18, 0, 0);
+
+    const eqSun = Astronomy.Equator(Astronomy.Body.Sun, calcTime, obs, true, true);
+    const eqMoon = Astronomy.Equator(Astronomy.Body.Moon, calcTime, obs, true, true);
+    const hcSun = Astronomy.Horizon(calcTime, obs, eqSun.ra, eqSun.dec, "normal");
+    const hcMoon = Astronomy.Horizon(calcTime, obs, eqMoon.ra, eqMoon.dec, "normal");
+    const moonIllum = Astronomy.Illumination(Astronomy.Body.Moon, calcTime);
 
     let refractionDelta = 0;
     if (temperature !== undefined && pressure !== undefined) {
@@ -42,19 +45,12 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterio
         refractionDelta = R_true - R_std;
     }
 
-    const moonAlt = toDeg(moonPos.altitude) + refractionDelta;
-    const sunAlt = toDeg(sunPos.altitude) + refractionDelta;
+    const moonAlt = hcMoon.altitude + refractionDelta;
+    const sunAlt = hcSun.altitude + refractionDelta;
     const arcv = moonAlt - sunAlt;
 
-    // Clamp to [-1, 1] to guard against floating-point precision errors outside Math.acos domain
-    const cosElongation = Math.max(-1, Math.min(1,
-        Math.sin(sunPos.altitude) * Math.sin(moonPos.altitude) +
-        Math.cos(sunPos.altitude) * Math.cos(moonPos.altitude) *
-        Math.cos(moonPos.azimuth - sunPos.azimuth)
-    ));
-    const elongation = toDeg(Math.acos(cosElongation));
-
-    const crescent = crescentWidth(elongation, moonPos.distance);
+    const elongation = Astronomy.AngleFromSun(Astronomy.Body.Moon, calcTime);
+    const crescent = crescentWidth(elongation, moonIllum.geo_dist * 149597870.7);
 
     if (criterion === "yallop") {
         const q = yallopQ(arcv, crescent.w);
@@ -72,8 +68,10 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterio
 }
 
 function isDaylight(lat: number, lng: number, date: Date): boolean {
-    const sunPos = SunCalc.getPosition(date, lat, lng);
-    return toDeg(sunPos.altitude) > -6;
+    const obs = new Astronomy.Observer(lat, lng, 0);
+    const eq = Astronomy.Equator(Astronomy.Body.Sun, date, obs, true, true);
+    const hc = Astronomy.Horizon(date, obs, eq.ra, eq.dec, "normal");
+    return hc.altitude > -6;
 }
 
 // ─── Worker message handler ──────────────────────────────────────────────────
@@ -104,7 +102,8 @@ self.onmessage = (e: MessageEvent) => {
 
         for (let px = 0; px < W; px++) {
             const lng = -180 + ((px + 0.5) / W) * 360;
-            const { zone, value } = computeVisibilityAtPoint(date, lat, lng, criterion || "yallop", temperature, pressure);
+            const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+            const { zone, value } = computeVisibilityAtPoint(startOfDay, lat, lng, criterion || "yallop", temperature, pressure);
             const [r, g, b] = rgbMap[zone];
             const night = !isDaylight(lat, lng, date);
             const alpha = zone === "F" ? 40 : night ? 100 : 180;

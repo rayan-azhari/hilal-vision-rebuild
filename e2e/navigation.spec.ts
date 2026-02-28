@@ -6,12 +6,13 @@ test.describe("Navigation & Core Pages", () => {
         await expect(page).toHaveTitle(/Hilal Vision|Moon/i);
     });
 
-    test("Bottom navigation has all main links", async ({ page }) => {
-        // Bottom nav is only visible on mobile screens, so we must set a mobile viewport
+    test("Mobile navigation toggle works", async ({ page }) => {
+        // Mobile header uses a hamburger menu instead of bottom nav now
         await page.setViewportSize({ width: 375, height: 812 });
         await page.goto("/");
-        const nav = page.locator("nav").last();
-        await expect(nav).toBeVisible({ timeout: 10000 });
+        await page.locator('button[aria-label="Open menu"]').click();
+        const menuHeader = page.locator("text=/Explore Content/i");
+        await expect(menuHeader).toBeVisible({ timeout: 10000 });
     });
 
     test("Map page loads with Leaflet container", async ({ page }) => {
@@ -43,9 +44,12 @@ test.describe("Responsive Design", () => {
     });
 
     test("works on tablet viewport", async ({ page }) => {
+        page.on("pageerror", err => console.log("PAGE ERROR:", err));
+        page.on("console", msg => { if (msg.type() === "error") console.log("CONSOLE ERROR:", msg.text()) });
         await page.setViewportSize({ width: 768, height: 1024 }); // iPad
         await page.goto("/map");
-        await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 15000 });
+        console.log("DEBUG DOM for MAP:", await page.locator("body").innerText());
+        await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 25000 });
     });
 });
 

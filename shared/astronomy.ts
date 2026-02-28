@@ -11,7 +11,7 @@
  * Uses SunCalc for sun/moon positions and adds Islamic-specific calculations.
  */
 
-import * as SunCalc from "suncalc";
+import * as Astronomy from "astronomy-engine";
 import uq from "@umalqura/core";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -208,62 +208,58 @@ export function classifyOdeh(v: number, moonAltAtSunset: number): VisibilityZone
  * Get the time of astronomical sunset for a location and date.
  */
 export function getSunsetTime(date: Date, loc: Location): Date | null {
-    const times = SunCalc.getTimes(date, loc.lat, loc.lng);
-    return times.sunset instanceof Date && !isNaN(times.sunset.getTime())
-        ? times.sunset
-        : null;
+    const obs = new Astronomy.Observer(loc.lat, loc.lng, loc.elevation || 0);
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+    const result = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, -1, startOfDay, 1);
+    return result ? result.date : null;
 }
 
 /**
  * Main calculation: compute all sun/moon parameters at sunset for a given date and location.
  */
 export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
-    const times = SunCalc.getTimes(date, loc.lat, loc.lng);
-    const sunset = times.sunset instanceof Date && !isNaN(times.sunset.getTime())
-        ? times.sunset
-        : null;
-    const sunrise = times.sunrise instanceof Date && !isNaN(times.sunrise.getTime())
-        ? times.sunrise
-        : null;
+    const obs = new Astronomy.Observer(loc.lat, loc.lng, loc.elevation || 0);
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+
+    const sunsetResult = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, -1, startOfDay, 1);
+    const sunriseResult = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, 1, startOfDay, 1);
+
+    const sunset = sunsetResult ? sunsetResult.date : null;
+    const sunrise = sunriseResult ? sunriseResult.date : null;
 
     // Use sunset time for calculations, or 18:00 local as fallback
     const calcTime = sunset ?? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
 
-    const sunPos = SunCalc.getPosition(calcTime, loc.lat, loc.lng);
-    const moonPos = SunCalc.getMoonPosition(calcTime, loc.lat, loc.lng);
-    const moonIllum = SunCalc.getMoonIllumination(calcTime);
-    const moonTimes = SunCalc.getMoonTimes(date, loc.lat, loc.lng);
+    const eqSun = Astronomy.Equator(Astronomy.Body.Sun, calcTime, obs, true, true);
+    const eqMoon = Astronomy.Equator(Astronomy.Body.Moon, calcTime, obs, true, true);
+
+    const hcSun = Astronomy.Horizon(calcTime, obs, eqSun.ra, eqSun.dec, "normal");
+    const hcMoon = Astronomy.Horizon(calcTime, obs, eqMoon.ra, eqMoon.dec, "normal");
+
+    const moonIllum = Astronomy.Illumination(Astronomy.Body.Moon, calcTime);
+
+    const moonriseResult = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, 1, startOfDay, 1);
+    const moonsetResult = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, startOfDay, 1);
 
     // Horizon dip due to elevation: 1.76 * sqrt(elevation_in_meters). Result is arcminutes.
     const dipArcmin = loc.elevation ? 1.76 * Math.sqrt(loc.elevation) : 0;
     const dipDeg = dipArcmin / 60;
 
     // Calculate atmospheric refraction adjustment if temperature and pressure are provided
-    // SunCalc uses a standard refraction. We'll approximate the delta.
-    // Standard temp = 10C, Standard pressure = 1010 hPa
     let refractionDelta = 0;
     if (loc.temperature !== undefined && loc.pressure !== undefined) {
-        // True refraction R = R_std * (P / 1010) * (283 / (273 + T))
-        // Since we are looking near the horizon (sunset), typical standard refraction is ~34 arcminutes.
         const R_std = 34 / 60; // degrees
         const R_true = R_std * (loc.pressure / 1010) * (283 / (273 + loc.temperature));
         refractionDelta = R_true - R_std;
     }
 
-    const sunAlt = toDeg(sunPos.altitude) + dipDeg + refractionDelta;
-    const sunAz = toDeg(sunPos.azimuth) + 180; // SunCalc returns south=0; convert to N=0
-    const moonAlt = toDeg(moonPos.altitude) + dipDeg + refractionDelta;
-    const moonAz = toDeg(moonPos.azimuth) + 180;
+    const sunAlt = hcSun.altitude + dipDeg + refractionDelta;
+    const sunAz = hcSun.azimuth;
+    const moonAlt = hcMoon.altitude + dipDeg + refractionDelta;
+    const moonAz = hcMoon.azimuth;
 
-    // Elongation (angular distance between sun and moon).
-    // Clamp cosine input to [-1, 1] to guard against floating-point precision errors
-    // that can push the value infinitesimally outside the Math.acos domain, returning NaN.
-    const cosElongation = Math.max(-1, Math.min(1,
-        Math.sin(sunPos.altitude) * Math.sin(moonPos.altitude) +
-        Math.cos(sunPos.altitude) * Math.cos(moonPos.altitude) *
-        Math.cos(moonPos.azimuth - sunPos.azimuth)
-    ));
-    const elongation = toDeg(Math.acos(cosElongation));
+    // Elongation: True angular separation
+    const elongation = Astronomy.AngleFromSun(Astronomy.Body.Moon, calcTime);
 
     // Arc of Vision: moon altitude minus sun altitude at sunset
     const arcv = moonAlt - sunAlt;
@@ -271,16 +267,18 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
     // Difference in azimuth
     const daz = moonAz - sunAz;
 
-    // Moon distance for crescent width
-    const moonDist = moonPos.distance; // km
+    // Moon distance for crescent width (km)
+    const moonDist = moonIllum.geo_dist * 149597870.7;
     const crescent = crescentWidth(elongation, moonDist);
 
     const q = yallopQ(arcv, crescent.w);
     const odeh = odehV(arcv, crescent.w);
 
-    // Moon age: approximate from phase angle
-    // Phase 0 = new moon, cycles every ~29.53 days
-    const moonAge = moonIllum.phase * 29.53 * 24; // hours
+    // Phase angle in degrees (0 to 360)
+    const phaseDeg = Astronomy.MoonPhase(calcTime);
+    // Phase 0..1 representation for compatibility
+    const phaseNormal = phaseDeg / 360;
+    const moonAge = phaseNormal * 29.53 * 24; // hours
 
     const maghrib = sunset ? new Date(sunset.getTime() + 18 * 60 * 1000) : null;
 
@@ -297,10 +295,10 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
         qValue: q,
         odehCriterion: odeh,
         visibility: classifyYallop(q, moonAlt),
-        illumination: moonIllum.fraction,
-        phase: moonIllum.phase,
-        moonrise: moonTimes.rise instanceof Date ? moonTimes.rise : null,
-        moonset: moonTimes.set instanceof Date ? moonTimes.set : null,
+        illumination: moonIllum.phase_fraction,
+        phase: phaseNormal,
+        moonrise: moonriseResult ? moonriseResult.date : null,
+        moonset: moonsetResult ? moonsetResult.date : null,
         sunset,
         sunrise,
         maghrib,
@@ -335,9 +333,10 @@ export function generateVisibilityGrid(
 // ─── Moon Phase ───────────────────────────────────────────────────────────────
 
 export function getMoonPhaseInfo(date: Date): MoonPhaseInfo {
-    const illum = SunCalc.getMoonIllumination(date);
-    const phase = illum.phase;
-    const illuminatedFraction = illum.fraction;
+    const phaseDeg = Astronomy.MoonPhase(date);
+    const phase = phaseDeg / 360.0;
+    const illum = Astronomy.Illumination(Astronomy.Body.Moon, date);
+    const illuminatedFraction = illum.phase_fraction;
 
     // Moon age in days (approximate)
     const LUNAR_CYCLE = 29.53058867;
@@ -347,26 +346,24 @@ export function getMoonPhaseInfo(date: Date): MoonPhaseInfo {
     const phaseName = getPhaseName(phase);
     const phaseArabic = getPhaseArabic(phase);
 
-    // Find next new moon (phase crosses 0)
-    const nextNewMoon = findNextPhase(date, 0); // Approximate
-    const nextFullMoon = findNextPhase(date, 0.5); // Approximate
+    // Exact Next New Moon
+    const nextNewResult = Astronomy.SearchMoonPhase(0, date, 35);
+    const exactNextNewMoon = nextNewResult ? nextNewResult.date : new Date();
 
-    // Find exact next new moon
-    let approxNewMoonSearchStart = new Date(date.getTime());
-    // Search up to 31 days forward to find an approximate new moon day
-    for (let i = 0; i < 31; i++) {
-        let testDate = new Date(date.getTime() + i * 24 * 3600 * 1000);
-        let currentPhase = SunCalc.getMoonIllumination(testDate).phase;
-        // If phase is near 0 or 1, it's a new moon day
-        if (currentPhase < 0.033 || currentPhase > 0.967) {
-            approxNewMoonSearchStart = testDate;
-            break;
-        }
-    }
-    const exactNextNewMoon = findNewMoonNear(approxNewMoonSearchStart);
+    // Exact Next Full Moon (180 deg)
+    const nextFullResult = Astronomy.SearchMoonPhase(180, date, 35);
+    const nextFullMoon = nextFullResult ? nextFullResult.date : new Date();
 
-
-    return { phase, phaseName, phaseArabic, illuminatedFraction, moonAge, nextNewMoon, nextNewMoonExact: exactNextNewMoon, nextFullMoon };
+    return {
+        phase,
+        phaseName,
+        phaseArabic,
+        illuminatedFraction,
+        moonAge,
+        nextNewMoon: exactNextNewMoon,
+        nextNewMoonExact: exactNextNewMoon,
+        nextFullMoon
+    };
 }
 
 function getPhaseName(phase: number): string {
@@ -391,74 +388,12 @@ function getPhaseArabic(phase: number): string {
     return "الهلال المتناقص";
 }
 
-function findNextPhase(from: Date, targetPhase: number): Date {
-    const LUNAR_CYCLE_MS = 29.53058867 * 24 * 3600 * 1000;
-    let t = new Date(from.getTime() + 24 * 3600 * 1000);
-    for (let i = 0; i < 35; i++) {
-        const illum = SunCalc.getMoonIllumination(t);
-        const diff = Math.abs(illum.phase - targetPhase);
-        if (diff < 0.02) return t;
-        t = new Date(t.getTime() + 12 * 3600 * 1000);
-    }
-    // Fallback: estimate
-    const currentPhase = SunCalc.getMoonIllumination(from).phase;
-    let phaseDiff = targetPhase - currentPhase;
-    if (phaseDiff <= 0) phaseDiff += 1;
-    return new Date(from.getTime() + phaseDiff * LUNAR_CYCLE_MS);
-}
-
-function findLastNewMoon(from: Date): Date {
-    const LUNAR_CYCLE_MS = 29.53058867 * 24 * 3600 * 1000;
-    let t = new Date(from.getTime() - 24 * 3600 * 1000);
-    for (let i = 0; i < 35; i++) {
-        const illum = SunCalc.getMoonIllumination(t);
-        if (illum.phase < 0.03 || illum.phase > 0.97) return t;
-        t = new Date(t.getTime() - 12 * 3600 * 1000);
-    }
-    // Fallback
-    const currentPhase = SunCalc.getMoonIllumination(from).phase;
-    return new Date(from.getTime() - currentPhase * LUNAR_CYCLE_MS);
-}
-
-// ─── Hijri Calendar ───────────────────────────────────────────────────────────
-
-/**
- * Lunar synodic month length in milliseconds (~29.53059 days).
- */
-const SYNODIC_MS = 29.53058867 * 24 * 3600 * 1000;
-
-/**
- * Find the precise moment of the new moon (conjunction) nearest to `approx`.
- * Searches in 6-hour steps for the phase minimum (phase crosses 0/1).
- */
 export function findNewMoonNear(approx: Date): Date {
-    // Coarse search: 6-hour steps over ±15 days
-    const start = approx.getTime() - 15 * 24 * 3600 * 1000;
-    let bestT = start;
-    let bestPhase = 1;
-
-    for (let t = start; t < start + 30 * 24 * 3600 * 1000; t += 6 * 3600 * 1000) {
-        const p = SunCalc.getMoonIllumination(new Date(t)).phase;
-        // Phase wraps 0→1, new moon is at 0 (or equivalently 1)
-        const dist = Math.min(p, 1 - p);
-        if (dist < bestPhase) {
-            bestPhase = dist;
-            bestT = t;
-        }
-    }
-
-    // Fine search: 30-minute steps over ±6 hours
-    const fineStart = bestT - 6 * 3600 * 1000;
-    for (let t = fineStart; t < bestT + 6 * 3600 * 1000; t += 30 * 60 * 1000) {
-        const p = SunCalc.getMoonIllumination(new Date(t)).phase;
-        const dist = Math.min(p, 1 - p);
-        if (dist < bestPhase) {
-            bestPhase = dist;
-            bestT = t;
-        }
-    }
-
-    return new Date(bestT);
+    // astronomy-engine's SearchMoonPhase solves iteratively for the exact moment the phase is 0 (Longitude matches Sun).
+    // By rewinding 15 days and searching forward, we find the new moon closest to 'approx'
+    const start = new Date(approx.getTime() - 15 * 24 * 3600 * 1000);
+    const result = Astronomy.SearchMoonPhase(0, start, 30);
+    return result ? result.date : approx;
 }
 
 /**
@@ -475,6 +410,11 @@ const HIJRI_EPOCH_GREG = new Date(2024, 6, 7); // July 7, 2024
  * Returns the Gregorian date of the 1st of each Hijri month.
  */
 const newMoonCache = new Map<number, Date>();
+
+/**
+ * Lunar synodic month length in milliseconds (~29.53059 days).
+ */
+const SYNODIC_MS = 29.53058867 * 24 * 3600 * 1000;
 
 function getNewMoonForMonthOffset(offset: number): Date {
     if (newMoonCache.has(offset)) return newMoonCache.get(offset)!;
@@ -705,8 +645,10 @@ export function getTerminatorPoints(date: Date, steps = 360): Array<[number, num
  * Check if a point is in daylight.
  */
 export function isDaylight(lat: number, lng: number, date: Date): boolean {
-    const sunPos = SunCalc.getPosition(date, lat, lng);
-    return sunPos.altitude > 0;
+    const obs = new Astronomy.Observer(lat, lng, 0);
+    const eq = Astronomy.Equator(Astronomy.Body.Sun, date, obs, true, true);
+    const hc = Astronomy.Horizon(date, obs, eq.ra, eq.dec, "normal");
+    return hc.altitude > 0;
 }
 
 // ─── Best Time to Observe ─────────────────────────────────────────────────────
@@ -719,23 +661,19 @@ export function computeBestObservationTime(
     date: Date,
     loc: { lat: number; lng: number }
 ): BestObservationResult {
-    const times = SunCalc.getTimes(date, loc.lat, loc.lng);
-    const moonTimes = SunCalc.getMoonTimes(date, loc.lat, loc.lng);
+    const obs = new Astronomy.Observer(loc.lat, loc.lng, 0);
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+
+    const sunsetResult = Astronomy.SearchRiseSet(Astronomy.Body.Sun, obs, -1, startOfDay, 1);
+    const moonsetResult = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, startOfDay, 1);
 
     // Window starts at sunset
-    const sunset =
-        times.sunset instanceof Date && !isNaN(times.sunset.getTime())
-            ? times.sunset
-            : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
+    const sunset = sunsetResult ? sunsetResult.date : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 18, 0, 0);
 
     // Window ends at moonset, or sunset + 2h if no set time or set is before sunset
     let windowEnd: Date;
-    if (
-        moonTimes.set instanceof Date &&
-        !isNaN(moonTimes.set.getTime()) &&
-        moonTimes.set.getTime() > sunset.getTime()
-    ) {
-        windowEnd = moonTimes.set;
+    if (moonsetResult && moonsetResult.date.getTime() > sunset.getTime()) {
+        windowEnd = moonsetResult.date;
     } else {
         windowEnd = new Date(sunset.getTime() + 2 * 3600 * 1000); // 2h fallback
     }
@@ -748,11 +686,14 @@ export function computeBestObservationTime(
 
     for (let t = sunset.getTime(); t <= windowEnd.getTime(); t += STEP_MS) {
         const moment = new Date(t);
-        const sunPos = SunCalc.getPosition(moment, loc.lat, loc.lng);
-        const moonPos = SunCalc.getMoonPosition(moment, loc.lat, loc.lng);
+        const eqSun = Astronomy.Equator(Astronomy.Body.Sun, moment, obs, true, true);
+        const eqMoon = Astronomy.Equator(Astronomy.Body.Moon, moment, obs, true, true);
 
-        const moonAlt = (moonPos.altitude * 180) / Math.PI;
-        const sunAlt = (sunPos.altitude * 180) / Math.PI;
+        const hcSun = Astronomy.Horizon(moment, obs, eqSun.ra, eqSun.dec, "normal");
+        const hcMoon = Astronomy.Horizon(moment, obs, eqMoon.ra, eqMoon.dec, "normal");
+
+        const moonAlt = hcMoon.altitude;
+        const sunAlt = hcSun.altitude;
 
         if (moonAlt <= 0) continue; // Moon must be above horizon
 
