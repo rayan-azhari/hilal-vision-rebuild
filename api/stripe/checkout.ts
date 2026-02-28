@@ -78,10 +78,12 @@ export default async function handler(req: IncomingMessage & { body?: any; url?:
         }
     }
 
-    // Fallback to body for backwards compatibility (e.g. during migration)
-    if (!userId) {
-        userId = body.userId;
-        userEmail = body.userEmail;
+    // Require authenticated user for subscription plans; donations allow anonymous
+    const { planId: _planIdCheck } = body;
+    if (!userId && _planIdCheck) {
+        res.statusCode = 401;
+        res.end(JSON.stringify({ error: "Authentication required to subscribe" }));
+        return;
     }
 
     const origin = req.headers.origin ?? req.headers.referer ?? "https://moonsighting.live";

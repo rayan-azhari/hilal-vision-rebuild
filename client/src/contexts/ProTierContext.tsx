@@ -43,14 +43,20 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
     const isPatron = isLoaded ? (meta?.isPatron === true) : false;
 
     // Use either Clerk's truth OR the local RevenueCat cache truth
-    // Give admin bypass to moonsightinglive@gmail.com
-    const isAdmin = user?.primaryEmailAddress?.emailAddress === "moonsightinglive@gmail.com";
+    // Give admin bypass to users with isAdmin flag in Clerk publicMetadata
+    const isAdmin = (user?.publicMetadata as { isAdmin?: boolean } | undefined)?.isAdmin === true;
 
-    // ⚠️ TESTING MODE — Pro gating disabled (all users treated as Premium)
-    // TODO: Remove this line before final release / after testing is complete
-    const TESTING_DISABLE_PRO_GATE = true;
+    const TESTING_DISABLE_PRO_GATE = false;
 
     const isPremium = TESTING_DISABLE_PRO_GATE || clerkHasPro || nativeHasPro || isAdmin;
+
+    // Warn in dev if RevenueCat keys are missing on native
+    useEffect(() => {
+        if (!isNative) return;
+        if (!import.meta.env.VITE_REVENUECAT_APPLE_KEY && !import.meta.env.VITE_REVENUECAT_GOOGLE_KEY) {
+            console.warn("[ProTierContext] RevenueCat API keys are not set. Set VITE_REVENUECAT_APPLE_KEY and VITE_REVENUECAT_GOOGLE_KEY.");
+        }
+    }, [isNative]);
 
     useEffect(() => {
         if (!isNative) return;

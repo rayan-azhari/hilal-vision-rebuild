@@ -1,6 +1,39 @@
 import { Router } from "express";
 import { z } from "zod";
 import { computeSunMoonAtSunset, getMoonPhaseInfo } from "../shared/astronomy.js";
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
+
+// Lazy-initialised rate limiter (gracefully skipped if env vars are missing)
+let ratelimiter: Ratelimit | null = null;
+
+function getRatelimiter(): Ratelimit | null {
+    if (ratelimiter) return ratelimiter;
+    const url = process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (!url || !token) return null;
+    ratelimiter = new Ratelimit({
+        redis: new Redis({ url, token }),
+        limiter: Ratelimit.slidingWindow(10, "1 m"),
+        prefix: "hilal:public-api",
+    });
+    return ratelimiter;
+}
+
+async function applyRateLimit(req: any, res: any): Promise<boolean> {
+    const rl = getRatelimiter();
+    if (!rl) return false; // No rate limiting if Upstash is not configured
+    const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? "unknown";
+    const { success, limit, remaining, reset } = await rl.limit(ip);
+    res.set("X-RateLimit-Limit", String(limit));
+    res.set("X-RateLimit-Remaining", String(remaining));
+    res.set("X-RateLimit-Reset", String(reset));
+    if (!success) {
+        res.status(429).json({ error: "Too many requests. Please wait before retrying." });
+        return true;
+    }
+    return false;
+}
 
 export const publicApiRouter = Router();
 
@@ -20,7 +53,8 @@ const moonPhaseSchema = z.object({
  *   get:
  *     description: Get visibility data (Yallop & Odeh criteria) for a specific location and date.
  */
-export function visibilityHandler(req: any, res: any) {
+export async function visibilityHandler(req: any, res: any) {
+    if (await applyRateLimit(req, res)) return;
     try {
         const parsed = visibilitySchema.parse(req.query);
         const date = parsed.date ? new Date(parsed.date as string) : new Date();
@@ -62,7 +96,8 @@ export function visibilityHandler(req: any, res: any) {
  *   get:
  *     description: Get current and upcoming moon phase information.
  */
-export function moonPhasesHandler(req: any, res: any) {
+export async function moonPhasesHandler(req: any, res: any) {
+    if (await applyRateLimit(req, res)) return;
     try {
         const parsed = moonPhaseSchema.parse(req.query);
         const date = parsed.date ? new Date(parsed.date) : new Date();

@@ -108,8 +108,7 @@ _Completed this session._
 ---
 
 
-## ⏳ Phase 6 — UX Polish & Bug Fixes
-_Priority: MEDIUM — affects daily usability and user trust._
+## ✅ Phase 6 — UX Polish & Bug Fixes (DONE — commit 9ff47ca)
 
 ### 6a. Fix i18n — either implement or clean up
 **Current state:** `useTranslation()` called everywhere; `document.documentElement.dir` set for RTL; but **no translation JSON files exist**. App runs in English-only with broken i18n infrastructure.
@@ -187,103 +186,32 @@ New component `client/src/components/IslamicCountdown.tsx`:
 
 ---
 
-## ⏳ Phase 7 — Push Notifications & Community Features
-_Priority: MEDIUM — `push_tokens` schema and `notifications` tRPC router exist; just needs FCM wiring._
+## ✅ Phase 7 — Push Notifications & Community Features (DONE — commit fa8af3f)
 
-### 7a. Firebase Cloud Messaging (web push)
-- Create `api/push/send.ts` — serverless endpoint to send FCM notifications
-- Add FCM vapid key to Vercel env vars
-- Update Service Worker (`sw.js`) to handle `push` events and show notifications
-- Wire `SightingFeed.tsx` bell icon → proper FCM subscription flow (replace current broken implementation)
+- [x] **7a.** `api/push/send.ts` — FCM broadcast via firebase-admin 13.6.1; 500-token batches; stale token cleanup; `x-cron-secret` auth
+- [x] **7c.** `api/cron/moonAlerts.ts` — Vercel Cron at `0 8 * * *`; 29th Hijri night + full moon + blue moon + lunar eclipse alerts
+- [x] **7e.** `SightingFeed.tsx` — pause/resume toggle + "Updated Xs ago" counter + dynamic `refetchInterval`
+- [x] **7f.** `shared/astronomy.ts` — `predictLunarEclipse(date)` using node regression orbital mechanics
+- [x] `App.tsx` — `ForegroundPushListener` component shows sonner toast on foreground FCM messages
+- [x] `vite.config.ts` — `closeBundle` plugin injects `VITE_FIREBASE_*` into built service worker
+- [x] `vercel.json` — `crons` section + function entries + rewrites for new endpoints
+- [x] Vercel env vars set: `FIREBASE_ADMIN_CREDENTIALS`, `CRON_SECRET`
 
-### 7b. Capacitor Push (iOS/Android)
-- Install `@capacitor/push-notifications`
-- Register device token on app launch → `notifications.saveToken` tRPC
-- Handle foreground/background notification taps
-
-### 7c. 29th-night crescent alert
-- Add cron job (Vercel Cron or GitHub Actions scheduled workflow) that fires on the 29th of each Hijri month
-- Sends FCM notification to all subscribed tokens: "Tonight may be the first night of [Month]"
-- Include computed visibility score for user's saved location
-
-### 7d. Photo upload for sighting reports
-- Add Cloudinary or Vercel Blob storage endpoint (`api/upload/photo.ts`)
-- Update `observationReports` schema: add `photoUrl varchar(500)`
-- Wire `SightingReportForm.tsx` camera/upload button to upload endpoint
-- Display photo thumbnails in `SightingFeed.tsx`
-
-### 7e. Sighting feed real-time refresh control
-- Add toggle to pause/resume auto-refresh in `SightingFeed.tsx`
-- Show "last updated X seconds ago" instead of silently polling
-
-### 7f. Moon event notifications — Full Moon, Blue Moon, Lunar Eclipse _(user-requested)_
-**Infrastructure needed first:** Firebase Admin SDK on server, `FIREBASE_SERVICE_ACCOUNT_JSON` env var, Vercel Cron.
-
-**7f-i. Full Moon alert**
-- Daily cron `api/cron/moonAlerts.ts` at 08:00 UTC
-- If `getMoonPhaseInfo(today).nextFullMoon` is today → send FCM to all subscribed push tokens
-- Message: _"🌕 Full Moon tonight — crescent season ends, next Hilal in ~15 days"_
-
-**7f-ii. Blue Moon alert**
-- Blue moon = second full moon in the same Gregorian calendar month
-- Detect by finding the previous full moon (walk back ~29 days from `nextFullMoon`) and checking if it's in the same calendar month
-- Message: _"🌕 Blue Moon tonight! Two full moons in one month"_
-
-**7f-iii. Lunar Eclipse (basic detection)**
-- Lunar eclipses occur at full moon when the Moon is near a node
-- New function `predictLunarEclipse(fullMoonDate: Date): 'none' | 'penumbral' | 'partial' | 'total'` in `shared/astronomy.ts`
-- Detection: check Moon's ecliptic latitude at full moon — within ±1.5° → penumbral, ±0.9° → partial, ±0.5° → total
-- Message: _"🌑 Lunar Eclipse tonight — [type] shadow on the Moon"_
-
-**Note:** Solar eclipses are out of scope (require path-of-totality computation).
-
-**Files:** `api/cron/moonAlerts.ts` (new), `shared/astronomy.ts` (add `predictLunarEclipse`), `vercel.json` (cron config), `server/routers/notifications.ts` (sendNotification helper), Vercel env: `FIREBASE_SERVICE_ACCOUNT_JSON`
-
-**Files:** `api/push/send.ts` (new), `client/public/sw.js`, `SightingFeed.tsx`, `SightingReportForm.tsx`, `server/routers/notifications.ts`, `drizzle/schema.ts`, Vercel env vars, `api/cron/moonAlerts.ts` (new), `shared/astronomy.ts`
-**Effort:** ~4 days
+_Deferred: 7b (Capacitor native push), 7d (photo upload)_
 
 ---
 
-## ⏳ Phase 8 — Production Hardening & Launch Prep
-_Priority: MUST DO BEFORE PUBLIC LAUNCH._
+## ✅ Phase 8 — Production Hardening & Launch Prep (DONE — code items complete)
 
-### 8a. Disable pro gate
-```typescript
-// client/src/contexts/ProTierContext.tsx:51
-const TESTING_DISABLE_PRO_GATE = false; // ← flip this
-```
-
-### 8b. Fix Stripe checkout userId body fallback (S3)
-Remove `userId = body.userId` fallback. Require Clerk token. Return `401` if absent.
-
-### 8c. Public API rate limiting
-Add Upstash rate limiting (10 req/min per IP) to `server/publicApi.ts` endpoints.
-
-### 8d. Sync iOS version in Xcode
-Set `MARKETING_VERSION = 1.0.4` and `CURRENT_PROJECT_VERSION = 5` in Xcode target settings.
-
-### 8e. Move admin bypass to Clerk metadata
-Replace hardcoded `moonsightinglive@gmail.com` check with `user.publicMetadata.isAdmin === true` set via Clerk dashboard.
-
-### 8f. Validate Vite env vars on startup
-In `ProTierContext.tsx`, throw (or warn loudly) if `VITE_REVENUECAT_APPLE_KEY` / `VITE_REVENUECAT_GOOGLE_KEY` are empty strings.
-
-### 8g. Google Play Store
-- Finalize Data Safety form (camera, location, purchase data)
-- Upload screenshots/feature graphic
-- Internal Testing → Open Testing → Production
-
-### 8h. Apple App Store
-- Update version to 1.0.4 / build 5 in Xcode
-- TestFlight internal → external → App Store Connect review
-
-### 8i. Update docs and memory
-- Update `MEMORY.md` round number to 40
-- Update `HILAL_VISION_DOCUMENTATION.md` with completed work
-- Mark completed items in this plan
-
-**Files:** `ProTierContext.tsx`, `api/stripe/checkout.ts`, `server/publicApi.ts`, `ios/App/App.xcodeproj/project.pbxproj`, Xcode, Google Play Console, App Store Connect
-**Effort:** ~2 days
+- [x] **8a** — `TESTING_DISABLE_PRO_GATE = false` in `ProTierContext.tsx`
+- [x] **8b** — Removed `userId = body.userId` body fallback in `api/stripe/checkout.ts`; subscription plans now require Clerk token (returns 401 if absent); anonymous donations still allowed
+- [x] **8c** — Upstash sliding-window rate limiting (10 req/min per IP) added to `server/publicApi.ts` visibility + moon-phases endpoints; gracefully skips if env vars missing
+- [ ] **8d** — Sync iOS version in Xcode: set `MARKETING_VERSION = 1.0.4`, `CURRENT_PROJECT_VERSION = 5` _(manual Xcode task)_
+- [x] **8e** — Admin bypass now reads `user.publicMetadata.isAdmin === true` (set via Clerk dashboard) instead of hardcoded email
+- [x] **8f** — Console warning if RevenueCat API keys are empty on native startup
+- [ ] **8g** — Google Play Store: Data Safety form, screenshots, release tracks _(manual)_
+- [ ] **8h** — Apple App Store: Xcode version bump, TestFlight, App Store Connect review _(manual)_
+- [x] **8i** — Docs and MEMORY.md updated
 
 ---
 
@@ -296,9 +224,9 @@ In `ProTierContext.tsx`, throw (or warn loudly) if `VITE_REVENUECAT_APPLE_KEY` /
 | 3 | Database & Backend Polish | ✅ Done | — | — |
 | 4 | Scientific Accuracy Fixes | ✅ Done | — | — |
 | 5 | Testing Expansion | ✅ Done | — | — |
-| **6** | **UX Polish & Bug Fixes** (+6j weather, 6k countdown, 6l alignment fix) | ⏳ Next | 🔴 High | ~2 days |
-| **7** | **Push Notifications & Community** (+7f moon events) | ⏳ | 🟡 Medium | ~4 days |
-| **8** | **Production Hardening & Launch** | ⏳ | 🔴 Must-do | ~2 days |
+| **6** | **UX Polish & Bug Fixes** (+6j weather, 6k countdown, 6l alignment fix) | ✅ Done | — | — |
+| **7** | **Push Notifications & Community** (+7f moon events) | ✅ Done | — | — |
+| **8** | **Production Hardening & Launch** | ✅ Done (code items) | — | — |
 
 **Recommended order:** 6 → 7 → 8 (6l alignment fix is highest priority; countdown and weather are fast wins; notifications before launch)
 
