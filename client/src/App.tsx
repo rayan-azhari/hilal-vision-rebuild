@@ -55,12 +55,12 @@ function Router() {
       <Suspense fallback={<PageLoader />}>
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/visibility" component={VisibilityPage} />
-          <Route path="/globe" component={VisibilityPage} />
-          <Route path="/map" component={VisibilityPage} />
+          <Route path="/visibility">{() => <ErrorBoundary><VisibilityPage /></ErrorBoundary>}</Route>
+          <Route path="/globe">{() => <ErrorBoundary><VisibilityPage /></ErrorBoundary>}</Route>
+          <Route path="/map">{() => <ErrorBoundary><VisibilityPage /></ErrorBoundary>}</Route>
           <Route path="/moon" component={MoonPage} />
           <Route path="/calendar" component={CalendarPage} />
-          <Route path="/horizon" component={HorizonPage} />
+          <Route path="/horizon">{() => <ErrorBoundary><HorizonPage /></ErrorBoundary>}</Route>
           <Route path="/archive" component={ArchivePage} />
           <Route path="/about" component={AboutPage} />
           <Route path="/methodology" component={MethodologyPage} />

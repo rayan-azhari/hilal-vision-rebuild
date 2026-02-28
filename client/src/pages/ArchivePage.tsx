@@ -267,6 +267,7 @@ export default function ArchivePage() {
                         if (isLocked) { setShowUpgradeModal(true); return; }
                         setSelectedYear(y); setSelectedMonth(null); setMonthDetail(null);
                       }}
+                      title={isLocked ? "Years before 1463 AH · Unlock with Pro" : undefined}
                       className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
                       style={{
                         background: y === selectedYear

@@ -318,19 +318,6 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Handle resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (globeRef.current && globeInstanceRef.current) {
-        globeInstanceRef.current
-          .width(globeRef.current.clientWidth)
-          .height(globeRef.current.clientHeight);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
     <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
       {/* Page header */}

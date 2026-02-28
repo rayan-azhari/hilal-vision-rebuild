@@ -58,7 +58,7 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
         // Initialize RevenueCat
         const initRevenueCat = async () => {
             try {
-                await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+                await Purchases.setLogLevel({ level: LOG_LEVEL.WARN });
 
                 // Note: Real keys would be injected via environment variables at build time
                 // For capacitor, these usually need to be public or injected into the native project directly.

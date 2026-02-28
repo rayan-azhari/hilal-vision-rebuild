@@ -59,6 +59,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const pinsGroupRef = useRef<any>(null);
   const tileLayerRef = useRef<any>(null);
   const overlayRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { theme, highContrast } = useTheme();
   const trpcUtils = trpc.useContext();
@@ -179,35 +180,38 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       layerGroupRef.current = L.layerGroup().addTo(map);
       pinsGroupRef.current = L.layerGroup().addTo(map);
 
-      map.on('click', async (e: any) => {
-        let lat = e.latlng.lat;
-        let lng = e.latlng.lng;
-        if (lat > 90) lat = 90;
-        if (lat < -90) lat = -90;
-        lng = ((lng + 180) % 360 + 360) % 360 - 180;
+      map.on('click', (e: any) => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(async () => {
+          let lat = e.latlng.lat;
+          let lng = e.latlng.lng;
+          if (lat > 90) lat = 90;
+          if (lat < -90) lat = -90;
+          lng = ((lng + 180) % 360 + 360) % 360 - 180;
 
-        let localElevation = typeof elevationOverride === "number" ? elevationOverride : undefined;
+          let localElevation = typeof elevationOverride === "number" ? elevationOverride : undefined;
 
-        // If we don't have an override, fetch the real DEM data for this point
-        if (localElevation === undefined) {
-          try {
-            const demRes = await trpcUtils.dem.getDem.fetch({ lat, lng });
-            if (demRes && demRes.elevation !== undefined) {
-              localElevation = demRes.elevation;
+          // If we don't have an override, fetch the real DEM data for this point
+          if (localElevation === undefined) {
+            try {
+              const demRes = await trpcUtils.dem.getDem.fetch({ lat, lng });
+              if (demRes && demRes.elevation !== undefined) {
+                localElevation = demRes.elevation;
+              }
+            } catch (err) {
+              console.error("Failed to fetch DEM elevation for point", err);
             }
-          } catch (err) {
-            console.error("Failed to fetch DEM elevation for point", err);
           }
-        }
 
-        const d = computeSunMoonAtSunset(effectiveDateRef.current, {
-          lat,
-          lng,
-          elevation: localElevation,
-          temperature: typeof tempOverride === "number" ? tempOverride : undefined,
-          pressure: typeof pressureOverride === "number" ? pressureOverride : undefined
-        });
-        setSelectedPoint({ lat, lng, data: d, elevation: localElevation });
+          const d = computeSunMoonAtSunset(effectiveDateRef.current, {
+            lat,
+            lng,
+            elevation: localElevation,
+            temperature: typeof tempOverride === "number" ? tempOverride : undefined,
+            pressure: typeof pressureOverride === "number" ? pressureOverride : undefined
+          });
+          setSelectedPoint({ lat, lng, data: d, elevation: localElevation });
+        }, 300);
       });
 
       leafletRef.current = map;
