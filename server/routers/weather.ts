@@ -74,7 +74,7 @@ export const weatherRouter = router({
           if (i > 0) await new Promise(r => setTimeout(r, 100));
 
           const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&hourly=cloud_cover&forecast_days=1&timezone=auto`;
-          const res = await fetch(url);
+          const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
 
           if (!res.ok) {
             console.error(`Open-Meteo cloud fetch failed: ${res.status}`);
@@ -127,7 +127,7 @@ export const weatherRouter = router({
     .query(async ({ input }) => {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,cloud_cover,relative_humidity_2m,wind_speed_10m,visibility&timezone=auto`;
-        const res = await fetch(url);
+        const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
         if (!res.ok) {
           throw new Error(`Open-Meteo fetch failed: ${res.status}`);
         }
