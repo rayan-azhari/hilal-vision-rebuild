@@ -143,7 +143,7 @@ export const appRouter = router({
             : (reqAny.headers["x-forwarded-for"]?.toString().split(",")[0] ?? reqAny.socket?.remoteAddress ?? "unknown");
         }
 
-        let success = true;
+        let success: boolean;
         try {
           const result = await ratelimit.limit(ip);
           success = result.success;
