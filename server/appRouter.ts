@@ -28,6 +28,14 @@ class LocalRateLimiter implements IRateLimiter {
 
   async limit(ip: string): Promise<RateLimitResult> {
     const now = Date.now();
+
+    // Evict expired entries when cache grows large (prevents unbounded memory under DDoS)
+    if (this.cache.size > 10000) {
+      this.cache.forEach((v, k) => {
+        if (now > v.resetTime) this.cache.delete(k);
+      });
+    }
+
     const record = this.cache.get(ip);
 
     if (!record || now > record.resetTime) {
@@ -138,9 +146,13 @@ export const appRouter = router({
         let ip = "unknown";
         if (ctx.req && "headers" in ctx.req) {
           const reqAny = ctx.req as any;
-          ip = typeof reqAny.headers?.get === "function"
-            ? (reqAny.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown")
-            : (reqAny.headers["x-forwarded-for"]?.toString().split(",")[0] ?? reqAny.socket?.remoteAddress ?? "unknown");
+          const fwd = typeof reqAny.headers?.get === "function"
+            ? reqAny.headers.get("x-forwarded-for")
+            : reqAny.headers["x-forwarded-for"]?.toString();
+        // Use the last entry Vercel appends (not the first, which is user-controlled)
+        ip = fwd
+            ? fwd.split(",").map((s: string) => s.trim()).at(-1) ?? "unknown"
+            : reqAny.socket?.remoteAddress ?? "unknown";
         }
 
         let success: boolean;

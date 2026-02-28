@@ -1,5 +1,17 @@
+import { timingSafeEqual } from "crypto";
 import { createClerkClient } from "@clerk/backend";
 import type { IncomingMessage, ServerResponse } from "http";
+
+function safeCompare(a: string, b: string): boolean {
+    try {
+        const bufA = Buffer.from(a, "utf8");
+        const bufB = Buffer.from(b, "utf8");
+        if (bufA.length !== bufB.length) return false;
+        return timingSafeEqual(bufA, bufB);
+    } catch {
+        return false;
+    }
+}
 
 export const config = {
     api: {
@@ -31,7 +43,7 @@ export default async function handler(req: IncomingMessage & { body?: any }, res
     }
 
     const authHeader = req.headers["authorization"];
-    if (authHeader !== `Bearer ${revenuecatWebhookAuth}`) {
+    if (!safeCompare(authHeader ?? "", `Bearer ${revenuecatWebhookAuth}`)) {
         res.statusCode = 401;
         res.end(JSON.stringify({ error: "Unauthorized" }));
         return;

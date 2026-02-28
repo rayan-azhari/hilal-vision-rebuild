@@ -49,10 +49,20 @@ All authenticated tRPC procedures use the `protectedProcedure` middleware in `se
 
 ### Admin Authorization
 
-The `adminProcedure` middleware extends `protectedProcedure` with an additional check against `ENV.ownerOpenId` (set via the `OWNER_OPEN_ID` environment variable). Any authenticated user who is not the owner receives `FORBIDDEN`.
+There are two separate admin mechanisms in the codebase — they serve different purposes and are not interchangeable:
+
+**1. Server-side `adminProcedure` (tRPC)**
+The `adminProcedure` middleware in `server/_core/trpc.ts` checks `ctx.user.id === ENV.ownerOpenId` (the `OWNER_OPEN_ID` environment variable). This is a single-owner check for sensitive server operations.
 
 Currently gated behind `adminProcedure`:
 - `system.notifyOwner` — sends push notifications to the owner
+
+**2. Client-side Pro/admin bypass (Clerk metadata)**
+`ProTierContext.tsx` reads `user.publicMetadata.isAdmin === true` from the Clerk JWT. This grants the UI admin-level access (bypasses Pro gates) for any user with that metadata flag.
+
+To grant admin access: Clerk Dashboard → Users → select user → Public metadata → `{ "isAdmin": true }`.
+
+These two systems are intentionally separate: `OWNER_OPEN_ID` guards destructive server operations; `isAdmin` metadata controls UI-level access. Do not conflate them.
 
 ### Stripe Checkout — Server-Side User Identity
 
@@ -93,7 +103,9 @@ The webhook requires a `Bearer` token in the `Authorization` header matching the
 
 Two rate-limiting layers are active:
 
-**tRPC (`telemetry.submitObservation`):** 5 requests per minute per IP. Fail-closed — throws if Upstash credentials are absent.
+**tRPC (`telemetry.submitObservation`):** 5 requests per minute per IP. Uses Upstash Redis when configured; falls back to an in-memory `LocalRateLimiter` (fail-safe, not fail-closed — the fallback still enforces the limit). The `LocalRateLimiter` Map is capped at 10,000 entries with expired-entry eviction to prevent memory exhaustion under DDoS.
+
+**tRPC (`notifications.subscribe`):** 10 requests per minute per IP. Uses an in-memory rate limiter (always active, no Upstash needed for this low-frequency endpoint).
 
 **Public REST API (`/api/v1/*`):** 10 requests per minute per IP (sliding window). Fail-open — skipped gracefully if Upstash credentials are absent (allows local dev without Upstash). Returns `429 Too Many Requests` with headers:
 - `X-RateLimit-Limit`
@@ -161,8 +173,10 @@ frame-ancestors 'none'
 | `STRIPE_PRICE_ANNUAL` | Stripe | Live Price ID |
 | `STRIPE_PRICE_LIFETIME` | Stripe | Live Price ID |
 | `REVENUECAT_WEBHOOK_AUTH` | RevenueCat | Bearer token for native webhook |
-| `UPSTASH_REDIS_REST_URL` | Upstash | Rate limiter (required — fail-closed) |
-| `UPSTASH_REDIS_REST_TOKEN` | Upstash | Rate limiter (required — fail-closed) |
+| `UPSTASH_REDIS_REST_URL` | Upstash | Rate limiter — fail-open on public API, fail-safe on tRPC |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash | Rate limiter |
+| `FIREBASE_ADMIN_CREDENTIALS` | Firebase | Full service account JSON (for FCM push notifications) |
+| `CRON_SECRET` | Custom | Random string — authenticates `/api/push/send` cron calls |
 | `DATABASE_URL` | TiDB/MySQL | Optional — telemetry storage |
 
 ---
@@ -188,10 +202,13 @@ Before every public release or App Store / Play Store build:
 
 | # | Item | Priority |
 |---|------|----------|
-| 1 | Stripe customer ID → Clerk user ID mapping in DB (for O(1) revocation) | High |
+| 1 | ~~Stripe customer ID → Clerk user ID mapping in DB~~ ✅ Fixed Round 40 Phase 3 (`stripe_customers` table) | — |
 | 2 | Webhook event deduplication (prevent double-grant on retry) | High |
 | 3 | OWASP ZAP scan against staging environment | Medium |
+| 4 | S6: Sidebar localStorage key lacks `Secure; SameSite=Strict` cookie hardening | Low |
+| 5 | S9: RevenueCat webhook has no Upstash rate limiting — if the bearer token is leaked, the endpoint can be called at high volume to revoke Pro for users | Medium |
+| 6 | CSP uses `unsafe-inline` + `unsafe-eval` in `script-src` — required by Clerk and Vite HMR, but weakens XSS protection from CSP | Medium |
 
 ---
 
-*Last updated: February 28, 2026 (Round 40 — all phases complete)*
+*Last updated: February 28, 2026 (Round 41 — Phase 1 security hardening)*

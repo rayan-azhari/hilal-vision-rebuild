@@ -120,8 +120,8 @@ export const weatherRouter = router({
   getLocalWeather: publicProcedure
     .input(
       z.object({
-        lat: z.number(),
-        lng: z.number(),
+        lat: z.number().min(-90).max(90),
+        lng: z.number().min(-180).max(180),
       })
     )
     .query(async ({ input }) => {

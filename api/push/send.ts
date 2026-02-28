@@ -7,12 +7,24 @@
  * Body: { title: string, body: string, data?: Record<string, string> }
  * Returns: { sent: number, removed: number }
  */
+import { timingSafeEqual } from "crypto";
 import type { IncomingMessage, ServerResponse } from "http";
 import { getDb } from "../../server/db.js";
 import { pushTokens } from "../../drizzle/schema.js";
 import { inArray } from "drizzle-orm";
 import { ENV } from "../../server/_core/env.js";
 import { setCorsHeaders } from "../_cors.js";
+
+function safeCompare(a: string, b: string): boolean {
+    try {
+        const bufA = Buffer.from(a, "utf8");
+        const bufB = Buffer.from(b, "utf8");
+        if (bufA.length !== bufB.length) return false;
+        return timingSafeEqual(bufA, bufB);
+    } catch {
+        return false;
+    }
+}
 
 // Lazy firebase-admin initialisation — must NOT be at module top-level
 // (Vercel cold starts import everything; the credentials may not be available at import time)
@@ -57,7 +69,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     // Authenticate with shared cron secret
     const secret = (req.headers as any)["x-cron-secret"];
-    if (!ENV.cronSecret || secret !== ENV.cronSecret) {
+    if (!ENV.cronSecret || !safeCompare(String(secret ?? ""), ENV.cronSecret)) {
         res.statusCode = 401;
         res.end(JSON.stringify({ error: "Unauthorized" }));
         return;

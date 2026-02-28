@@ -23,7 +23,11 @@ function getRatelimiter(): Ratelimit | null {
 async function applyRateLimit(req: any, res: any): Promise<boolean> {
     const rl = getRatelimiter();
     if (!rl) return false; // No rate limiting if Upstash is not configured
-    const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? "unknown";
+    const forwarded = req.headers["x-forwarded-for"] as string | undefined;
+    // Use the last entry Vercel appends (not the first, which is user-controlled)
+    const ip = forwarded
+        ? forwarded.split(",").map((s: string) => s.trim()).at(-1) ?? "unknown"
+        : req.socket?.remoteAddress ?? "unknown";
     const { success, limit, remaining, reset } = await rl.limit(ip);
     res.set("X-RateLimit-Limit", String(limit));
     res.set("X-RateLimit-Remaining", String(remaining));
