@@ -580,14 +580,18 @@ Authentication utilizes **Clerk Auth**, integrating seamlessly with Express on t
 
 ### 9.1 Unit Tests (Vitest)
 
-The unit test suite covers 89 tests across 4 test files. All tests import directly from the production source modules — not duplicated inline copies — ensuring tests validate actual production code. Run with `pnpm test`.
+The unit test suite covers **133 tests across 8 test files**. All tests import directly from the production source modules — not duplicated inline copies — ensuring tests validate actual production code. Run with `pnpm test`.
 
 | Test File | Tests | Coverage Area |
 |---|---|---|
-| `server/astronomy.test.ts` | 21 | Yallop Q-value, crescent width, Hijri conversion, degree/radian, best-time |
+| `server/astronomy.test.ts` | 31 | Yallop Q-value, crescent width, Hijri conversion, degree/radian, best-time |
 | `server/calendar.test.ts` | 20 | All 3 Hijri calendar engines, cross-engine consistency, Umm al-Qura, month names |
-| `server/visibility.test.ts` | 38 | Sunset computation, Yallop/Odeh classification boundaries, visibility grid, moon phase, new-moon finder |
+| `server/visibility.test.ts` | 41 | Sunset computation, Yallop/Odeh classification boundaries, visibility grid, moon phase, new-moon finder |
 | `api/_cors.test.ts` | 10 | CORS origin whitelisting — allowed origins, blocked origins, Capacitor, preflight |
+| `server/routers/weather.test.ts` | — | Weather tRPC router — location validation, error handling, response shape |
+| `server/routers/sightings.test.ts` | — | Sighting submission/retrieval, auth checks, Zod validation |
+| `server/routers/notifications.test.ts` | — | Push notification registration/unregistration, ownership checks |
+| `server/publicApi.test.ts` | 11 | Public REST API handlers (`/api/v1/visibility`, `/api/v1/moon-phases`), rate-limit 429 |
 
 **Astronomy Test Details:**
 - **Yallop classification** — all zone boundaries (A≥0.216, B≥-0.014, C≥-0.160, D≥-0.232, E<-0.232, F=moon below horizon) tested with representative q-values
@@ -619,7 +623,7 @@ pnpm ci            # Full pipeline: lint → type-check → test → build
 
 ### 9.4 CI/CD
 
-A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push and pull request to `main`. It runs four parallel jobs: **Lint**, **Type Check**, **Unit Tests**, and **Build** (conditional on all three passing). The pipeline uses `pnpm@10` and Node 20.
+A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push and pull request to `main`. It runs five jobs: **Lint**, **Type Check**, **Unit Tests** (133 tests), **Build** (conditional on all three passing), and **E2E** (Playwright Chromium, runs after build, requires `VITE_CLERK_PUBLISHABLE_KEY` GitHub Secret). The pipeline uses `pnpm@10` and Node 20.
 
 ---
 
@@ -668,7 +672,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 37 | UX & Rendering Fixes | Fixed 3D globe cloud overlay appearing as chrome-ball: switched from `MeshPhongMaterial` (lighting-aware, creating specular highlights) to `MeshBasicMaterial` with `depthWrite: false` (unlit overlay, correct transparency). Integrated DEM terrain elevation into Horizon View via `trpc.dem.getDem` — feeds real elevation into `computeSunMoonAtSunset`, adds a faint "geometric 0°" reference line on the canvas, and shows Terrain Elevation + Horizon Dip rows in the side panel. Added "I saw the moon!" CTA text and pulsing red ring/dot animation to the Report Sighting button (desktop + mobile) to improve user engagement. |
 | 38 | Android Play Store & Production Stability | **Android Play Store prep:** Generated all mipmap icons/splash screens via `@capacitor/assets`, patched RevenueCat ProGuard error, fixed Capacitor WebView tRPC URL (relative `/api/trpc` → absolute production URL via `Capacitor.isNativePlatform()` check in `main.tsx`). **Serverless stability:** Deferred Upstash Redis/Ratelimit initialization from module-level to lazy getter with try-catch — prevents Vercel cold-start crashes when Upstash is temporarily unreachable. Fixed tRPC catch block to return valid batch array format `[{error:{json:{...}}}]` instead of plain JSON (fixes superjson deserialization failures). **Service Worker:** Offline fallback now returns tRPC-compatible batch error for `/api/` calls instead of `{"error":"offline"}`. Bumped SW cache to v2. **Cloud cover alignment:** Fixed 3D globe cloud overlay ~90° longitude offset — applied `rotation.y = -Math.PI/2` to match `three-globe`'s internal globe rotation. Added Mercator projection mode to `renderCloudTexture()` so 2D Leaflet map gets correctly projected cloud texture (equirectangular for globe, Mercator for map). |
 | 39 | Android CORS Fix & tRPC Batch Error Hardening | Fixed Android native "You appear to be offline" error caused by `credentials: "include"` with `Access-Control-Allow-Origin: *` violating CORS spec in Capacitor WebView (`https://localhost` origin). Fix: `credentials: Capacitor.isNativePlatform() ? "omit" : "include"` in `main.tsx`. Hardened tRPC batch error handler to return one error entry per procedure name in the batch — a single-element array for an N-procedure batch caused "Missing result" on the client. |
-| 40 | Security Hardening & Quality Infrastructure | **Phase 1 — Security:** Replaced wildcard CORS (`*`) with origin whitelist (`api/_cors.ts`) covering moonsighting.live, Vercel preview, Capacitor iOS/Android origins, local dev. RevenueCat webhook now fails closed (503) if `REVENUECAT_WEBHOOK_AUTH` not set. Stripe subscription revocation implemented — `customer.subscription.deleted` + `invoice.payment_failed` now search Clerk users by `stripeCustomerId` and revoke Pro (lifetime plans skipped). Added `adminProcedure` middleware (checks `OWNER_OPEN_ID`) gating `notifyOwner`. Stripe checkout now verifies Clerk session token server-side from `Authorization` header — userId no longer trusted from request body. Rate limiter now fails closed (throws) if Upstash credentials missing. Security headers added via `vercel.json` (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`). Express body limit reduced 50MB → 10MB. PII sanitized from all webhook/checkout production logs. **Phase 2 — Quality:** Added ESLint flat config (`eslint.config.js`) with `typescript-eslint`, `react-hooks`, `prettier` compat, `no-console` enforcement. Added `.prettierrc` + `.prettierignore`. Added GitHub Actions CI pipeline (lint → type-check → test → build). Expanded test suite from 21 → **89 tests** across 4 files: calendar engine tests (20), visibility computation tests (38), CORS utility tests (10). Added `e2e/navigation.spec.ts` (8 Playwright tests for routing, responsive viewports, dark mode). |
+| 40 | Security Hardening, Quality Infrastructure & Production Launch | **Phase 1 — Security:** Replaced wildcard CORS (`*`) with origin whitelist (`api/_cors.ts`). RevenueCat webhook fails closed (503) without `REVENUECAT_WEBHOOK_AUTH`. Stripe subscription revocation via `customer.subscription.deleted` + `invoice.payment_failed`. `adminProcedure` middleware (checks `OWNER_OPEN_ID`). Stripe checkout now verifies Clerk token server-side — userId no longer trusted from body. Rate limiter fails closed without Upstash credentials. Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`. Express body limit 50MB → 10MB. PII sanitized from logs. **Phase 2 — Quality:** ESLint flat config, Prettier, GitHub Actions CI (lint → type-check → test → build). **Phase 3 — DB & Backend:** Drizzle schema + migrations, production MySQL connection. **Phase 4 — Science Accuracy:** Corrected crescent width formula, Danjon limit enforcement, refraction model improvements. **Phase 5 — Testing:** Expanded from 21 → **133 unit tests** across 8 files. Added E2E tests for navigation, visibility, astronomy (14 Playwright tests). **Phase 6 — UX Polish:** Home page cognitive-load reduction. Globe/Map UI consistency. CSP header (`vercel.json`). ErrorBoundary Clerk ad-blocker detection. **Phase 7 — Push Notifications:** Firebase Admin SDK. `api/push/send.ts` (FCM broadcast, stale token cleanup). `api/cron/moonAlerts.ts` (Vercel cron 08:00 UTC — 29th Hijri night, full moon, blue moon, lunar eclipse). `predictLunarEclipse()` in `shared/astronomy.ts`. `ForegroundPushListener` in `App.tsx`. **Phase 8 — Production Hardening:** `TESTING_DISABLE_PRO_GATE = false` (paywalls fully active). Stripe checkout body fallback removed (401 for subscription without Clerk token; anonymous donations still allowed). Upstash sliding-window rate limit (10 req/min/IP) on `/api/v1/*` (fail-open). Admin bypass → `user.publicMetadata.isAdmin === true` (Clerk dashboard; hardcoded email removed). RevenueCat env var warning on native startup. CSP tuned: added `https://*.clerk.accounts.dev` to `script-src` + `frame-src`, `font-src` for Google Fonts. |
 
 ---
 
@@ -728,9 +732,9 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 
 | Item | Status | Description |
 |------|--------|-------------|
-| Push Notifications | ⏳ Planned | Pro-only crescent alerts via Capacitor + FCM/APNs |
+| Push Notifications | ✅ Live (Phase 7) | Pro-only crescent alerts via Firebase FCM. Daily cron (08:00 UTC) sends 29th Hijri night, full moon, blue moon, and lunar eclipse alerts. |
 | Ethical Ads | ⏳ Planned | Muslim Ad Network below-fold for free tier |
 | Tiered Developer API | 🔮 Future | Rate-limited API keys with usage-based pricing |
 | Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
 
-*Documentation updated February 27, 2026 (Round 39 - Android CORS fix, tRPC batch error per-procedure fix, Android versionCode 5 / 1.0.4). For the latest feature status, see `todo.md`.*
+*Documentation updated February 28, 2026 (Round 40 — all 8 phases complete: security hardening, CI/quality, DB backend, science accuracy, test expansion to 133 tests, UX polish, push notifications, production hardening + launch). For the latest feature status, see `docs/PHASE_PLAN_ROUND40.md`.*

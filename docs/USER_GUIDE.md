@@ -182,7 +182,7 @@ Hilal Vision uses a **soft paywall** model: all features are visible from Day 1,
 - `ProTierContext` manages premium status (`isPremium`) and modal visibility.
 - `<ProGate>` wraps gated content with a blurred preview and "Upgrade to Pro" prompt for free users.
 - `UpgradeModal` presents the three pricing plans.
-- A **Pro badge** in the navbar (desktop and mobile) toggles premium status during development.
+- The **Pro badge** in the navbar is only visible to users with an active Pro subscription or admin status. It no longer functions as a development toggle in production (`TESTING_DISABLE_PRO_GATE = false`).
 
 ### Gated Features by Page
 | Page | Gated Feature | Free Default |
@@ -195,7 +195,37 @@ Hilal Vision uses a **soft paywall** model: all features are visible from Day 1,
 | Calendar | Astronomical & Tabular engines | Umm al-Qura only |
 | Archive | Years before 1463 AH | 1463-1465 AH (3 most recent) |
 
-## 13. Public REST API
+## 13. Push Notifications *(Pro Feature)*
+
+Hilal Vision can send you push notifications for important lunar events.
+
+### Enabling Notifications
+
+1. Sign in and upgrade to Pro.
+2. Open **Account Settings** (top-right) and enable **Moon Alerts**.
+3. Your browser or device will prompt for notification permission — click **Allow**.
+4. Your device is now registered. Notifications will arrive automatically.
+
+### Alert Types
+
+| Alert | When sent |
+|---|---|
+| **Crescent Watch** | Every 29th Hijri night — reminder to look for the new crescent |
+| **Full Moon** | Night of the full moon |
+| **Blue Moon** | When a second full moon occurs in a single Gregorian month |
+| **Lunar Eclipse** | Total, partial, or penumbral eclipse alert |
+
+Alerts are sent daily at **08:00 UTC** via Firebase Cloud Messaging.
+
+### Disabling Notifications
+
+Go to **Account Settings** → toggle **Moon Alerts** off. Your device token is removed immediately and no further alerts will be sent.
+
+> **Platform note:** Push notifications work on web (browsers supporting the Web Push API) and on the native iOS/Android apps. Safari on iOS requires iOS 16.4+ and the app must be added to the Home Screen as a Web App.
+
+---
+
+## 14. Public REST API
 
 Hilal Vision exposes a programmatic REST API for external integrations and developers:
 
@@ -210,7 +240,7 @@ All parameters are validated with Zod schemas. Invalid or out-of-range inputs re
 
 For full schemas, `curl` integration examples, and detailed JSON response breakdowns, please see the [**Public API Reference Guide**](PUBLIC_API_REFERENCE.md).
 
-## 14. Atmospheric Overrides & DEM *(Pro Feature)*
+## 15. Atmospheric Overrides & DEM *(Pro Feature)*
 
 Both the 2D Map and 3D Globe pages feature an **Atmospheric Overrides** panel. This panel is gated behind the Pro tier — free users see a blurred preview with an upgrade prompt.
 
@@ -225,3 +255,6 @@ R_true = R_standard × (P / 1010) × (283 / (273 + T))
 ```
 This delta is applied to both sun and moon altitude calculations, providing observatory-grade accuracy for near-horizon crescent visibility predictions.
 
+---
+
+*Last updated: February 28, 2026 (Round 40 — all phases complete)*

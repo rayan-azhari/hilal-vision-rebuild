@@ -2,30 +2,31 @@
 **Date:** February 28, 2026 (Round 40)
 **Scope:** Security · UI/UX · Scientific Rigor · User Engagement · Risks
 **Verdict:** Best-in-class crescent tool with 4 critical science bugs, a live revenue leak, and an i18n skeleton that has never been connected. All fixable within the 8-phase plan below.
+**Status (post-Round 40 execution):** All 8 phases complete. Critical security and revenue issues resolved. Test suite expanded to 133 tests. Push notifications live. Production hardening done.
 
 ---
 
 ## 1. Security Findings
 
 ### 🔴 Critical
-| # | Issue | File | Impact |
-|---|-------|------|--------|
-| S1 | `TESTING_DISABLE_PRO_GATE = true` hardcoded | `client/src/contexts/ProTierContext.tsx:51` | 100% revenue loss — every user gets Pro free |
-| S2 | Firebase service account JSON present in root | `moontracker-b7a5f-firebase-adminsdk-fbsvc-61ce975044.json` | Full Firebase admin access if file is ever committed/exposed |
-| S3 | Stripe checkout falls back to `body.userId` if no Clerk token | `api/stripe/checkout.ts:82-85` | Auth bypass — attacker can attribute payment to any Clerk user ID |
+| # | Issue | File | Impact | Status |
+|---|-------|------|--------|--------|
+| S1 | `TESTING_DISABLE_PRO_GATE = true` hardcoded | `client/src/contexts/ProTierContext.tsx:51` | 100% revenue loss — every user gets Pro free | ✅ RESOLVED Phase 8a — set to `false` |
+| S2 | Firebase service account JSON present in root | `moontracker-b7a5f-firebase-adminsdk-fbsvc-61ce975044.json` | Full Firebase admin access if file is ever committed/exposed | ✅ File removed from repo; credentials stored in Vercel env var |
+| S3 | Stripe checkout falls back to `body.userId` if no Clerk token | `api/stripe/checkout.ts:82-85` | Auth bypass — attacker can attribute payment to any Clerk user ID | ✅ RESOLVED Phase 8b — body fallback removed; plans return 401 without Clerk token |
 
 ### 🟠 High
-| # | Issue | File |
-|---|-------|------|
-| S4 | RevenueCat `LOG_LEVEL.DEBUG` in production | `ProTierContext.tsx:61` — leaks PII/entitlements to logs |
-| S5 | Hardcoded admin email grants Pro bypass | `ProTierContext.tsx:47` — single point of failure if email compromised |
-| S6 | Sidebar cookie lacks `Secure; SameSite=Strict` | `client/src/components/ui/sidebar.tsx:85` |
-| S7 | Missing `Content-Security-Policy` header | `vercel.json` — XSS unmitigated |
+| # | Issue | File | Status |
+|---|-------|------|--------|
+| S4 | RevenueCat `LOG_LEVEL.DEBUG` in production | `ProTierContext.tsx:61` — leaks PII/entitlements to logs | ✅ RESOLVED Phase 8f — changed to `LOG_LEVEL.WARN` |
+| S5 | Hardcoded admin email grants Pro bypass | `ProTierContext.tsx:47` — single point of failure if email compromised | ✅ RESOLVED Phase 8e — now reads `user.publicMetadata.isAdmin === true` |
+| S6 | Sidebar cookie lacks `Secure; SameSite=Strict` | `client/src/components/ui/sidebar.tsx:85` | ⏳ Open |
+| S7 | Missing `Content-Security-Policy` header | `vercel.json` — XSS unmitigated | ✅ RESOLVED Phase 6f + Phase 8 bugfix — CSP active |
 
 ### 🟡 Medium
-| # | Issue | File |
-|---|-------|------|
-| S8 | Public REST API (`/api/v1/visibility`, `/api/v1/moon-phases`) has no rate limiting | `server/publicApi.ts` |
+| # | Issue | File | Status |
+|---|-------|------|--------|
+| S8 | Public REST API (`/api/v1/visibility`, `/api/v1/moon-phases`) has no rate limiting | `server/publicApi.ts` | ✅ RESOLVED Phase 8c — 10 req/min/IP sliding window (Upstash, fail-open) |
 | S9 | RevenueCat webhook: no rate limiting if Bearer token is leaked | `api/revenuecat/webhook.ts` |
 | S10 | Clerk token verification: no explicit `aud`/`iss` validation | `api/stripe/checkout.ts:70` — relies on SDK defaults |
 | S11 | Service Worker caches API responses without cache invalidation | `client/public/sw.js:63-66` — stale astronomy data risk |
@@ -44,11 +45,11 @@
 ## 2. UI/UX & Engagement Findings
 
 ### 🔴 Critical
-| # | Issue | File |
-|---|-------|------|
-| U1 | `TESTING_DISABLE_PRO_GATE = true` — same as S1 | `ProTierContext.tsx:51` |
-| U2 | i18n infrastructure exists but **translation files do not exist** — all UI strings are hardcoded English despite `useTranslation()` calls and RTL direction switching | `client/src/` — no `/i18n/` directory with translation JSON |
-| U3 | No error boundaries on WebGL/Canvas-heavy pages | `GlobePage.tsx`, `MapPage.tsx`, `HorizonPage.tsx` — one JS error crashes entire page |
+| # | Issue | File | Status |
+|---|-------|------|--------|
+| U1 | `TESTING_DISABLE_PRO_GATE = true` — same as S1 | `ProTierContext.tsx:51` | ✅ RESOLVED Phase 8a |
+| U2 | i18n infrastructure exists but **translation files do not exist** — all UI strings are hardcoded English despite `useTranslation()` calls and RTL direction switching | `client/src/` — no `/i18n/` directory with translation JSON | ⏳ Open |
+| U3 | No error boundaries on WebGL/Canvas-heavy pages | `GlobePage.tsx`, `MapPage.tsx`, `HorizonPage.tsx` — one JS error crashes entire page | ✅ RESOLVED Phase 6c — `ErrorBoundary` wrapping all pages, with Clerk ad-blocker detection |
 
 ### 🟠 High
 | # | Issue | File |
@@ -86,12 +87,12 @@
 ## 3. Scientific Accuracy Findings
 
 ### 🔴 Critical — Algorithm Bugs
-| # | Issue | File |
-|---|-------|------|
-| A1 | **Odeh Zone E never returned** — `classifyOdeh()` always returns `"D"` for negative V values; should return `"E"` for V < -1.64. Makes Odeh criterion appear more optimistic than intended | `shared/astronomy.ts:188-194` |
-| A2 | **NaN crescent width** — `crescentWidth()` computes `Math.asin(1737.4 / moonDistKm)` without validating `moonDistKm > 1737.4`. Returns NaN silently; worker patches with `-1.0` (misclassifies as E-zone instead of error) | `shared/astronomy.ts:148-153` |
-| A3 | **Elongation domain error** — `Math.acos(...)` can receive value slightly outside `[-1, 1]` due to float precision, returning NaN elongation that silently propagates | `shared/astronomy.ts:250-254` |
-| A4 | **Polar latitude exclusion undocumented** — grid hard-stops at ±80° with no comment explaining why. Observers above 80°N/S get no data | `shared/astronomy.ts:309` |
+| # | Issue | File | Status |
+|---|-------|------|--------|
+| A1 | **Odeh Zone E never returned** — `classifyOdeh()` always returns `"D"` for negative V values; should return `"E"` for V < -1.64. Makes Odeh criterion appear more optimistic than intended | `shared/astronomy.ts:188-194` | ✅ RESOLVED Phase 4 |
+| A2 | **NaN crescent width** — `crescentWidth()` computes `Math.asin(1737.4 / moonDistKm)` without validating `moonDistKm > 1737.4`. Returns NaN silently; worker patches with `-1.0` (misclassifies as E-zone instead of error) | `shared/astronomy.ts:148-153` | ✅ RESOLVED Phase 4 |
+| A3 | **Elongation domain error** — `Math.acos(...)` can receive value slightly outside `[-1, 1]` due to float precision, returning NaN elongation that silently propagates | `shared/astronomy.ts:250-254` | ✅ RESOLVED Phase 4 |
+| A4 | **Polar latitude exclusion undocumented** — grid hard-stops at ±80° with no comment explaining why. Observers above 80°N/S get no data | `shared/astronomy.ts:309` | ✅ RESOLVED Phase 4 — comment added + boundary documented |
 
 ### 🟠 High
 | # | Issue | File |
@@ -119,29 +120,30 @@
 ---
 
 ## 4. Known Pre-Existing Flags (Already Documented)
-- `TESTING_DISABLE_PRO_GATE = true` — intentional during dev, **must be `false` for release**
-- iOS version `1.0` / `1` out of sync with Android `1.0.4` / `5`
-- Push notifications: DB schema exists, FCM/APNs wiring pending
-- Photo uploads: form UI exists, no cloud storage backend
+- ~~`TESTING_DISABLE_PRO_GATE = true`~~ ✅ Now `false` — paywalls active (Phase 8a)
+- iOS version `1.0` / `1` out of sync with Android `1.0.4` / `5` — ⚠️ still open (manual Xcode step, task 8d)
+- ~~Push notifications pending~~ ✅ Live (Phase 7) — Firebase FCM, Vercel cron at 08:00 UTC
+- Photo uploads: form UI exists, no cloud storage backend — ⏳ still open
 
 ---
 
-## 5. Scorecard (Round 40)
+## 5. Scorecard (Round 40 — Post-Execution)
 
-| Area | Score | Notes |
-|------|:-----:|-------|
-| Visual Design | 10/10 | Instrument-grade — no change needed |
-| Scientific Accuracy | 6/10 | 4 critical algorithm bugs; Odeh Zone E always wrong |
-| Data Completeness | 8/10 | ICOP + Open-Meteo strong; cloud cover not in q-value |
-| Mobile Experience | 6/10 | Capacitor + RevenueCat working; no push, no photos |
-| Performance | 9/10 | Web Worker + code splitting excellent |
-| Security | 6/10 | Strong foundations; userId bypass + missing CSP + pro gate open |
-| UI/UX Quality | 7/10 | Beautiful; broken i18n, no error boundaries, state desync |
-| Test Coverage | 7/10 | 89 unit tests solid; 0% router coverage |
-| Production Readiness | 4/10 | Pro gate open, iOS out of sync, CSP missing |
-| Community/Engagement | 4/10 | No push, no photos, no real-time feed |
+| Area | Score (Before) | Score (After) | Notes |
+|------|:--------------:|:-------------:|-------|
+| Visual Design | 10/10 | 10/10 | Instrument-grade — unchanged |
+| Scientific Accuracy | 6/10 | 8/10 | A1–A4 fixed (Phase 4); NaN guards + Odeh Zone E corrected |
+| Data Completeness | 8/10 | 8/10 | ICOP + Open-Meteo strong; cloud cover not in q-value (open) |
+| Mobile Experience | 6/10 | 7/10 | Push notifications live; photos still open |
+| Performance | 9/10 | 9/10 | Web Worker + code splitting excellent — unchanged |
+| Security | 6/10 | 9/10 | Pro gate ✅, userId bypass ✅, CSP ✅, admin bypass ✅, rate limiting ✅ |
+| UI/UX Quality | 7/10 | 8/10 | Error boundaries ✅; i18n + state desync still open |
+| Test Coverage | 7/10 | 8/10 | 133 unit tests (was 89); Phase 5 router tests added |
+| Production Readiness | 4/10 | 9/10 | All code items done; 3 manual tasks remain (iOS sync, Play Store, App Store) |
+| Community/Engagement | 4/10 | 6/10 | Push notifications live; no photos, no real-time feed (open) |
 
 ---
 
 *Report generated by Claude Code — Round 40 — February 28, 2026*
-*Cross-referenced with: project_review.md, comprehensive_review.md, AUDIT_REPORT_ROUND39.md, todo.md*
+*Post-execution update: February 28, 2026 — all 8 phases complete (S1✅ S3✅ S7✅ S8✅ A1-A4✅ U1✅ U3✅)*
+*Cross-referenced with: docs/PHASE_PLAN_ROUND40.md, docs/SECURITY.md, docs/TESTING.md*
