@@ -46,24 +46,28 @@ function computeVisibilityAtPoint(date: Date, lat: number, lng: number, criterio
     const sunAlt = toDeg(sunPos.altitude) + refractionDelta;
     const arcv = moonAlt - sunAlt;
 
-    const elongation = toDeg(Math.acos(
+    // Clamp to [-1, 1] to guard against floating-point precision errors outside Math.acos domain
+    const cosElongation = Math.max(-1, Math.min(1,
         Math.sin(sunPos.altitude) * Math.sin(moonPos.altitude) +
         Math.cos(sunPos.altitude) * Math.cos(moonPos.altitude) *
         Math.cos(moonPos.azimuth - sunPos.azimuth)
     ));
+    const elongation = toDeg(Math.acos(cosElongation));
 
     const crescent = crescentWidth(elongation, moonPos.distance);
 
     if (criterion === "yallop") {
         const q = yallopQ(arcv, crescent.w);
-        const safeQ = isNaN(q) ? -1.0 : q;
+        // Use -99 for NaN so classifyYallop returns "E" (definitely not visible), not a false E-zone
+        const safeQ = isNaN(q) ? -99 : q;
         const zone = classifyYallop(safeQ, moonAlt);
-        return { zone, value: moonAlt <= 0 ? -1.0 : safeQ };
+        return { zone, value: moonAlt <= 0 ? -99 : safeQ };
     } else {
         const v = odehV(arcv, crescent.w);
-        const safeV = isNaN(v) ? -10.0 : v;
+        // Use -99 for NaN so classifyOdeh returns "E" (definitely not visible)
+        const safeV = isNaN(v) ? -99 : v;
         const zone = classifyOdeh(safeV, moonAlt);
-        return { zone, value: moonAlt <= 0 ? -10.0 : safeV };
+        return { zone, value: moonAlt <= 0 ? -99 : safeV };
     }
 }
 

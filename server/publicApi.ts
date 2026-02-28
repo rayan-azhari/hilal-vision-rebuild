@@ -29,6 +29,12 @@ publicApiRouter.get("/visibility", (req: any, res: any) => {
             return res.status(400).json({ error: "Invalid date format" });
         }
 
+        // SunCalc accuracy degrades significantly outside 1900-2100; reject extreme dates
+        const FIFTY_YEARS_MS = 50 * 365.25 * 24 * 3600 * 1000;
+        if (Math.abs(date.getTime() - Date.now()) > FIFTY_YEARS_MS) {
+            return res.status(400).json({ error: "Date out of supported range (±50 years from today)" });
+        }
+
         const data = computeSunMoonAtSunset(date, { lat: parsed.lat as number, lng: parsed.lng as number });
 
         res.json({
@@ -63,6 +69,11 @@ publicApiRouter.get("/moon-phases", (req: any, res: any) => {
 
         if (isNaN(date.getTime())) {
             return res.status(400).json({ error: "Invalid date format" });
+        }
+
+        const FIFTY_YEARS_MS = 50 * 365.25 * 24 * 3600 * 1000;
+        if (Math.abs(date.getTime() - Date.now()) > FIFTY_YEARS_MS) {
+            return res.status(400).json({ error: "Date out of supported range (±50 years from today)" });
         }
 
         const data = getMoonPhaseInfo(date);

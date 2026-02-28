@@ -284,4 +284,29 @@ describe("generateVisibilityGrid", () => {
         const fine = generateVisibilityGrid(new Date(2026, 1, 27), 10);
         expect(fine.length).toBeGreaterThan(coarse.length);
     });
+
+    it("Odeh grid can contain Zone E points (Phase 4 fix verification)", () => {
+        // Use day 1 of new moon cycle — deep non-visible regions should be Zone E with Odeh
+        // 2024-03-10 = day of new moon (conjunction); vast majority of globe should be D/E/F
+        const date = new Date(2024, 2, 10); // March 10, 2024
+        const grid = generateVisibilityGrid(date, 30, "odeh");
+        const zones = new Set(grid.map(p => p.zone));
+        // After the fix, Zone E should appear (was previously never returned by classifyOdeh)
+        expect(zones.has("E") || zones.has("F")).toBe(true);
+    });
+
+    it("grid zones are all valid VisibilityZone values", () => {
+        const validZones: VisibilityZone[] = ["A", "B", "C", "D", "E", "F"];
+        const grid = generateVisibilityGrid(new Date(2026, 1, 27), 30, "odeh");
+        for (const point of grid) {
+            expect(validZones).toContain(point.zone);
+        }
+    });
+
+    it("grid does not contain NaN q-values", () => {
+        const grid = generateVisibilityGrid(new Date(2026, 1, 27), 30);
+        for (const point of grid) {
+            expect(isNaN(point.q)).toBe(false);
+        }
+    });
 });

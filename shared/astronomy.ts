@@ -146,6 +146,8 @@ export const toDeg = (r: number) => (r * 180) / Math.PI;
  * W = SD × (1 - cos(ARCL)) where ARCL = elongation
  */
 export function crescentWidth(elongationDeg: number, moonDistKm: number): CrescentWidth {
+    // Guard: moon radius is 1737.4 km — distance must exceed this to be valid
+    if (!moonDistKm || moonDistKm <= 1737.4) return { w: 0, sd: 0 };
     const SD = toDeg(Math.asin(1737.4 / moonDistKm)) * 60; // semi-diameter in arcmin
     const arcl = toRad(elongationDeg);
     const w = SD * (1 - Math.cos(arcl));
@@ -184,13 +186,20 @@ export function classifyYallop(q: number, moonAltAtSunset: number): VisibilityZo
 
 /**
  * Classify visibility zone from Odeh (2004) V-value.
+ * Zones per Odeh (2004):
+ *   A: V ≥ 5.65  — easily visible with naked eye
+ *   B: V ≥ 2.00  — visible under perfect conditions
+ *   C: V ≥ -0.96 — may need optical aid
+ *   D: V ≥ -1.64 — not visible even with optical aid
+ *   E: V < -1.64 — definitely not visible (moon too young or too low)
  */
 export function classifyOdeh(v: number, moonAltAtSunset: number): VisibilityZone {
     if (moonAltAtSunset <= 0) return "F";
     if (v >= 5.65) return "A";
     if (v >= 2.00) return "B";
     if (v >= -0.96) return "C";
-    return "D"; // Or E, Odeh groups D/E as 'not visible' or 'requires telescope'
+    if (v >= -1.64) return "D";
+    return "E";
 }
 
 // ─── Sun/Moon Calculations ────────────────────────────────────────────────────
@@ -246,12 +255,15 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
     const moonAlt = toDeg(moonPos.altitude) + dipDeg + refractionDelta;
     const moonAz = toDeg(moonPos.azimuth) + 180;
 
-    // Elongation (angular distance between sun and moon)
-    const elongation = toDeg(Math.acos(
+    // Elongation (angular distance between sun and moon).
+    // Clamp cosine input to [-1, 1] to guard against floating-point precision errors
+    // that can push the value infinitesimally outside the Math.acos domain, returning NaN.
+    const cosElongation = Math.max(-1, Math.min(1,
         Math.sin(sunPos.altitude) * Math.sin(moonPos.altitude) +
         Math.cos(sunPos.altitude) * Math.cos(moonPos.altitude) *
         Math.cos(moonPos.azimuth - sunPos.azimuth)
     ));
+    const elongation = toDeg(Math.acos(cosElongation));
 
     // Arc of Vision: moon altitude minus sun altitude at sunset
     const arcv = moonAlt - sunAlt;
@@ -306,6 +318,9 @@ export function generateVisibilityGrid(
 ): Array<{ lat: number; lng: number; zone: VisibilityZone; q: number; v?: number }> {
     const results: Array<{ lat: number; lng: number; zone: VisibilityZone; q: number; v?: number }> = [];
 
+    // Latitude clamped to ±80° — SunCalc accuracy degrades significantly at extreme
+    // latitudes (polar twilight zones where sun may not set). Observers above 80°N/S
+    // should use a dedicated polar-region visibility tool.
     for (let lat = -80; lat <= 80; lat += resolution) {
         for (let lng = -180; lng <= 180; lng += resolution) {
             const data = computeSunMoonAtSunset(date, { lat, lng });
