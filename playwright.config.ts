@@ -53,5 +53,7 @@ export default defineConfig({
         command: 'npm run dev',
         url: 'http://localhost:5173',
         reuseExistingServer: !process.env.CI,
+        // In CI the server defaults to port 3000; force it to 5173 to match baseURL
+        env: process.env.CI ? { PORT: '5173' } : {},
     },
 });

@@ -20,7 +20,7 @@ const moonPhaseSchema = z.object({
  *   get:
  *     description: Get visibility data (Yallop & Odeh criteria) for a specific location and date.
  */
-publicApiRouter.get("/visibility", (req: any, res: any) => {
+export function visibilityHandler(req: any, res: any) {
     try {
         const parsed = visibilitySchema.parse(req.query);
         const date = parsed.date ? new Date(parsed.date as string) : new Date();
@@ -54,7 +54,7 @@ publicApiRouter.get("/visibility", (req: any, res: any) => {
     } catch (err: any) {
         res.status(400).json({ error: "Validation failed", details: err.errors || err.message });
     }
-});
+}
 
 /**
  * @openapi
@@ -62,7 +62,7 @@ publicApiRouter.get("/visibility", (req: any, res: any) => {
  *   get:
  *     description: Get current and upcoming moon phase information.
  */
-publicApiRouter.get("/moon-phases", (req: any, res: any) => {
+export function moonPhasesHandler(req: any, res: any) {
     try {
         const parsed = moonPhaseSchema.parse(req.query);
         const date = parsed.date ? new Date(parsed.date) : new Date();
@@ -93,5 +93,7 @@ publicApiRouter.get("/moon-phases", (req: any, res: any) => {
     } catch (err: any) {
         res.status(400).json({ error: "Validation failed", details: err.errors || err.message });
     }
-});
+}
 
+publicApiRouter.get("/visibility", visibilityHandler);
+publicApiRouter.get("/moon-phases", moonPhasesHandler);

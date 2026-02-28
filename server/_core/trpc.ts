@@ -48,3 +48,4 @@ const requireAdmin = t.middleware(async opts => {
 });
 
 export const adminProcedure = t.procedure.use(requireAdmin);
+export const createCallerFactory = t.createCallerFactory;
