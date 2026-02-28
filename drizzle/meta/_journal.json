@@ -8,6 +8,13 @@
       "when": 1771450320908,
       "tag": "0000_slow_scarlet_spider",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1772215488467,
+      "tag": "0001_closed_christian_walker",
+      "breakpoints": true
     }
   ]
 }

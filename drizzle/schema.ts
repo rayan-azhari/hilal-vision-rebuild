@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -39,7 +39,11 @@ export const observationReports = mysqlTable("observation_reports", {
   visualSuccess: mysqlEnum("visualSuccess", ["naked_eye", "optical_aid", "not_seen"]).notNull(),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => [
+  index("obs_userId_idx").on(table.userId),
+  index("obs_createdAt_idx").on(table.createdAt),
+  index("obs_lat_lng_idx").on(table.lat, table.lng),
+]);
 
 export type ObservationReport = typeof observationReports.$inferSelect;
 export type InsertObservationReport = typeof observationReports.$inferInsert;
@@ -52,7 +56,22 @@ export const pushTokens = mysqlTable("push_tokens", {
   deviceType: varchar("deviceType", { length: 50 }), // 'web', 'ios', 'android'
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("push_userId_idx").on(table.userId),
+]);
 
 export type PushToken = typeof pushTokens.$inferSelect;
 export type InsertPushToken = typeof pushTokens.$inferInsert;
+
+// Maps Stripe customer IDs to Clerk user IDs for O(1) subscription revocation.
+// Written at checkout completion; read at cancellation/payment_failed webhook.
+export const stripeCustomers = mysqlTable("stripe_customers", {
+  id: int("id").autoincrement().primaryKey(),
+  clerkUserId: varchar("clerkUserId", { length: 255 }).notNull().unique(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type StripeCustomer = typeof stripeCustomers.$inferSelect;
+export type InsertStripeCustomer = typeof stripeCustomers.$inferInsert;

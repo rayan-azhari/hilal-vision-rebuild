@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClerkClient } from "@clerk/backend";
+import { upsertStripeCustomer, getStripeCustomerByStripeId } from "../../server/db.js";
 import type { IncomingMessage, ServerResponse } from "http";
 
 // Webhook MUST have bodyParser disabled — Stripe validates the raw body signature
@@ -81,6 +82,10 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
                                 proGrantedAt: new Date().toISOString(),
                             },
                         });
+                        // Persist stripeCustomerId → clerkUserId mapping for O(1) revocation
+                        if (typeof session.customer === "string") {
+                            await upsertStripeCustomer(userId, session.customer);
+                        }
                         console.log(`[Stripe Webhook] Granted Pro (plan: ${meta.plan})`);
                     } else if (meta.type === "donation" && Number(meta.amount?.replace("$", "")) >= 10) {
                         // $10+ donation → grant Patron badge
@@ -109,42 +114,61 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
                 if (clerkSecretKey && customerId) {
                     const clerk = createClerkClient({ secretKey: clerkSecretKey });
 
-                    // Search Clerk users — stripeCustomerId is stored in publicMetadata at checkout
-                    // Paginate through users to find the match (Clerk doesn't support metadata search)
-                    let found = false;
-                    let offset = 0;
-                    const PAGE_SIZE = 100;
+                    // O(1) lookup via DB mapping (written at checkout completion)
+                    const mapping = await getStripeCustomerByStripeId(customerId);
 
-                    while (!found) {
-                        const users = await clerk.users.getUserList({ limit: PAGE_SIZE, offset });
-                        if (users.data.length === 0) break;
-
-                        for (const user of users.data) {
-                            const meta = user.publicMetadata as any;
-                            if (meta?.stripeCustomerId === customerId && meta?.isPro === true) {
-                                // Only revoke if they are on a subscription plan (not lifetime)
-                                if (meta.plan === "lifetime") {
-                                    console.log(`[Stripe Webhook] Skipping revocation — user has lifetime plan`);
-                                } else {
-                                    await clerk.users.updateUserMetadata(user.id, {
-                                        publicMetadata: {
-                                            isPro: false,
-                                            proRevokedAt: new Date().toISOString(),
-                                        },
-                                    });
-                                    console.log(`[Stripe Webhook] Revoked Pro — subscription ended`);
-                                }
-                                found = true;
-                                break;
+                    if (mapping) {
+                        const user = await clerk.users.getUser(mapping.clerkUserId);
+                        const meta = user.publicMetadata as { isPro?: boolean; plan?: string };
+                        if (meta?.isPro) {
+                            if (meta.plan === "lifetime") {
+                                console.log(`[Stripe Webhook] Skipping revocation — user has lifetime plan`);
+                            } else {
+                                await clerk.users.updateUserMetadata(mapping.clerkUserId, {
+                                    publicMetadata: {
+                                        isPro: false,
+                                        proRevokedAt: new Date().toISOString(),
+                                    },
+                                });
+                                console.log(`[Stripe Webhook] Revoked Pro — subscription ended`);
                             }
                         }
+                    } else {
+                        // Fallback: paginate Clerk users (legacy customers before DB mapping was added)
+                        let found = false;
+                        let offset = 0;
+                        const PAGE_SIZE = 100;
 
-                        if (users.data.length < PAGE_SIZE) break;
-                        offset += PAGE_SIZE;
-                    }
+                        while (!found) {
+                            const users = await clerk.users.getUserList({ limit: PAGE_SIZE, offset });
+                            if (users.data.length === 0) break;
 
-                    if (!found) {
-                        console.warn(`[Stripe Webhook] Could not find Clerk user for Stripe customer`);
+                            for (const user of users.data) {
+                                const meta = user.publicMetadata as any;
+                                if (meta?.stripeCustomerId === customerId && meta?.isPro === true) {
+                                    if (meta.plan === "lifetime") {
+                                        console.log(`[Stripe Webhook] Skipping revocation — user has lifetime plan`);
+                                    } else {
+                                        await clerk.users.updateUserMetadata(user.id, {
+                                            publicMetadata: {
+                                                isPro: false,
+                                                proRevokedAt: new Date().toISOString(),
+                                            },
+                                        });
+                                        console.log(`[Stripe Webhook] Revoked Pro — subscription ended (legacy lookup)`);
+                                    }
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if (users.data.length < PAGE_SIZE) break;
+                            offset += PAGE_SIZE;
+                        }
+
+                        if (!found) {
+                            console.warn(`[Stripe Webhook] Could not find Clerk user for Stripe customer`);
+                        }
                     }
                 }
                 break;
