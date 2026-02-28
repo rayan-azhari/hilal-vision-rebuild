@@ -377,11 +377,11 @@ W  = SD × (1 − cos(elongation))`}
                         a fundamentally different philosophy of Islamic timekeeping.
                     </Para>
 
-                    <SubHeading>Engine 1 - Astronomical (SunCalc)</SubHeading>
+                    <SubHeading>Engine 1 - Astronomical (astronomy-engine)</SubHeading>
                     <Para>
                         Uses a conjunction-based algorithm to detect the physical new moon. The
                         function <code style={{ color: "var(--gold-dim)" }}>findNewMoonNear()</code> employs a
-                        two-pass search using SunCalc's <code style={{ color: "var(--gold-dim)" }}>getMoonIllumination()</code>:
+                        two-pass search using astronomy-engine's phase computations:
                         a coarse 6-hour sweep followed by a 30-minute fine sweep to locate the phase minimum.
                         Months are counted relative to an epoch of 1 Muharram 1446 AH ≈ 7 July 2024. This
                         represents true physical reality and may differ from civic calendars by ±1 day.
@@ -693,10 +693,10 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
                                 href: "https://www.willbell.com/math/mc1.htm",
                             },
                             {
-                                author: "Agafonkin, V.",
-                                title: "SunCalc - Sun/Moon Calculations Library",
-                                pub: "JavaScript implementation of Meeus algorithms",
-                                href: "https://github.com/mourner/suncalc",
+                                author: "Cross, D.",
+                                title: "astronomy-engine - High precision astronomy algorithms",
+                                pub: "JavaScript and C implementations of Novas & JPL DE405",
+                                href: "https://github.com/cosinekitty/astronomy",
                             },
                             {
                                 author: "International Astronomical Center",
