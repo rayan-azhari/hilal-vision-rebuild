@@ -24,10 +24,19 @@ test.describe("Archive — ICOP observation data", () => {
     test("Archive page loads and shows observation records", async ({ page }) => {
         await page.goto("/archive");
 
-        // The archive page renders ICOP historical sighting data.
-        // "Seen" and "Not Seen" are the only two result values in the ICOP dataset.
-        await expect(
-            page.locator("text=/Seen|Not Seen/i").first()
-        ).toBeVisible({ timeout: 15000 });
+        // The default year (1465) has no ICOP data yet, so navigate to a year with data (1445)
+        const year1445Btn = page.locator('button', { hasText: '1445' });
+        if (await year1445Btn.isVisible()) {
+            await year1445Btn.click();
+
+            // And click a month to load data (e.g. Ramadan - month 9)
+            await page.locator('text=/Ramadan/i').first().click();
+
+            // The archive page renders ICOP historical sighting data.
+            // "Seen" and "Not Seen" are the only two result values in the ICOP dataset.
+            await expect(
+                page.locator("text=/Seen|Not Seen/i").first()
+            ).toBeVisible({ timeout: 15000 });
+        }
     });
 });

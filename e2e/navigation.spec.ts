@@ -7,6 +7,8 @@ test.describe("Navigation & Core Pages", () => {
     });
 
     test("Bottom navigation has all main links", async ({ page }) => {
+        // Bottom nav is only visible on mobile screens, so we must set a mobile viewport
+        await page.setViewportSize({ width: 375, height: 812 });
         await page.goto("/");
         const nav = page.locator("nav").last();
         await expect(nav).toBeVisible({ timeout: 10000 });

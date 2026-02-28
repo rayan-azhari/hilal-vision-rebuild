@@ -1,4 +1,4 @@
-import { ChevronDown, Eye, Cloud } from "lucide-react";
+import { ChevronDown, Eye, Cloud, Clock } from "lucide-react";
 import ProGate from "./ProGate";
 
 interface MapControlsPanelProps {
@@ -11,6 +11,8 @@ interface MapControlsPanelProps {
     setShowVisibility: (val: boolean) => void;
     showClouds: boolean;
     setShowClouds: (val: boolean) => void;
+    hourOffset: number;
+    setHourOffset: (val: number) => void;
     isPremium: boolean;
     setShowUpgradeModal: (val: boolean) => void;
     autoFetchWeather: boolean;
@@ -31,6 +33,8 @@ export function MapControlsPanel({
     setShowVisibility,
     showClouds,
     setShowClouds,
+    hourOffset,
+    setHourOffset,
     isPremium,
     setShowUpgradeModal,
     autoFetchWeather,
@@ -49,6 +53,32 @@ export function MapControlsPanel({
                 )}
             </div>
             <div className="space-y-4">
+                {/* Hour Offset */}
+                <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Hour Offset</label>
+                        <span className="text-xs font-mono" style={{ color: "var(--gold)" }}>
+                            {hourOffset >= 0 ? "+" : ""}{hourOffset}h
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
+                        <Clock className="w-4 h-4" style={{ color: "var(--gold-dim)" }} />
+                        <input
+                            type="range"
+                            min={-24}
+                            max={24}
+                            step={1}
+                            value={hourOffset}
+                            onChange={e => setHourOffset(Number(e.target.value))}
+                            className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+                            style={{
+                                background: `linear-gradient(to right, var(--gold) ${((hourOffset + 24) / 48) * 100}%, var(--space-light) ${((hourOffset + 24) / 48) * 100}%)`,
+                                accentColor: "var(--gold)",
+                            }}
+                        />
+                    </div>
+                </div>
+
                 {/* Resolution */}
                 <div>
                     <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Resolution</label>

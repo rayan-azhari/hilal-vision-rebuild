@@ -544,6 +544,8 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
               setShowVisibility={setShowVisibility}
               showClouds={showClouds}
               setShowClouds={setShowClouds}
+              hourOffset={hourOffset}
+              setHourOffset={setHourOffset}
               isPremium={isPremium}
               setShowUpgradeModal={setShowUpgradeModal}
               autoFetchWeather={autoFetchWeather}
@@ -555,23 +557,31 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
             />
           </div>
 
-          {/* Best Time to Observe */}
-          <ProGate featureName="Best Time to Observe">
-            <div className="animate-breezy-enter" style={{ animationDelay: "45ms" }}>
-              <BestTimeCard date={effectiveDate} location={selectedCity} />
-            </div>
-          </ProGate>
+          <div
+            className="p-5 space-y-4 border-t"
+            style={{
+              borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
+              background: "color-mix(in oklch, var(--space) 95%, transparent)",
+            }}
+          >
+            {/* Best Time to Observe */}
+            <ProGate featureName="Best Time to Observe">
+              <div className="animate-breezy-enter" style={{ animationDelay: "45ms" }}>
+                <BestTimeCard date={effectiveDate} location={selectedCity} />
+              </div>
+            </ProGate>
 
-          <MapInfoPanel
-            visibilityCriterion={visibilityCriterion}
-            highContrast={highContrast}
-            zoneColors={ZONE_COLORS}
-            highContrastZoneColors={HIGH_CONTRAST_ZONE_COLORS}
-          />
+            <MapInfoPanel
+              visibilityCriterion={visibilityCriterion}
+              highContrast={highContrast}
+              zoneColors={ZONE_COLORS}
+              highContrastZoneColors={HIGH_CONTRAST_ZONE_COLORS}
+            />
 
-          <MapTimePanel effectiveDate={effectiveDate} />
+            <MapTimePanel effectiveDate={effectiveDate} />
 
-          <MapCrowdsourceLegend />
+            <MapCrowdsourceLegend />
+          </div>
         </div>
       </div>
     </div>

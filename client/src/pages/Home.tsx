@@ -202,7 +202,7 @@ export default function Home() {
       {/* Live Status Bar */}
       <section className="py-6 relative z-10 -mt-8">
         <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Current time */}
             <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.1s' }}>
               <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>UTC Time</div>
@@ -226,17 +226,6 @@ export default function Home() {
               </div>
               <div className="text-[10px] font-arabic" style={{ color: "var(--gold-dim)" }}>
                 {hijri.day} {hijri.monthNameArabic} {hijri.year} AH
-              </div>
-            </div>
-            {/* Moon age */}
-            <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.4s' }}>
-              <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Lunar Age</div>
-              <div className="flex justify-between items-center px-2">
-                <span className="text-muted-foreground">Age</span>
-                <span className="font-medium text-foreground">{(moonInfo.moonAge / 24).toFixed(1)} days</span>
-              </div>
-              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>
-                New: {formatTime(moonInfo.nextNewMoon)}
               </div>
             </div>
           </div>
