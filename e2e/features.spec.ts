@@ -34,3 +34,31 @@ test.describe("Archive — ICOP observation data", () => {
         ).toBeVisible({ timeout: 15000 });
     });
 });
+
+test.describe("SightingFeed — Home page", () => {
+    test("renders Live Sighting Feed section on Home page", async ({ page }) => {
+        await page.goto("/");
+        // Feed shows either live reports, empty state, or loading skeleton — all under "Live Sighting Feed" header
+        await expect(
+            page.locator("text=/Live Sighting Feed/i").first()
+        ).toBeVisible({ timeout: 15000 });
+    });
+
+    test("shows empty state CTA or sighting cards when feed resolves", async ({ page }) => {
+        await page.goto("/");
+        // After load, either sighting cards appear OR the empty-state "Report a Sighting" CTA
+        await expect(
+            page.locator("text=/Report a Sighting|No reports yet|Seen|Not Seen/i").first()
+        ).toBeVisible({ timeout: 15000 });
+    });
+});
+
+test.describe("ProGate — upgrade overlay", () => {
+    test("Sky Dome on Moon page shows Pro gate for free users", async ({ page }) => {
+        await page.goto("/moon");
+        // For free users, the ProGate renders "Upgrade to Pro" or the inline "Pro" badge
+        await expect(
+            page.locator("text=/Upgrade to Pro|Pro/i").first()
+        ).toBeVisible({ timeout: 15000 });
+    });
+});

@@ -60,3 +60,16 @@ test.describe("Dark Mode", () => {
         await expect(page.locator("body")).toBeVisible();
     });
 });
+
+test.describe("404 Not Found — dark theme", () => {
+    test("shows 404 heading for unknown routes", async ({ page }) => {
+        await page.goto("/this-route-does-not-exist-at-all");
+        await expect(page.locator("text=404").first()).toBeVisible({ timeout: 10000 });
+        await expect(page.locator("text=/Page Not Found/i").first()).toBeVisible({ timeout: 5000 });
+    });
+
+    test("404 page has a Go Home button", async ({ page }) => {
+        await page.goto("/this-route-does-not-exist-at-all");
+        await expect(page.locator("button", { hasText: /Go Home/i }).first()).toBeVisible({ timeout: 10000 });
+    });
+});
