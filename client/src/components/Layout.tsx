@@ -184,7 +184,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 const newDate = new Date(y, m - 1, d, date.getHours(), date.getMinutes(), date.getSeconds());
                 setDate(newDate);
               }}
-              className="px-2 py-[7px] min-w-0 rounded-lg text-[12px] font-sans text-center transition-colors"
+              className="px-2 py-[7px] min-w-[7.5rem] rounded-lg text-[12px] font-sans text-center transition-colors"
               style={{
                 background: "var(--space-light)",
                 border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
@@ -565,7 +565,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {routePath !== "/" && (
         <div
           className="fixed left-0 right-0 z-40 flex justify-center pointer-events-none px-4"
-          style={{ top: "calc(4.5rem + env(safe-area-inset-top))" }}
+          style={{ top: "calc(5.5rem + env(safe-area-inset-top))" }}
         >
           <div
             className="pointer-events-auto flex items-center gap-2 px-3 py-1 rounded-full text-[10px]"

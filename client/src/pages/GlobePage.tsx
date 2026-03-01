@@ -302,17 +302,24 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     }
   }, [theme]);
 
-  // Handle resize
+  // Handle resize — use ResizeObserver to also catch display:none → display:block transitions
   useEffect(() => {
+    const el = globeRef.current;
+    if (!el) return;
     const handleResize = () => {
-      if (globeRef.current && globeInstanceRef.current) {
+      if (el.clientWidth > 0 && el.clientHeight > 0 && globeInstanceRef.current) {
         globeInstanceRef.current
-          .width(globeRef.current.clientWidth)
-          .height(globeRef.current.clientHeight);
+          .width(el.clientWidth)
+          .height(el.clientHeight);
       }
     };
+    const ro = new ResizeObserver(handleResize);
+    ro.observe(el);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   return (

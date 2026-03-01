@@ -23,14 +23,17 @@ function drawHorizon(
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  const W = canvas.width;
-  const H = canvas.height;
   const dpr = window.devicePixelRatio || 1;
-  const logicalW = W / dpr;
-  const s = Math.max(0.6, Math.min(1, logicalW / 500));
+  // Use logical (CSS pixel) dimensions for all drawing since ctx is already scaled by dpr
+  const W = canvas.width / dpr;
+  const H = canvas.height / dpr;
+  const s = Math.max(0.6, Math.min(1, W / 500));
 
-  // Clear
-  ctx.clearRect(0, 0, W, H);
+  // Clear the full physical canvas buffer
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
 
   // Sky gradient (dusk)
   const sky = ctx.createLinearGradient(0, 0, 0, H * 0.75);
