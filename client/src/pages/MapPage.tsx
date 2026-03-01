@@ -132,11 +132,16 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       const map = L.map(mapRef.current!, {
         center: [20, 30],
         zoom: 2,
-        minZoom: 1,
+        minZoom: 2, // Increased from 1 to avoid showing grey space above/below map on tall screens
         maxZoom: 6,
-        worldCopyJump: true,
+        worldCopyJump: false, // Turned off since we are restricting bounds
         zoomControl: true,
         attributionControl: false,
+        maxBounds: [
+          [-90, -180],
+          [90, 180]
+        ],
+        maxBoundsViscosity: 1.0 // Prevents dragging outside the bounds
       });
 
       // Dark or Light tile layer
@@ -144,7 +149,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
         theme === "light"
           ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        { subdomains: "abcd", maxZoom: 20 }
+        { subdomains: "abcd", maxZoom: 20, noWrap: true, bounds: [[-90, -180], [90, 180]] }
       ).addTo(map);
 
       // Attribution

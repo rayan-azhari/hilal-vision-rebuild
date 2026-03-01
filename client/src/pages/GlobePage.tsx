@@ -66,7 +66,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
   useEffect(() => {
     if (isGlobeInitialized && globeInstanceRef.current) {
-      globeInstanceRef.current.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 }, 1000);
+      globeInstanceRef.current.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 3.0 }, 1000);
     }
   }, [selectedCity, isGlobeInitialized]);
 
@@ -110,9 +110,14 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
           .atmosphereAltitude(0.12)
           .enablePointerInteraction(true);
 
-        globe.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 });
+        // Point of view: altitude 2.5 is slightly zoomed in, altitude 3.0 allows the full earth to be visible on desktop
+        globe.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 3.0 });
         globe.controls().autoRotate = true;
         globe.controls().autoRotateSpeed = 0.3;
+        globe.controls().enableZoom = true;
+        // Prevent users from zooming too close or too far
+        globe.controls().minDistance = 150;
+        globe.controls().maxDistance = 600;
 
         // Adjust lighting to tint the dark side deep navy instead of pure black
         const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
