@@ -132,13 +132,9 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       const map = L.map(mapRef.current!, {
         center: [20, 30],
         zoom: 2,
-        minZoom: 2,
+        minZoom: 1,
         maxZoom: 6,
-        maxBounds: [
-          [-90, -180],
-          [90, 180]
-        ],
-        maxBoundsViscosity: 1.0,
+        worldCopyJump: true,
         zoomControl: true,
         attributionControl: false,
       });

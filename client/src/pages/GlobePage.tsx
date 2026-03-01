@@ -79,55 +79,81 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
 
   const trpcUtils = trpc.useContext();
 
-  // Initialize globe once
+  // Initialize globe once — defer until container is visible (has non-zero dimensions).
+  // When mounted inside a display:none parent (e.g. VisibilityPage's tab system),
+  // clientWidth/clientHeight are 0, which creates a broken 0×0 WebGL canvas.
   useEffect(() => {
     if (!globeRef.current) return;
     let mounted = true;
+    let cleanupGlobe: (() => void) | null = null;
 
-    import("globe.gl").then((mod) => {
+    const initGlobe = () => {
       if (!mounted || !globeRef.current) return;
-      const GlobeGL = mod.default as any;
+      const el = globeRef.current;
+      if (el.clientWidth === 0 || el.clientHeight === 0) return; // still hidden
 
-      const globe = GlobeGL()(globeRef.current)
-        .width(globeRef.current.clientWidth)
-        .height(globeRef.current.clientHeight)
-        .backgroundColor("rgba(0,0,0,0)")
-        .globeImageUrl(theme === "light" ? "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg" : "https://unpkg.com/three-globe/example/img/earth-dark.jpg")
-        .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
-        .atmosphereColor("#c8a040")
-        .atmosphereAltitude(0.12)
-        .enablePointerInteraction(true);
+      import("globe.gl").then((mod) => {
+        if (!mounted || !globeRef.current) return;
+        // Double-check visibility after async import
+        if (globeRef.current.clientWidth === 0 || globeRef.current.clientHeight === 0) return;
+        if (globeInstanceRef.current) return; // already initialized
 
-      globe.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 });
-      globe.controls().autoRotate = true;
-      globe.controls().autoRotateSpeed = 0.3;
+        const GlobeGL = mod.default as any;
 
-      // Adjust lighting to tint the dark side deep navy instead of pure black
-      const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
-      if (ambientLight) {
-        (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x233342);
-        (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
-      } else {
-        globe.scene().add(new THREE.AmbientLight(theme === "light" ? 0xffffff : 0x233342, theme === "light" ? Math.PI : Math.PI * 1.5));
+        const globe = GlobeGL()(globeRef.current)
+          .width(globeRef.current.clientWidth)
+          .height(globeRef.current.clientHeight)
+          .backgroundColor("rgba(0,0,0,0)")
+          .globeImageUrl(theme === "light" ? "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg" : "https://unpkg.com/three-globe/example/img/earth-dark.jpg")
+          .bumpImageUrl("https://unpkg.com/three-globe/example/img/earth-topology.png")
+          .atmosphereColor("#c8a040")
+          .atmosphereAltitude(0.12)
+          .enablePointerInteraction(true);
+
+        globe.pointOfView({ lat: selectedCity.lat, lng: selectedCity.lng, altitude: 2.5 });
+        globe.controls().autoRotate = true;
+        globe.controls().autoRotateSpeed = 0.3;
+
+        // Adjust lighting to tint the dark side deep navy instead of pure black
+        const ambientLight = globe.scene().children.find((obj: any) => obj.type === 'AmbientLight');
+        if (ambientLight) {
+          (ambientLight as THREE.AmbientLight).color = new THREE.Color(theme === "light" ? 0xffffff : 0x233342);
+          (ambientLight as THREE.AmbientLight).intensity = theme === "light" ? Math.PI : Math.PI * 1.5;
+        } else {
+          globe.scene().add(new THREE.AmbientLight(theme === "light" ? 0xffffff : 0x233342, theme === "light" ? Math.PI : Math.PI * 1.5));
+        }
+
+        // Add base emissive glow so the black oceans on the texture don't render pure black
+        const baseMaterial = globe.globeMaterial();
+        if (baseMaterial) {
+          baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x151f28);
+          baseMaterial.emissiveIntensity = theme === "light" ? 0 : 1.0;
+        }
+
+        globeInstanceRef.current = globe;
+        cleanupGlobe = () => {
+          globe._destructor?.();
+        };
+        setTimeout(() => setIsGlobeInitialized(true), 150);
+      });
+    };
+
+    // Try immediately (works when map tab is not the default)
+    initGlobe();
+
+    // Also watch for visibility changes via ResizeObserver
+    const ro = new ResizeObserver(() => {
+      if (!globeInstanceRef.current) {
+        initGlobe();
       }
-
-      // Add base emissive glow so the black oceans on the texture don't render pure black
-      const baseMaterial = globe.globeMaterial();
-      if (baseMaterial) {
-        baseMaterial.emissive = new THREE.Color(theme === "light" ? 0x000000 : 0x151f28);
-        baseMaterial.emissiveIntensity = theme === "light" ? 0 : 1.0;
-      }
-
-      globeInstanceRef.current = globe;
-      setTimeout(() => setIsGlobeInitialized(true), 150);
     });
+    ro.observe(globeRef.current);
 
     return () => {
       mounted = false;
-      if (globeInstanceRef.current) {
-        globeInstanceRef.current._destructor?.();
-        globeInstanceRef.current = null;
-      }
+      ro.disconnect();
+      if (cleanupGlobe) cleanupGlobe();
+      globeInstanceRef.current = null;
     };
   }, []);
 
@@ -302,24 +328,18 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
     }
   }, [theme]);
 
-  // Handle resize — use ResizeObserver to also catch display:none → display:block transitions
+  // Handle window resize for already-initialized globe
   useEffect(() => {
-    const el = globeRef.current;
-    if (!el) return;
     const handleResize = () => {
-      if (el.clientWidth > 0 && el.clientHeight > 0 && globeInstanceRef.current) {
+      const el = globeRef.current;
+      if (el && el.clientWidth > 0 && el.clientHeight > 0 && globeInstanceRef.current) {
         globeInstanceRef.current
           .width(el.clientWidth)
           .height(el.clientHeight);
       }
     };
-    const ro = new ResizeObserver(handleResize);
-    ro.observe(el);
     window.addEventListener("resize", handleResize);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { MAJOR_CITIES } from "@/lib/astronomy";
 import { GeoLocation } from "@/components/LocationSearch";
 
@@ -34,15 +34,15 @@ export function GlobalStateProvider({ children }: { children: ReactNode }) {
     const [date, setDate] = useState<Date>(new Date());
     const [visibilityCriterion, setVisibilityCriterionState] = useState<"yallop" | "odeh">(loadCriterion);
 
-    const setLocation = (loc: GeoLocation) => {
+    const setLocation = useCallback((loc: GeoLocation) => {
         setLocationState(loc);
         try { localStorage.setItem(LS_LOCATION, JSON.stringify(loc)); } catch { /* ignore */ }
-    };
+    }, []);
 
-    const setVisibilityCriterion = (criterion: "yallop" | "odeh") => {
+    const setVisibilityCriterion = useCallback((criterion: "yallop" | "odeh") => {
         setVisibilityCriterionState(criterion);
         try { localStorage.setItem(LS_CRITERION, criterion); } catch { /* ignore */ }
-    };
+    }, []);
 
     // Keep date fresh when the day rolls over (e.g. browser left open overnight)
     useEffect(() => {
