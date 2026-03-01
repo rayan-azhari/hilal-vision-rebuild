@@ -62,6 +62,7 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 - The Globe and Map views are unified under `/visibility` with a toggle, not separate routes. Both views support independent cloud cover and visibility overlay toggles.
 - Backend changes should support Drizzle ORM schemas for telemetry ingestion (`observation_reports`) and proxying DEM/AOD data.
 - The `weather` tRPC router (`server/routers/weather.ts`) fetches cloud cover from Open-Meteo for a sparse global grid with a 5-minute in-memory cache. The `useCloudOverlay` hook on the client interpolates this into a canvas texture.
+- **Strict Vercel Limits**: Vercel functions have a hard 10-second execution limit. **Never** perform sequential await fetches to external third-party APIs (like Open-Meteo). All external fetches must be parallelized using `Promise.allSettled()`, and every fetch must include a strict abort timeout (e.g., `AbortSignal.timeout(2000)` or `fetchWithTimeout(url, 2000)`) to ensure the function fails gracefully instead of crashing with `FUNCTION_INVOCATION_FAILED`.
 - Clerk's `getAuth()` in `server/_core/context.ts` is wrapped in try/catch so public endpoints (like archive data) work without authentication middleware.
 
 **5. Update Documentation as You Go**

@@ -108,7 +108,7 @@ export const demRouter = router({
     .query(async ({ input }) => {
       try {
         const url = `https://api.open-meteo.com/v1/elevation?latitude=${input.lat}&longitude=${input.lng}`;
-        const res = await fetch(url);
+        const res = await fetchWithTimeout(url, 2000);
         if (!res.ok) return { elevation: 0 };
         const data = (await res.json()) as any;
         return { elevation: data.elevation?.[0] ?? 0 };
@@ -290,7 +290,7 @@ export const appRouter = router({
       .query(async ({ input }) => {
         try {
           const url = `https://api.open-meteo.com/v1/elevation?latitude=${input.lat}&longitude=${input.lng}`;
-          const res = await fetch(url);
+          const res = await fetchWithTimeout(url, 2000);
           if (!res.ok) return { elevation: 0 };
           const data = (await res.json()) as any;
           return { elevation: data.elevation?.[0] ?? 0 };
@@ -303,7 +303,7 @@ export const appRouter = router({
       .query(async ({ input }) => {
         try {
           const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${input.lat}&longitude=${input.lng}&current=aerosol_optical_depth`;
-          const res = await fetch(url);
+          const res = await fetchWithTimeout(url, 2000);
           if (!res.ok) return { aod: 0.1 };
           const data = (await res.json()) as any;
           return { aod: data.current?.aerosol_optical_depth ?? 0.1 };

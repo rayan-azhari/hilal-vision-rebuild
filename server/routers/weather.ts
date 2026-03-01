@@ -64,52 +64,55 @@ export const weatherRouter = router({
       const BATCH_SIZE = 25;
       const allResults: Array<{ lat: number; lng: number; cloud_cover: number }> = [];
 
+      const fetchPromises = [];
+
       for (let i = 0; i < gridPoints.length; i += BATCH_SIZE) {
         const batch = gridPoints.slice(i, i + BATCH_SIZE);
         const lats = batch.map((p) => p.lat).join(",");
         const lngs = batch.map((p) => p.lng).join(",");
 
-        try {
-          // Add a small delay between batches to respect rate limits
-          if (i > 0) await new Promise(r => setTimeout(r, 100));
+        const fetchBatch = async (batchIndex: number) => {
+          try {
+            // Add a small staggered delay between batches to respect rate limits
+            if (batchIndex > 0) await new Promise(r => setTimeout(r, batchIndex * 50));
 
-          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&hourly=cloud_cover&forecast_days=1&timezone=auto`;
-          const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&hourly=cloud_cover&forecast_days=1&timezone=auto`;
+            const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
 
-          if (!res.ok) {
-            console.error(`Open-Meteo cloud fetch failed: ${res.status}`);
-            // Fill with 0 (clear) as fallback
-            batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
-            continue;
-          }
-
-          const json = (await res.json()) as any;
-
-          // Open-Meteo returns an array when multiple coordinates are provided
-          const locations = Array.isArray(json) ? json : [json];
-
-          for (let j = 0; j < batch.length; j++) {
-            const locData = locations[j];
-            if (!locData?.hourly?.cloud_cover) {
-              allResults.push({ ...batch[j], cloud_cover: 0 });
-              continue;
+            if (!res.ok) {
+              console.error(`Open-Meteo cloud fetch failed: ${res.status}`);
+              batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
+              return;
             }
 
-            // Find the cloud cover value nearest to sunset time (~18:00 local)
-            // The hourly array has 24 entries (0-23h), we use index 18
-            const hourlyCloud = locData.hourly.cloud_cover as number[];
-            const sunsetHourIdx = Math.min(18, hourlyCloud.length - 1);
-            allResults.push({
-              lat: batch[j].lat,
-              lng: batch[j].lng,
-              cloud_cover: hourlyCloud[sunsetHourIdx] ?? 0,
-            });
+            const json = (await res.json()) as any;
+            const locations = Array.isArray(json) ? json : [json];
+
+            for (let j = 0; j < batch.length; j++) {
+              const locData = locations[j];
+              if (!locData?.hourly?.cloud_cover) {
+                allResults.push({ ...batch[j], cloud_cover: 0 });
+                continue;
+              }
+
+              const hourlyCloud = locData.hourly.cloud_cover as number[];
+              const sunsetHourIdx = Math.min(18, hourlyCloud.length - 1);
+              allResults.push({
+                lat: batch[j].lat,
+                lng: batch[j].lng,
+                cloud_cover: hourlyCloud[sunsetHourIdx] ?? 0,
+              });
+            }
+          } catch (err) {
+            console.error("Open-Meteo cloud grid fetch error:", err);
+            batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
           }
-        } catch (err) {
-          console.error("Open-Meteo cloud grid fetch error:", err);
-          batch.forEach((p) => allResults.push({ ...p, cloud_cover: 0 }));
-        }
+        };
+
+        fetchPromises.push(fetchBatch(i / BATCH_SIZE));
       }
+
+      await Promise.allSettled(fetchPromises);
 
       // Cache
       cache.set(dateKey, { data: allResults, timestamp: Date.now() });
@@ -127,7 +130,7 @@ export const weatherRouter = router({
     .query(async ({ input }) => {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,cloud_cover,relative_humidity_2m,wind_speed_10m,visibility&timezone=auto`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
         if (!res.ok) {
           throw new Error(`Open-Meteo fetch failed: ${res.status}`);
         }

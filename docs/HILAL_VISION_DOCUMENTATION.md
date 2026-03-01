@@ -533,7 +533,7 @@ The tRPC router (`server/routers.ts`) exposes authentication and telemetry proce
 
 **Fail-Open Rate Limiting:** Global rate limiting is handled by Upstash utilizing a Redis store (5 requests per IP address). To prevent complete telemetry failure during Serverless cold starts or Redis degradation, the router implements a fail-open `LocalRateLimiter` using a native Node.js `Map` cache fallback.
 
-**API Timeout Protection:** External meteorological enrichment calls to Open-Meteo are strictly wrapped in a `Promise.race` with an `AbortController` (2000ms timeout). If the external weather API stalls, the mutation silently drops the weather enrichment and proceeds to save the core astronomical report, preventing Vercel function timeouts.
+**Strict API Timeout Protection & Concurrency:** To prevent standard Vercel 10s serverless function crashes (`FUNCTION_INVOCATION_FAILED`), all external HTTP calls (such as Open-Meteo weather and DEM fetches) enforce strict `AbortSignal.timeout(2000)` boundaries or the `fetchWithTimeout` wrapper. Furthermore, bulk internal grid generations are systematically executed concurrently via `Promise.allSettled()` rather than sequentially stalling the Node thread. If the external weather API stalls, the mutation silently drops the weather enrichment and proceeds to save the core astronomical report or return default values.
 
 All astronomical calculations are performed client-side. The telemetry endpoints store crowdsourced sighting data and automatically enrich reports with Open-Meteo weather data (cloud cover, surface pressure, aerosol optical depth).
 
