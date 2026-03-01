@@ -332,6 +332,8 @@ export default function HorizonPage() {
         <div className="relative flex-1 min-h-[50vh] lg:min-h-0">
           <canvas
             ref={canvasRef}
+            role="img"
+            aria-label="Horizon view showing sun and moon positions above the local horizon"
             className="absolute inset-0 w-full h-full"
             style={{ display: "block" }}
           />

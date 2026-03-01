@@ -97,7 +97,7 @@ function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
     ctx.lineWidth = 0.5;
   }, [year, month]);
 
-  return <canvas ref={canvasRef} className="w-full rounded-lg" style={{ height: "80px", imageRendering: "pixelated" }} />;
+  return <canvas ref={canvasRef} role="img" aria-label={`World visibility map for ${year} AH month ${month}`} className="w-full rounded-lg" style={{ height: "80px", imageRendering: "pixelated" }} />;
 }
 
 export default function ArchivePage() {
@@ -280,7 +280,13 @@ export default function ArchivePage() {
                         opacity: isLocked ? 0.4 : 1,
                       }}
                     >
-                      {y}{isLocked ? " 🔒" : ""}
+                      {y}
+                      {isLocked && (
+                        <>
+                          <span aria-hidden="true"> 🔒</span>
+                          <span className="sr-only"> (Pro required)</span>
+                        </>
+                      )}
                     </button>
                   );
                 })}

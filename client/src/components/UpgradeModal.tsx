@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useProTier } from "@/contexts/ProTierContext";
 import { X, Crown, Check, Sparkles, Globe, Cloud, Archive, Bell, Loader2, Clock, Wind } from "lucide-react";
+import { toast } from "sonner";
 
 const PRO_FEATURES = [
     { icon: Globe, label: "Interactive 3D Globe" },
@@ -17,9 +18,13 @@ const PLANS = [
     { id: "lifetime", label: "Lifetime", price: "$49.99", period: "once", savings: "Best Value" },
 ] as const;
 
+const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function UpgradeModal() {
     const { showUpgradeModal, setShowUpgradeModal, startCheckout, checkoutLoading, isPremium, isNative, getNativeOfferings, purchaseNativePackage } = useProTier();
     const [nativePackages, setNativePackages] = useState<any[]>([]);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (showUpgradeModal && isNative) {
@@ -30,6 +35,49 @@ export default function UpgradeModal() {
             });
         }
     }, [showUpgradeModal, isNative, getNativeOfferings]);
+
+    // Focus close button when modal opens
+    useEffect(() => {
+        if (showUpgradeModal) {
+            setTimeout(() => closeButtonRef.current?.focus(), 0);
+        }
+    }, [showUpgradeModal]);
+
+    // Escape key + focus trap
+    useEffect(() => {
+        if (!showUpgradeModal) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setShowUpgradeModal(false);
+                return;
+            }
+            if (e.key !== "Tab") return;
+
+            const modal = modalRef.current;
+            if (!modal) return;
+            const focusable = Array.from(modal.querySelectorAll<HTMLElement>(FOCUSABLE));
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [showUpgradeModal, setShowUpgradeModal]);
 
     if (!showUpgradeModal) return null;
 
@@ -47,7 +95,7 @@ export default function UpgradeModal() {
                 const success = await purchaseNativePackage(pkgToBuy);
                 if (success) setShowUpgradeModal(false);
             } else {
-                alert("This package is not currently available in the app store.");
+                toast.error("This package is not currently available in the app store.");
             }
         } else {
             // Web Stripe flow
@@ -61,30 +109,39 @@ export default function UpgradeModal() {
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={() => setShowUpgradeModal(false)}
+                aria-hidden="true"
             />
 
             {/* Modal */}
-            <div className="relative w-full max-w-lg rounded-3xl overflow-hidden
+            <div
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="upgrade-modal-title"
+                className="relative w-full max-w-lg rounded-3xl overflow-hidden
         border border-amber-400/20 shadow-2xl shadow-amber-900/20
-        bg-[var(--card)]">
+        bg-[var(--card)]"
+            >
 
                 {/* Header */}
                 <div className="relative px-8 pt-8 pb-6 text-center
           bg-gradient-to-b from-amber-500/10 to-transparent">
                     <button
+                        ref={closeButtonRef}
                         onClick={() => setShowUpgradeModal(false)}
+                        aria-label="Close upgrade modal"
                         className="absolute top-4 right-4 p-2 rounded-xl
               text-[var(--muted-foreground)] hover:text-[var(--foreground)]
               hover:bg-[var(--secondary)] transition-colors"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-5 h-5" aria-hidden="true" />
                     </button>
 
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl
             bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/30 mb-4">
-                        <Crown className="w-8 h-8 text-white" />
+                        <Crown className="w-8 h-8 text-white" aria-hidden="true" />
                     </div>
-                    <h2 className="text-2xl font-semibold text-[var(--foreground)] mb-1">
+                    <h2 id="upgrade-modal-title" className="text-2xl font-semibold text-[var(--foreground)] mb-1">
                         Hilal Vision <span className="text-amber-400">Pro</span>
                     </h2>
                     <p className="text-sm text-[var(--muted-foreground)]">
@@ -97,10 +154,10 @@ export default function UpgradeModal() {
                     {PRO_FEATURES.map(({ icon: Icon, label }) => (
                         <div key={label} className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center shrink-0">
-                                <Icon className="w-4 h-4 text-amber-400" />
+                                <Icon className="w-4 h-4 text-amber-400" aria-hidden="true" />
                             </div>
                             <span className="text-sm text-[var(--foreground)]">{label}</span>
-                            <Check className="w-4 h-4 text-emerald-400 ml-auto shrink-0" />
+                            <Check className="w-4 h-4 text-emerald-400 ml-auto shrink-0" aria-hidden="true" />
                         </div>
                     ))}
                 </div>
@@ -122,6 +179,7 @@ export default function UpgradeModal() {
                                 key={plan.id}
                                 onClick={() => handleSelectPlan(plan.id)}
                                 disabled={checkoutLoading || isPremium || (isNative && nativePackages.length === 0)}
+                                aria-label={`Select ${plan.label} plan at ${displayPrice} ${plan.period}${plan.savings ? ` — ${plan.savings}` : ""}`}
                                 className={`relative flex flex-col items-center gap-1 p-4 rounded-2xl border
                     transition-all duration-300 cursor-pointer group disabled:opacity-60 disabled:cursor-not-allowed
                     ${plan.id === "annual"
@@ -131,13 +189,13 @@ export default function UpgradeModal() {
                             >
                                 {plan.savings && (
                                     <span className="absolute -top-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold
-                      bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm">
+                      bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-sm" aria-hidden="true">
                                         {plan.savings}
                                     </span>
                                 )}
-                                <span className="text-xs text-[var(--muted-foreground)] font-medium">{plan.label}</span>
-                                <span className="text-xl font-bold text-[var(--foreground)]">{displayPrice}</span>
-                                <span className="text-[10px] text-[var(--muted-foreground)]">{plan.period}</span>
+                                <span className="text-xs text-[var(--muted-foreground)] font-medium" aria-hidden="true">{plan.label}</span>
+                                <span className="text-xl font-bold text-[var(--foreground)]" aria-hidden="true">{displayPrice}</span>
+                                <span className="text-[10px] text-[var(--muted-foreground)]" aria-hidden="true">{plan.period}</span>
                             </button>
                         );
                     })}
@@ -146,12 +204,12 @@ export default function UpgradeModal() {
                 <div className="px-8 pb-6 pt-2 text-center">
                     {checkoutLoading ? (
                         <div className="flex items-center justify-center gap-2 text-xs text-[var(--muted-foreground)]">
-                            <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+                            <Loader2 className="w-3 h-3 animate-spin text-amber-400" aria-hidden="true" />
                             <span>{isNative ? "Processing purchase…" : "Redirecting to checkout…"}</span>
                         </div>
                     ) : (
                         <div className="flex items-center justify-center gap-1.5 text-xs text-[var(--muted-foreground)]">
-                            <Sparkles className="w-3 h-3 text-amber-400" />
+                            <Sparkles className="w-3 h-3 text-amber-400" aria-hidden="true" />
                             <span>Sadaqah Jariyah · Secure checkout via {isNative ? "App Store / Google Play" : "Stripe"}</span>
                         </div>
                     )}

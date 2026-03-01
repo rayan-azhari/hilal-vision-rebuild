@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useUser, useClerk, useAuth } from "@clerk/clerk-react";
 import { Capacitor } from "@capacitor/core";
 import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
+import { toast } from "sonner";
 
 interface ProTierContextType {
     /** Whether the current user has an active Pro subscription (from Clerk metadata or RevenueCat) */
@@ -131,7 +132,7 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
             }
         } catch (err: any) {
             console.error("[ProTierContext] Checkout error:", err);
-            alert(`Could not start checkout: ${err.message ?? "Unknown error"}`);
+            toast.error(`Could not start checkout: ${err.message ?? "Unknown error"}`);
         } finally {
             setCheckoutLoading(false);
         }
@@ -163,7 +164,7 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
         } catch (err: any) {
             if (!err.userCancelled) {
                 console.error("[ProTierContext] Purchase error:", err);
-                alert(`Purchase failed: ${err.message}`);
+                toast.error(`Purchase failed: ${err.message}`);
             }
             return false;
         } finally {

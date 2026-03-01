@@ -24,6 +24,7 @@ import {
     PartyPopper,
 } from "lucide-react";
 import { useProTier } from "@/contexts/ProTierContext";
+import { toast } from "sonner";
 
 /* ─── Feature Access Matrix ────────────────────────────────────────────── */
 
@@ -109,7 +110,7 @@ export default function SupportPage() {
             if (pkgToBuy) {
                 await purchaseNativePackage(pkgToBuy);
             } else {
-                alert("This package is not currently available in the app store.");
+                toast.error("This package is not currently available in the app store.");
             }
         } else {
             startCheckout({ planId });

@@ -218,18 +218,27 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Language Switcher */}
-              <div className="relative">
+              <div
+                className="relative"
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setLangOpen(false);
+                }}
+              >
                 <button
                   className="p-1.5 rounded-lg transition-colors flex items-center gap-1"
                   style={{ color: "var(--muted-foreground)" }}
                   onClick={() => setLangOpen(!langOpen)}
                   aria-label="Change language"
+                  aria-haspopup="listbox"
+                  aria-expanded={langOpen}
                 >
                   <Languages className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase">{i18n.language}</span>
                 </button>
                 {langOpen && (
                   <div
+                    role="listbox"
+                    aria-label="Select language"
                     className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden shadow-xl z-[100]"
                     style={{
                       background: "var(--space-mid)",
@@ -237,15 +246,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       minWidth: "120px",
                     }}
                   >
-                    {LANG_OPTIONS.map(({ code, label }) => (
+                    {LANG_OPTIONS.map(({ code, label }, idx) => (
                       <button
                         key={code}
+                        role="option"
+                        aria-selected={i18n.language === code}
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/5"
                         style={{
                           color: i18n.language === code ? "var(--gold)" : "var(--foreground)",
                           background: i18n.language === code ? "color-mix(in oklch, var(--gold) 10%, transparent)" : "transparent",
                         }}
                         onClick={() => { i18n.changeLanguage(code); setLangOpen(false); }}
+                        onKeyDown={(e) => {
+                          if (e.key === "ArrowDown") {
+                            e.preventDefault();
+                            const next = (e.currentTarget.parentElement?.querySelectorAll("button") ?? [])[idx + 1] as HTMLButtonElement | undefined;
+                            next?.focus();
+                          } else if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            const prev = (e.currentTarget.parentElement?.querySelectorAll("button") ?? [])[idx - 1] as HTMLButtonElement | undefined;
+                            prev?.focus();
+                          }
+                        }}
                       >
                         <span className="font-bold">{label}</span>
                         <span style={{ color: "var(--muted-foreground)" }}>{t(`language.${code}`)}</span>

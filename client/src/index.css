@@ -230,7 +230,7 @@
     width: 100vw;
     height: 100vh;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 50;
     opacity: 0.03;
     /* Subdued, organic 0.05 max */
   }

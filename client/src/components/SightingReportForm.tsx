@@ -183,6 +183,9 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                         step="any"
                         placeholder="Latitude"
                         value={lat}
+                        aria-label="Latitude"
+                        aria-describedby={errors.lat || errors.lng ? "coords-error" : undefined}
+                        aria-invalid={!!(errors.lat || errors.lng)}
                         onChange={(e) => setLat(e.target.value === "" ? "" : Number(e.target.value))}
                     />
                     <Input
@@ -190,11 +193,14 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                         step="any"
                         placeholder="Longitude"
                         value={lng}
+                        aria-label="Longitude"
+                        aria-describedby={errors.lat || errors.lng ? "coords-error" : undefined}
+                        aria-invalid={!!(errors.lat || errors.lng)}
                         onChange={(e) => setLng(e.target.value === "" ? "" : Number(e.target.value))}
                     />
                 </div>
                 {(errors.lat || errors.lng) && (
-                    <p className="text-xs text-destructive">Coordinates are required</p>
+                    <p id="coords-error" role="alert" className="text-xs text-destructive">Coordinates are required</p>
                 )}
                 <AutoDetectButton onClick={geo.detect} loading={geo.loading} variant="inline" />
             </div>
@@ -203,18 +209,24 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 <Label>Observation Time (Local)</Label>
                 <Input
                     type="datetime-local"
+                    id="obs-time"
                     value={observationTime}
+                    aria-describedby={errors.observationTime ? "obs-time-error" : undefined}
+                    aria-invalid={!!errors.observationTime}
                     onChange={(e) => setObservationTime(e.target.value)}
                 />
                 {errors.observationTime && (
-                    <p className="text-xs text-destructive">{errors.observationTime}</p>
+                    <p id="obs-time-error" role="alert" className="text-xs text-destructive">{errors.observationTime}</p>
                 )}
             </div>
 
             <div className="space-y-2">
                 <Label>Observation Result</Label>
                 <Select onValueChange={(val: any) => { setVisualSuccess(val); setErrors(e => ({ ...e, visualSuccess: "" })); }}>
-                    <SelectTrigger>
+                    <SelectTrigger
+                        aria-describedby={errors.visualSuccess ? "visual-success-error" : undefined}
+                        aria-invalid={!!errors.visualSuccess}
+                    >
                         <SelectValue placeholder="Select outcome..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -224,7 +236,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                     </SelectContent>
                 </Select>
                 {errors.visualSuccess && (
-                    <p className="text-xs text-destructive">{errors.visualSuccess}</p>
+                    <p id="visual-success-error" role="alert" className="text-xs text-destructive">{errors.visualSuccess}</p>
                 )}
             </div>
 

@@ -274,10 +274,22 @@ export default function CalendarPage() {
                 const hasEvent = monthEvents.some(e => e.day === cell.day);
                 const isFriday = cell.greg?.getDay() === 5;
 
+                const gregLabel = cell.greg
+                  ? cell.greg.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                  : "";
+                const dayLabel = [
+                  `${cell.day} ${monthInfo?.en ?? ""} ${viewYear} AH`,
+                  gregLabel,
+                  isToday ? "today" : "",
+                  hasEvent ? "has Islamic event" : "",
+                ].filter(Boolean).join(", ");
+
                 return (
                   <button
                     key={i}
                     onClick={() => setSelectedDay(cell.day)}
+                    aria-label={dayLabel}
+                    aria-pressed={isSelected}
                     className="relative flex flex-col items-center py-2 rounded-xl transition-all duration-150 group"
                     style={{
                       background: isSelected
