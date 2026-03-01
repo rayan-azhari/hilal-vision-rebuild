@@ -138,7 +138,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-0.5 ml-2 mr-1">
             {navItems.map(({ href, label, icon: Icon }) => {
-              const active = routePath === href;
+              const active = routePath === href ||
+                (href === "/visibility" && (routePath === "/map" || routePath === "/globe"));
               return (
                 <Link key={href} href={href}>
                   <div

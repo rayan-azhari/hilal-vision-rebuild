@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { MAJOR_CITIES } from "@/lib/astronomy";
 import { GeoLocation } from "@/components/LocationSearch";
 
@@ -13,11 +13,48 @@ interface GlobalStateContextType {
 
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
 
+const LS_LOCATION = "hilal_location";
+const LS_CRITERION = "hilal_criterion";
+
+function loadLocation(): GeoLocation {
+    try {
+        const raw = localStorage.getItem(LS_LOCATION);
+        if (raw) return JSON.parse(raw) as GeoLocation;
+    } catch { /* ignore */ }
+    return MAJOR_CITIES[0];
+}
+
+function loadCriterion(): "yallop" | "odeh" {
+    const raw = localStorage.getItem(LS_CRITERION);
+    return raw === "odeh" ? "odeh" : "yallop";
+}
+
 export function GlobalStateProvider({ children }: { children: ReactNode }) {
-    // Default to Mecca and today initially
-    const [location, setLocation] = useState<GeoLocation>(MAJOR_CITIES[0]);
+    const [location, setLocationState] = useState<GeoLocation>(loadLocation);
     const [date, setDate] = useState<Date>(new Date());
-    const [visibilityCriterion, setVisibilityCriterion] = useState<"yallop" | "odeh">("yallop");
+    const [visibilityCriterion, setVisibilityCriterionState] = useState<"yallop" | "odeh">(loadCriterion);
+
+    const setLocation = (loc: GeoLocation) => {
+        setLocationState(loc);
+        try { localStorage.setItem(LS_LOCATION, JSON.stringify(loc)); } catch { /* ignore */ }
+    };
+
+    const setVisibilityCriterion = (criterion: "yallop" | "odeh") => {
+        setVisibilityCriterionState(criterion);
+        try { localStorage.setItem(LS_CRITERION, criterion); } catch { /* ignore */ }
+    };
+
+    // Keep date fresh when the day rolls over (e.g. browser left open overnight)
+    useEffect(() => {
+        const id = setInterval(() => {
+            const now = new Date();
+            setDate(prev => {
+                if (prev.toDateString() !== now.toDateString()) return now;
+                return prev;
+            });
+        }, 60_000);
+        return () => clearInterval(id);
+    }, []);
 
     return (
         <GlobalStateContext.Provider value={{

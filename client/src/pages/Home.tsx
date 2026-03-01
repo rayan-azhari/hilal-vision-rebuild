@@ -8,6 +8,7 @@ import { BreezyFullCard } from "@/components/BreezyFullCard";
 import { MoonArcVisual, VisibilityDotScale, IlluminationArc } from "@/components/BreezyVisuals";
 import { ShareButton } from "@/components/ShareButton";
 import { SightingFeed } from "@/components/SightingFeed";
+import { TonightCard } from "@/components/TonightCard";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const features = [
@@ -226,6 +227,15 @@ export default function Home() {
       </section>
 
 
+
+      {/* Tonight's Prediction */}
+      <section className="py-6 relative z-10">
+        <div className="container">
+          <div className="max-w-lg">
+            <TonightCard />
+          </div>
+        </div>
+      </section>
 
       {/* Feature Cards Navigation */}
       <section className="py-12 border-t mt-4" style={{ borderColor: 'var(--border)' }}>

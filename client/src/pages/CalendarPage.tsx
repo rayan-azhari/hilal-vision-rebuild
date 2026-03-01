@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { SEO } from "@/components/SEO";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { downloadHijriICS } from "@/lib/icsExport";
 import ProGate from "@/components/ProGate";
 import { useProTier } from "@/contexts/ProTierContext";
 import { PageHeader } from "@/components/PageHeader";
@@ -222,6 +223,19 @@ export default function CalendarPage() {
               {!isPremium && <ProGate featureName="Tabular Engine" inline>‎</ProGate>}
             </button>
           </div>
+          <button
+            onClick={() => downloadHijriICS(viewYear)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors hover:opacity-80"
+            style={{
+              background: "color-mix(in oklch, var(--gold) 10%, transparent)",
+              border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
+              color: "var(--gold)",
+            }}
+            title={`Download ${viewYear} AH Hijri calendar as .ics`}
+          >
+            <Download className="w-3 h-3" />
+            Add to Calendar
+          </button>
         </div>
       </PageHeader>
 

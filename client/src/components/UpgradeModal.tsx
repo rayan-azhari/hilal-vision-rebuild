@@ -132,6 +132,12 @@ export default function UpgradeModal() {
 
                 {/* Plans */}
                 <div className="px-8 py-5 grid grid-cols-3 gap-3">
+                    {isNative && nativePackages.length === 0 && (
+                        <div className="col-span-3 flex items-center justify-center gap-2 py-4 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                            <Loader2 className="w-4 h-4 animate-spin text-amber-400" aria-hidden="true" />
+                            <span>Loading store prices…</span>
+                        </div>
+                    )}
                     {PLANS.map((plan) => {
                         // For native, use the real localized price if available
                         let displayPrice = plan.price;

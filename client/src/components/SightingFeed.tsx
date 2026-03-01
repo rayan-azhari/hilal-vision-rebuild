@@ -1,8 +1,10 @@
 import { trpc } from "@/lib/trpc";
-import { Eye, MapPin, Clock, Bell, Download, Pause, Play } from "lucide-react";
+import { Eye, MapPin, Clock, Bell, Download, Pause, Play, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { requestNotificationPermission } from "@/lib/firebase";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { SightingReportForm } from "./SightingReportForm";
 
 const SIGHTING_COLORS: Record<string, string> = {
     positive: "#4ade80",
@@ -20,6 +22,7 @@ export function SightingFeed() {
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [showExportMenu, setShowExportMenu] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
+    const [reportOpen, setReportOpen] = useState(false);
     const [lastUpdated, setLastUpdated] = useState(() => new Date());
     const [secondsAgo, setSecondsAgo] = useState(0);
     const subscribeMutation = trpc.notifications.subscribe.useMutation({
@@ -140,28 +143,63 @@ export function SightingFeed() {
 
     if (!sightings || sightings.length === 0) {
         return (
-            <div className="breezy-card p-6 animate-breezy-enter">
-                <div className="flex items-center gap-2 mb-4">
-                    <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
-                    <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
-                        Live Sighting Feed
-                    </span>
-                    <button
-                        onClick={handleSubscribe}
-                        disabled={isSubscribing}
-                        className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-                        title="Enable Notifications"
-                    >
-                        <Bell className="w-4 h-4 text-white" />
-                    </button>
+            <>
+                <div className="breezy-card p-6 animate-breezy-enter">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
+                        <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
+                            Live Sighting Feed
+                        </span>
+                        <button
+                            onClick={handleSubscribe}
+                            disabled={isSubscribing}
+                            className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                            title="Enable Notifications"
+                        >
+                            <Bell className="w-4 h-4 text-white" />
+                        </button>
+                    </div>
+                    <div className="text-center py-8 flex flex-col items-center gap-4">
+                        <div
+                            className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+                            style={{ background: "color-mix(in oklch, var(--gold) 8%, transparent)", border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)" }}
+                        >
+                            ☽
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
+                                No reports yet tonight
+                            </p>
+                            <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                                Be the first observer to share what you see
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setReportOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-105"
+                            style={{
+                                background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                                color: "#fff",
+                            }}
+                        >
+                            <PlusCircle className="w-3.5 h-3.5" />
+                            Report a Sighting
+                        </button>
+                    </div>
                 </div>
-                <div className="text-center py-6">
-                    <div className="text-2xl mb-2">☽</div>
-                    <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                        No recent sighting reports. Be the first to report tonight!
-                    </p>
-                </div>
-            </div>
+
+                <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Submit Crescent Sighting</DialogTitle>
+                            <DialogDescription>
+                                Share your live observation. Environmental conditions will be fetched automatically.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <SightingReportForm onSuccess={() => setReportOpen(false)} />
+                    </DialogContent>
+                </Dialog>
+            </>
         );
     }
 
