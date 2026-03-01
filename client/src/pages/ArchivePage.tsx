@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SEO } from "@/components/SEO";
 import { Archive, ChevronLeft, ChevronRight, Info, Download } from "lucide-react";
 import { useProTier } from "@/contexts/ProTierContext";
@@ -63,39 +63,40 @@ import { trpc } from "@/lib/trpc";
 
 function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const workerRef = useRef<Worker | null>(null);
 
+  // Send computation to worker when year/month changes
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const W = canvas.width = 200;
-    const H = canvas.height = 100;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.fillStyle = "#0a0e1a";
-    ctx.fillRect(0, 0, W, H);
-
-    const date = hijriToGregorian(year, month, 1);
-    const resolution = 8;
-
-    for (let lat = -80; lat <= 80; lat += resolution) {
-      for (let lng = -180; lng <= 180; lng += resolution) {
-        const data = computeSunMoonAtSunset(date, { lat, lng });
-        const x = ((lng + 180) / 360) * W;
-        const y = ((90 - lat) / 180) * H;
-        const pw = (resolution / 360) * W + 1;
-        const ph = (resolution / 180) * H + 1;
-
-        ctx.fillStyle = ZONE_COLORS[data.visibility] + "99";
-        ctx.fillRect(x, y, pw, ph);
-      }
+    if (!workerRef.current) {
+      workerRef.current = new Worker(
+        new URL("../workers/archiveMiniMap.worker.ts", import.meta.url),
+        { type: "module" }
+      );
     }
 
-    // Simple continent outlines (very simplified)
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    ctx.lineWidth = 0.5;
+    const worker = workerRef.current;
+    const dateTs = hijriToGregorian(year, month, 1).getTime();
+    worker.postMessage({ dateTs });
+
+    worker.onmessage = (e: MessageEvent) => {
+      const { pixels, width, height } = e.data;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
+    };
   }, [year, month]);
+
+  // Terminate worker on unmount
+  useEffect(() => {
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
+  }, []);
 
   return <canvas ref={canvasRef} role="img" aria-label={`World visibility map for ${year} AH month ${month}`} className="w-full rounded-lg" style={{ height: "80px", imageRendering: "pixelated" }} />;
 }

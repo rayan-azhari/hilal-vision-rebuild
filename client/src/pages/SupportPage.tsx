@@ -24,7 +24,7 @@ import {
     PartyPopper,
 } from "lucide-react";
 import { useProTier } from "@/contexts/ProTierContext";
-import { toast } from "sonner";
+import { usePlanSelection } from "@/hooks/usePlanSelection";
 
 /* ─── Feature Access Matrix ────────────────────────────────────────────── */
 
@@ -86,36 +86,9 @@ const PLANS = [
 /* ─── Page ─────────────────────────────────────────────────────────────── */
 
 export default function SupportPage() {
-    const { isPremium, setShowUpgradeModal, startCheckout, checkoutLoading, isNative, getNativeOfferings, purchaseNativePackage } = useProTier();
+    const { isPremium, setShowUpgradeModal, startCheckout, checkoutLoading, isNative } = useProTier();
+    const { nativePackages, handleSelectPlan } = usePlanSelection();
     const [location] = useLocation();
-    const [nativePackages, setNativePackages] = useState<any[]>([]);
-
-    useEffect(() => {
-        if (isNative) {
-            getNativeOfferings().then((offerings) => {
-                if (offerings && offerings.availablePackages) {
-                    setNativePackages(offerings.availablePackages);
-                }
-            });
-        }
-    }, [isNative, getNativeOfferings]);
-
-    const handleSelectPlan = async (planId: string) => {
-        if (isNative) {
-            let pkgToBuy = nativePackages.find(p => p.identifier.toLowerCase().includes(planId));
-            if (!pkgToBuy && nativePackages.length > 0) {
-                const map: Record<string, string> = { monthly: "MONTHLY", annual: "ANNUAL", lifetime: "LIFETIME" };
-                pkgToBuy = nativePackages.find(p => p.packageType === map[planId]);
-            }
-            if (pkgToBuy) {
-                await purchaseNativePackage(pkgToBuy);
-            } else {
-                toast.error("This package is not currently available in the app store.");
-            }
-        } else {
-            startCheckout({ planId });
-        }
-    };
 
     // Parse success / cancel from Stripe redirect query params
     const params = new URLSearchParams(window.location.search);

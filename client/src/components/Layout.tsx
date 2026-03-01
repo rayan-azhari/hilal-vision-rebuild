@@ -300,7 +300,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   color: isPremium ? "var(--gold)" : "var(--muted-foreground)",
                 }}
                 onClick={() => isPremium ? togglePremium() : setShowUpgradeModal(true)}
-                title={isPremium ? "Pro Active (click to toggle for testing)" : "Upgrade to Pro"}
+                title={isPremium ? "Hilal Vision Pro" : "Upgrade to Pro"}
               >
                 <Crown className="w-3.5 h-3.5" />
                 <span>{isPremium ? "Pro" : "Upgrade"}</span>

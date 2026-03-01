@@ -116,8 +116,6 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
                 body: JSON.stringify({
                     planId: opts.planId,
                     donationAmount: opts.donationAmount,
-                    userId: user?.id ?? undefined,
-                    userEmail: user?.primaryEmailAddress?.emailAddress ?? undefined,
                 }),
             });
 

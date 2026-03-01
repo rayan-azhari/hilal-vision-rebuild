@@ -273,11 +273,6 @@ export default function HorizonPage() {
   const elevation = demQuery.data?.elevation ?? 0;
   const dipDeg = (1.76 * Math.sqrt(elevation)) / 60; // arcmin → degrees
 
-  // Set document title
-  useEffect(() => {
-    // document.title managed by <SEO> component
-  }, [loc.name]);
-
   useEffect(() => {
     const d = computeSunMoonAtSunset(date, { ...loc, elevation });
     setData(d);

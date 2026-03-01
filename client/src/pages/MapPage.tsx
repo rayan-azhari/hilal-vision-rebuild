@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
+import { useAtmosphericData } from "@/hooks/useAtmosphericData";
 import { BestTimeCard } from "@/components/BestTimeCard";
 import ProGate from "@/components/ProGate";
 import { useProTier } from "@/contexts/ProTierContext";
@@ -75,10 +76,12 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   const [showClouds, setShowClouds] = useState(false);
 
   // Atmospheric Overrides
-  const [tempOverride, setTempOverride] = useState<number | "">("");
-  const [pressureOverride, setPressureOverride] = useState<number | "">("");
-  const [elevationOverride, setElevationOverride] = useState<number | "">("");
-  const [autoFetchWeather, setAutoFetchWeather] = useState(true);
+  const {
+    tempOverride, setTempOverride,
+    pressureOverride, setPressureOverride,
+    elevationOverride, setElevationOverride,
+    autoFetchWeather, setAutoFetchWeather,
+  } = useAtmosphericData(selectedCity);
 
   const [moonData, setMoonData] = useState(() =>
     computeSunMoonAtSunset(new Date(), MAJOR_CITIES[0])
@@ -100,32 +103,6 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   useEffect(() => {
     effectiveDateRef.current = effectiveDate;
   }, [effectiveDate]);
-
-  // Auto-fetch real-time atmospheric data from Open-Meteo
-  useEffect(() => {
-    if (!autoFetchWeather) return;
-
-    let isMounted = true;
-    const fetchWeather = async () => {
-      try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.lat}&longitude=${selectedCity.lng}&current=temperature_2m,surface_pressure&elevation=nan`);
-        if (!res.ok) throw new Error("Weather fetch failed");
-        const data = await res.json();
-
-        if (isMounted) {
-          if (data.current?.temperature_2m !== undefined) setTempOverride(data.current.temperature_2m);
-          if (data.current?.surface_pressure !== undefined) setPressureOverride(data.current.surface_pressure);
-          if (data.elevation !== undefined && !isNaN(data.elevation)) setElevationOverride(data.elevation);
-        }
-      } catch (err) {
-        console.error("Failed to fetch atmospheric overrides from Open-Meteo:", err);
-      }
-    };
-
-    fetchWeather();
-
-    return () => { isMounted = false; };
-  }, [selectedCity, autoFetchWeather]);
 
   // Initialize Leaflet map
   useEffect(() => {

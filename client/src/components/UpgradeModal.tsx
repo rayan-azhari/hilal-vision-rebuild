@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useProTier } from "@/contexts/ProTierContext";
 import { X, Crown, Check, Sparkles, Globe, Cloud, Archive, Bell, Loader2, Clock, Wind } from "lucide-react";
-import { toast } from "sonner";
+import { usePlanSelection } from "@/hooks/usePlanSelection";
 
 const PRO_FEATURES = [
     { icon: Globe, label: "Interactive 3D Globe" },
@@ -13,28 +13,18 @@ const PRO_FEATURES = [
 ];
 
 const PLANS = [
-    { id: "monthly", label: "Monthly", price: "$2.99", period: "/mo", savings: null },
+    { id: "monthly", label: "Monthly", price: "$2.99", period: "/mo", savings: null as string | null },
     { id: "annual", label: "Annual", price: "$14.99", period: "/yr", savings: "Save 58%" },
     { id: "lifetime", label: "Lifetime", price: "$49.99", period: "once", savings: "Best Value" },
-] as const;
+];
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export default function UpgradeModal() {
-    const { showUpgradeModal, setShowUpgradeModal, startCheckout, checkoutLoading, isPremium, isNative, getNativeOfferings, purchaseNativePackage } = useProTier();
-    const [nativePackages, setNativePackages] = useState<any[]>([]);
+    const { showUpgradeModal, setShowUpgradeModal, checkoutLoading, isPremium, isNative } = useProTier();
+    const { nativePackages, handleSelectPlan } = usePlanSelection(() => setShowUpgradeModal(false));
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (showUpgradeModal && isNative) {
-            getNativeOfferings().then((offerings) => {
-                if (offerings && offerings.availablePackages) {
-                    setNativePackages(offerings.availablePackages);
-                }
-            });
-        }
-    }, [showUpgradeModal, isNative, getNativeOfferings]);
 
     // Focus close button when modal opens
     useEffect(() => {
@@ -80,28 +70,6 @@ export default function UpgradeModal() {
     }, [showUpgradeModal, setShowUpgradeModal]);
 
     if (!showUpgradeModal) return null;
-
-    const handleSelectPlan = async (planId: string) => {
-        if (isNative) {
-            // Find the RevenueCat package that matches our standard plan IDs
-            let pkgToBuy = nativePackages.find(p => p.identifier.toLowerCase().includes(planId));
-            if (!pkgToBuy && nativePackages.length > 0) {
-                // Fallback map if identifiers differ
-                const map: Record<string, string> = { monthly: "MONTHLY", annual: "ANNUAL", lifetime: "LIFETIME" };
-                pkgToBuy = nativePackages.find(p => p.packageType === map[planId]);
-            }
-
-            if (pkgToBuy) {
-                const success = await purchaseNativePackage(pkgToBuy);
-                if (success) setShowUpgradeModal(false);
-            } else {
-                toast.error("This package is not currently available in the app store.");
-            }
-        } else {
-            // Web Stripe flow
-            startCheckout({ planId });
-        }
-    };
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
