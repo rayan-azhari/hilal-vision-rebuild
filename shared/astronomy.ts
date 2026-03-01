@@ -8,7 +8,7 @@
  * client/src/lib/astronomy.ts which re-exports everything from here.
  *
  * Implements Yallop (1997) and Odeh (2004) crescent visibility criteria.
- * Uses SunCalc for sun/moon positions and adds Islamic-specific calculations.
+ * Uses astronomy-engine (VSOP87/ELP2000) for sun/moon positions and adds Islamic-specific calculations.
  */
 
 import * as Astronomy from "astronomy-engine";
@@ -44,7 +44,7 @@ export interface SunMoonData {
     moonset: Date | null;
     sunset: Date | null;
     sunrise: Date | null;
-    maghrib: Date | null; // ~18 min after sunset
+    maghrib: Date | null; // equals sunset (Maghrib begins at sunset)
 }
 
 export interface CrescentWidth {
@@ -245,17 +245,28 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
     const dipArcmin = loc.elevation ? 1.76 * Math.sqrt(loc.elevation) : 0;
     const dipDeg = dipArcmin / 60;
 
-    // Calculate atmospheric refraction adjustment if temperature and pressure are provided
-    let refractionDelta = 0;
+    // Atmospheric refraction P/T correction.
+    // Astronomy.Horizon("normal") already applies standard refraction (P=1010 hPa, T=10°C).
+    // This computes the delta for non-standard conditions using the altitude-dependent
+    // Bennett (1982) formula: R = 1.02 / tan((h + 10.3/(h+5.11)) × π/180) arcminutes.
+    const computeRefractionDelta = (altDeg: number, pressure: number, temperature: number): number => {
+        const h = Math.max(altDeg, 0.21); // clamp to avoid formula instability near/below horizon
+        const R_bennett = 1.02 / Math.tan(((h + 10.3 / (h + 5.11)) * Math.PI) / 180); // arcmin
+        const R_std = R_bennett / 60; // degrees, standard conditions
+        const R_true = R_std * (pressure / 1010) * (283 / (273 + temperature));
+        return R_true - R_std;
+    };
+
+    let sunRefractionDelta = 0;
+    let moonRefractionDelta = 0;
     if (loc.temperature !== undefined && loc.pressure !== undefined) {
-        const R_std = 34 / 60; // degrees
-        const R_true = R_std * (loc.pressure / 1010) * (283 / (273 + loc.temperature));
-        refractionDelta = R_true - R_std;
+        sunRefractionDelta = computeRefractionDelta(hcSun.altitude, loc.pressure, loc.temperature);
+        moonRefractionDelta = computeRefractionDelta(hcMoon.altitude, loc.pressure, loc.temperature);
     }
 
-    const sunAlt = hcSun.altitude + dipDeg + refractionDelta;
+    const sunAlt = hcSun.altitude + dipDeg + sunRefractionDelta;
     const sunAz = hcSun.azimuth;
-    const moonAlt = hcMoon.altitude + dipDeg + refractionDelta;
+    const moonAlt = hcMoon.altitude + dipDeg + moonRefractionDelta;
     const moonAz = hcMoon.azimuth;
 
     // Elongation: True angular separation
@@ -278,9 +289,10 @@ export function computeSunMoonAtSunset(date: Date, loc: Location): SunMoonData {
     const phaseDeg = Astronomy.MoonPhase(calcTime);
     // Phase 0..1 representation for compatibility
     const phaseNormal = phaseDeg / 360;
-    const moonAge = phaseNormal * 29.53 * 24; // hours
+    const moonAge = phaseNormal * 29.53058867 * 24; // hours
 
-    const maghrib = sunset ? new Date(sunset.getTime() + 18 * 60 * 1000) : null;
+    // Maghrib = sunset (Islamic jurisprudence: Maghrib begins at sunset)
+    const maghrib = sunset;
 
     return {
         sunAlt,
@@ -316,9 +328,9 @@ export function generateVisibilityGrid(
 ): Array<{ lat: number; lng: number; zone: VisibilityZone; q: number; v?: number }> {
     const results: Array<{ lat: number; lng: number; zone: VisibilityZone; q: number; v?: number }> = [];
 
-    // Latitude clamped to ±80° — SunCalc accuracy degrades significantly at extreme
-    // latitudes (polar twilight zones where sun may not set). Observers above 80°N/S
-    // should use a dedicated polar-region visibility tool.
+    // Latitude clamped to ±80° — polar twilight zones where the sun may not set
+    // produce undefined sunset times. Observers above 80°N/S should use a dedicated
+    // polar-region visibility tool.
     for (let lat = -80; lat <= 80; lat += resolution) {
         for (let lng = -180; lng <= 180; lng += resolution) {
             const data = computeSunMoonAtSunset(date, { lat, lng });
@@ -750,25 +762,23 @@ export function formatTime(date: Date | null): string {
 export type LunarEclipseType = "none" | "penumbral" | "partial" | "total";
 
 /**
- * Approximate whether a given full moon date will have a lunar eclipse.
- * Uses Moon's ecliptic latitude derived from the node regression cycle.
- *
- * Accuracy: ±1 eclipse type step for eclipses within ~5 years of J2000.
- * Good enough for notification purposes; not a substitute for a full ephemeris.
+ * Determine whether a given full moon date will have a lunar eclipse.
+ * Delegates to astronomy-engine's SearchLunarEclipse which uses the full
+ * ELP2000 lunar model — far more accurate than node-regression approximations.
  */
 export function predictLunarEclipse(fullMoonDate: Date): LunarEclipseType {
-    const J2000_MS = Date.UTC(2000, 0, 1, 12, 0, 0);
-    const D = (fullMoonDate.getTime() - J2000_MS) / 86400000;
-    // Longitude of the ascending node
-    const N = ((125.04 - 0.0529539 * D) % 360 + 360) % 360;
-    // Moon's mean anomaly (mean longitude measured from perigee)
-    const M_moon = ((134.963 + 13.064993 * D) % 360 + 360) % 360;
-    // Moon's ecliptic latitude β ≈ 5.145° × sin(M - N)
-    const moonLat = 5.145 * Math.sin(((M_moon - N) * Math.PI) / 180);
-    const absLat = Math.abs(moonLat);
-    if (absLat < 0.5) return "total";
-    if (absLat < 0.9) return "partial";
-    if (absLat < 1.5) return "penumbral";
+    // Search from 2 days before the full moon to find any eclipse at this full moon.
+    const searchStart = new Date(fullMoonDate.getTime() - 2 * 86400000);
+    const eclipse = Astronomy.SearchLunarEclipse(searchStart);
+
+    // If the found eclipse peak is more than 2 days away, this full moon has no eclipse.
+    if (Math.abs(eclipse.peak.date.getTime() - fullMoonDate.getTime()) > 2 * 86400000) {
+        return "none";
+    }
+
+    if (eclipse.kind === Astronomy.EclipseKind.Total) return "total";
+    if (eclipse.kind === Astronomy.EclipseKind.Partial) return "partial";
+    if (eclipse.kind === Astronomy.EclipseKind.Penumbral) return "penumbral";
     return "none";
 }
 

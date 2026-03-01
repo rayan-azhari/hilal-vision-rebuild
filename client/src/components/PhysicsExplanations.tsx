@@ -152,7 +152,7 @@ export function PhysicsExplanations() {
                 <BreezyFullCard title="Atmospheric Refraction & Altitude" icon={<Sparkles />}>
                     <div className="p-4 space-y-4 text-sm" style={{ color: "var(--muted-foreground)" }}>
                         <p>
-                            Our geometry computations utilizing <em>SunCalc</em> account for standard atmospheric refraction-which "lifts" objects above the true horizon.
+                            Our geometry computations via <em>astronomy-engine</em> (VSOP87/ELP2000) account for standard atmospheric refraction — which "lifts" objects above the true horizon.
                         </p>
                         <p>
                             True Altitude (H_true) is calculated geometrically relative to the center of the Earth. Refracted Altitude (H_app) factors in the bending of light through the Earth's atmosphere, which is largest precisely when viewing objects like the Hilal hugging the horizon.

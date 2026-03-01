@@ -67,7 +67,7 @@ export async function visibilityHandler(req: any, res: any) {
             return res.status(400).json({ error: "Invalid date format" });
         }
 
-        // SunCalc accuracy degrades significantly outside 1900-2100; reject extreme dates
+        // Reject extreme dates — polar and deep-past/future edge cases are unsupported
         const FIFTY_YEARS_MS = 50 * 365.25 * 24 * 3600 * 1000;
         if (Math.abs(date.getTime() - Date.now()) > FIFTY_YEARS_MS) {
             return res.status(400).json({ error: "Date out of supported range (±50 years from today)" });

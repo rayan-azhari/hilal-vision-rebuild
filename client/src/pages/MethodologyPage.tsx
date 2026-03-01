@@ -689,7 +689,7 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
                             {
                                 author: "Meeus, J. (1998)",
                                 title: "Astronomical Algorithms, 2nd Edition",
-                                pub: "Willmann-Bell - Foundation for SunCalc position algorithms",
+                                pub: "Willmann-Bell - Foundational reference for astronomical algorithms",
                                 href: "https://www.willbell.com/math/mc1.htm",
                             },
                             {

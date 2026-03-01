@@ -11,8 +11,8 @@ A full multi-disciplinary audit was conducted across the entire Hilal Vision wor
 
 ---
 
-## Phase 1 — Critical Security Fixes
-**Priority: IMMEDIATE | Effort: 1-2 days**
+## Phase 1 — Critical Security Fixes ✅
+**Priority: IMMEDIATE | Effort: 1-2 days | Status: COMPLETE (commit f66a39c)**
 
 ### 1a. Delete on-disk Firebase credential files
 Two live service account JSON files exist at project root (not in git, but on disk):
@@ -45,31 +45,51 @@ Two parallel admin systems exist: `ownerOpenId` env var (tRPC `adminProcedure`) 
 
 ---
 
-## Phase 2 — Scientific Accuracy Fixes
+## Phase 2 — Scientific Accuracy & SunCalc Cleanup
 **Priority: HIGH | Effort: 1 day**
-**File:** `shared/astronomy.ts` (all items)
+**Primary file:** `shared/astronomy.ts`
+
+> **Note (Round 41 update):** The project migrated from SunCalc to `astronomy-engine` (VSOP87/ELP2000-based) in commit `473525d`. This resolved the core position-engine accuracy limitations (item 2e — `findNextPhase` search depth — is now handled by `Astronomy.SearchMoonPhase()` with a 35-day window). However, **4 derived-calculation bugs remain unfixed** and stale SunCalc references appear in code comments and user-facing UI.
 
 ### 2a. Fix eclipse prediction algorithm (CRITICAL)
-`predictLunarEclipse()` uses `M_moon - N` instead of the argument of latitude `F`. Thresholds are also incorrect:
+`predictLunarEclipse()` (line ~759) still uses hand-rolled node regression with `M_moon - N` instead of the argument of latitude `F`. Thresholds are also wrong:
 - Current: total < 0.5°, partial < 0.9°, penumbral < 1.5°
 - Correct: total < 0.47°, partial < 0.99°, penumbral < 1.54°
 
-Replace with proper `F = (93.272 + 13.229350 * D) % 360` and corrected geometric thresholds. This function drives push notifications — false alerts damage user trust.
+**Fix:** Replace with `Astronomy.SearchLunarEclipse()` from astronomy-engine — uses the full ELP2000 model and returns typed eclipse results (`total`, `partial`, `penumbral`), eliminating the hand-rolled approximation entirely.
+**File:** `shared/astronomy.ts`
+**Impact:** Drives push notifications via `api/cron/moonAlerts.ts` — false alerts damage user trust.
 
 ### 2b. Fix atmospheric refraction model
-Currently applies fixed 34 arcmin (horizon value) to all altitudes. At 10° altitude, true refraction is only ~5 arcmin. Replace with Bennett/Saemundsson formula: `R = 1.02 / tan(h + 10.3/(h + 5.11))` arcminutes, then apply P/T correction.
+Lines ~248–253 apply a fixed 34 arcmin baseline (horizon-only value) then adjust for P/T. At 10° altitude, true refraction is ~5 arcmin not 34. Note: `Astronomy.Horizon()` with `"normal"` mode already handles standard refraction internally; the `refractionDelta` block should compute the altitude-dependent Bennett formula `R = 1.02 / tan(h + 10.3/(h + 5.11))` arcmin, then apply the P/T correction to *that* value, not to a flat 34'.
+**File:** `shared/astronomy.ts`
 
 ### 2c. Fix Maghrib calculation
-Line 285 adds 18 minutes to sunset — Maghrib in Islamic jurisprudence IS sunset (±1-2 min). The 18-min value likely conflates with Isha twilight depression. Remove the addition or relabel as "Observation Window Start."
+Line ~283: `new Date(sunset.getTime() + 18 * 60 * 1000)`. Maghrib in Islamic jurisprudence IS sunset — the +18 min conflates with Isha twilight.
+**Decision:** Remove the +18min offset entirely — set `maghrib = sunset`.
+**File:** `shared/astronomy.ts`
 
 ### 2d. Use precise synodic month constant
-`moonAge` uses `29.53` — should be `29.53058867` (already used elsewhere in the same file). ~45-second cumulative error per month.
+Line ~281 in `computeSunMoonAtSunset()`: `moonAge = phaseNormal * 29.53 * 24`. Should be `29.53058867` (already used correctly in `getMoonPhaseInfo()` and `SYNODIC_MS` in the same file). ~45-second cumulative error per month.
+**File:** `shared/astronomy.ts`
 
-### 2e. Extend findNextPhase search depth
-35 iterations × 12h = 17.5 days — may miss next new moon. Increase to 70 iterations (35 days).
+### ~~2e. Extend findNextPhase search depth~~ — RESOLVED
+Replaced by astronomy-engine's `Astronomy.SearchMoonPhase(..., 35)` with 35-day window — sufficient for a full synodic month.
 
-### 2f. Add unit tests for corrected algorithms
-Test eclipse prediction against known dates (Jan 21, 2019 total; Jul 16, 2019 partial; non-eclipse full moons). Test refraction at 0° (~34') and 10° (~5.3').
+### 2f. Clean up stale SunCalc references
+SunCalc has been removed as a dependency but stale text remains in 7 files:
+- `shared/astronomy.ts` line ~11 — JSDoc header: *"Uses SunCalc for sun/moon positions"*
+- `shared/astronomy.ts` line ~319 — code comment about SunCalc accuracy
+- `server/publicApi.ts` lines ~70,73 — code comment + error message mentioning SunCalc
+- `client/src/pages/AboutPage.tsx` lines ~43,65,90,92 — UI credit listing SunCalc + link to SunCalc repo
+- `client/src/pages/TermsPage.tsx` line ~129 — legal text referencing SunCalc
+- `client/src/components/PhysicsExplanations.tsx` line ~155 — UI text about SunCalc
+- `client/src/pages/MethodologyPage.tsx` line ~692 — citation referencing SunCalc
+
+**Fix:** Replace all with `astronomy-engine` / VSOP87 / ELP2000 as appropriate. User-facing pages should credit `astronomy-engine` with correct GitHub link.
+
+### 2g. Add unit tests for corrected algorithms
+Test eclipse prediction against known dates (Jan 21, 2019 total; Jul 16, 2019 partial; non-eclipse full moons). Test refraction at 0° (~34') and 10° (~5.3'). Test moonAge precision.
 
 ---
 
@@ -132,7 +152,7 @@ Open-Meteo atmospheric data fetch duplicated in `MapPage.tsx` and `GlobePage.tsx
 ### 4g. Remove dead code
 - Empty `useEffect` in `HorizonPage.tsx`
 - Dead `userId`/`userEmail` fields in checkout body (`ProTierContext.tsx`)
-- Dead `findLastNewMoon()` function in `shared/astronomy.ts`
+- ~~Dead `findLastNewMoon()` function in `shared/astronomy.ts`~~ — already removed in astronomy-engine migration
 - `togglePremium` debug tooltip in nav (title attribute exposes testing intent to users)
 
 ---
@@ -270,5 +290,5 @@ After each phase:
 5. `pnpm test:e2e` — E2E navigation tests pass
 6. Manual smoke test on localhost: Home → Visibility → Moon → Calendar → Archive → Horizon → Support → 404
 7. After Phase 1: verify rate limiting with curl (spoofed vs real IP)
-8. After Phase 2: verify eclipse prediction against NASA eclipse catalog
+8. After Phase 2: verify eclipse prediction against NASA eclipse catalog; confirm no remaining `suncalc` text in codebase search
 9. After Phase 3: keyboard-only navigation test through modal flow

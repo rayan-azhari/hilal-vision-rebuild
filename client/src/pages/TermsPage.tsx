@@ -126,7 +126,7 @@ export default function TermsPage() {
                 <Heading>5. Accuracy Disclaimer</Heading>
                 <Para>
                     Hilal Vision provides mathematical predictions based on established astronomical algorithms
-                    (Yallop 1997, Odeh 2004, SunCalc). While we strive for accuracy, we make no warranties -
+                    (Yallop 1997, Odeh 2004, astronomy-engine VSOP87/ELP2000). While we strive for accuracy, we make no warranties -
                     express or implied - regarding the correctness, completeness, or fitness for any particular
                     purpose of any prediction, calendar date, or sighting data.
                 </Para>

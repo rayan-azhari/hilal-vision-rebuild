@@ -40,7 +40,7 @@ const TOOLS = [
         href: "/calendar",
         icon: Calendar,
         title: "Hijri Calendar",
-        desc: "Triple-engine calendar supporting Astronomical (SunCalc), Umm al-Qura (KACST), and Tabular algorithms. Includes a 'Compare to Heavens' divergence overlay.",
+        desc: "Triple-engine calendar supporting Astronomical (astronomy-engine), Umm al-Qura (KACST), and Tabular algorithms. Includes a 'Compare to Heavens' divergence overlay.",
         color: "#c084fc",
     },
     {
@@ -62,7 +62,7 @@ const TOOLS = [
 const TECH = [
     { icon: Globe, label: "React 19 + Vite 7", desc: "Frontend framework and build tool" },
     { icon: Map, label: "Leaflet + Globe.gl", desc: "2D map and 3D WebGL globe" },
-    { icon: FlaskConical, label: "SunCalc", desc: "Sun & moon position algorithms (Jean Meeus)" },
+    { icon: FlaskConical, label: "astronomy-engine", desc: "VSOP87/ELP2000 sun & moon position algorithms (Don Cross)" },
     { icon: Database, label: "tRPC + Express + MySQL", desc: "Type-safe API and database layer (Drizzle ORM)" },
     { icon: Shield, label: "Clerk + Upstash Redis", desc: "Authentication and rate limiting" },
     { icon: Smartphone, label: "Capacitor.js", desc: "Native iOS & Android packaging" },
@@ -87,9 +87,9 @@ const CREDITS = [
         href: "https://astronomycenter.net/icop.html?l=en",
     },
     {
-        title: "SunCalc by Vladimir Agafonkin",
-        desc: "JavaScript library implementing Jean Meeus's astronomical algorithms for sun and moon positions.",
-        href: "https://github.com/mourner/suncalc",
+        title: "astronomy-engine by Don Cross",
+        desc: "High-precision VSOP87/ELP2000 planetary and lunar position library for JavaScript.",
+        href: "https://github.com/cosinekitty/astronomy",
     },
     {
         title: "Umm al-Qura Calendar (@umalqura/core)",
