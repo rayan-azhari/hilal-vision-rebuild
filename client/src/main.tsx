@@ -22,7 +22,19 @@ const API_BASE = Capacitor.isNativePlatform()
   ? "https://moon-dashboard-one.vercel.app"
   : "";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => {
+        // Retry transient server errors (non-JSON 500s) up to 2 times
+        if (error instanceof TRPCClientError && error.message.includes("is not valid JSON")) {
+          return failureCount < 2;
+        }
+        return false;
+      },
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
@@ -35,11 +47,18 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   window.location.href = getLoginUrl();
 };
 
+const isTransientServerError = (err: unknown) =>
+  err instanceof TRPCClientError && (
+    err.message.includes("is not valid JSON") ||
+    err.message.includes("Server error") ||
+    err.message.includes("INTERNAL_SERVER_ERROR")
+  );
+
 queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
-    Sentry.captureException(error);
+    if (!isTransientServerError(error)) Sentry.captureException(error);
     console.error("[API Query Error]", error);
   }
 });
@@ -58,8 +77,8 @@ const trpcClient = trpc.createClient({
     httpBatchLink({
       url: `${API_BASE}/api/trpc`,
       transformer: superjson,
-      fetch(input, init) {
-        return globalThis.fetch(input, {
+      async fetch(input, init) {
+        const res = await globalThis.fetch(input, {
           ...(init ?? {}),
           // Native WebView origin is https://localhost, which is cross-origin vs the
           // Vercel API. "include" + "Allow-Origin: *" is a CORS violation that causes
@@ -67,6 +86,29 @@ const trpcClient = trpc.createClient({
           // through Clerk tokens/headers, not browser cookies, so "omit" is correct.
           credentials: Capacitor.isNativePlatform() ? "omit" : "include",
         });
+
+        // Vercel sometimes returns plain text error pages (e.g. "A server error
+        // occurred") when the serverless function crashes on cold start. Wrap
+        // these in a JSON error response so the tRPC client doesn't choke on
+        // invalid JSON parsing.
+        const ct = res.headers.get("content-type") ?? "";
+        if (!res.ok && !ct.includes("application/json")) {
+          const text = await res.text();
+          return new Response(
+            JSON.stringify([{
+              error: {
+                json: {
+                  message: text || "Server error",
+                  code: -32603,
+                  data: { code: "INTERNAL_SERVER_ERROR", httpStatus: res.status, path: null },
+                },
+              },
+            }]),
+            { status: res.status, headers: { "content-type": "application/json" } },
+          );
+        }
+
+        return res;
       },
     }),
   ],

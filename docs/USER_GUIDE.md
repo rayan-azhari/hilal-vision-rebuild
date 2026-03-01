@@ -10,6 +10,7 @@ The top navigation bar provides access to all views and includes:
 - **Theme Toggle** (Light/Dark mode)
 - **Report Sighting** button (golden `+` icon) - Submit crowdsourced telemetry and earn Observer Badges (Novice to Master).
 - **Account Settings** / Sign In (Clerk authentication)
+- **Persistent Date/Location Chip** — A small indicator below the header shows your currently selected city and date on all pages (except the Home page), so you always know your active context.
 
 ---
 
@@ -76,12 +77,14 @@ A dedicated dashboard for the lunar cycle.
 
 - Highlights significant upcoming events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid).
 - Each day shows a small moon phase icon.
+- **Crescent Country List** — A sidebar panel shows which countries can see the new crescent on the 29th night of the displayed Hijri month, grouped by visibility zone (A–F). Zones A and B are expanded by default. Uses the currently selected criterion (Yallop or Odeh).
 
 ## 5. Horizon View (`/horizon`)
 
 - Input your city and see exactly where the moon sits on the horizon relative to the setting sun.
 - **Detect My Location** button uses the browser Geolocation API to auto-fill your GPS coordinates, with reverse-geocoding via Nominatim to display a human-readable location name.
 - Custom latitude/longitude input for precise positioning.
+- Responsive canvas rendering automatically scales text and visuals for mobile screens.
 
 ## 6. Archive (`/archive`)
 

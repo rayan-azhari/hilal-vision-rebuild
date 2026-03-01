@@ -186,7 +186,7 @@ export default function Home() {
                   border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
                 }}
               >
-                <Moon className="w-4 h-4" />
+                <Moon className="w-4 h-4" style={{ color: "#facc15", filter: "drop-shadow(0 0 6px #facc15)" }} />
                 Moon Phases
               </Link>
             </div>

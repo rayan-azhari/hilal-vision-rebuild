@@ -335,7 +335,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
           <div
             ref={globeRef}
             className="absolute inset-0 transition-opacity duration-[2000ms] ease-[cubic-bezier(0.2,0.8,0.2,1)]"
-            style={{ opacity: isGlobeInitialized ? 1 : 0 }}
+            style={{ opacity: isGlobeInitialized ? 1 : 0, touchAction: "none" }}
           />
 
           {(!isGlobeInitialized || isLoading) && (

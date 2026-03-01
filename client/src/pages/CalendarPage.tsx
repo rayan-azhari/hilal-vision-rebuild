@@ -18,6 +18,7 @@ import {
   type HijriDate
 } from "@/lib/astronomy";
 import { IslamicCountdown } from "@/components/IslamicCountdown";
+import { CrescentCountryList } from "@/components/CrescentCountryList";
 
 const ISLAMIC_EVENTS: Array<{ month: number; day: number; name: string; nameAr: string; type: "major" | "minor" }> = [
   { month: 1, day: 1, name: "Islamic New Year", nameAr: "رأس السنة الهجرية", type: "major" },
@@ -434,6 +435,8 @@ export default function CalendarPage() {
                 Go to Today
               </button>
             </div>
+
+            <CrescentCountryList viewYear={viewYear} viewMonth={viewMonth} />
           </div>
         </div>
       </div>

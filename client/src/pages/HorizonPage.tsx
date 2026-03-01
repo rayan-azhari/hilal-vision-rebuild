@@ -25,6 +25,9 @@ function drawHorizon(
 
   const W = canvas.width;
   const H = canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  const logicalW = W / dpr;
+  const s = Math.max(0.6, Math.min(1, logicalW / 500));
 
   // Clear
   ctx.clearRect(0, 0, W, H);
@@ -68,7 +71,7 @@ function drawHorizon(
     ctx.lineTo(W, geoY);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.font = "9px Inter, sans-serif";
+    ctx.font = `${Math.round(9 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(150,150,150,0.4)";
     ctx.textAlign = "left";
     ctx.fillText("geometric 0°", 4, geoY - 2);
@@ -103,12 +106,12 @@ function drawHorizon(
   // Azimuth labels
   const azLabels = [210, 240, 270, 300, 330];
   const dirLabels: Record<number, string> = { 210: "SSW", 240: "WSW", 270: "W", 300: "WNW", 330: "NNW" };
-  ctx.font = "11px Inter, sans-serif";
+  ctx.font = `${Math.round(11 * s)}px Inter, sans-serif`;
   ctx.fillStyle = "rgba(200,160,80,0.5)";
   ctx.textAlign = "center";
   azLabels.forEach(az => {
     const x = azToX(az);
-    ctx.fillText(dirLabels[az] ?? `${az}°`, x, H * 0.75 + 18);
+    ctx.fillText(dirLabels[az] ?? `${az}°`, x, H * 0.75 + Math.round(18 * s));
     ctx.strokeStyle = "rgba(200,160,80,0.1)";
     ctx.lineWidth = 0.5;
     ctx.setLineDash([2, 6]);
@@ -131,7 +134,7 @@ function drawHorizon(
     ctx.lineTo(W, y);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.font = "9px Inter, sans-serif";
+    ctx.font = `${Math.round(9 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(200,160,80,0.35)";
     ctx.textAlign = "left";
     ctx.fillText(`${alt}°`, 4, y - 2);
@@ -142,7 +145,7 @@ function drawHorizon(
   const sunY = altToY(data.sunAlt);
 
   // Sunset glow on horizon
-  const sunGlow = ctx.createRadialGradient(sunX, H * 0.75, 0, sunX, H * 0.75, 120);
+  const sunGlow = ctx.createRadialGradient(sunX, H * 0.75, 0, sunX, H * 0.75, Math.round(120 * s));
   sunGlow.addColorStop(0, "rgba(255,120,0,0.35)");
   sunGlow.addColorStop(0.5, "rgba(255,80,0,0.12)");
   sunGlow.addColorStop(1, "rgba(0,0,0,0)");
@@ -151,18 +154,19 @@ function drawHorizon(
 
   // Sun disc (below horizon or just setting)
   if (sunY > 0 && sunY < H * 0.75) {
-    const sunDisc = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 20);
+    const sunR = Math.round(20 * s);
+    const sunDisc = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunR);
     sunDisc.addColorStop(0, "rgba(255,200,50,0.9)");
     sunDisc.addColorStop(0.3, "rgba(255,120,0,0.7)");
     sunDisc.addColorStop(1, "rgba(255,80,0,0)");
     ctx.fillStyle = sunDisc;
     ctx.beginPath();
-    ctx.arc(sunX, sunY, 20, 0, Math.PI * 2);
+    ctx.arc(sunX, sunY, sunR, 0, Math.PI * 2);
     ctx.fill();
   }
 
   // Sun label
-  ctx.font = "bold 11px Inter, sans-serif";
+  ctx.font = `bold ${Math.round(11 * s)}px Inter, sans-serif`;
   ctx.fillStyle = "rgba(255,160,50,0.8)";
   ctx.textAlign = "center";
   ctx.fillText("☀ Sun", sunX, Math.min(sunY - 12, H * 0.72));
@@ -173,17 +177,18 @@ function drawHorizon(
 
   if (moonY > 0 && moonY < H * 0.75 && moonX > 0 && moonX < W) {
     // Moon glow
-    const moonGlow = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 30);
+    const moonGlowR = Math.round(30 * s);
+    const moonGlow = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonGlowR);
     moonGlow.addColorStop(0, "rgba(200,180,100,0.5)");
     moonGlow.addColorStop(0.4, "rgba(200,180,100,0.2)");
     moonGlow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = moonGlow;
     ctx.beginPath();
-    ctx.arc(moonX, moonY, 30, 0, Math.PI * 2);
+    ctx.arc(moonX, moonY, moonGlowR, 0, Math.PI * 2);
     ctx.fill();
 
     // Moon crescent
-    const mr = 12;
+    const mr = Math.round(12 * s);
     ctx.fillStyle = "rgba(40,35,25,0.9)";
     ctx.beginPath();
     ctx.arc(moonX, moonY, mr, 0, Math.PI * 2);
@@ -210,19 +215,19 @@ function drawHorizon(
     ctx.fill();
 
     // Moon label
-    ctx.font = "bold 11px Inter, sans-serif";
+    ctx.font = `bold ${Math.round(11 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(220,200,120,0.9)";
     ctx.textAlign = "center";
-    ctx.fillText("☽ Moon", moonX, moonY - mr - 6);
+    ctx.fillText("☽ Moon", moonX, moonY - mr - Math.round(6 * s));
 
     // Altitude label
-    ctx.font = "10px Inter, sans-serif";
+    ctx.font = `${Math.round(10 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(220,200,120,0.6)";
-    ctx.fillText(`${data.moonAlt.toFixed(1)}°`, moonX, moonY + mr + 14);
+    ctx.fillText(`${data.moonAlt.toFixed(1)}°`, moonX, moonY + mr + Math.round(14 * s));
   } else {
     // Moon below horizon indicator
     const indicatorX = Math.max(20, Math.min(W - 20, moonX));
-    ctx.font = "11px Inter, sans-serif";
+    ctx.font = `${Math.round(11 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(200,180,100,0.4)";
     ctx.textAlign = "center";
     ctx.fillText("☽ Moon below horizon", W / 2, H * 0.75 - 10);
@@ -242,22 +247,22 @@ function drawHorizon(
     // ARCV label
     const midX = (sunX + moonX) / 2;
     const midY = (altToY(data.sunAlt) + moonY) / 2;
-    ctx.font = "10px Inter, sans-serif";
+    ctx.font = `${Math.round(10 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(200,160,80,0.6)";
     ctx.textAlign = "center";
     ctx.fillText(`ARCV: ${data.arcv.toFixed(1)}°`, midX, midY - 8);
   }
 
   // Compass rose (bottom right)
-  const cx2 = W - 40;
-  const cy2 = H - 30;
-  ctx.font = "bold 10px Inter, sans-serif";
+  const cx2 = W - Math.round(40 * s);
+  const cy2 = H - Math.round(30 * s);
+  ctx.font = `bold ${Math.round(10 * s)}px Inter, sans-serif`;
   ctx.fillStyle = "rgba(200,160,80,0.5)";
   ctx.textAlign = "center";
   ctx.fillText("W", cx2, cy2);
   ctx.fillStyle = "rgba(200,160,80,0.3)";
-  ctx.fillText("N", cx2 - 14, cy2);
-  ctx.fillText("S", cx2 + 14, cy2);
+  ctx.fillText("N", cx2 - Math.round(14 * s), cy2);
+  ctx.fillText("S", cx2 + Math.round(14 * s), cy2);
 }
 
 export default function HorizonPage() {

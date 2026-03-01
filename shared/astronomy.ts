@@ -116,6 +116,24 @@ export const VISIBILITY_LABELS: Record<VisibilityZone, { label: string; color: s
     F: { label: "Below Horizon", color: "#374151", desc: "Moon sets before or simultaneously with the sun, or conjunction hasn't occurred yet." },
 };
 
+export const YALLOP_ZONE_LABELS: Record<VisibilityZone, { label: string; threshold: string; desc: string }> = {
+    A: { label: "Easily Visible", threshold: "q ≥ +0.216", desc: "Crescent easily visible to the naked eye." },
+    B: { label: "Visible", threshold: "q ≥ −0.014", desc: "Visible under perfect atmospheric conditions." },
+    C: { label: "Optical Aid Helpful", threshold: "q ≥ −0.160", desc: "May need binoculars to locate the crescent initially." },
+    D: { label: "Optical Aid Only", threshold: "q ≥ −0.232", desc: "Only visible through a telescope or binoculars." },
+    E: { label: "Not Visible", threshold: "q < −0.232", desc: "Below the visibility threshold for any method." },
+    F: { label: "Below Horizon", threshold: "—", desc: "Moon sets before the sun, or conjunction has not occurred." },
+};
+
+export const ODEH_ZONE_LABELS: Record<VisibilityZone, { label: string; threshold: string; desc: string }> = {
+    A: { label: "Easily Visible", threshold: "V ≥ 5.65", desc: "Crescent easily visible to the naked eye." },
+    B: { label: "Visible", threshold: "V ≥ 2.00", desc: "Visible under perfect atmospheric conditions." },
+    C: { label: "Optical Aid May Help", threshold: "V ≥ −0.96", desc: "May need optical aid to sight the crescent." },
+    D: { label: "Not Visible", threshold: "V < −0.96", desc: "Not visible even with optical aid." },
+    E: { label: "Not Visible", threshold: "V < −0.96", desc: "Far below any visibility threshold." },
+    F: { label: "Below Horizon", threshold: "—", desc: "Moon sets before the sun, or conjunction has not occurred." },
+};
+
 export const ZONE_RGB: Record<VisibilityZone, [number, number, number]> = {
     A: [74, 222, 128],
     B: [250, 204, 21],

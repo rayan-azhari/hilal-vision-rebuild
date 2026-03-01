@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle, Languages, Crown } from "lucide-react";
+import { Menu, X, Moon, Globe, Map, Calendar, Compass, Archive, Home, Sun, PlusCircle, Languages, Crown, MapPin } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -82,7 +82,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Floating Command Centre Navigation */}
       <div className="fixed left-0 right-0 z-50 flex justify-center pointer-events-none px-4" style={{ top: "calc(1.5rem + env(safe-area-inset-top))" }}>
         <header
-          className="pointer-events-auto flex items-center px-2 md:px-3 h-14 rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] overflow-hidden"
+          className="pointer-events-auto flex items-center px-2 md:px-3 h-14 rounded-full transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
           style={{
             background: scrolled
               ? "color-mix(in oklch, var(--card) 60%, transparent)"
@@ -560,6 +560,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="text-[10px] font-semibold">Menu</span>
         </button>
       </nav>
+
+      {/* Persistent date/location indicator */}
+      {routePath !== "/" && (
+        <div
+          className="fixed left-0 right-0 z-40 flex justify-center pointer-events-none px-4"
+          style={{ top: "calc(4.5rem + env(safe-area-inset-top))" }}
+        >
+          <div
+            className="pointer-events-auto flex items-center gap-2 px-3 py-1 rounded-full text-[10px]"
+            style={{
+              background: "color-mix(in oklch, var(--card) 60%, transparent)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid color-mix(in oklch, var(--border) 20%, transparent)",
+              color: "var(--muted-foreground)",
+            }}
+          >
+            <MapPin className="w-3 h-3 flex-shrink-0" style={{ color: "var(--gold-dim)" }} />
+            <span className="truncate max-w-[120px]">{location.name}</span>
+            <span style={{ color: "var(--border)" }}>|</span>
+            <Calendar className="w-3 h-3 flex-shrink-0" style={{ color: "var(--gold-dim)" }} />
+            <span className="whitespace-nowrap">
+              {date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <main className="flex-1 w-full relative z-10 pt-28">

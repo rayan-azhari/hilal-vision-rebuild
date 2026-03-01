@@ -1,5 +1,5 @@
 import { Info } from "lucide-react";
-import { VISIBILITY_LABELS, type VisibilityZone } from "@/lib/astronomy";
+import { VISIBILITY_LABELS, YALLOP_ZONE_LABELS, ODEH_ZONE_LABELS, type VisibilityZone } from "@/lib/astronomy";
 
 interface MapLegendPanelsProps {
     visibilityCriterion: "yallop" | "odeh";
@@ -36,22 +36,29 @@ export function MapInfoPanel({ visibilityCriterion, highContrast, zoneColors, hi
                     </p>
 
                     <div className="space-y-3">
-                        {(["A", "B", "C", "D", "E", "F"] as VisibilityZone[]).map(zone => (
-                            <div key={zone} className="flex items-start gap-2.5">
-                                <div
-                                    className="w-3.5 h-3.5 rounded-sm flex-shrink-0 mt-0.5"
-                                    style={{ background: highContrast ? highContrastZoneColors[zone] : zoneColors[zone] }}
-                                />
-                                <div>
-                                    <div className="text-[11px] font-bold leading-tight" style={{ color: "var(--foreground)" }}>
-                                        Zone {zone}: {VISIBILITY_LABELS[zone].label}
-                                    </div>
-                                    <div className="text-[10px] leading-snug mt-0.5 opacity-80" style={{ color: "var(--muted-foreground)" }}>
-                                        {VISIBILITY_LABELS[zone].desc}
+                        {(["A", "B", "C", "D", "E", "F"] as VisibilityZone[]).map(zone => {
+                            const criterionLabels = visibilityCriterion === "yallop" ? YALLOP_ZONE_LABELS : ODEH_ZONE_LABELS;
+                            const zoneLabel = criterionLabels[zone];
+                            return (
+                                <div key={zone} className="flex items-start gap-2.5">
+                                    <div
+                                        className="w-3.5 h-3.5 rounded-sm flex-shrink-0 mt-0.5"
+                                        style={{ background: highContrast ? highContrastZoneColors[zone] : zoneColors[zone] }}
+                                    />
+                                    <div>
+                                        <div className="text-[11px] font-bold leading-tight" style={{ color: "var(--foreground)" }}>
+                                            Zone {zone}: {zoneLabel.label}
+                                            {zoneLabel.threshold !== "—" && (
+                                                <span className="font-mono font-normal ml-1 opacity-50" style={{ fontSize: "9px" }}>({zoneLabel.threshold})</span>
+                                            )}
+                                        </div>
+                                        <div className="text-[10px] leading-snug mt-0.5 opacity-80" style={{ color: "var(--muted-foreground)" }}>
+                                            {zoneLabel.desc}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 

@@ -432,7 +432,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Map */}
         <div className="relative flex-1 min-h-[60vh] lg:min-h-0">
-          <div ref={mapRef} className="absolute inset-0" style={{ zIndex: 1 }} />
+          <div ref={mapRef} className="absolute inset-0" style={{ zIndex: 1, touchAction: "none" }} />
 
           {/* Selected point popup */}
           {selectedPoint && (
