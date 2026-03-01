@@ -14,7 +14,7 @@ Hilal Vision deploys to Vercel as a **hybrid application**:
 
 ```bash
 # 1. Push to GitHub
-git add . && git commit -m "deploy" && git push
+git add -u && git commit -m "deploy" && git push
 
 # 2. Import at https://vercel.com/new
 #    Vercel auto-detects settings from vercel.json

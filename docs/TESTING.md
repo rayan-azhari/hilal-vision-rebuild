@@ -1,6 +1,6 @@
 # Hilal Vision — Testing Reference
 
-This document describes the test infrastructure, how to run tests, and what is covered. The test suite was expanded in **Round 40** from 21 to **133 unit tests** across 8 test files.
+This document describes the test infrastructure, how to run tests, and what is covered. The test suite was expanded in **Round 41** from 133 (Round 40) to **144 unit tests** across 9 test files.
 
 ---
 
@@ -44,7 +44,7 @@ pnpm format:check  # Prettier check (no write)
 
 Tests live in `server/**/*.test.ts` and `api/**/*.test.ts` and run in a Node environment via Vitest. No browser, no network requests.
 
-**Total: 133 unit tests** across 8 files.
+**Total: 144 unit tests** across 9 files.
 
 ### Test Files
 
@@ -206,7 +206,7 @@ push/PR to main
     │
     ├── lint job       (pnpm lint)
     ├── typecheck job  (pnpm check)
-    └── test job       (pnpm test — 133 unit tests)
+    └── test job       (pnpm test — 144 unit tests)
               │
               └── build job  (pnpm vercel-build) ← only runs if all 3 above pass
                         │

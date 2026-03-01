@@ -15,7 +15,7 @@ pnpm ci
 # Or individually:
 pnpm lint          # ESLint (must pass — no errors)
 pnpm check         # TypeScript type check
-pnpm test          # Unit tests (133 tests must pass)
+pnpm test          # Unit tests (144 tests must pass)
 pnpm vercel-build  # Vite build check
 
 # 2. Verify pnpm lockfile is in sync (Vercel uses frozen-lockfile by default)
@@ -36,7 +36,7 @@ The following must be confirmed before every store submission or major deploymen
 - [ ] Stripe webhook endpoint is active and `STRIPE_WEBHOOK_SECRET` matches Stripe Dashboard
 - [ ] No API keys or secrets appear in source code or committed `.env` files
 - [ ] `pnpm lint` passes with zero errors
-- [ ] `pnpm test` shows 133 tests passing
+- [ ] `pnpm test` shows 144 tests passing
 - [x] Content Security Policy (CSP) active in `vercel.json` ✅ done — Phase 6f / Phase 8 bugfix
 - [ ] Admin account has `{ "isAdmin": true }` set in **Clerk Dashboard → User → Public Metadata** (hardcoded email bypass was removed in Phase 8e)
 - [ ] `VITE_CLERK_PUBLISHABLE_KEY` is set as a **GitHub Secret** (`Settings → Secrets and variables → Actions`) for E2E CI to pass

@@ -75,13 +75,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 25. **Data Export**: CSV and JSON export buttons on the Archive page (both ICOP historical data and computed visibility tables) and the Sighting Feed widget, enabling researchers to download datasets for offline analysis.
 26. **Photo Uploads & EXIF Extraction**: Photo uploads in the Sighting Report form are securely persisted to an S3 proxy via tRPC. The images are also automatically parsed for embedded GPS coordinates, camera model, and capture timestamp using the `exifr` library, pre-filling the location and time fields for accuracy.
 27. **Enhanced Map Click Tooltips**: Clicking any point on the 2D Map displays a rich popup showing the visibility zone, q-value, moon age, altitude, azimuth, elongation, crescent width, and local DEM-sourced terrain elevation.
-23. **App Store Readiness**: Mobile web views are strictly styled using `env(safe-area-inset-top)` to seamlessly accommodate iOS Dynamic Islands and Android gesture navs via Capacitor.
-24. **Exact Conjunction Times**: The `findNewMoonNear()` algorithm (two-pass astronomy-engine phase minimization) is now exported and wired to the Moon Phase Dashboard, displaying the exact UTC time of the next new moon conjunction down to the second.
-25. **Soft Paywall Monetization (Pro Tier)**: A `ProTierContext` + `<ProGate>` component system gates deep feature interaction behind a "Pro" subscription while keeping all features visible to free users from Day 1. Gated features include the 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular calendar engines, and historical ICOP data. An `UpgradeModal` offers Monthly ($2.99), Annual ($14.99), and Lifetime ($49.99) plans (Stripe integration pending).
-26. **Goodwill & Support Page**: A dedicated `/support` page with Sadaqah Jariyah messaging, Feature Access Matrix, pricing tiers, one-time donation options, and a Patron badge system. A Sadaqah banner on the Home page links to `/support`.
-27. **Gamified Engagement Mechanics**: Added an `observerBadge` progression system (Novice → Master) and `sightingCount` tracker to the Drizzle user schema to incentivize crowdsourced telemetry reporting.
-28. **Accessibility & Responsive Design Pass**: Enforced a strict >44px `min-height` and `min-width` on all touch targets via `@media (pointer: coarse)` CSS queries, ensuring rigorous mobile usability standards.
-29. **Component Modularity**: Refactored massive page components (like MapPage) into focused, maintainable micro-components (`MapControlsPanel`, `MapLegendPanels`).
+28. **Component Modularity**: Refactored massive page components (like MapPage) into focused, maintainable micro-components (`MapControlsPanel`, `MapLegendPanels`).
 
 ## Getting Started
 
@@ -99,13 +93,13 @@ pnpm install
 npx pnpm install
 
 # Start the development server
-npm run dev
+pnpm dev
 
 # Database migration (optional, for telemetry)
-npm run db:push
+pnpm db:push
 
 # Production build (self-hosted)
-npm run build && npm run start
+pnpm build && pnpm start
 ```
 
 ### Vercel Deployment
@@ -124,8 +118,6 @@ npm run build && npm run start
 # Optional: set DATABASE_URL env var for telemetry persistence
 ```
 
-```
-
 See `docs/DEPLOYMENT.md` for the full Vercel deployment guide and **Native Mobile Deployment (iOS & Android)** instructions using Capacitor.
 
 ### Native Mobile Build (Capacitor)
@@ -134,7 +126,7 @@ Hilal Vision compiles to native iOS and Android. To generate the release builds:
 
 ```bash
 # First, synchronize the web assets with the native wrappers
-npm run build:cap
+pnpm build:cap
 
 # For Android (Requires Android Studio)
 npx cap open android
@@ -148,18 +140,21 @@ npx cap open ios
 ### Code Quality & Testing
 
 ```bash
-npm run test     # Unit tests (21 tests - Yallop, crescent width, Hijri calendar, best-time)
-npm run test:e2e # Playwright End-to-End browser tests
-npm run check    # TypeScript type checking
+pnpm test        # Unit tests (144 tests across 9 files)
+pnpm test:e2e    # Playwright End-to-End browser tests
+pnpm check       # TypeScript type checking
+pnpm lint        # ESLint static analysis
 ```
 
 ## Documentation
 
-- `docs/USER_GUIDE.md` - Comprehensive walkthrough of all features
-- `docs/HILAL_VISION_DOCUMENTATION.md` - Core algorithms and math
-- `docs/DEPLOYMENT.md` - Vercel deployment guide
-- `docs/Islamic Calendar Astronomical Dashboard.md` - Problem space overview
-- `docs/The Hilal Dashboard Revised Architecture.md` - Telemetry architecture
+- `docs/USER_GUIDE.md` - Comprehensive walkthrough of all features (Free + Pro)
+- `docs/HILAL_VISION_DOCUMENTATION.md` - Core algorithms, architecture, and DB schema
+- `docs/DEPLOYMENT.md` - Vercel deployment guide and environment variable reference
+- `docs/DEPLOYMENT_CHECKLIST.md` - Pre-push checklist and common error patterns
+- `docs/SECURITY.md` - Security architecture, CORS policy, payment security, env vars
+- `docs/TESTING.md` - Test stack, 144 unit tests, E2E tests, CI pipeline
+- `docs/PUBLIC_API_REFERENCE.md` - REST API schema, parameters, and `curl` examples
 
 ### In-App Documentation Pages
 
@@ -168,10 +163,6 @@ npm run check    # TypeScript type checking
 - `/support` - Sadaqah Jariyah mission, Feature Access Matrix (Free vs Pro), pricing tiers, one-time donation
 - `/privacy` - Privacy Policy (data collection, sub-processors, GDPR rights)
 - `/terms` - Terms of Service (acceptable use, All Rights Reserved, accuracy disclaimer)
-
-### Developer Documentation
-
-- `docs/PUBLIC_API_REFERENCE.md` - Standalone documentation providing schema details and `curl` examples for interacting with the Hilal Vision backend.
 
 ## Monetization Roadmap
 
@@ -183,7 +174,7 @@ npm run check    # TypeScript type checking
 | ✅ Done | Feature Gating | 3D Globe, Sky Dome, Altitude Chart, Ephemeris, Astronomical/Tabular engines, historical Archive |
 | ✅ Done | Support Page | `/support` with Feature Access Matrix, pricing, donation, Sadaqah banner on Home |
 | ✅ Done | Payment Gateways | Stripe checkout (Web) + RevenueCat Native SDK (iOS/Android) + Clerk webhook sync |
-| ⏳ Planned | Push Notifications | Pro-only crescent alerts via Capacitor + FCM/APNs |
+| ✅ Done | Push Notifications | Pro-only crescent alerts via FCM (web + Capacitor), Vercel cron daily 08:00 UTC |
 | ⏳ Planned | Ethical Ads | Muslim Ad Network below-fold for free tier, suppressed for Pro |
 | ✅ Done | Public REST API | `/api/v1/visibility` and `/api/v1/moon-phases` endpoints (free, Zod-validated) |
 | ✅ Done | Data Export | CSV/JSON download for Archive page and Sighting Feed |

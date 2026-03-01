@@ -1,6 +1,6 @@
 # Hilal Vision - Full Application Documentation
 
-**Version:** Round 40 (current)
+**Version:** Round 41 (current)
 **Stack:** React 19 + TypeScript + Tailwind 4 + tRPC 11 + Express 4 + MySQL (Drizzle ORM)
 **Deployment:** Vercel (static frontend + serverless tRPC API)
 **Mobile Packaging:** Capacitor.js
@@ -19,11 +19,13 @@
    - 6.2 Visibility - 3D Globe & 2D Map (`/visibility`, `/globe`, `/map`)
    - 6.3 Moon Phase (`/moon`)
    - 6.4 Hijri Calendar (`/calendar`)
-   - 6.5–6.9 Horizon, Archive, Ramadan, Sighting Feed
-   - 6.10 About (`/about`)
-   - 6.11 Methodology (`/methodology`)
-   - 6.12 Privacy Policy (`/privacy`)
-   - 6.13 Terms of Service (`/terms`)
+   - 6.5 Horizon View (`/horizon`)
+   - 6.6 Crescent Visibility Archive (`/archive`)
+   - 6.7 About (`/about`)
+   - 6.8 Methodology (`/methodology`)
+   - 6.9 Support (`/support`)
+   - 6.10 Privacy Policy (`/privacy`)
+   - 6.11 Terms of Service (`/terms`)
 7. [Performance Architecture](#7-performance-architecture)
 8. [Database and Backend](#8-database-and-backend)
 9. [Testing](#9-testing)
@@ -66,7 +68,7 @@ The application is named after the Arabic word *hilal* (هلال), which specifi
 
 ### 2.2 Key Frontend Libraries
 
-The application uses several specialised libraries beyond the core stack. **astronomy-engine** (`astronomy-engine@2.1.19`) provides the foundational sun and moon position calculations. **globe.gl** (`globe.gl@2.45.0`) renders the interactive 3D globe using WebGL via Three.js. **Leaflet** (`leaflet@1.9.4`) with **react-leaflet** provides the flat 2D world map. **D3** (`d3@7.9.0`) is available for custom data visualisations. **Recharts** (`recharts@2.15.2`) renders the sun/moon altitude charts. **Framer Motion** (`framer-motion@12.23.22`) handles page transitions and micro-animations. **Three.js** (`three@0.183.0`) is used directly for the custom visibility overlay mesh on the globe.
+The application uses several specialised libraries beyond the core stack. **astronomy-engine** (`astronomy-engine@2.1.19`) provides the foundational sun and moon position calculations using VSOP87/ELP2000 models. **globe.gl** (`globe.gl@2.45.0`) renders the interactive 3D globe using WebGL via Three.js. **Leaflet** (`leaflet@1.9.4`) with **react-leaflet** provides the flat 2D world map. **D3** (`d3@7.9.0`) is available for custom data visualisations. **Recharts** (`recharts@2.15.2`) renders the sun/moon altitude charts. **Three.js** (`three@0.183.0`) is used directly for the custom visibility overlay mesh on the globe.
 
 ### 2.3 File Structure
 
@@ -124,13 +126,18 @@ The application uses Wouter for client-side routing. All routes are wrapped in a
 
 | Path | Component | Description |
 |---|---|---|
-| `/` | `Home` | Landing page with live status cards and feature navigation |
+| `/` | `Home` | Landing page with TonightCard hero, live status cards, and Sighting Feed |
 | `/visibility` | `VisibilityPage` | Unified page with 3D Globe / 2D Map toggle |
-| `/moon` | `MoonPage` | Moon phase detail with altitude charts |
-| `/calendar` | `CalendarPage` | Hijri calendar with Islamic events |
+| `/moon` | `MoonPage` | Moon phase detail with altitude charts and Sky Dome |
+| `/calendar` | `CalendarPage` | Triple-engine Hijri calendar with Islamic events |
 | `/horizon` | `HorizonPage` | Local horizon visibility simulator |
-| `/archive` | `ArchivePage` | Historical visibility archive (1,028+ ICOP real-world records) |
-| `/404` | `NotFound` | 404 error page |
+| `/archive` | `ArchivePage` | Historical visibility archive (1,000+ ICOP real-world records) |
+| `/about` | `AboutPage` | Mission, tech stack, competitor comparison, attributions |
+| `/methodology` | `MethodologyPage` | Full algorithm reference (Yallop, Odeh, Hijri, Best-Time, ICOP) |
+| `/support` | `SupportPage` | Sadaqah Jariyah, Pro pricing, donations |
+| `/privacy` | `PrivacyPage` | GDPR-aware Privacy Policy |
+| `/terms` | `TermsPage` | Terms of Service |
+| `*` | `NotFound` | Dark-themed 404 error page |
 
 All tool pages share a consistent `PageHeader` component providing a unified header bar with icon, title (Cinzel serif), and subtitle, plus an optional right-side slot for page-specific controls (location pickers, dates, Hijri date badges).
 
@@ -232,11 +239,11 @@ The context exposes: `location` (the current `CityLocation` object), `setLocatio
 
 The Islamic event calculation covers Ramadan (1 Ramadan), Eid al-Fitr (1 Shawwal), and Eid al-Adha (10 Dhu al-Hijjah). Events are computed by converting the Hijri event date to Gregorian using the algorithmic Hijri calendar, checking the current year and the next two years to ensure a future event is always available, and sorting by days until the event. The computation runs hourly via `setInterval` to stay current.
 
-### 4.2 ProModeContext
+### 4.2 ProTierContext
 
-The `ProModeContext` (`client/src/contexts/ProModeContext.tsx`) provides a boolean `isPro` flag and a `togglePro` function. When Pro Mode is enabled, each page reveals additional technical data panels - extended orbital parameters, methodology explanations, q-value data tables, and physics annotations. The state persists via `localStorage` under the key `"hilal-pro-mode"`.
+The `ProTierContext` (`client/src/contexts/ProTierContext.tsx`) is the Pro subscription brain. It reads `isPro` from Clerk `publicMetadata` (web) or RevenueCat customer info (native). It exposes `isPremium`, `startCheckout()` (Stripe web), `purchaseNativePackage()` (RevenueCat), `showUpgradeModal`, and `setShowUpgradeModal`.
 
-Pro Mode is designed for astronomers, Islamic calendar scholars, and technically sophisticated users who want access to the raw calculation parameters (ARCV, DAZ, W, q-value, Odeh criterion) rather than just the simplified visibility zone classification.
+Feature gating uses the `<ProGate>` component (`client/src/components/ProGate.tsx`), which renders a blurred preview with an upgrade overlay for free users, and the `<UpgradeModal>` for the pricing modal. Pro features include: 3D Globe, Cloud Cover overlay, Atmospheric Overrides, Best Time to Observe, Sky Dome, Ephemeris data, Astronomical/Tabular Hijri engines, and full ICOP Archive.
 
 ### 4.3 ThemeContext
 
@@ -347,49 +354,21 @@ The **live status cards** section shows four glassmorphism cards in a 2×2 (mobi
 
 The **feature cards** section shows all seven application features in a responsive grid (1 column on mobile, 2 on tablet, 3–4 on desktop). Each card has a unique accent colour, an icon, an English title, an Arabic subtitle, and a description. Cards lift on hover with a coloured border glow matching the card's accent colour.
 
-### 6.2 Dashboard Page (`/dashboard`)
+### 6.2 Unified Visibility Page (`/visibility`)
 
-The Dashboard is a unified desktop-optimised view that combines the most important elements from multiple pages into a single layout. It is intended for users who want a comprehensive overview without navigating between pages.
+The Visibility page is the flagship feature, presenting a single unified interface with a toggle between the **3D Globe** (Pro) and **2D Map** (free) views. Both views share the same global location/date/criterion state and a common side panel of controls.
 
-The layout uses a CSS grid with a large left panel (globe or map) and a right sidebar with stacked data cards. The dashboard includes: a compact 3D globe with the visibility overlay, the current moon phase illustration and key metrics, the Hijri date and next Islamic event countdown, and a summary of crescent visibility for the selected location.
+**Globe view** renders an interactive 3D globe using `globe.gl` (WebGL via Three.js) with a visibility overlay, day/night terminator, and optional cloud cover layer. The overlay texture is generated by the Web Worker and applied to a custom `SphereGeometry` mesh. Supports auto-rotation, opacity slider, and location pinning.
 
-### 6.3 3D Globe Page (`/globe`)
+**Map view** uses Leaflet with CartoDB dark tiles. The crescent visibility heatmap is rendered as a bilinearly-interpolated canvas overlay. Includes a time slider (±24 hours, 15-minute granularity), resolution control (2°/4°/6°), and an animate button.
 
-The Globe page is the most technically complex feature in the application. It renders an interactive 3D globe using `globe.gl` (a WebGL-based library built on Three.js) with several custom overlays.
+Both views share: **Criterion toggle** (Yallop/Odeh), **GPS auto-detect**, **city search** (Open-Meteo geocoding), **cloud cover overlay** (Open-Meteo, independently toggleable), **Atmospheric Overrides** panel (Pro — temperature °C, pressure hPa, elevation m), **Best Time to Observe** card (Pro — optimal sunset window), **DEM Integration** (Open-Meteo elevation API on map click), **Enhanced Tooltips** (q-value, moon age, altitude, elongation, crescent width, terrain elevation), and **High Contrast CVD mode**.
 
-The **visibility overlay** is a canvas texture computed by the `useVisibilityTexture` hook and applied to a custom Three.js `SphereGeometry` mesh added directly to the globe's scene. The texture uses a bilinear interpolation algorithm to produce smooth colour gradients between grid points rather than a stepped rectangular grid. The overlay uses semi-transparent RGBA colours for each visibility zone, allowing the Earth texture to show through.
+The 3D Globe (Pro) is gated by `<ProGate>` — free users see a static preview with an upgrade overlay. It renders an interactive 3D globe using `globe.gl` (WebGL / Three.js) with: a **visibility overlay** canvas texture (bilinear interpolation, semi-transparent RGBA zones), a **day/night terminator** mesh (`getTerminatorPoints()`), and an optional **cloud cover** mesh at `r × 1.004` from Open-Meteo data. The side panel shows sun/moon altitude, azimuth, elongation, ARCV, DAZ, crescent width W, q-value, Odeh V-value, visibility zone, illumination, moon age, and rise/set times.
 
-The **day/night terminator overlay** is a second Three.js mesh that renders the night-side hemisphere as a dark semi-transparent overlay. The terminator boundary is computed from the sub-solar point using the `getTerminatorPoints()` function.
+The 2D Map uses Leaflet with CartoDB dark tiles. The crescent visibility heatmap is rendered as a bilinearly-interpolated canvas overlay. All features described in section 6.2 apply here. The cloud cover overlay uses Leaflet `imageOverlay` with a Mercator-projected texture (vs. equirectangular for the globe).
 
-The globe supports: auto-rotation toggle, overlay opacity slider, date selection (any date), geolocation auto-detect, shareable URL encoding (date + location in query string), and a location pin for the selected city.
-
-The **side panel** shows the full astronomical data readout for the selected location and date: sun altitude/azimuth, moon altitude/azimuth, elongation, ARCV, DAZ, crescent width W, q-value, Odeh criterion, visibility zone, illumination, moon age, and rise/set times. In Pro Mode, the panel expands to show additional physics explanations for each parameter.
-
-The globe also features a **cloud cover overlay** - a second Three.js `SphereGeometry` mesh at `r * 1.004` (slightly above the visibility sphere at `r * 1.002`) displaying real-time cloud cover data from Open-Meteo. This overlay is independently toggleable via a "Clouds" button alongside the existing "Visibility" toggle.
-
-A **High Contrast Mode** toggle is available from the main header. When active, the Web Worker dynamically generates the visibility texture utilizing a Cividis-inspired perceptual palette (Bright Yellow, Orange, Reddish Brown, Deep Blue, Dark Navy) to guarantee intelligibility for users with Color Vision Deficiency (CVD).
-
-A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window, computed by the `computeBestObservationTime()` function.
-
-### 6.4 Visibility Map Page (`/map`)
-
-The Map page uses Leaflet with CartoDB dark tiles to render a flat 2D world map. The crescent visibility heatmap is rendered as a canvas overlay using bilinear interpolation between the grid points, producing a smooth gradient rather than the stepped rectangular grid of earlier versions.
-
-The page features a **time slider** with 15-minute granularity covering ±24 hours from the selected date, an **animate button** that plays through the time range automatically, and a **resolution control** (2°/4°/6°) that trades computation time for grid density.
-
-**Atmospheric Overrides:** A collapsible panel allows manual or auto-fetched temperature (°C), pressure (hPa), and elevation (m) overrides. When "Auto-fetch" is toggled, real-time atmospheric data is pulled from Open-Meteo's weather API based on the selected location. These parameters are fed into the refraction correction formula `R = R_std × (P/1010) × (283/(273+T))`, adjusting both sun and moon altitude calculations.
-
-**DEM Integration:** On map click, the application automatically fetches the real terrain elevation from the Open-Meteo Elevation API via a `dem.getDem` tRPC endpoint. This elevation adjusts the theoretical horizon dip for accurate near-horizon calculations.
-
-**Enhanced Click Tooltips:** Clicking any point on the map now displays a rich popup showing the visibility zone, q-value, moon age (days), moon altitude, moon azimuth, elongation, crescent width, and the DEM-sourced local terrain elevation (meters).
-
-A **cloud cover overlay** fetches real-time data from Open-Meteo's forecast API via a dedicated tRPC endpoint (`weather.getCloudGrid`). The sparse grid (~162 points at 15°×20° resolution) is bilinearly interpolated into a smooth canvas texture and rendered as an independent Leaflet `imageOverlay` at 35% opacity. The overlay can be toggled on/off independently from the visibility layer.
-
-A **Best Time to Observe** card in the sidebar displays the optimal crescent viewing window computed by `computeBestObservationTime()`, showing the optimal time, observation window (sunset to moonset), and moon/sun altitudes at the best moment. This card additionally displays the observer's elevation when GPS is active.
-
-The map also supports geolocation auto-detect and shareable URLs. In Pro Mode, a methodology panel explains the Yallop and Odeh criteria in detail, and a contour label overlay shows the q-value contour lines. A high visibility color-blind accessible mapping state is also supported, instantly syncing with the globe logic when toggled.
-
-### 6.5 Moon Phase Page (`/moon`)
+### 6.3 Moon Phase Page (`/moon`)
 
 The Moon Phase page provides a detailed view of the current lunar cycle. The hero section shows a large SVG moon illustration with correct phase geometry, the phase name in English and Arabic, illumination percentage, and moon age in days.
 
@@ -403,7 +382,7 @@ Alongside it, **The Sky Dome** offers a custom SVG-based polar stereographic pro
 
 In Pro Mode, the page shows extended orbital data including libration (the apparent rocking of the moon), parallax, the equation of time, and the moon's distance from Earth.
 
-### 6.6 Hijri Calendar Page (`/calendar`)
+### 6.4 Hijri Calendar Page (`/calendar`)
 
 The Calendar page provides a comprehensive Hijri calendar supporting three calculation engines. Users can instantly toggle between **Astronomical**, **Umm al-Qura**, and **Tabular (Kuwaiti)** dates. 
 
@@ -412,7 +391,7 @@ The page supports dynamic year and month navigation. Each cell renders its exact
 
 In Pro Mode, the page shows conjunction times (the exact moment of new moon) and a lunar month length analysis showing the variation in month lengths over the selected year.
 
-### 6.7 Local Horizon View Page (`/horizon`)
+### 6.5 Local Horizon View Page (`/horizon`)
 
 The Horizon page simulates the local sky at sunset from any location on Earth. It renders a canvas-based panoramic horizon view showing the silhouette of the landscape, the position of the setting sun, and the position of the crescent moon relative to the sun.
 
@@ -422,7 +401,7 @@ The altitude and azimuth readout updates in real time as the user changes the lo
 
 In Pro Mode, the canvas adds atmosphere refraction annotations, ARCV/DAZ/W measurement lines with labels, and an explanation of how each parameter affects visibility.
 
-### 6.8 Crescent Visibility Archive Page (`/archive`)
+### 6.6 Crescent Visibility Archive Page (`/archive`)
 
 The Archive page provides a historical and future record of crescent visibility. Crucially, it features over **1,000 real-world sightings** systematically scraped from the famous Islamic Crescents' Observation Project (ICOP) spanning 1438 AH to 1465 AH.
 
@@ -434,15 +413,7 @@ The page supports filtering by year and month. Each city cell is colour-coded by
 
 In Pro Mode, the archive shows q-value data tables alongside the zone classifications, and a methodology comparison panel showing how the Yallop and Odeh criteria differ for each month.
 
-### 6.9 Ramadan Start Predictor Page (`/ramadan`)
-
-The Ramadan page predicts the start date of Ramadan for the next 10 years (1447–1456 AH, approximately 2025–2034 CE). For each year, it shows the predicted Gregorian date range (accounting for the ±1 day uncertainty of crescent sighting), the visibility zone for a selection of major cities, and a visual timeline.
-
-The prediction is based on the Yallop criterion applied to the expected new moon for 1 Ramadan of each year. The city-by-city comparison shows how visibility varies geographically - a crescent that is Zone A (easily visible) in Mecca may be Zone C (optical aid needed) in London due to the different sun-moon geometry at different latitudes.
-
-In Pro Mode, the page shows detailed conjunction times, elongation at sunset, and q-values for each city and year.
-
-### 6.10 About Page (`/about`)
+### 6.7 About Page (`/about`)
 
 A rich informational page communicating Hilal Vision's mission, platform scope, and scientific foundations to new visitors.
 
@@ -457,7 +428,7 @@ A rich informational page communicating Hilal Vision's mission, platform scope, 
 
 **Design:** Stars-field hero section with orbit rings, `.breezy-card` grid layout, gold accent on Hilal Vision column of the comparison table, methodology teaser CTA.
 
-### 6.11 Methodology Page (`/methodology`)
+### 6.8 Methodology Page (`/methodology`)
 
 A comprehensive technical reference page written for astronomers, Islamic calendar scholars, and developers who need to understand the mathematical foundations behind every calculation in Hilal Vision.
 
@@ -476,7 +447,11 @@ A comprehensive technical reference page written for astronomers, Islamic calend
 
 **Design:** Fixed Table of Contents sidebar (desktop), Mobile 44px touch targets minimum, `FormulaBlock` monospace display components, coloured zone tables, and anchor-linked headings.
 
-### 6.12 Privacy Policy (`/privacy`)
+### 6.9 Support Page (`/support`)
+
+A Sadaqah Jariyah-framed support page with three sections: a mission narrative explaining the ongoing charity purpose of the project, a **Feature Access Matrix** (Free vs Pro comparison across all 16 features), and a **Pricing** section with Monthly ($2.99), Annual ($14.99), and Lifetime ($49.99) plans. One-time donation presets ($5/$10/$25/$50) are available for free users. Patron badge ($10+ donation) shown on sighting reports. Stripe checkout (web) and RevenueCat IAP (native) — donation options suppressed on native platforms per App Store policies.
+
+### 6.10 Privacy Policy (`/privacy`)
 
 A GDPR-aware privacy policy covering:
 - **Data collected:** GPS coordinates (opt-in, ephemeral), Clerk email/name, sighting reports (stored permanently as public scientific data), Sentry error events (anonymised), IP addresses (Upstash, TTL 60s).
@@ -485,7 +460,7 @@ A GDPR-aware privacy policy covering:
 - **Retention:** Account data until deletion; sighting reports retained indefinitely; error logs 30 days.
 - **User rights:** Access, correction, deletion, export - applicable under GDPR, UK DPA 2018, and CCPA.
 
-### 6.13 Terms of Service (`/terms`)
+### 6.11 Terms of Service (`/terms`)
 
 A clear terms document covering:
 - **Acceptable use:** No false sighting reports, no DDoS/rate-limit bypass, no impersonation.
@@ -562,8 +537,8 @@ Authentication utilizes **Clerk Auth**, integrating seamlessly with Express on t
 
 ### 8.4 Vercel Deployment
 
-- `npm run dev` starts the frontend and the local development backend (`server/_core/index.ts` binding to port 5000).
-- `npm run build` is used by Vercel inside `vercel.json`.
+- `pnpm dev` starts the frontend and the local development backend (`server/_core/index.ts` binding to port 5000).
+- `npx vite build` is the Vercel build command (configured in `vercel.json`).
 - The tRPC AppRouter is served in production via a catch-all serverless function: `/api/trpc/[trpc].ts`.
 - The Public API (Express) is served via a separate serverless function wrapper: `/api/v1/[...path].ts`.
 - **Configuration**: `vercel.json` defines build commands, output directory, and routing rules (API rewrites + SPA fallback).
@@ -580,7 +555,7 @@ Authentication utilizes **Clerk Auth**, integrating seamlessly with Express on t
 
 ### 9.1 Unit Tests (Vitest)
 
-The unit test suite covers **133 tests across 8 test files**. All tests import directly from the production source modules — not duplicated inline copies — ensuring tests validate actual production code. Run with `pnpm test`.
+The unit test suite covers **144 tests across 9 test files**. All tests import directly from the production source modules — not duplicated inline copies — ensuring tests validate actual production code. Run with `pnpm test`.
 
 | Test File | Tests | Coverage Area |
 |---|---|---|
@@ -623,7 +598,7 @@ pnpm ci            # Full pipeline: lint → type-check → test → build
 
 ### 9.4 CI/CD
 
-A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push and pull request to `main`. It runs five jobs: **Lint**, **Type Check**, **Unit Tests** (133 tests), **Build** (conditional on all three passing), and **E2E** (Playwright Chromium, runs after build, requires `VITE_CLERK_PUBLISHABLE_KEY` GitHub Secret). The pipeline uses `pnpm@10` and Node 20.
+A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push and pull request to `main`. It runs five jobs: **Lint**, **Type Check**, **Unit Tests** (144 tests), **Build** (conditional on all three passing), and **E2E** (Playwright Chromium, runs after build, requires `VITE_CLERK_PUBLISHABLE_KEY` GitHub Secret). The pipeline uses `pnpm@10` and Node 20.
 
 ---
 
@@ -673,6 +648,7 @@ Hilal Vision was developed in 10 rounds of iterative feature additions and refin
 | 38 | Android Play Store & Production Stability | **Android Play Store prep:** Generated all mipmap icons/splash screens via `@capacitor/assets`, patched RevenueCat ProGuard error, fixed Capacitor WebView tRPC URL (relative `/api/trpc` → absolute production URL via `Capacitor.isNativePlatform()` check in `main.tsx`). **Serverless stability:** Deferred Upstash Redis/Ratelimit initialization from module-level to lazy getter with try-catch — prevents Vercel cold-start crashes when Upstash is temporarily unreachable. Fixed tRPC catch block to return valid batch array format `[{error:{json:{...}}}]` instead of plain JSON (fixes superjson deserialization failures). **Service Worker:** Offline fallback now returns tRPC-compatible batch error for `/api/` calls instead of `{"error":"offline"}`. Bumped SW cache to v2. **Cloud cover alignment:** Fixed 3D globe cloud overlay ~90° longitude offset — applied `rotation.y = -Math.PI/2` to match `three-globe`'s internal globe rotation. Added Mercator projection mode to `renderCloudTexture()` so 2D Leaflet map gets correctly projected cloud texture (equirectangular for globe, Mercator for map). |
 | 39 | Android CORS Fix & tRPC Batch Error Hardening | Fixed Android native "You appear to be offline" error caused by `credentials: "include"` with `Access-Control-Allow-Origin: *` violating CORS spec in Capacitor WebView (`https://localhost` origin). Fix: `credentials: Capacitor.isNativePlatform() ? "omit" : "include"` in `main.tsx`. Hardened tRPC batch error handler to return one error entry per procedure name in the batch — a single-element array for an N-procedure batch caused "Missing result" on the client. |
 | 40 | Security Hardening, Quality Infrastructure & Production Launch | **Phase 1 — Security:** Replaced wildcard CORS (`*`) with origin whitelist (`api/_cors.ts`). RevenueCat webhook fails closed (503) without `REVENUECAT_WEBHOOK_AUTH`. Stripe subscription revocation via `customer.subscription.deleted` + `invoice.payment_failed`. `adminProcedure` middleware (checks `OWNER_OPEN_ID`). Stripe checkout now verifies Clerk token server-side — userId no longer trusted from body. Rate limiter fails closed without Upstash credentials. Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `HSTS`. Express body limit 50MB → 10MB. PII sanitized from logs. **Phase 2 — Quality:** ESLint flat config, Prettier, GitHub Actions CI (lint → type-check → test → build). **Phase 3 — DB & Backend:** Drizzle schema + migrations, production MySQL connection. **Phase 4 — Science Accuracy:** Corrected crescent width formula, Danjon limit enforcement, refraction model improvements. **Phase 5 — Testing:** Expanded from 21 → **133 unit tests** across 8 files. Added E2E tests for navigation, visibility, astronomy (14 Playwright tests). **Phase 6 — UX Polish:** Home page cognitive-load reduction. Globe/Map UI consistency. CSP header (`vercel.json`). ErrorBoundary Clerk ad-blocker detection. **Phase 7 — Push Notifications:** Firebase Admin SDK. `api/push/send.ts` (FCM broadcast, stale token cleanup). `api/cron/moonAlerts.ts` (Vercel cron 08:00 UTC — 29th Hijri night, full moon, blue moon, lunar eclipse). `predictLunarEclipse()` in `shared/astronomy.ts`. `ForegroundPushListener` in `App.tsx`. **Phase 8 — Production Hardening:** `TESTING_DISABLE_PRO_GATE = false` (paywalls fully active). Stripe checkout body fallback removed (401 for subscription without Clerk token; anonymous donations still allowed). Upstash sliding-window rate limit (10 req/min/IP) on `/api/v1/*` (fail-open). Admin bypass → `user.publicMetadata.isAdmin === true` (Clerk dashboard; hardcoded email removed). RevenueCat env var warning on native startup. CSP tuned: added `https://*.clerk.accounts.dev` to `script-src` + `frame-src`, `font-src` for Google Fonts. |
+| 41 | Comprehensive Audit & Improvements | **Phase 1 — Security:** `crypto.timingSafeEqual()` for cron/webhook secrets, IP spoofing fix (use `.at(-1)` on `x-forwarded-for`), bounded `LocalRateLimiter` (10k entries + eviction), rate limit on `notifications.subscribe`, Zod bounds on weather router coordinates. **Phase 2 — Science:** Replaced hand-rolled eclipse algorithm with `Astronomy.SearchLunarEclipse()` (ELP2000). Bennett altitude-dependent refraction model. Maghrib = sunset (removed erroneous +18 min offset). Precise 29.53058867 synodic constant. Removed stale SunCalc comments/references; updated all UI credits to astronomy-engine. **Phase 3 — Accessibility:** NotFound dark theme. UpgradeModal WCAG 2.1 AA (role/aria-modal/focus trap/Escape). Noise z-index lowered. `alert()` → sonner toasts. Language dropdown keyboard nav. aria-labels on calendar days, archive locks, canvas elements. aria-describedby for form errors. **Phase 4 — Performance:** ArchivePage mini-map offloaded to Web Worker. Framer Motion removed (CSS keyframe). `exif-js` removed. `usePlanSelection` hook, `useAtmosphericData` hook. Dead code pruned. **Phase 5 — Engagement:** `TonightCard` hero widget (auto-detects location, shows visibility zone + sunset/moonset times). Location/criterion persisted to localStorage. `.ics` calendar export. SightingFeed empty state CTA. Nav active state fix for `/map`/`/globe`. **Phase 6 — Docs:** UNLICENSED license. Removed superseded root docs. README pnpm fixes, test count, doc links. HILAL_VISION_DOCUMENTATION.md ghost routes removed, ProTierContext, Round 41. **Phase 7 — Testing:** 144 unit tests across 9 files. Eclipse/refraction/ProGate/NotFound/empty-state tests added. |
 
 ---
 

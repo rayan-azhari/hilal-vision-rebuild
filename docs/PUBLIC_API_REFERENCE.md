@@ -5,6 +5,12 @@ The Hilal Vision Public REST API provides programmatic access to precision astro
 **Base URL (Production):** `https://moon-dashboard-one.vercel.app`
 **Base Path:** `/api/v1`
 
+**Authentication:** No authentication required. The API is open for external integrations.
+
+**Rate Limiting:** 10 requests/minute/IP (sliding window via Upstash Redis). Exceeding the limit returns `429 Too Many Requests`.
+
+**Versioning:** The current version is `v1`. Breaking changes will be released under a new version prefix (e.g., `v2`). The `v1` endpoints will remain stable.
+
 ---
 
 ## 1. Crescent Visibility (`/api/v1/visibility`)

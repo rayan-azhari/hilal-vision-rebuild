@@ -182,7 +182,7 @@ Hilal Vision uses a **soft paywall** model: all features are visible from Day 1,
 - `ProTierContext` manages premium status (`isPremium`) and modal visibility.
 - `<ProGate>` wraps gated content with a blurred preview and "Upgrade to Pro" prompt for free users.
 - `UpgradeModal` presents the three pricing plans.
-- The **Pro badge** in the navbar is only visible to users with an active Pro subscription or admin status. It no longer functions as a development toggle in production (`TESTING_DISABLE_PRO_GATE = false`).
+- The **Pro badge** in the navbar is only visible to users with an active Pro subscription or admin status.
 
 ### Gated Features by Page
 | Page | Gated Feature | Free Default |

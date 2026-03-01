@@ -192,7 +192,7 @@ Before every public release or App Store / Play Store build:
 - [ ] Stripe webhook endpoint registered and `STRIPE_WEBHOOK_SECRET` matches
 - [ ] No secrets in source code or committed `.env` files
 - [ ] Run `pnpm lint` — no errors
-- [ ] Run `pnpm test` — all 133 tests pass
+- [ ] Run `pnpm test` — all 144 tests pass
 - [x] CSP header active in `vercel.json` ✅ done — Phase 6f / Phase 8 bugfix
 - [ ] Admin account has `{ "isAdmin": true }` in Clerk Dashboard public metadata (hardcoded email bypass removed — Phase 8e)
 
