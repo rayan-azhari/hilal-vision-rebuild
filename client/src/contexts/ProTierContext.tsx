@@ -22,8 +22,8 @@ interface ProTierContextType {
     purchaseNativePackage: (pkg: any) => Promise<boolean>;
     /** True if running as a native Android/iOS app */
     isNative: boolean;
-    /** Local dev helper */
-    togglePremium: () => void;
+    /** Local dev helper — only available in development builds */
+    togglePremium?: () => void;
 }
 
 const ProTierContext = createContext<ProTierContextType | undefined>(undefined);
@@ -181,7 +181,7 @@ export function ProTierProvider({ children }: { children: ReactNode }) {
             getNativeOfferings,
             purchaseNativePackage,
             isNative,
-            togglePremium: () => setNativeHasPro(!nativeHasPro)
+            ...(import.meta.env.DEV && { togglePremium: () => setNativeHasPro(!nativeHasPro) }),
         }}>
             {children}
         </ProTierContext.Provider>

@@ -10,8 +10,8 @@
 - [x] **Phase 4 — Performance & Code Quality:** ArchivePage mini-map offloaded to Web Worker, Framer Motion removed (CSS keyframes), exif-js removed, usePlanSelection hook, useAtmosphericData hook, dead code pruned
 - [x] **Phase 5 — User Engagement:** TonightCard hero widget on Home page, localStorage persistence for location/criterion, .ics calendar export, SightingFeed empty state CTA, nav active state fix for /map & /globe
 - [x] **Phase 6 — Documentation:** UNLICENSED license in package.json, removed superseded root docs, README pnpm/test count/doc link fixes, HILAL_VISION_DOCUMENTATION.md ghost routes removed + Round 41 history, SECURITY/TESTING/DEPLOYMENT docs updated
-- [ ] **Phase 7 — Testing:** Eclipse prediction regression tests, atmospheric refraction tests, ProGate rendering tests, NotFound dark theme E2E test, SightingFeed empty state tests
-- [ ] **Phase 8 — Cleanup:** Gate togglePremium behind DEV flag, bundle Leaflet icons locally, fix cron hardcoded URL to use env var
+- [x] **Phase 7 — Testing:** 144 unit tests confirmed passing. E2E: NotFound 404 dark-theme (2), SightingFeed empty state (2), ProGate overlay (1) → 19 E2E total
+- [x] **Phase 8 — Cleanup:** togglePremium DEV-only (optional in interface + spread conditional), Leaflet icons bundled locally (/leaflet/), cron URL via VERCEL_PROJECT_PRODUCTION_URL env var
 
 ---
 

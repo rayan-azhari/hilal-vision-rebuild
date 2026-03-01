@@ -300,7 +300,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     : "1px solid color-mix(in oklch, var(--border) 50%, transparent)",
                   color: isPremium ? "var(--gold)" : "var(--muted-foreground)",
                 }}
-                onClick={() => isPremium ? togglePremium() : setShowUpgradeModal(true)}
+                onClick={() => isPremium ? togglePremium?.() : setShowUpgradeModal(true)}
                 title={isPremium ? "Hilal Vision Pro" : "Upgrade to Pro"}
               >
                 <Crown className="w-3.5 h-3.5" />
@@ -477,7 +477,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
                   {/* Pro Badge */}
                   <button
-                    onClick={() => isPremium ? togglePremium() : setShowUpgradeModal(true)}
+                    onClick={() => isPremium ? togglePremium?.() : setShowUpgradeModal(true)}
                     className="flex items-center justify-center gap-2 p-3.5 rounded-2xl transition-colors border text-[13px] font-semibold w-full"
                     style={{
                       background: isPremium

@@ -16,7 +16,8 @@ import { ENV } from "../../server/_core/env.js";
 import { getUmmAlQuraHijri, getMoonPhaseInfo, predictLunarEclipse } from "../../shared/astronomy.js";
 import { setCorsHeaders } from "../_cors.js";
 
-const SEND_URL = "https://moon-dashboard-one.vercel.app/api/push/send";
+// Use Vercel's auto-provisioned production URL env var; fall back to the canonical domain.
+const SEND_URL = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "moon-dashboard-one.vercel.app"}/api/push/send`;
 
 async function sendNotification(
     title: string,
