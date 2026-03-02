@@ -78,6 +78,7 @@ A dedicated dashboard for the lunar cycle.
 - Highlights significant upcoming events (Ramadan, Eid al-Fitr, Eid al-Adha, Ashura, Mawlid).
 - Each day shows a small moon phase icon.
 - **Crescent Country List** — A sidebar panel shows which countries can see the new crescent on the 29th night of the displayed Hijri month, grouped by visibility zone (A–F). Zones A and B are expanded by default. Uses the currently selected criterion (Yallop or Odeh).
+- **Add to Calendar (.ics Export)** — Free feature. An "Add to Calendar" button generates a standard `.ics` file containing the predicted 1st-of-month Hijri dates for the displayed year. Compatible with Apple Calendar, Google Calendar, Outlook, and any iCalendar-compatible app.
 
 ## 5. Horizon View (`/horizon`)
 
@@ -260,4 +261,4 @@ This delta is applied to both sun and moon altitude calculations, providing obse
 
 ---
 
-*Last updated: February 28, 2026 (Round 40 — all phases complete)*
+*Last updated: March 2, 2026 (Round 41 — all phases complete)*

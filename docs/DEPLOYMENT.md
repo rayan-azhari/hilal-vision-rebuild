@@ -154,7 +154,7 @@ curl -X POST https://moon-dashboard-one.vercel.app/api/cron/moonAlerts \
 | Feature                 | Status                            |
 | ----------------------- | --------------------------------- |
 | All client-side pages   | ✅ Full functionality             |
-| Moon phase calculations | ✅ Client-side SunCalc            |
+| Moon phase calculations | ✅ Client-side astronomy-engine   |
 | Hijri calendar          | ✅ Conjunction-based, client-side |
 | 3D Globe + 2D Map       | ✅ WebGL + Leaflet                |
 | tRPC telemetry API      | ✅ Serverless function            |
@@ -197,10 +197,10 @@ npx cap open android
 
 > **Version Code:** Google Play requires a unique `versionCode` for every AAB upload. **Before every Play Store build**, increment `versionCode` and `versionName` in `android/app/build.gradle`:
 > ```groovy
-> versionCode 6    // Current is 5 — increment before every upload (5 → 6 → 7...)
-> versionName "1.0.5"  // Human-readable version string
+> versionCode 7    // Current is 6 — increment before every upload (6 → 7 → 8...)
+> versionName "1.0.6"  // Human-readable version string
 > ```
-> **Current:** `versionCode 5` / `versionName "1.0.4"` (bumped Round 39)
+> **Current:** `versionCode 6` / `versionName "1.0.5"` (bumped Round 41)
 >
 > **Rule: bump versionCode before every `git push` that targets a Play Store AAB build.** The `versionCode` is an integer that must strictly increase. Google Play rejects uploads with a previously used code. Forgetting this causes "Version code X has already been used" errors in Play Console.
 
@@ -223,9 +223,9 @@ npx cap sync ios
 3. **Open Xcode:** `npx cap open ios`
 4. **Sync iOS Version** ⚠️ — Before archiving, update the version in Xcode to match Android:
    - Select the **App** target → **General** → **Identity**
-   - Set **Version** (MARKETING_VERSION) to match Android `versionName` (e.g. `1.0.4`)
-   - Set **Build** (CURRENT_PROJECT_VERSION) to match Android `versionCode` (e.g. `5`)
-   - **Current state:** iOS is at `1.0` / build `1`; Android is `1.0.4` / `5`. These must be aligned.
+   - Set **Version** (MARKETING_VERSION) to match Android `versionName` (e.g. `1.0.5`)
+   - Set **Build** (CURRENT_PROJECT_VERSION) to match Android `versionCode` (e.g. `6`)
+   - **Current state:** iOS is at `1.0` / build `1`; Android is `1.0.5` / `6`. These must be aligned.
 5. **Build Archive:**
    - Ensure the Target is set to "Any iOS Device (arm64)".
    - Go to **Product** > **Archive**.

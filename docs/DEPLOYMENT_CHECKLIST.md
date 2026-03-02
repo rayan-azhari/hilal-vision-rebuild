@@ -31,6 +31,8 @@ The following must be confirmed before every store submission or major deploymen
 
 - [x] `TESTING_DISABLE_PRO_GATE = false` in `ProTierContext.tsx` ✅ done — Phase 8a
 - [ ] `REVENUECAT_WEBHOOK_AUTH` is set in Vercel environment variables
+- [ ] `FIREBASE_ADMIN_CREDENTIALS` is set in Vercel environment variables (push notifications)
+- [ ] `CRON_SECRET` is set in Vercel environment variables (cron job authentication)
 - [ ] `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are set (rate limiter fails closed without them)
 - [ ] `OWNER_OPEN_ID` is set to the correct Clerk user ID (gates `notifyOwner`)
 - [ ] Stripe webhook endpoint is active and `STRIPE_WEBHOOK_SECRET` matches Stripe Dashboard
@@ -53,13 +55,13 @@ See `docs/SECURITY.md` for the full security reference.
 >
 > Edit `android/app/build.gradle` before building:
 > ```groovy
-> versionCode 6    // ← always +1 from last upload (current: 5)
-> versionName "1.0.5"  // ← bump patch version to match
+> versionCode 7    // ← always +1 from last upload (current: 6)
+> versionName "1.0.6"  // ← bump patch version to match
 > ```
 >
 > Google Play rejects any AAB whose `versionCode` was already used. There is no way to reuse a code — it must strictly increase with every upload. Forgetting this causes the "Version code X has already been used" error in Play Console.
 >
-> **Current version:** `versionCode 5` / `versionName "1.0.4"` (bumped Round 39)
+> **Current version:** `versionCode 6` / `versionName "1.0.5"` (bumped Round 41)
 
 ---
 
@@ -363,15 +365,15 @@ credentials: Capacitor.isNativePlatform() ? "omit" : "include",
 ### 14. iOS Version Out of Sync with Android
 
 **Symptom:**
-App Store Connect rejects the archive or users see `v1.0` on iOS while the Android Play Store shows `v1.0.4`. Inconsistent version display across platforms.
+App Store Connect rejects the archive or users see `v1.0` on iOS while the Android Play Store shows `v1.0.5`. Inconsistent version display across platforms.
 
 **Root Cause:** The iOS `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `ios/App/App.xcodeproj/project.pbxproj` are not automatically updated when the Android `versionCode`/`versionName` in `android/app/build.gradle` is bumped. They must be updated manually in Xcode.
 
 **Fix:** Before every iOS App Store build, open Xcode (`npx cap open ios`), select the App target, go to **General** → **Identity**, and update:
-- **Version** (MARKETING_VERSION) — set to match Android `versionName` (e.g. `1.0.4`)
-- **Build** (CURRENT_PROJECT_VERSION) — set to match Android `versionCode` (e.g. `5`)
+- **Version** (MARKETING_VERSION) — set to match Android `versionName` (e.g. `1.0.5`)
+- **Build** (CURRENT_PROJECT_VERSION) — set to match Android `versionCode` (e.g. `6`)
 
-**Current state:** iOS shows `1.0` / build `1`; Android is `1.0.4` / versionCode `5`. These need to be aligned before the next iOS App Store submission.
+**Current state:** iOS shows `1.0` / build `1`; Android is `1.0.5` / versionCode `6`. These need to be aligned before the next iOS App Store submission.
 
 **Prevention:** Add "Sync iOS version in Xcode" as a step in your iOS release checklist alongside the Android build step.
 
@@ -434,7 +436,7 @@ The token '&&' is not a valid statement separator in this version.
 - Output directory is `dist/public`
 - API routes live in `api/trpc/[trpc].ts` (serverless function)
 - ICOP data is served statically from `client/public/` to avoid serverless size limits
-- Environment variables needed: `DATABASE_URL` (optional), `CLERK_*`, `UPSTASH_*`, `STRIPE_*`, `REVENUECAT_WEBHOOK_AUTH`
+- Environment variables needed: `DATABASE_URL` (optional), `CLERK_*`, `UPSTASH_*`, `STRIPE_*`, `REVENUECAT_WEBHOOK_AUTH`, `FIREBASE_ADMIN_CREDENTIALS`, `CRON_SECRET`
 
 ### Stripe Production Config (Live Mode)
 
@@ -446,10 +448,19 @@ The token '&&' is not a valid statement separator in this version.
 | `STRIPE_PRICE_ANNUAL` | Live Price ID for annual plan |
 | `STRIPE_PRICE_LIFETIME` | Live Price ID for lifetime plan |
 
+### Push Notifications Config
+
+| Variable | Description |
+|---|---|
+| `FIREBASE_ADMIN_CREDENTIALS` | Full Firebase service account JSON — from Firebase Console → Project Settings → Service Accounts → Generate new private key. Paste the entire JSON value. |
+| `CRON_SECRET` | Random secret string (e.g. `openssl rand -hex 32`) — shared between Vercel's cron job trigger and the `/api/push/send` endpoint to authenticate the request. |
+
+Vercel cron job: `api/cron/moonAlerts.ts` runs daily at `0 8 * * *` UTC. It sends push alerts on the 29th Hijri night, full moons, blue moons, and lunar eclipses.
+
 Webhook endpoint: `https://moon-dashboard-one.vercel.app/api/stripe/webhook`
 
 > **Switching to test mode:** Replace all `STRIPE_*` vars in Vercel with `sk_test_...` equivalents and redeploy.
 
 ---
 
-*Last updated: February 28, 2026 (Round 40 — all phases complete)*
+*Last updated: March 2, 2026 (Round 41 — all phases complete)*

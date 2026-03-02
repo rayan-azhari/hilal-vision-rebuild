@@ -565,7 +565,7 @@ The unit test suite covers **144 tests across 9 test files**. All tests import d
 
 | Test File | Tests | Coverage Area |
 |---|---|---|
-| `server/astronomy.test.ts` | 31 | Yallop Q-value, crescent width, Hijri conversion, degree/radian, best-time |
+| `server/astronomy.test.ts` | 42 | Yallop Q-value, crescent width, Hijri conversion, degree/radian, best-time, eclipse prediction, atmospheric refraction |
 | `server/calendar.test.ts` | 20 | All 3 Hijri calendar engines, cross-engine consistency, Umm al-Qura, month names |
 | `server/visibility.test.ts` | 41 | Sunset computation, Yallop/Odeh classification boundaries, visibility grid, moon phase, new-moon finder |
 | `api/_cors.test.ts` | 10 | CORS origin whitelisting — allowed origins, blocked origins, Capacitor, preflight |
@@ -720,4 +720,4 @@ Hilal Vision uses a **soft paywall** model ("Approach C"): all features are visi
 | Tiered Developer API | 🔮 Future | Rate-limited API keys with usage-based pricing |
 | Mosque Widget | 🔮 Future | Embeddable iframe for mosques ($10-$20/month B2B) |
 
-*Documentation updated February 28, 2026 (Round 40 — all 8 phases complete: security hardening, CI/quality, DB backend, science accuracy, test expansion to 133 tests, UX polish, push notifications, production hardening + launch). For the latest feature status, see `docs/PHASE_PLAN_ROUND40.md`.*
+*Documentation updated March 2, 2026 (Round 41 — all 8 phases complete: security hardening, scientific accuracy, accessibility, performance, user engagement, docs overhaul, testing expansion, cleanup. 144 unit tests across 9 files.)*

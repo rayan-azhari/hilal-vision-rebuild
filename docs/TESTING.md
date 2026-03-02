@@ -48,7 +48,7 @@ Tests live in `server/**/*.test.ts` and `api/**/*.test.ts` and run in a Node env
 
 ### Test Files
 
-#### `server/astronomy.test.ts` — 31 tests
+#### `server/astronomy.test.ts` — 42 tests
 
 Original test suite covering the core astronomical primitives:
 
@@ -260,4 +260,4 @@ test("my page feature works", async ({ page }) => {
 
 ---
 
-*Last updated: February 28, 2026 (Round 40 — all phases complete)*
+*Last updated: March 2, 2026 (Round 41 — all phases complete)*
