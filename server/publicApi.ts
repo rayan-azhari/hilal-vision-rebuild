@@ -28,7 +28,13 @@ async function applyRateLimit(req: any, res: any): Promise<boolean> {
     const ip = forwarded
         ? forwarded.split(",").map((s: string) => s.trim()).at(-1) ?? "unknown"
         : req.socket?.remoteAddress ?? "unknown";
-    const { success, limit, remaining, reset } = await rl.limit(ip);
+    let result: { success: boolean; limit: number; remaining: number; reset: number };
+    try {
+        result = await rl.limit(ip);
+    } catch {
+        return false; // Fail open — skip rate limiting if Redis is unreachable
+    }
+    const { success, limit, remaining, reset } = result;
     res.set("X-RateLimit-Limit", String(limit));
     res.set("X-RateLimit-Remaining", String(remaining));
     res.set("X-RateLimit-Reset", String(reset));

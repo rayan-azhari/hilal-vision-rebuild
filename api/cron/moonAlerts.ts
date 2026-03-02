@@ -15,6 +15,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { ENV } from "../../server/_core/env.js";
 import { getUmmAlQuraHijri, getMoonPhaseInfo, predictLunarEclipse } from "../../shared/astronomy.js";
 import { setCorsHeaders } from "../_cors.js";
+import { Redis } from "@upstash/redis";
 
 // Use Vercel's auto-provisioned production URL env var; fall back to the canonical domain.
 const SEND_URL = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? "moon-dashboard-one.vercel.app"}/api/push/send`;
@@ -59,6 +60,17 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     const today = new Date();
     const alerts: string[] = [];
+
+    // Keep Upstash Redis alive — ping once per day so the free-tier DB isn't archived
+    try {
+        const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+        const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+        if (upstashUrl && upstashToken) {
+            await new Redis({ url: upstashUrl, token: upstashToken }).ping();
+        }
+    } catch {
+        // Non-fatal — rate limiting still works on next real request
+    }
 
     try {
         // ── 1. 29th Hijri night alert ──────────────────────────────────────────
