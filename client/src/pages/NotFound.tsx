@@ -1,8 +1,10 @@
 import { useLocation } from "wouter";
 import { AlertCircle, Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div
@@ -36,13 +38,13 @@ export default function NotFound() {
           className="text-xl font-semibold mb-4"
           style={{ color: "var(--foreground)" }}
         >
-          Page Not Found
+          {t("notFound.heading")}
         </h2>
 
         <p className="mb-8 leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-          Sorry, the page you are looking for doesn&apos;t exist.
+          {t("notFound.message")}
           <br />
-          It may have been moved or deleted.
+          {t("notFound.detail")}
         </p>
 
         <button
@@ -54,7 +56,7 @@ export default function NotFound() {
           }}
         >
           <Home className="w-4 h-4" />
-          Go Home
+          {t("notFound.goHome")}
         </button>
       </div>
     </div>

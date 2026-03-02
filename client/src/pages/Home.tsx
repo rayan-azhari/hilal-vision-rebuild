@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { SEO } from "@/components/SEO";
-import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Star, Heart, Crown } from "lucide-react";
+import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Heart, Crown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getMoonPhaseInfo, gregorianToHijri, formatTime, HIJRI_MONTHS } from "@/lib/astronomy";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
@@ -10,57 +10,24 @@ import { ShareButton } from "@/components/ShareButton";
 import { SightingFeed } from "@/components/SightingFeed";
 import { TonightCard } from "@/components/TonightCard";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useTranslation } from "react-i18next";
 
-const features = [
-  {
-    href: "/globe",
-    icon: Globe,
-    title: "3D Globe",
-    titleAr: "الكرة الأرضية",
-    desc: "Interactive globe with real-time day/night terminator and moon visibility overlay",
-    color: "#60a5fa",
-  },
-  {
-    href: "/map",
-    icon: Map,
-    title: "Visibility Map",
-    titleAr: "خريطة الرؤية",
-    desc: "Flat world map with time slider showing crescent visibility predictions globally",
-    color: "#4ade80",
-  },
-  {
-    href: "/moon",
-    icon: Moon,
-    title: "Moon Phase",
-    titleAr: "أطوار القمر",
-    desc: "Current lunar phase, illumination, age, and upcoming moon events",
-    color: "#facc15",
-  },
-  {
-    href: "/calendar",
-    icon: Calendar,
-    title: "Hijri Calendar",
-    titleAr: "التقويم الهجري",
-    desc: "Islamic calendar with Gregorian comparison and upcoming Islamic dates",
-    color: "#c084fc",
-  },
-  {
-    href: "/horizon",
-    icon: Compass,
-    title: "Horizon View",
-    titleAr: "منظر الأفق",
-    desc: "Local horizon simulator showing moon position relative to the setting sun",
-    color: "#fb923c",
-  },
-  {
-    href: "/archive",
-    icon: Archive,
-    title: "Archive",
-    titleAr: "الأرشيف",
-    desc: "Crescent visibility maps for all Islamic months from 1438 to 1465 AH",
-    color: "#94a3b8",
-  },
+const FEATURE_DEFS = [
+  { href: "/globe",    icon: Globe,    key: "globe",    color: "#60a5fa" },
+  { href: "/map",      icon: Map,      key: "map",      color: "#4ade80" },
+  { href: "/moon",     icon: Moon,     key: "moon",     color: "#facc15" },
+  { href: "/calendar", icon: Calendar, key: "calendar", color: "#c084fc" },
+  { href: "/horizon",  icon: Compass,  key: "horizon",  color: "#fb923c" },
+  { href: "/archive",  icon: Archive,  key: "archive",  color: "#94a3b8" },
 ];
+
+const ZONE_LEGEND = [
+  { zone: "A", color: "#4ade80", q: "q ≥ +0.216" },
+  { zone: "B", color: "#facc15", q: "q ≥ −0.014" },
+  { zone: "C", color: "#fb923c", q: "q ≥ −0.160" },
+  { zone: "D", color: "#f87171", q: "q ≥ −0.232" },
+  { zone: "E", color: "#6b7280", q: "q < −0.232" },
+] as const;
 
 function MoonSVG({ phase }: { phase: number }) {
   // Draw a crescent/gibbous moon based on phase (0–1)
@@ -102,6 +69,7 @@ export default function Home() {
   const [now] = useState(() => new Date());
   const [moonInfo] = useState(() => getMoonPhaseInfo(now));
   const [hijri] = useState(() => gregorianToHijri(now));
+  const { t } = useTranslation();
 
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -162,7 +130,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg md:text-xl mb-8 max-w-xl leading-relaxed font-light mt-4" style={{ color: "var(--muted-foreground)" }}>
-              A precision astronomical platform for predicting and visualising Islamic crescent moon sightings worldwide - powered by Yallop & Odeh criteria.
+              {t("home.tagline")}
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -175,7 +143,7 @@ export default function Home() {
                 }}
               >
                 <Map className="w-4 h-4" />
-                Visibility Map
+                {t("home.visibilityMap")}
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link href="/moon"
@@ -187,7 +155,7 @@ export default function Home() {
                 }}
               >
                 <Moon className="w-4 h-4" style={{ color: "#facc15", filter: "drop-shadow(0 0 6px #facc15)" }} />
-                Moon Phases
+                {t("home.moonPhases")}
               </Link>
             </div>
           </div>
@@ -206,15 +174,15 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Moon phase */}
             <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.2s' }}>
-              <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Phase</div>
+              <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{t("home.moonPhase")}</div>
               <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                 {moonInfo.phaseName}
               </div>
-              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>{Math.round(moonInfo.illuminatedFraction * 100)}% illuminated</div>
+              <div className="text-[10px]" style={{ color: "var(--gold-dim)" }}>{Math.round(moonInfo.illuminatedFraction * 100)}% {t("home.illuminated")}</div>
             </div>
             {/* Hijri date */}
             <div className="breezy-card text-center !p-4 !rounded-xl !border-transparent glass-card animate-breezy-enter" style={{ animationDelay: '0.3s' }}>
-              <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Hijri Date</div>
+              <div className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{t("home.hijriDate")}</div>
               <div className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
                 {hijri.day} {hijri.monthName}
               </div>
@@ -241,10 +209,10 @@ export default function Home() {
       <section className="py-12 border-t mt-4" style={{ borderColor: 'var(--border)' }}>
         <div className="container">
           <h3 className="text-xl font-medium mb-6" style={{ color: "var(--foreground)" }}>
-            Explore Features
+            {t("home.exploreFeatures")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map(({ href, icon: Icon, title, titleAr, desc, color }, i) => (
+            {FEATURE_DEFS.map(({ href, icon: Icon, key, color }, i) => (
               <Link key={href} href={href}>
                 <div
                   className="breezy-card group h-full flex flex-col items-start cursor-pointer animate-breezy-enter hover:-translate-y-1 transition-transform"
@@ -259,12 +227,13 @@ export default function Home() {
                     </div>
                     <div className="flex-1 flex items-baseline justify-between">
                       <h4 className="text-base font-medium" style={{ color: "var(--foreground)" }}>
-                        {title}
+                        {t(`home.features.${key}.title`)}
                       </h4>
-                      <span className="text-[11px] font-arabic" style={{ color: "var(--gold-dim)" }}>{titleAr}</span>
                     </div>
                   </div>
-                  <p className="text-xs leading-relaxed flex-1" style={{ color: "var(--muted-foreground)" }}>{desc}</p>
+                  <p className="text-xs leading-relaxed flex-1" style={{ color: "var(--muted-foreground)" }}>
+                    {t(`home.features.${key}.desc`)}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -277,20 +246,14 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-medium mb-2" style={{ color: "var(--foreground)" }}>
-              Visibility Criteria
+              {t("home.visibilityCriteria")}
             </h2>
             <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
-              Based on the Yallop (1997) q-value criterion for naked-eye crescent sighting
+              {t("home.visibilityCriteriaDesc")}
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
-            {[
-              { zone: "A", label: "Easily Visible", color: "#4ade80", q: "q ≥ +0.216" },
-              { zone: "B", label: "Visible", color: "#facc15", q: "q ≥ −0.014" },
-              { zone: "C", label: "Optical Aid", color: "#fb923c", q: "q ≥ −0.160" },
-              { zone: "D", label: "Telescope Only", color: "#f87171", q: "q ≥ −0.232" },
-              { zone: "E", label: "Not Visible", color: "#6b7280", q: "q < −0.232" },
-            ].map(({ zone, label, color, q }) => (
+            {ZONE_LEGEND.map(({ zone, color, q }) => (
               <div
                 key={zone}
                 className="p-4 rounded-xl text-center"
@@ -305,7 +268,9 @@ export default function Home() {
                 >
                   {zone}
                 </div>
-                <div className="text-xs font-medium mb-1" style={{ color: "var(--foreground)" }}>{label}</div>
+                <div className="text-xs font-medium mb-1" style={{ color: "var(--foreground)" }}>
+                  {t(`zones.${zone}`)}
+                </div>
                 <div className="text-xs font-mono" style={{ color }}>{q}</div>
               </div>
             ))}
@@ -332,13 +297,13 @@ export default function Home() {
               </div>
               <div className="flex-1 text-center md:text-left">
                 <div className="text-xs font-semibold mb-1" style={{ color: "var(--gold)" }}>
-                  صدقة جارية — Sadaqah Jariyah
+                  {t("home.sadaqahLabel")}
                 </div>
                 <h3 className="text-base font-medium mb-1" style={{ color: "var(--foreground)" }}>
-                  Help keep Hilal Vision accessible and ad-free
+                  {t("home.sadaqahBanner")}
                 </h3>
                 <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                  Your support — through Pro or a one-time donation — keeps this platform running for 1.8 billion Muslims worldwide.
+                  {t("home.sadaqahDesc")}
                 </p>
               </div>
               <div
@@ -349,7 +314,7 @@ export default function Home() {
                 }}
               >
                 <Crown className="w-4 h-4" />
-                Support Us
+                {t("home.supportUs")}
                 <ArrowRight className="w-4 h-4" />
               </div>
             </div>

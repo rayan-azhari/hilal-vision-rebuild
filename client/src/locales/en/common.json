@@ -58,8 +58,205 @@
         "tagline": "A precision astronomical platform for predicting and visualising Islamic crescent moon sightings worldwide - powered by Yallop & Odeh criteria.",
         "exploreGlobe": "Explore Globe",
         "visibilityMap": "Visibility Map",
+        "moonPhases": "Moon Phases",
         "exploreFeatures": "Explore Features",
-        "visibilityCriteria": "Visibility Criteria"
+        "visibilityCriteria": "Visibility Criteria",
+        "moonPhase": "Moon Phase",
+        "illuminated": "illuminated",
+        "hijriDate": "Hijri Date",
+        "visibilityCriteriaDesc": "Based on the Yallop (1997) q-value criterion for naked-eye crescent sighting",
+        "sadaqahLabel": "صدقة جارية — Sadaqah Jariyah",
+        "sadaqahBanner": "Help keep Hilal Vision accessible and ad-free",
+        "sadaqahDesc": "Your support — through Pro or a one-time donation — keeps this platform running for 1.8 billion Muslims worldwide.",
+        "supportUs": "Support Us",
+        "features": {
+            "globe": {
+                "title": "3D Globe",
+                "desc": "Interactive globe with real-time day/night terminator and moon visibility overlay"
+            },
+            "map": {
+                "title": "Visibility Map",
+                "desc": "Flat world map with time slider showing crescent visibility predictions globally"
+            },
+            "moon": {
+                "title": "Moon Phase",
+                "desc": "Current lunar phase, illumination, age, and upcoming moon events"
+            },
+            "calendar": {
+                "title": "Hijri Calendar",
+                "desc": "Islamic calendar with Gregorian comparison and upcoming Islamic dates"
+            },
+            "horizon": {
+                "title": "Horizon View",
+                "desc": "Local horizon simulator showing moon position relative to the setting sun"
+            },
+            "archive": {
+                "title": "Archive",
+                "desc": "Crescent visibility maps for all Islamic months from 1438 to 1465 AH"
+            }
+        }
+    },
+    "tonight": {
+        "header": "Tonight's Prediction · {{location}}",
+        "question": "Can you see the crescent?",
+        "sunset": "Sunset",
+        "moonset": "Moonset",
+        "arc": "Arc",
+        "viewMap": "View full visibility map",
+        "zones": {
+            "A": { "label": "Easily Visible", "answer": "Yes — naked eye" },
+            "B": { "label": "Visible", "answer": "Likely visible" },
+            "C": { "label": "Optical Aid", "answer": "Binoculars needed" },
+            "D": { "label": "Telescope Only", "answer": "Telescope only" },
+            "E": { "label": "Not Visible", "answer": "Not visible tonight" },
+            "F": { "label": "No Data", "answer": "Below horizon" }
+        }
+    },
+    "feed": {
+        "title": "Live Sighting Feed",
+        "live": "Live",
+        "paused": "Paused",
+        "enableNotif": "Enable Notifications",
+        "pauseRefresh": "Pause auto-refresh",
+        "resumeRefresh": "Resume auto-refresh",
+        "exportCsv": "Export CSV",
+        "exportJson": "Export JSON",
+        "noReports": "No reports yet tonight",
+        "beFirst": "Be the first observer to share what you see",
+        "reportSighting": "Report a Sighting",
+        "submitTitle": "Submit Crescent Sighting",
+        "submitDesc": "Share your live observation. Environmental conditions will be fetched automatically.",
+        "seen": "🟢 Seen",
+        "uncertain": "🔵 Uncertain",
+        "notSeen": "⚪ Not Seen",
+        "secsAgo": "{{count}}s ago",
+        "subscribedSuccess": "Successfully subscribed to notifications!",
+        "subscribeFailed": "Failed to subscribe to notifications.",
+        "permissionDenied": "Permission denied or browser unsupported."
+    },
+    "modal": {
+        "proSubtitle": "Observatory-grade tools for serious moon observers",
+        "closeModal": "Close upgrade modal",
+        "loadingPrices": "Loading store prices…",
+        "processingPurchase": "Processing purchase…",
+        "redirectCheckout": "Redirecting to checkout…",
+        "sadaqahStripe": "Sadaqah Jariyah · Secure checkout via Stripe",
+        "sadaqahNative": "Sadaqah Jariyah · Secure checkout via App Store / Google Play",
+        "features": {
+            "globe": "Interactive 3D Globe",
+            "cloud": "Live Cloud Cover Overlay",
+            "atmo": "Atmospheric Overrides (Temp, Pressure)",
+            "bestTime": "Best Time to Observe",
+            "archive": "Full ICOP Archive (1438–1465 AH)",
+            "alerts": "Crescent Visibility Alerts (coming soon)"
+        },
+        "plans": {
+            "monthly": "Monthly",
+            "annual": "Annual",
+            "lifetime": "Lifetime",
+            "perMo": "/mo",
+            "perYr": "/yr",
+            "once": "once",
+            "save58": "Save 58%",
+            "bestValue": "Best Value"
+        }
+    },
+    "support": {
+        "sadaqahLabel": "صدقة جارية — Sadaqah Jariyah",
+        "heroTitle": "Help Keep Hilal Vision",
+        "heroTitleHighlight": "Accessible to All",
+        "heroDesc": "Hilal Vision serves 1.8 billion Muslims who rely on the lunar calendar. Your support — whether through Pro or a one-time contribution — helps keep the platform running, accurate, and ad-free. In the Islamic tradition, supporting beneficial knowledge is considered",
+        "sadaqahArabic": "صدقة جارية",
+        "sadaqahMeaning": "ongoing charity",
+        "upgradePro": "Upgrade to Pro",
+        "currentlyPro": "You're Pro ✓",
+        "oneTimeDonation": "One-Time Donation",
+        "whySupport": "Why Your Support Matters",
+        "keepRunning": "Keep It Running",
+        "keepRunningDesc": "Server costs, API calls, weather data, and real-time ephemeris computation — science isn't free.",
+        "keepAccurate": "Keep It Accurate",
+        "keepAccurateDesc": "Continuous calibration against ICOP observations, new criterion research, and multi-engine calendar validation.",
+        "keepFree": "Keep It Ad-Free",
+        "keepFreeDesc": "Hilal Vision aims to be a clean, respectful experience. Your support replaces the need for intrusive advertising.",
+        "freeVsPro": "Free vs. Pro",
+        "freeVsProDesc": "Every feature is visible from Day 1. Pro unlocks deeper interaction and advanced tools.",
+        "tableFeature": "Feature",
+        "tableFree": "🟢 Free",
+        "choosePlan": "Choose Your Plan",
+        "planSubtitle": "Unlock every feature. Support Islamic astronomy.",
+        "mostPopular": "Most Popular",
+        "getStarted": "Get Started",
+        "activePlan": "Active ✓",
+        "donationTitle": "One-Time Donation",
+        "sadaqahOngoing": "صدقة جارية — Ongoing Charity",
+        "donationDesc": "Not ready for Pro? A one-time donation of any amount helps cover server costs and keeps Hilal Vision freely accessible to communities worldwide. Donors who give $10+ receive a",
+        "goldenCrescent": "Golden Crescent",
+        "donationPatron": "patron badge on their sighting reports.",
+        "secureStripe": "Secure payment via Stripe · 🔒 End-to-end encrypted",
+        "welcomePro": "Welcome to Hilal Vision Pro! جزاك الله خيراً 🌙",
+        "thanksDonation": "Thank you for your donation! جزاك الله خيراً 🤲",
+        "paymentCancelled": "Payment canceled — no charge was made.",
+        "features": {
+            "map2d": "2D Visibility Map",
+            "globe3d": "3D Interactive Globe",
+            "moonBasic": "Moon Phase (Basic)",
+            "altChart": "Sun & Moon Altitude Chart",
+            "skyDome": "Sky Dome",
+            "ephemeris": "Ephemeris Data",
+            "hijriUmm": "Hijri Calendar (Umm al-Qura)",
+            "astroTabular": "Astronomical & Tabular Engines",
+            "archiveRecent": "ICOP Archive (Recent 3 years)",
+            "archiveHistorical": "ICOP Archive (Historical)",
+            "horizonView": "Horizon View",
+            "sightings": "Sighting Reports",
+            "pushNotif": "Push Notifications",
+            "adFreeExp": "Ad-Free Experience"
+        },
+        "access": {
+            "fullAccess": "Full access",
+            "locked": "Locked",
+            "blurredPreview": "Blurred preview",
+            "fullInteractive": "Full interactive",
+            "fullDashboard": "Full dashboard",
+            "moonFree": "Illumination, age, phase",
+            "ephemerisPro": "Sunrise, sunset, moonrise, moonset",
+            "allEngines": "All 3 calendar engines",
+            "archiveFreeTier": "1463-1465 AH",
+            "archiveProTier": "Full 1438-1465 AH",
+            "archiveHistorical": "28 years of data",
+            "sightingFree": "Submit freely",
+            "sightingPro": "Submit + Patron badge",
+            "pushFree": "None",
+            "pushPro": "Crescent alerts",
+            "adFree": "Ethical ads",
+            "adPro": "Fully ad-free"
+        },
+        "plans": {
+            "monthly": {
+                "name": "Monthly",
+                "period": "/month",
+                "desc": "Try Pro with no commitment",
+                "savings": ""
+            },
+            "annual": {
+                "name": "Annual",
+                "period": "/year",
+                "desc": "Best recurring value",
+                "savings": "Save 58%"
+            },
+            "lifetime": {
+                "name": "Lifetime",
+                "period": "one-time",
+                "desc": "Unlock forever — the Astronomer plan",
+                "savings": "Best Value"
+            }
+        }
+    },
+    "notFound": {
+        "heading": "Page Not Found",
+        "message": "Sorry, the page you are looking for doesn't exist.",
+        "detail": "It may have been moved or deleted.",
+        "goHome": "Go Home"
     },
     "moon": {
         "moonPhaseDashboard": "Moon Phase Dashboard",

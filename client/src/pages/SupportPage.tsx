@@ -25,69 +25,64 @@ import {
 } from "lucide-react";
 import { useProTier } from "@/contexts/ProTierContext";
 import { usePlanSelection } from "@/hooks/usePlanSelection";
+import { useTranslation } from "react-i18next";
 
 /* ─── Feature Access Matrix ────────────────────────────────────────────── */
 
 const FEATURE_MATRIX: Array<{
-    feature: string;
+    featureKey: string;
     icon: React.ElementType;
-    free: string;
-    pro: string;
+    freeKey: string;
+    proKey: string;
     freeOk: boolean;
 }> = [
-        { feature: "2D Visibility Map", icon: Map, free: "Full access", pro: "Full access", freeOk: true },
-        { feature: "3D Interactive Globe", icon: Globe, free: "Locked", pro: "Full interactive", freeOk: false },
-        { feature: "Moon Phase (Basic)", icon: Moon, free: "Illumination, age, phase", pro: "Full dashboard", freeOk: true },
-        { feature: "Sun & Moon Altitude Chart", icon: Clock, free: "Full access", pro: "Full access", freeOk: true },
-        { feature: "Sky Dome", icon: Eye, free: "Blurred preview", pro: "Full interactive", freeOk: false },
-        { feature: "Ephemeris Data", icon: Clock, free: "Blurred preview", pro: "Sunrise, sunset, moonrise, moonset", freeOk: false },
-        { feature: "Hijri Calendar (Umm al-Qura)", icon: Calendar, free: "Full access", pro: "Full access", freeOk: true },
-        { feature: "Astronomical & Tabular Engines", icon: Sparkles, free: "Locked", pro: "All 3 calendar engines", freeOk: false },
-        { feature: "ICOP Archive (Recent 3 years)", icon: Archive, free: "1463-1465 AH", pro: "Full 1438-1465 AH", freeOk: true },
-        { feature: "ICOP Archive (Historical)", icon: Archive, free: "Locked", pro: "28 years of data", freeOk: false },
-        { feature: "Horizon View", icon: Compass, free: "Full access", pro: "Full access", freeOk: true },
-        { feature: "Sighting Reports", icon: Star, free: "Submit freely", pro: "Submit + Patron badge", freeOk: true },
-        { feature: "Push Notifications", icon: Bell, free: "None", pro: "Crescent alerts", freeOk: false },
-        { feature: "Ad-Free Experience", icon: Ban, free: "Ethical ads", pro: "Fully ad-free", freeOk: false },
+        { featureKey: "map2d",           icon: Map,      freeKey: "fullAccess",     proKey: "fullAccess",     freeOk: true },
+        { featureKey: "globe3d",          icon: Globe,    freeKey: "locked",         proKey: "fullInteractive", freeOk: false },
+        { featureKey: "moonBasic",        icon: Moon,     freeKey: "moonFree",       proKey: "fullDashboard",   freeOk: true },
+        { featureKey: "altChart",         icon: Clock,    freeKey: "fullAccess",     proKey: "fullAccess",     freeOk: true },
+        { featureKey: "skyDome",          icon: Eye,      freeKey: "blurredPreview", proKey: "fullInteractive", freeOk: false },
+        { featureKey: "ephemeris",        icon: Clock,    freeKey: "blurredPreview", proKey: "ephemerisPro",   freeOk: false },
+        { featureKey: "hijriUmm",         icon: Calendar, freeKey: "fullAccess",     proKey: "fullAccess",     freeOk: true },
+        { featureKey: "astroTabular",     icon: Sparkles, freeKey: "locked",         proKey: "allEngines",     freeOk: false },
+        { featureKey: "archiveRecent",    icon: Archive,  freeKey: "archiveFreeTier",proKey: "archiveProTier", freeOk: true },
+        { featureKey: "archiveHistorical",icon: Archive,  freeKey: "locked",         proKey: "archiveHistorical",freeOk: false },
+        { featureKey: "horizonView",      icon: Compass,  freeKey: "fullAccess",     proKey: "fullAccess",     freeOk: true },
+        { featureKey: "sightings",        icon: Star,     freeKey: "sightingFree",   proKey: "sightingPro",    freeOk: true },
+        { featureKey: "pushNotif",        icon: Bell,     freeKey: "pushFree",       proKey: "pushPro",        freeOk: false },
+        { featureKey: "adFreeExp",        icon: Ban,      freeKey: "adFree",         proKey: "adPro",          freeOk: false },
     ];
 
 /* ─── Pricing Plans ────────────────────────────────────────────────────── */
 
-const PLANS = [
-    {
-        id: "monthly",
-        name: "Monthly",
-        price: "$2.99",
-        period: "/month",
-        desc: "Try Pro with no commitment",
-        savings: null,
-        popular: false,
-    },
-    {
-        id: "annual",
-        name: "Annual",
-        price: "$14.99",
-        period: "/year",
-        desc: "Best recurring value",
-        savings: "Save 58%",
-        popular: true,
-    },
-    {
-        id: "lifetime",
-        name: "Lifetime",
-        price: "$49.99",
-        period: "one-time",
-        desc: "Unlock forever — the Astronomer plan",
-        savings: "Best Value",
-        popular: false,
-    },
-];
+const PLAN_IDS = ["monthly", "annual", "lifetime"] as const;
+const PLAN_PRICES: Record<string, string> = {
+    monthly:  "$2.99",
+    annual:   "$14.99",
+    lifetime: "$49.99",
+};
+const PLAN_POPULAR: Record<string, boolean> = {
+    monthly:  false,
+    annual:   true,
+    lifetime: false,
+};
+const PLAN_HAS_SAVINGS: Record<string, boolean> = {
+    monthly:  false,
+    annual:   true,
+    lifetime: true,
+};
+
+const WHY_SUPPORT = [
+    { icon: Zap,   key: "keepRunning", color: "#fb923c" },
+    { icon: Globe, key: "keepAccurate", color: "#60a5fa" },
+    { icon: Heart, key: "keepFree",    color: "#f472b6" },
+] as const;
 
 /* ─── Page ─────────────────────────────────────────────────────────────── */
 
 export default function SupportPage() {
     const { isPremium, setShowUpgradeModal, startCheckout, checkoutLoading, isNative } = useProTier();
     const { nativePackages, handleSelectPlan } = usePlanSelection();
+    const { t } = useTranslation();
     const [location] = useLocation();
 
     // Parse success / cancel from Stripe redirect query params
@@ -125,9 +120,9 @@ export default function SupportPage() {
                         border: "1px solid color-mix(in oklch, var(--gold) 30%, transparent)",
                     }}
                 >
-                    {banner === "pro" && <><PartyPopper className="w-4 h-4" /> Welcome to Hilal Vision Pro! جزاك الله خيراً 🌙</>}
-                    {banner === "donated" && <><Heart className="w-4 h-4" /> Thank you for your donation! جزاك الله خيراً 🤲</>}
-                    {banner === "canceled" && <>Payment canceled — no charge was made.</>}
+                    {banner === "pro" && <><PartyPopper className="w-4 h-4" /> {t("support.welcomePro")}</>}
+                    {banner === "donated" && <><Heart className="w-4 h-4" /> {t("support.thanksDonation")}</>}
+                    {banner === "canceled" && <>{t("support.paymentCancelled")}</>}
                     <button onClick={() => setBanner(null)} className="ml-2 opacity-60 hover:opacity-100">
                         <X className="w-3 h-3" />
                     </button>
@@ -160,7 +155,7 @@ export default function SupportPage() {
                     >
                         <Heart className="w-4 h-4" style={{ color: "var(--gold)" }} />
                         <span className="text-xs font-semibold" style={{ color: "var(--gold)" }}>
-                            صدقة جارية — Sadaqah Jariyah
+                            {t("support.sadaqahLabel")}
                         </span>
                     </div>
 
@@ -168,19 +163,17 @@ export default function SupportPage() {
                         className="text-4xl md:text-5xl font-light tracking-tight mb-6 leading-tight"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Help Keep Hilal Vision
+                        {t("support.heroTitle")}
                         <br />
-                        <span style={{ color: "var(--gold)" }}>Accessible to All</span>
+                        <span style={{ color: "var(--gold)" }}>{t("support.heroTitleHighlight")}</span>
                     </h1>
                     <p
                         className="text-base leading-relaxed font-light max-w-xl mx-auto mb-8"
                         style={{ color: "var(--muted-foreground)" }}
                     >
-                        Hilal Vision serves 1.8 billion Muslims who rely on the lunar calendar. Your support —
-                        whether through Pro or a one-time contribution — helps keep the platform running,
-                        accurate, and ad-free. In the Islamic tradition, supporting beneficial knowledge is
-                        considered <em className="font-arabic" style={{ color: "var(--gold-dim)" }}>صدقة جارية</em>{" "}
-                        (ongoing charity).
+                        {t("support.heroDesc")}{" "}
+                        <em className="font-arabic" style={{ color: "var(--gold-dim)" }}>{t("support.sadaqahArabic")}</em>{" "}
+                        ({t("support.sadaqahMeaning")}).
                     </p>
 
                     <div className="flex flex-wrap justify-center gap-3">
@@ -193,7 +186,7 @@ export default function SupportPage() {
                             }}
                         >
                             <Crown className="w-4 h-4" />
-                            {isPremium ? "You're Pro ✓" : "Upgrade to Pro"}
+                            {isPremium ? t("support.currentlyPro") : t("support.upgradePro")}
                         </button>
                         <a
                             href="#donate"
@@ -205,7 +198,7 @@ export default function SupportPage() {
                             }}
                         >
                             <Heart className="w-4 h-4" />
-                            One-Time Donation
+                            {t("support.oneTimeDonation")}
                         </a>
                     </div>
                 </div>
@@ -234,30 +227,11 @@ export default function SupportPage() {
                         className="text-2xl font-light mb-6 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Why Your Support Matters
+                        {t("support.whySupport")}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[
-                            {
-                                icon: Zap,
-                                title: "Keep It Running",
-                                desc: "Server costs, API calls, weather data, and real-time ephemeris computation — science isn't free.",
-                                color: "#fb923c",
-                            },
-                            {
-                                icon: Globe,
-                                title: "Keep It Accurate",
-                                desc: "Continuous calibration against ICOP observations, new criterion research, and multi-engine calendar validation.",
-                                color: "#60a5fa",
-                            },
-                            {
-                                icon: Heart,
-                                title: "Keep It Ad-Free",
-                                desc: "Hilal Vision aims to be a clean, respectful experience. Your support replaces the need for intrusive advertising.",
-                                color: "#f472b6",
-                            },
-                        ].map(({ icon: Icon, title, desc, color }) => (
-                            <div key={title} className="breezy-card flex flex-col gap-3">
+                        {WHY_SUPPORT.map(({ icon: Icon, key, color }) => (
+                            <div key={key} className="breezy-card flex flex-col gap-3">
                                 <div
                                     className="w-10 h-10 rounded-xl flex items-center justify-center"
                                     style={{ background: `color-mix(in oklch, ${color} 15%, transparent)` }}
@@ -265,10 +239,10 @@ export default function SupportPage() {
                                     <Icon className="w-5 h-5" style={{ color }} />
                                 </div>
                                 <h3 className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
-                                    {title}
+                                    {t(`support.${key}`)}
                                 </h3>
                                 <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-                                    {desc}
+                                    {t(`support.${key}Desc`)}
                                 </p>
                             </div>
                         ))}
@@ -283,10 +257,10 @@ export default function SupportPage() {
                         className="text-2xl font-light mb-2 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Free vs. Pro
+                        {t("support.freeVsPro")}
                     </h2>
                     <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-                        Every feature is visible from Day 1. Pro unlocks deeper interaction and advanced tools.
+                        {t("support.freeVsProDesc")}
                     </p>
 
                     <div className="overflow-x-auto">
@@ -297,7 +271,7 @@ export default function SupportPage() {
                                         className="text-left py-3 px-3 font-semibold"
                                         style={{ color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}
                                     >
-                                        Feature
+                                        {t("support.tableFeature")}
                                     </th>
                                     <th
                                         className="text-center py-3 px-3 font-semibold"
@@ -307,7 +281,7 @@ export default function SupportPage() {
                                             minWidth: "120px",
                                         }}
                                     >
-                                        🟢 Free
+                                        {t("support.tableFree")}
                                     </th>
                                     <th
                                         className="text-center py-3 px-3 font-semibold"
@@ -324,9 +298,9 @@ export default function SupportPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {FEATURE_MATRIX.map(({ feature, icon: Icon, free, pro, freeOk }, i) => (
+                                {FEATURE_MATRIX.map(({ featureKey, icon: Icon, freeKey, proKey, freeOk }, i) => (
                                     <tr
-                                        key={feature}
+                                        key={featureKey}
                                         style={{
                                             background:
                                                 i % 2 === 0
@@ -342,7 +316,9 @@ export default function SupportPage() {
                                                     className="w-3.5 h-3.5 flex-shrink-0"
                                                     style={{ color: "var(--gold-dim)" }}
                                                 />
-                                                <span style={{ color: "var(--foreground)" }}>{feature}</span>
+                                                <span style={{ color: "var(--foreground)" }}>
+                                                    {t(`support.features.${featureKey}`)}
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="py-3 px-3 text-center">
@@ -357,13 +333,17 @@ export default function SupportPage() {
                                                         }}
                                                     />
                                                 )}
-                                                <span style={{ color: "var(--muted-foreground)" }}>{free}</span>
+                                                <span style={{ color: "var(--muted-foreground)" }}>
+                                                    {t(`support.access.${freeKey}`)}
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="py-3 px-3 text-center">
                                             <div className="flex items-center justify-center gap-1.5">
                                                 <Check className="w-3.5 h-3.5" style={{ color: "var(--gold)" }} />
-                                                <span style={{ color: "var(--gold-dim)" }}>{pro}</span>
+                                                <span style={{ color: "var(--gold-dim)" }}>
+                                                    {t(`support.access.${proKey}`)}
+                                                </span>
                                             </div>
                                         </td>
                                     </tr>
@@ -381,17 +361,20 @@ export default function SupportPage() {
                         className="text-2xl font-light mb-2 tracking-wide text-center"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Choose Your Plan
+                        {t("support.choosePlan")}
                     </h2>
                     <p className="text-sm mb-10 text-center" style={{ color: "var(--muted-foreground)" }}>
-                        Unlock every feature. Support Islamic astronomy.
+                        {t("support.planSubtitle")}
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        {PLANS.map((plan) => {
-                            let displayPrice = plan.price;
+                        {PLAN_IDS.map((planId) => {
+                            const popular = PLAN_POPULAR[planId];
+                            const hasSavings = PLAN_HAS_SAVINGS[planId];
+
+                            let displayPrice = PLAN_PRICES[planId];
                             if (isNative && nativePackages.length > 0) {
-                                const nativePkg = nativePackages.find(p => p.identifier.toLowerCase().includes(plan.id) || p.packageType === plan.id.toUpperCase());
+                                const nativePkg = nativePackages.find(p => p.identifier.toLowerCase().includes(planId) || p.packageType === planId.toUpperCase());
                                 if (nativePkg) {
                                     displayPrice = nativePkg.product.priceString;
                                 }
@@ -399,18 +382,18 @@ export default function SupportPage() {
 
                             return (
                                 <div
-                                    key={plan.id}
+                                    key={planId}
                                     className="breezy-card flex flex-col items-center text-center relative overflow-hidden"
                                     style={{
-                                        border: plan.popular
+                                        border: popular
                                             ? "1px solid color-mix(in oklch, var(--gold) 40%, transparent)"
                                             : undefined,
-                                        background: plan.popular
+                                        background: popular
                                             ? "color-mix(in oklch, var(--gold) 4%, var(--space-mid))"
                                             : undefined,
                                     }}
                                 >
-                                    {plan.popular && (
+                                    {popular && (
                                         <div
                                             className="absolute top-0 left-0 right-0 py-1 text-[10px] font-bold uppercase tracking-widest"
                                             style={{
@@ -418,27 +401,27 @@ export default function SupportPage() {
                                                 color: "var(--space)",
                                             }}
                                         >
-                                            Most Popular
+                                            {t("support.mostPopular")}
                                         </div>
                                     )}
 
-                                    <div className={plan.popular ? "mt-6" : ""}>
+                                    <div className={popular ? "mt-6" : ""}>
                                         <h3
                                             className="text-base font-semibold mb-1"
                                             style={{ color: "var(--foreground)" }}
                                         >
-                                            {plan.name}
+                                            {t(`support.plans.${planId}.name`)}
                                         </h3>
                                         <div
                                             className="text-3xl font-bold mb-0.5"
-                                            style={{ color: plan.popular ? "var(--gold)" : "var(--foreground)" }}
+                                            style={{ color: popular ? "var(--gold)" : "var(--foreground)" }}
                                         >
                                             {displayPrice}
                                         </div>
                                         <div className="text-xs mb-3" style={{ color: "var(--muted-foreground)" }}>
-                                            {plan.period}
+                                            {t(`support.plans.${planId}.period`)}
                                         </div>
-                                        {plan.savings && (
+                                        {hasSavings && (
                                             <div
                                                 className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold mb-3"
                                                 style={{
@@ -446,21 +429,21 @@ export default function SupportPage() {
                                                     color: "var(--gold)",
                                                 }}
                                             >
-                                                {plan.savings}
+                                                {t(`support.plans.${planId}.savings`)}
                                             </div>
                                         )}
                                         <p
                                             className="text-xs mb-4 leading-relaxed"
                                             style={{ color: "var(--muted-foreground)" }}
                                         >
-                                            {plan.desc}
+                                            {t(`support.plans.${planId}.desc`)}
                                         </p>
                                         <button
-                                            onClick={() => handleSelectPlan(plan.id)}
+                                            onClick={() => handleSelectPlan(planId)}
                                             disabled={checkoutLoading || isPremium || (isNative && nativePackages.length === 0)}
                                             className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                             style={
-                                                plan.popular
+                                                popular
                                                     ? {
                                                         background:
                                                             "linear-gradient(135deg, var(--gold-glow), var(--gold))",
@@ -475,7 +458,7 @@ export default function SupportPage() {
                                                     }
                                             }
                                         >
-                                            {checkoutLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isPremium ? "Active ✓" : "Get Started"}
+                                            {checkoutLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : isPremium ? t("support.activePlan") : t("support.getStarted")}
                                         </button>
                                     </div>
                                 </div>
@@ -509,22 +492,21 @@ export default function SupportPage() {
                                 className="text-2xl font-light mb-2"
                                 style={{ color: "var(--foreground)" }}
                             >
-                                One-Time Donation
+                                {t("support.donationTitle")}
                             </h2>
                             <p
                                 className="text-sm font-arabic mb-1"
                                 style={{ color: "var(--gold-dim)" }}
                             >
-                                صدقة جارية — Ongoing Charity
+                                {t("support.sadaqahOngoing")}
                             </p>
                             <p
                                 className="text-xs leading-relaxed max-w-md mx-auto mb-6"
                                 style={{ color: "var(--muted-foreground)" }}
                             >
-                                Not ready for Pro? A one-time donation of any amount helps cover server costs and
-                                keeps Hilal Vision freely accessible to communities worldwide. Donors who give
-                                $10+ receive a <strong style={{ color: "var(--gold)" }}>Golden Crescent</strong> patron
-                                badge on their sighting reports.
+                                {t("support.donationDesc")}{" "}
+                                <strong style={{ color: "var(--gold)" }}>{t("support.goldenCrescent")}</strong>{" "}
+                                {t("support.donationPatron")}
                             </p>
 
                             <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
@@ -547,7 +529,7 @@ export default function SupportPage() {
                             </div>
 
                             <p className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>
-                                Secure payment via Stripe · 🔒 End-to-end encrypted
+                                {t("support.secureStripe")}
                             </p>
                         </div>
                     </div>

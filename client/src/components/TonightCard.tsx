@@ -3,18 +3,20 @@ import { Link } from "wouter";
 import { Sunset, Moon, Eye, ArrowRight } from "lucide-react";
 import { computeSunMoonAtSunset, formatTime, type VisibilityZone } from "@/lib/astronomy";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
+import { useTranslation } from "react-i18next";
 
-const ZONE_CONFIG: Record<VisibilityZone, { label: string; color: string; answer: string }> = {
-    A: { label: "Easily Visible", color: "#4ade80", answer: "Yes — naked eye" },
-    B: { label: "Visible",        color: "#facc15", answer: "Likely visible" },
-    C: { label: "Optical Aid",    color: "#fb923c", answer: "Binoculars needed" },
-    D: { label: "Telescope Only", color: "#f87171", answer: "Telescope only" },
-    E: { label: "Not Visible",    color: "#6b7280", answer: "Not visible tonight" },
-    F: { label: "No Data",        color: "#374151", answer: "Below horizon" },
+const ZONE_COLORS: Record<VisibilityZone, string> = {
+    A: "#4ade80",
+    B: "#facc15",
+    C: "#fb923c",
+    D: "#f87171",
+    E: "#6b7280",
+    F: "#374151",
 };
 
 export function TonightCard() {
     const { location, date, visibilityCriterion } = useGlobalState();
+    const { t } = useTranslation();
 
     const data = useMemo(() => {
         try {
@@ -27,7 +29,7 @@ export function TonightCard() {
     if (!data) return null;
 
     const zone = data.visibility;
-    const cfg = ZONE_CONFIG[zone];
+    const color = ZONE_COLORS[zone];
 
     return (
         <div
@@ -38,32 +40,32 @@ export function TonightCard() {
             <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
                     <div className="text-[11px] uppercase font-semibold tracking-wider mb-1" style={{ color: "var(--gold-dim)" }}>
-                        Tonight's Prediction · {location.name}
+                        {t("tonight.header", { location: location.name })}
                     </div>
                     <div className="text-lg font-semibold leading-tight" style={{ color: "var(--foreground)" }}>
-                        Can you see the crescent?
+                        {t("tonight.question")}
                     </div>
                 </div>
                 {/* Zone badge */}
                 <div
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shrink-0"
                     style={{
-                        background: `color-mix(in oklch, ${cfg.color} 15%, transparent)`,
-                        border: `1px solid color-mix(in oklch, ${cfg.color} 40%, transparent)`,
-                        color: cfg.color,
+                        background: `color-mix(in oklch, ${color} 15%, transparent)`,
+                        border: `1px solid color-mix(in oklch, ${color} 40%, transparent)`,
+                        color,
                     }}
                 >
                     <span
                         className="w-2 h-2 rounded-full"
-                        style={{ background: cfg.color }}
+                        style={{ background: color }}
                     />
                     Zone {zone}
                 </div>
             </div>
 
             {/* Answer */}
-            <div className="text-2xl font-bold mb-4" style={{ color: cfg.color }}>
-                {cfg.answer}
+            <div className="text-2xl font-bold mb-4" style={{ color }}>
+                {t(`tonight.zones.${zone}.answer`)}
             </div>
 
             {/* Stats row */}
@@ -71,7 +73,7 @@ export function TonightCard() {
                 <div className="flex flex-col gap-1 p-2.5 rounded-xl" style={{ background: "var(--space-light)" }}>
                     <div className="flex items-center gap-1">
                         <Sunset className="w-3 h-3" style={{ color: "var(--gold-dim)" }} />
-                        <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>Sunset</span>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>{t("tonight.sunset")}</span>
                     </div>
                     <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                         {formatTime(data.sunset)}
@@ -81,7 +83,7 @@ export function TonightCard() {
                 <div className="flex flex-col gap-1 p-2.5 rounded-xl" style={{ background: "var(--space-light)" }}>
                     <div className="flex items-center gap-1">
                         <Moon className="w-3 h-3" style={{ color: "var(--gold-dim)" }} />
-                        <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>Moonset</span>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>{t("tonight.moonset")}</span>
                     </div>
                     <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                         {formatTime(data.moonset)}
@@ -91,7 +93,7 @@ export function TonightCard() {
                 <div className="flex flex-col gap-1 p-2.5 rounded-xl" style={{ background: "var(--space-light)" }}>
                     <div className="flex items-center gap-1">
                         <Eye className="w-3 h-3" style={{ color: "var(--gold-dim)" }} />
-                        <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>Arc</span>
+                        <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>{t("tonight.arc")}</span>
                     </div>
                     <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
                         {data.arcv.toFixed(1)}°
@@ -109,7 +111,7 @@ export function TonightCard() {
                         color: "var(--gold)",
                     }}
                 >
-                    View full visibility map
+                    {t("tonight.viewMap")}
                     <ArrowRight className="w-3 h-3" />
                 </div>
             </Link>

@@ -5,6 +5,7 @@ import { requestNotificationPermission } from "@/lib/firebase";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SightingReportForm } from "./SightingReportForm";
+import { useTranslation } from "react-i18next";
 
 const SIGHTING_COLORS: Record<string, string> = {
     positive: "#4ade80",
@@ -12,13 +13,8 @@ const SIGHTING_COLORS: Record<string, string> = {
     negative: "#f87171",
 };
 
-const SIGHTING_LABELS: Record<string, string> = {
-    positive: "🟢 Seen",
-    uncertain: "🔵 Uncertain",
-    negative: "⚪ Not Seen",
-};
-
 export function SightingFeed() {
+    const { t } = useTranslation();
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [showExportMenu, setShowExportMenu] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
@@ -27,12 +23,12 @@ export function SightingFeed() {
     const [secondsAgo, setSecondsAgo] = useState(0);
     const subscribeMutation = trpc.notifications.subscribe.useMutation({
         onSuccess: () => {
-            toast.success("Successfully subscribed to notifications!");
+            toast.success(t("feed.subscribedSuccess"));
             setIsSubscribing(false);
         },
         onError: (err) => {
             console.error("Subscription failed:", err);
-            toast.error("Failed to subscribe to notifications.");
+            toast.error(t("feed.subscribeFailed"));
             setIsSubscribing(false);
         }
     });
@@ -44,7 +40,7 @@ export function SightingFeed() {
             subscribeMutation.mutate({ token, deviceType: "web" });
         } else {
             setIsSubscribing(false);
-            toast.error("Permission denied or browser unsupported.");
+            toast.error(t("feed.permissionDenied"));
         }
     };
 
@@ -107,25 +103,31 @@ export function SightingFeed() {
         setShowExportMenu(false);
     };
 
+    const SIGHTING_LABELS: Record<string, string> = {
+        positive: t("feed.seen"),
+        uncertain: t("feed.uncertain"),
+        negative: t("feed.notSeen"),
+    };
+
     if (isLoading) {
         return (
             <div className="breezy-card p-6 animate-breezy-enter">
                 <div className="flex items-center gap-2 mb-4">
                     <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
                     <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
-                        Live Sighting Feed
+                        {t("feed.title")}
                     </span>
                     <button
                         onClick={handleSubscribe}
                         disabled={isSubscribing}
                         className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-                        title="Enable Notifications"
+                        title={t("feed.enableNotif")}
                     >
                         <Bell className="w-4 h-4 text-white" />
                     </button>
                     <span className="ml-auto flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>Live</span>
+                        <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{t("feed.live")}</span>
                     </span>
                 </div>
                 <div className="space-y-3">
@@ -148,13 +150,13 @@ export function SightingFeed() {
                     <div className="flex items-center gap-2 mb-4">
                         <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
                         <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
-                            Live Sighting Feed
+                            {t("feed.title")}
                         </span>
                         <button
                             onClick={handleSubscribe}
                             disabled={isSubscribing}
                             className="ml-2 w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-                            title="Enable Notifications"
+                            title={t("feed.enableNotif")}
                         >
                             <Bell className="w-4 h-4 text-white" />
                         </button>
@@ -168,10 +170,10 @@ export function SightingFeed() {
                         </div>
                         <div>
                             <p className="text-sm font-medium mb-1" style={{ color: "var(--foreground)" }}>
-                                No reports yet tonight
+                                {t("feed.noReports")}
                             </p>
                             <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                                Be the first observer to share what you see
+                                {t("feed.beFirst")}
                             </p>
                         </div>
                         <button
@@ -183,7 +185,7 @@ export function SightingFeed() {
                             }}
                         >
                             <PlusCircle className="w-3.5 h-3.5" />
-                            Report a Sighting
+                            {t("feed.reportSighting")}
                         </button>
                     </div>
                 </div>
@@ -191,9 +193,9 @@ export function SightingFeed() {
                 <Dialog open={reportOpen} onOpenChange={setReportOpen}>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Submit Crescent Sighting</DialogTitle>
+                            <DialogTitle>{t("feed.submitTitle")}</DialogTitle>
                             <DialogDescription>
-                                Share your live observation. Environmental conditions will be fetched automatically.
+                                {t("feed.submitDesc")}
                             </DialogDescription>
                         </DialogHeader>
                         <SightingReportForm onSuccess={() => setReportOpen(false)} />
@@ -208,7 +210,7 @@ export function SightingFeed() {
             <div className="flex items-center gap-2 mb-4">
                 <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
                 <span className="text-sm font-medium" style={{ color: "var(--foreground)" }}>
-                    Live Sighting Feed
+                    {t("feed.title")}
                 </span>
 
                 <div className="relative ml-2">
@@ -223,8 +225,8 @@ export function SightingFeed() {
                         <div className="absolute top-full left-0 mt-1 w-32 rounded-lg shadow-xl z-50 overflow-hidden border"
                             style={{ background: "var(--space-mid)", borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
                         >
-                            <button onClick={exportToCSV} className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: "var(--foreground)" }}>Export CSV</button>
-                            <button onClick={exportToJSON} className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: "var(--foreground)" }}>Export JSON</button>
+                            <button onClick={exportToCSV} className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: "var(--foreground)" }}>{t("feed.exportCsv")}</button>
+                            <button onClick={exportToJSON} className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: "var(--foreground)" }}>{t("feed.exportJson")}</button>
                         </div>
                     )}
                 </div>
@@ -233,7 +235,7 @@ export function SightingFeed() {
                     onClick={handleSubscribe}
                     disabled={isSubscribing}
                     className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-                    title="Enable Notifications"
+                    title={t("feed.enableNotif")}
                 >
                     <Bell className="w-4 h-4 text-white" />
                 </button>
@@ -241,7 +243,7 @@ export function SightingFeed() {
                     <button
                         onClick={() => setIsPaused((p) => !p)}
                         className="w-5 h-5 flex items-center justify-center rounded hover:bg-white/10 transition-colors"
-                        title={isPaused ? "Resume auto-refresh" : "Pause auto-refresh"}
+                        title={isPaused ? t("feed.resumeRefresh") : t("feed.pauseRefresh")}
                     >
                         {isPaused
                             ? <Play className="w-3 h-3" style={{ color: "var(--muted-foreground)" }} />
@@ -250,7 +252,10 @@ export function SightingFeed() {
                     </button>
                     <span className={`w-2 h-2 rounded-full ${isPaused ? "bg-gray-500" : "bg-green-400 animate-pulse"}`} />
                     <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                        {isPaused ? `Paused · ${sightings.length}` : `${secondsAgo}s ago · ${sightings.length}`}
+                        {isPaused
+                            ? `${t("feed.paused")} · ${sightings.length}`
+                            : `${t("feed.secsAgo", { count: secondsAgo })} · ${sightings.length}`
+                        }
                     </span>
                 </span>
             </div>
