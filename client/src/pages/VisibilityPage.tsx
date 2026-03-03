@@ -20,7 +20,7 @@ export default function VisibilityPage() {
     };
 
     return (
-        <div className="relative flex flex-col pt-12 lg:pt-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] overflow-hidden">
+        <div className="relative flex flex-col pt-12 lg:pt-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] overflow-y-auto">
             <SEO
                 title="Visibility - 3D Globe & 2D Map"
                 description="Interactive crescent moon visibility predictions on a 3D globe and 2D map with cloud cover overlay and best observation time calculator."

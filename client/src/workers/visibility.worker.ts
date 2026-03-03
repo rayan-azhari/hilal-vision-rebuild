@@ -102,7 +102,10 @@ self.onmessage = (e: MessageEvent) => {
 
         for (let px = 0; px < W; px++) {
             const lng = -180 + ((px + 0.5) / W) * 360;
-            const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+            // The green layer glitches on 2D map when calculated exclusively on local client startOfDay.
+            // Using the UTC midnight, shifting backwards across longitudes (1 hr per 15 degrees).
+            const utcMidnight = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0);
+            const startOfDay = new Date(utcMidnight - (lng / 15) * 3600 * 1000);
             const { zone, value } = computeVisibilityAtPoint(startOfDay, lat, lng, criterion || "yallop", temperature, pressure);
             const [r, g, b] = rgbMap[zone];
             const night = !isDaylight(lat, lng, date);

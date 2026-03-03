@@ -270,18 +270,23 @@ export const appRouter = router({
         if (!db) return { data: [], total: 0 };
         const limit = input?.limit ?? 50;
         const offset = input?.offset ?? 0;
-        const [data, totalResult] = await Promise.all([
-          db
-            .select()
-            .from(observationReports)
-            .orderBy(desc(observationReports.createdAt))
-            .limit(limit)
-            .offset(offset),
-          db
-            .select({ total: count() })
-            .from(observationReports),
-        ]);
-        return { data, total: totalResult[0]?.total ?? 0 };
+        try {
+          const [data, totalResult] = await Promise.all([
+            db
+              .select()
+              .from(observationReports)
+              .orderBy(desc(observationReports.createdAt))
+              .limit(limit)
+              .offset(offset),
+            db
+              .select({ total: count() })
+              .from(observationReports),
+          ]);
+          return { data, total: totalResult[0]?.total ?? 0 };
+        } catch (err) {
+          console.error("Failed to fetch observations from DB:", err);
+          return { data: [], total: 0 };
+        }
       }),
   }),
   environment: router({

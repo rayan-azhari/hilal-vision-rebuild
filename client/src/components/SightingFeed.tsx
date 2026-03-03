@@ -48,7 +48,7 @@ export function SightingFeed() {
         { limit: 10, offset: 0 },
         {
             refetchInterval: isPaused ? false : 30_000,
-            refetchOnWindowFocus: !isPaused,
+            refetchOnWindowFocus: false, // Prevent massive DB spike on tab switch
         }
     );
 

@@ -430,7 +430,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
         </div>
       </PageHeader>
 
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0">
         {/* Map */}
         <div className="relative flex-1 min-h-[60vh] lg:min-h-0">
           <div ref={mapRef} className="absolute inset-0" style={{ zIndex: 1, touchAction: "none" }} />
@@ -518,8 +518,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
           className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l overflow-y-auto relative z-50 flex flex-col"
           style={{
             borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)",
-            background: "var(--space-mid)",
-            height: "100%",
+            background: "var(--space-mid)"
           }}
         >
           <div className="p-5 space-y-5 flex-1">

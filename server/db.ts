@@ -15,7 +15,7 @@ export async function getDb() {
         uri: process.env.DATABASE_URL,
         waitForConnections: true,
         connectionLimit: 3,    // low limit appropriate for serverless
-        connectTimeout: 10000, // 10s — fail fast if DB is unreachable
+        connectTimeout: 5000,  // 5s — fail fast if DB is unreachable
         idleTimeout: 60000,    // release idle connections after 60s
       });
       _db = drizzle(pool);
