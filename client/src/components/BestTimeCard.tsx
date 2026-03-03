@@ -21,7 +21,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
 
     const { data: weather } = trpc.weather.getLocalWeather.useQuery(
         { lat: location.lat, lng: location.lng },
-        { enabled: result.viable && !!location.lat && !!location.lng, staleTime: 5 * 60 * 1000 }
+        { enabled: result.viable && !!location.lat && !!location.lng, staleTime: 5 * 60 * 1000, refetchOnWindowFocus: false }
     );
 
     const formatT = (d: Date) =>

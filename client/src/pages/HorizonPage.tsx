@@ -276,7 +276,7 @@ export default function HorizonPage() {
   // Fetch real terrain elevation from Open-Meteo DEM API
   const demQuery = trpc.dem.getDem.useQuery(
     { lat: loc.lat, lng: loc.lng },
-    { staleTime: Infinity }
+    { staleTime: 1000 * 60 * 60, refetchOnWindowFocus: false }
   );
   const elevation = demQuery.data?.elevation ?? 0;
   const dipDeg = (1.76 * Math.sqrt(elevation)) / 60; // arcmin → degrees

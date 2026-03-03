@@ -66,7 +66,10 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
   const { theme, highContrast } = useTheme();
   const trpcUtils = trpc.useContext();
-  const { data: observationsResult } = trpc.telemetry.getObservations.useQuery({});
+  const { data: observationsResult } = trpc.telemetry.getObservations.useQuery(
+    {},
+    { refetchOnWindowFocus: false }
+  );
   const observations = observationsResult?.data;
 
   const [isLoading, setIsLoading] = useState(true);
