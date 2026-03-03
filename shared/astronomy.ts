@@ -583,20 +583,6 @@ export function hijriToGregorian(year: number, month: number, day: number): Date
     return new Date(msDay.getTime() + (day - 1) * 24 * 3600 * 1000);
 }
 
-function jdToGregorian(jd: number): Date {
-    const z = Math.floor(jd + 0.5);
-    const a = Math.floor((z - 1867216.25) / 36524.25);
-    const aa = z + 1 + a - Math.floor(a / 4);
-    const b = aa + 1524;
-    const c = Math.floor((b - 122.1) / 365.25);
-    const d = Math.floor(365.25 * c);
-    const e = Math.floor((b - d) / 30.6001);
-    const day = b - d - Math.floor(30.6001 * e);
-    const month = e < 14 ? e - 1 : e - 13;
-    const year = month > 2 ? c - 4716 : c - 4715;
-    return new Date(year, month - 1, day);
-}
-
 // ─── Umm Al-Qura Implementation ───────────────────────────────────────────────
 
 export function getUmmAlQuraHijri(date: Date): HijriDate {

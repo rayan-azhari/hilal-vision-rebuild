@@ -12,7 +12,6 @@ import {
   classifyOdeh,
   gregorianToJD,
   jdToHijri,
-  gregorianToHijri,
   computeBestObservationTime,
   predictLunarEclipse,
   computeSunMoonAtSunset,
@@ -237,10 +236,10 @@ describe("classifyOdeh — Zone E fix (Phase 4)", () => {
 
 describe("predictLunarEclipse — regression against NASA eclipse catalog", () => {
   // Full moon peaks (UTC) for known eclipse events
-  const TOTAL_2019   = new Date("2019-01-21T05:12:00Z"); // Total lunar eclipse
+  const TOTAL_2019 = new Date("2019-01-21T05:12:00Z"); // Total lunar eclipse
   const PARTIAL_2019 = new Date("2019-07-16T21:31:00Z"); // Partial lunar eclipse
-  const PENUM_2020   = new Date("2020-01-10T19:11:00Z"); // Penumbral lunar eclipse
-  const NONE_2020    = new Date("2020-02-09T07:33:00Z"); // No eclipse (nearest full moon)
+  const PENUM_2020 = new Date("2020-01-10T19:11:00Z"); // Penumbral lunar eclipse
+  const NONE_2020 = new Date("2020-02-09T07:33:00Z"); // No eclipse (nearest full moon)
 
   it("correctly identifies Jan 21 2019 as a total eclipse", () => {
     expect(predictLunarEclipse(TOTAL_2019)).toBe("total");
@@ -271,7 +270,7 @@ describe("computeSunMoonAtSunset — atmospheric refraction P/T correction", () 
   const mecca = { lat: 21.39, lng: 39.86 };
 
   it("produces a small refraction delta under non-standard conditions", () => {
-    const std  = computeSunMoonAtSunset(date, mecca);
+    const std = computeSunMoonAtSunset(date, mecca);
     const nonStd = computeSunMoonAtSunset(date, {
       ...mecca,
       pressure: 980,    // low pressure (~30 hPa below standard)
@@ -284,8 +283,8 @@ describe("computeSunMoonAtSunset — atmospheric refraction P/T correction", () 
   });
 
   it("produces no refraction delta when P/T equal standard conditions", () => {
-    const std    = computeSunMoonAtSunset(date, mecca);
-    const stdPT  = computeSunMoonAtSunset(date, { ...mecca, pressure: 1010, temperature: 10 });
+    const std = computeSunMoonAtSunset(date, mecca);
+    const stdPT = computeSunMoonAtSunset(date, { ...mecca, pressure: 1010, temperature: 10 });
     // At exact standard P/T the correction should be ≈0
     expect(Math.abs(stdPT.moonAlt - std.moonAlt)).toBeLessThan(0.001);
   });
@@ -296,7 +295,7 @@ describe("computeSunMoonAtSunset — atmospheric refraction P/T correction", () 
 describe("computeSunMoonAtSunset — maghrib equals sunset", () => {
   it("maghrib is exactly equal to sunset (no +18 min offset)", () => {
     const date = new Date(2026, 2, 1);
-    const loc  = { lat: 21.39, lng: 39.86 };
+    const loc = { lat: 21.39, lng: 39.86 };
     const data = computeSunMoonAtSunset(date, loc);
 
     if (data.sunset && data.maghrib) {

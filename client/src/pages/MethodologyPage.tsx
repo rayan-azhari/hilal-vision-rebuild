@@ -32,12 +32,12 @@ function FormulaBlock({ children }: { children: React.ReactNode }) {
 
 function ZoneTable() {
     const zones = [
-        { zone: "A", range: "q ≥ +0.216", meaning: "Easily visible with naked eye", color: "#4ade80" },
-        { zone: "B", range: "−0.014 ≤ q < +0.216", meaning: "Visible under perfect conditions", color: "#facc15" },
-        { zone: "C", range: "−0.160 ≤ q < −0.014", meaning: "Binoculars may be needed to find crescent", color: "#fb923c" },
-        { zone: "D", range: "−0.232 ≤ q < −0.160", meaning: "Visible only with telescope", color: "#f87171" },
-        { zone: "E", range: "q < −0.232", meaning: "Not visible even with optical aid", color: "#6b7280" },
-        { zone: "F", range: "Moon below horizon", meaning: "Impossible - below horizon at sunset", color: "#374151" },
+        { zone: "A", range: "q ≥ +0.216", meaning: t("methodology.zoneA_mean"), color: "#4ade80" },
+        { zone: "B", range: "−0.014 ≤ q < +0.216", meaning: t("methodology.zoneB_mean"), color: "#facc15" },
+        { zone: "C", range: "−0.160 ≤ q < −0.014", meaning: t("methodology.zoneC_mean"), color: "#fb923c" },
+        { zone: "D", range: "−0.232 ≤ q < −0.160", meaning: t("methodology.zoneD_mean"), color: "#f87171" },
+        { zone: "E", range: "q < −0.232", meaning: t("methodology.zoneE_mean"), color: "#6b7280" },
+        { zone: "F", range: "Moon below horizon", meaning: t("methodology.zoneF_mean"), color: "#374151" },
     ];
 
     return (
@@ -45,9 +45,9 @@ function ZoneTable() {
             <table className="w-full text-xs border-collapse">
                 <thead>
                     <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Zone</th>
-                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>q-value Range</th>
-                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Interpretation</th>
+                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.tableH_zone")}</th>
+                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.tableH_range")}</th>
+                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.tableH_interp")}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,10 +77,10 @@ function ZoneTable() {
 
 function OdehTable() {
     const zones = [
-        { zone: "A", range: "V ≥ +5.65", meaning: "Visible by naked eye", color: "#4ade80" },
-        { zone: "B", range: "+2.00 ≤ V < +5.65", meaning: "Visible by optical aid; possibly naked eye", color: "#facc15" },
-        { zone: "C", range: "−0.96 ≤ V < +2.00", meaning: "Visible by optical aid only", color: "#fb923c" },
-        { zone: "D", range: "V < −0.96", meaning: "Not visible even with optical aid", color: "#6b7280" },
+        { zone: "A", range: "V ≥ +5.65", meaning: t("methodology.odehA_mean"), color: "#4ade80" },
+        { zone: "B", range: "+2.00 ≤ V < +5.65", meaning: t("methodology.odehB_mean"), color: "#facc15" },
+        { zone: "C", range: "−0.96 ≤ V < +2.00", meaning: t("methodology.odehC_mean"), color: "#fb923c" },
+        { zone: "D", range: "V < −0.96", meaning: t("methodology.zoneE_mean"), color: "#6b7280" },
     ];
 
     return (
@@ -88,9 +88,9 @@ function OdehTable() {
             <table className="w-full text-xs border-collapse">
                 <thead>
                     <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Zone</th>
-                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>V-value Range</th>
-                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Interpretation</th>
+                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.tableH_zone")}</th>
+                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.tableH_range2")}</th>
+                        <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.tableH_interp")}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,24 +153,25 @@ function Para({ children }: { children: React.ReactNode }) {
 }
 
 const TOC = [
-    { id: "problem", label: "1. The Crescent Visibility Problem" },
-    { id: "yallop", label: "2. Yallop (1997) Criterion" },
-    { id: "odeh", label: "3. Odeh (2004) Criterion" },
-    { id: "calendar", label: "4. Triple-Engine Hijri Calendar" },
-    { id: "besttime", label: "5. Best-Time-to-Observe Calculator" },
-    { id: "grid", label: "6. World Visibility Grid" },
-    { id: "icop", label: "7. ICOP Archive" },
-    { id: "telemetry", label: "8. Crowdsourced Telemetry & Validation" },
-    { id: "refraction", label: "9. Atmospheric Refraction & DEM" },
-    { id: "export", label: "10. Data Export & Public API" },
-    { id: "refs", label: "11. References" },
+    { id: "problem", label: t("methodology.toc_1") },
+    { id: "yallop", label: t("methodology.toc_2") },
+    { id: "odeh", label: t("methodology.toc_3") },
+    { id: "calendar", label: t("methodology.toc_4") },
+    { id: "besttime", label: t("methodology.toc_5") },
+    { id: "grid", label: t("methodology.toc_6") },
+    { id: "icop", label: t("methodology.toc_7") },
+    { id: "telemetry", label: t("methodology.toc_8") },
+    { id: "refraction", label: t("methodology.toc_9") },
+    { id: "export", label: t("methodology.toc_10") },
+    { id: "refs", label: t("methodology.toc_11") },
 ];
 
 export default function MethodologyPage() {
+    const { t } = useTranslation();
     return (
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
-                title="Methodology"
+                title={t("methodology.heroTitle")}
                 description="Technical methodology behind Hilal Vision - Yallop & Odeh criteria, triple-engine Hijri calendar, Best-Time-to-Observe algorithm, ICOP archive, and atmospheric refraction physics."
                 path="/methodology"
             />
@@ -188,7 +189,7 @@ export default function MethodologyPage() {
                 <div className="absolute inset-0 star-field opacity-30 pointer-events-none" />
                 <div className="container relative z-10 max-w-3xl">
                     <div className="text-xs mb-4 tracking-wider" style={{ color: "var(--gold-dim)" }}>
-                        Scientific Documentation - علم الفلك
+                        {t("methodology.heroSubtitle")}
                     </div>
                     <h1
                         className="text-4xl md:text-5xl font-light tracking-tight mb-4 leading-tight"
@@ -216,7 +217,7 @@ export default function MethodologyPage() {
                 <PageHeader
                     icon={<FlaskConical />}
                     title="Methodology"
-                    subtitle="Algorithms, formulas, and data sources"
+                    subtitle={t("methodology.headerSubtitle")}
                     className="max-w-5xl"
                 />
             </div>
@@ -258,7 +259,7 @@ export default function MethodologyPage() {
                 <article className="flex-1 min-w-0">
 
                     {/* ── 1. The Problem ─────────────────────────────── */}
-                    <SectionHeading id="problem">1. The Crescent Visibility Problem</SectionHeading>
+                    <SectionHeading id="problem">{t("methodology.toc_1")}</SectionHeading>
                     <Para>
                         The Islamic lunar calendar begins each month with the physical sighting of the new
                         crescent moon (<span className="font-arabic" style={{ color: "var(--gold-dim)" }}>الهلال</span>)
@@ -279,7 +280,7 @@ export default function MethodologyPage() {
                     <SectionDivider />
 
                     {/* ── 2. Yallop ───────────────────────────────────── */}
-                    <SectionHeading id="yallop">2. Yallop (1997) Criterion</SectionHeading>
+                    <SectionHeading id="yallop">{t("methodology.toc_2")}</SectionHeading>
                     <Para>
                         The <strong style={{ color: "var(--foreground)" }}>Yallop criterion</strong> was developed
                         by B.D. Yallop of HM Nautical Almanac Office in 1997 and is the primary visibility
@@ -342,7 +343,7 @@ W  = SD × (1 − cos(elongation))`}
                     <SectionDivider />
 
                     {/* ── 3. Odeh ─────────────────────────────────────── */}
-                    <SectionHeading id="odeh">3. Odeh (2004) Criterion</SectionHeading>
+                    <SectionHeading id="odeh">{t("methodology.toc_3")}</SectionHeading>
                     <Para>
                         The <strong style={{ color: "var(--foreground)" }}>Odeh criterion</strong> was developed
                         by Mohammad Odeh in 2004 as a refinement based on a larger dataset of 737 sightings, many
@@ -371,7 +372,7 @@ W  = SD × (1 − cos(elongation))`}
                     <SectionDivider />
 
                     {/* ── 4. Hijri Calendar ─────────────────────────────── */}
-                    <SectionHeading id="calendar">4. Triple-Engine Hijri Calendar</SectionHeading>
+                    <SectionHeading id="calendar">{t("methodology.toc_4")}</SectionHeading>
                     <Para>
                         The Hijri Calendar page supports three distinct calculation engines that each represent
                         a fundamentally different philosophy of Islamic timekeeping.
@@ -412,7 +413,7 @@ W  = SD × (1 − cos(elongation))`}
                     <SectionDivider />
 
                     {/* ── 5. Best Time ─────────────────────────────────── */}
-                    <SectionHeading id="besttime">5. Best-Time-to-Observe Calculator</SectionHeading>
+                    <SectionHeading id="besttime">{t("methodology.toc_5")}</SectionHeading>
                     <Para>
                         The <code style={{ color: "var(--gold-dim)" }}>computeBestObservationTime(date, location)</code> function
                         determines the optimal time window for crescent moon observation at any location on Earth.
@@ -457,7 +458,7 @@ W  = SD × (1 − cos(elongation))`}
                     <SectionDivider />
 
                     {/* ── 6. Grid ──────────────────────────────────────── */}
-                    <SectionHeading id="grid">6. World Visibility Grid</SectionHeading>
+                    <SectionHeading id="grid">{t("methodology.toc_6")}</SectionHeading>
                     <Para>
                         The <code style={{ color: "var(--gold-dim)" }}>generateVisibilityGrid()</code> function
                         computes crescent visibility for a regular latitude/longitude grid covering the entire
@@ -623,7 +624,7 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
                     <SectionDivider />
 
                     {/* ── 10. Data Export & Public API ──────────────── */}
-                    <SectionHeading id="export">10. Data Export & Public API</SectionHeading>
+                    <SectionHeading id="export">{t("methodology.toc_10")}</SectionHeading>
 
                     <SubHeading>CSV & JSON Export</SubHeading>
                     <Para>
@@ -671,7 +672,7 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
                     <SectionDivider />
 
                     {/* ── 10. References ───────────────────────────────── */}
-                    <SectionHeading id="refs">11. References</SectionHeading>
+                    <SectionHeading id="refs">{t("methodology.toc_11")}</SectionHeading>
                     <div className="space-y-3">
                         {[
                             {
