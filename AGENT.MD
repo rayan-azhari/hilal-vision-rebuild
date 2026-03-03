@@ -69,6 +69,11 @@ Welcome to the **Moon-dashboard (Hilal Vision)** project. You are operating with
 - If you establish new patterns or discover unique edge-cases in the data pipeline, document them.
 - Keep any relevant `todo.md` or tracker files updated as you complete tasks.
 
+## 6. Troubleshooting & Diagnostics
+
+A specialized skill has been created for debugging complex errors in this project, located at `.agents/workflows/hilal-vision-troubleshooter.md` (and registered as a Claude skill). 
+If you encounter **Vercel timeout errors** (`FUNCTION_INVOCATION_FAILED`), **Vite Dev Server silent hangs on Windows**, or **Capacitor CORS errors** ("You appear to be offline"), immediately consult the **Hilal Vision Troubleshooter** skill for known architectural fixes before attempting to write code.
+
 ## Summary
 
 You are building a sophisticated, scientific Web Dashboard for lunar visibility. Prioritize seamless integration of the React frontend with the Node backend through tRPC, ensure robust type safety with Drizzle and Zod, and deliver a visually stunning, premium user experience utilizing the Breezy Design System. Lay the groundwork for the upcoming hub-and-spoke telemetry architecture to ingest ground-truth field observations.
