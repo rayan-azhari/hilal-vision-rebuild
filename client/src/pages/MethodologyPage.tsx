@@ -1,5 +1,6 @@
 import { SEO } from "@/components/SEO";
 import { PageHeader } from "@/components/PageHeader";
+import { useTranslation } from "react-i18next";
 import { FlaskConical, ExternalLink } from "lucide-react";
 
 function SectionDivider() {
@@ -31,6 +32,7 @@ function FormulaBlock({ children }: { children: React.ReactNode }) {
 }
 
 function ZoneTable() {
+    const { t } = useTranslation();
     const zones = [
         { zone: "A", range: "q ≥ +0.216", meaning: t("methodology.zoneA_mean"), color: "#4ade80" },
         { zone: "B", range: "−0.014 ≤ q < +0.216", meaning: t("methodology.zoneB_mean"), color: "#facc15" },
@@ -76,6 +78,7 @@ function ZoneTable() {
 }
 
 function OdehTable() {
+    const { t } = useTranslation();
     const zones = [
         { zone: "A", range: "V ≥ +5.65", meaning: t("methodology.odehA_mean"), color: "#4ade80" },
         { zone: "B", range: "+2.00 ≤ V < +5.65", meaning: t("methodology.odehB_mean"), color: "#facc15" },
@@ -152,22 +155,11 @@ function Para({ children }: { children: React.ReactNode }) {
     );
 }
 
-const TOC = [
-    { id: "problem", label: t("methodology.toc_1") },
-    { id: "yallop", label: t("methodology.toc_2") },
-    { id: "odeh", label: t("methodology.toc_3") },
-    { id: "calendar", label: t("methodology.toc_4") },
-    { id: "besttime", label: t("methodology.toc_5") },
-    { id: "grid", label: t("methodology.toc_6") },
-    { id: "icop", label: t("methodology.toc_7") },
-    { id: "telemetry", label: t("methodology.toc_8") },
-    { id: "refraction", label: t("methodology.toc_9") },
-    { id: "export", label: t("methodology.toc_10") },
-    { id: "refs", label: t("methodology.toc_11") },
-];
+const TOC_IDS = ["problem", "yallop", "odeh", "calendar", "besttime", "grid", "icop", "telemetry", "refraction", "export", "refs"];
 
 export default function MethodologyPage() {
     const { t } = useTranslation();
+    const TOC = TOC_IDS.map((id, i) => ({ id, label: t(`methodology.toc_${i + 1}`) }));
     return (
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
@@ -216,7 +208,7 @@ export default function MethodologyPage() {
             >
                 <PageHeader
                     icon={<FlaskConical />}
-                    title="Methodology"
+                    title={t("methodology.heroTitle")}
                     subtitle={t("methodology.headerSubtitle")}
                     className="max-w-5xl"
                 />
@@ -238,7 +230,7 @@ export default function MethodologyPage() {
                             className="text-[11px] font-semibold mb-3 uppercase tracking-widest"
                             style={{ color: "var(--gold-dim)" }}
                         >
-                            Contents
+                            {t("methodology.toc_title")}
                         </div>
                         <nav className="space-y-1">
                             {TOC.map(({ id, label }) => (
