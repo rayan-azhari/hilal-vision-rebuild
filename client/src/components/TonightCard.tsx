@@ -10,8 +10,8 @@ const ZONE_COLORS: Record<VisibilityZone, string> = {
     B: "#facc15",
     C: "#fb923c",
     D: "#f87171",
-    E: "#6b7280",
-    F: "#374151",
+    E: "#9ca3af", // Lighter grey for E to distinguish from F
+    F: "#6b7280", // Lighter grey for F to ensure contrast against dark background
 };
 
 export function TonightCard() {
@@ -64,7 +64,10 @@ export function TonightCard() {
             </div>
 
             {/* Answer */}
-            <div className="text-2xl font-bold mb-4" style={{ color }}>
+            <div
+                className="text-2xl font-bold mb-4"
+                style={{ color: (zone === 'E' || zone === 'F') ? "var(--foreground)" : color }}
+            >
                 {t(`tonight.zones.${zone}.answer`)}
             </div>
 
