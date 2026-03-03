@@ -155,6 +155,7 @@ pnpm lint        # ESLint static analysis
 - `docs/SECURITY.md` - Security architecture, CORS policy, payment security, env vars
 - `docs/TESTING.md` - Test stack, 144 unit tests, E2E tests, CI pipeline
 - `docs/PUBLIC_API_REFERENCE.md` - REST API schema, parameters, and `curl` examples
+- `docs/I18N_LOCALIZATION.md` - Translation (English, Arabic, Urdu) and RTL layout replication guide
 
 ### In-App Documentation Pages
 
