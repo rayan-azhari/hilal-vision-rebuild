@@ -20,7 +20,7 @@ export default function VisibilityPage() {
     };
 
     return (
-        <div className="relative flex flex-col pt-12 lg:pt-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)] overflow-y-auto">
+        <div className="relative flex flex-col pt-12 lg:pt-0 h-[calc(100vh-10rem)] lg:h-[calc(100vh-7rem)] overflow-hidden">
             <SEO
                 title="Visibility - 3D Globe & 2D Map"
                 description="Interactive crescent moon visibility predictions on a 3D globe and 2D map with cloud cover overlay and best observation time calculator."
@@ -61,11 +61,11 @@ export default function VisibilityPage() {
                 </button>
             </div>
 
-            <div className="flex-1 w-full relative">
-                <div style={{ display: view === "globe" ? "block" : "none", height: "100%" }}>
+            <div className="flex-1 min-h-0 w-full relative">
+                <div style={{ display: view === "globe" ? "flex" : "none", height: "100%", flexDirection: "column" }}>
                     <GlobePage shared={shared} />
                 </div>
-                <div style={{ display: view === "map" ? "block" : "none", height: "100%" }}>
+                <div style={{ display: view === "map" ? "flex" : "none", height: "100%", flexDirection: "column" }}>
                     <MapPage shared={shared} />
                 </div>
             </div>

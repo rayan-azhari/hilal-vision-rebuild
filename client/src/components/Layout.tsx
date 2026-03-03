@@ -593,48 +593,50 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      {/* Footer */}
-      <footer
-        className="border-t py-8 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-[calc(2rem+env(safe-area-inset-bottom))]"
-        style={{
-          borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)",
-          background: "var(--space-mid)",
-        }}
-      >
-        <div className="container">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span style={{ color: "var(--gold)", fontFamily: "Cinzel, serif", fontSize: "0.875rem" }}>
-                ☽ Hilal Vision
-              </span>
-              <span style={{ color: "var(--muted-foreground)", fontSize: "0.75rem" }}>
-                - Islamic Crescent Moon Visibility
-              </span>
-            </div>
-            <div className="flex items-center gap-4 flex-wrap justify-center">
-              {[
-                { href: "/about", label: "About" },
-                { href: "/methodology", label: "Methodology" },
-                { href: "/support", label: "Support" },
-                { href: "/privacy", label: "Privacy" },
-                { href: "/terms", label: "Terms" },
-              ].map(({ href, label }) => (
-                <Link key={href} href={href}>
-                  <span
-                    className="text-xs transition-colors cursor-pointer hover:text-amber-300"
-                    style={{ color: "var(--muted-foreground)" }}
-                  >
-                    {label}
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-              Yallop & Odeh criteria · All Rights Reserved
+      {/* Footer — hidden on full-viewport map pages */}
+      {!["/visibility", "/map", "/globe"].includes(routePath) && (
+        <footer
+          className="border-t py-8 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-[calc(2rem+env(safe-area-inset-bottom))]"
+          style={{
+            borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)",
+            background: "var(--space-mid)",
+          }}
+        >
+          <div className="container">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span style={{ color: "var(--gold)", fontFamily: "Cinzel, serif", fontSize: "0.875rem" }}>
+                  ☽ Hilal Vision
+                </span>
+                <span style={{ color: "var(--muted-foreground)", fontSize: "0.75rem" }}>
+                  - Islamic Crescent Moon Visibility
+                </span>
+              </div>
+              <div className="flex items-center gap-4 flex-wrap justify-center">
+                {[
+                  { href: "/about", label: "About" },
+                  { href: "/methodology", label: "Methodology" },
+                  { href: "/support", label: "Support" },
+                  { href: "/privacy", label: "Privacy" },
+                  { href: "/terms", label: "Terms" },
+                ].map(({ href, label }) => (
+                  <Link key={href} href={href}>
+                    <span
+                      className="text-xs transition-colors cursor-pointer hover:text-amber-300"
+                      style={{ color: "var(--muted-foreground)" }}
+                    >
+                      {label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                Yallop & Odeh criteria · All Rights Reserved
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

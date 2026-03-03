@@ -104,7 +104,7 @@ self.onmessage = (e: MessageEvent) => {
             const lng = -180 + ((px + 0.5) / W) * 360;
             // Establish local Noon for the target calendar day. This ensures the subsequent sunset 
             // search (Astronomy.SearchRiseSet) perfectly lands on the local evening of this day exclusively.
-            const utcNoon = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+            const utcNoon = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12, 0, 0);
             const startOfDay = new Date(utcNoon - (lng / 15) * 3600 * 1000);
             const { zone, value } = computeVisibilityAtPoint(startOfDay, lat, lng, criterion || "yallop", temperature, pressure);
             const [r, g, b] = rgbMap[zone];
