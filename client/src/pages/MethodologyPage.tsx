@@ -164,7 +164,7 @@ export default function MethodologyPage() {
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
                 title={t("methodology.heroTitle")}
-                description="Technical methodology behind Hilal Vision - Yallop & Odeh criteria, triple-engine Hijri calendar, Best-Time-to-Observe algorithm, ICOP archive, and atmospheric refraction physics."
+                description={t("methodology.seoDesc")}
                 path="/methodology"
             />
 
@@ -253,20 +253,10 @@ export default function MethodologyPage() {
                     {/* ── 1. The Problem ─────────────────────────────── */}
                     <SectionHeading id="problem">{t("methodology.toc_1")}</SectionHeading>
                     <Para>
-                        The Islamic lunar calendar begins each month with the physical sighting of the new
-                        crescent moon (<span className="font-arabic" style={{ color: "var(--gold-dim)" }}>الهلال</span>)
-                        at sunset. At the moment of astronomical conjunction - when the Sun and Moon share the
-                        same geocentric ecliptic longitude - the moon is entirely invisible from Earth. Visibility
-                        only becomes possible as the moon moves away from the Sun's glare, forming a thin illuminated
-                        sliver.
+                        {t("methodology.s1_p1")}
                     </Para>
                     <Para>
-                        Whether that sliver is actually observable depends on a complex interplay of geometry,
-                        atmospheric physics, and the observer's location on Earth. Simple single-parameter models
-                        based solely on moon age or lag time are historically unreliable. A moon that is 24 hours
-                        old may be invisible if its ecliptic latitude is unfavourable, while a younger moon at a
-                        high latiude may be easily seen. Modern predictive engines therefore rely on bi-parametric
-                        polynomial criteria that combine altitude and crescent width.
+                        {t("methodology.s1_p2")}
                     </Para>
 
                     <SectionDivider />
@@ -274,62 +264,45 @@ export default function MethodologyPage() {
                     {/* ── 2. Yallop ───────────────────────────────────── */}
                     <SectionHeading id="yallop">{t("methodology.toc_2")}</SectionHeading>
                     <Para>
-                        The <strong style={{ color: "var(--foreground)" }}>Yallop criterion</strong> was developed
-                        by B.D. Yallop of HM Nautical Almanac Office in 1997 and is the primary visibility
-                        classification used throughout Hilal Vision. It is widely adopted by Islamic calendar
-                        authorities in the UK, Malaysia, and internationally.
+                        {t("methodology.s2_intro")}
                     </Para>
 
-                    <SubHeading>Input Parameters</SubHeading>
+                    <SubHeading>{t("methodology.sub_inputParams")}</SubHeading>
                     <Para>
-                        Two parameters are computed at the "Best Time" - approximately 4/9ths of the lag time
-                        (duration between sunset and moonset) after sunset:
+                        {t("methodology.s2_inputDesc")}
                     </Para>
                     <ul
                         className="text-sm mb-4 space-y-1 pl-4"
                         style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}
                     >
-                        <li>
-                            <strong style={{ color: "var(--foreground)" }}>ARCV</strong> - Arc of Vision: the
-                            moon's altitude above the horizon minus the sun's altitude at the moment of evaluation
-                            (degrees).
-                        </li>
-                        <li>
-                            <strong style={{ color: "var(--foreground)" }}>W</strong> - Topocentric Crescent Width:
-                            the width of the illuminated crescent in arcminutes.
-                        </li>
+                        <li><strong style={{ color: "var(--foreground)" }}>ARCV</strong> - {t("methodology.s2_arcv")}</li>
+                        <li><strong style={{ color: "var(--foreground)" }}>W</strong> - {t("methodology.s2_w")}</li>
                     </ul>
 
-                    <SubHeading>Crescent Width Formula</SubHeading>
+                    <SubHeading>{t("methodology.sub_crescentWidth")}</SubHeading>
                     <Para>
-                        The crescent width W is derived from the moon's angular semi-diameter SD and its elongation
-                        from the Sun:
+                        {t("methodology.s2_cwDesc")}
                     </Para>
                     <FormulaBlock>
                         {`SD = arcsin(1737.4 / moonDist) × 60   [arcminutes]
 W  = SD × (1 − cos(elongation))`}
                     </FormulaBlock>
                     <Para>
-                        Where <code>moonDist</code> is the geocentric lunar distance in kilometres. The
-                        semi-diameter at mean distance is approximately 15.5 arcminutes.
+                        {t("methodology.s2_cwNote")}
                     </Para>
 
-                    <SubHeading>q-value Formula</SubHeading>
+                    <SubHeading>{t("methodology.sub_qValue")}</SubHeading>
                     <FormulaBlock>
                         {`q = (ARCV − (11.8371 − 6.3226·W + 0.7319·W² − 0.1018·W³)) / 10`}
                     </FormulaBlock>
                     <Para>
-                        The polynomial <code>(11.8371 − 6.3226·W + 0.7319·W² − 0.1018·W³)</code> models the
-                        minimum ARCV required for a crescent of width W to be visible. The q-value represents
-                        how far above or below this threshold the actual ARCV falls.
+                        {t("methodology.s2_qDesc")}
                     </Para>
 
-                    <SubHeading>Visibility Zone Classification</SubHeading>
+                    <SubHeading>{t("methodology.sub_zoneClass")}</SubHeading>
                     <ZoneTable />
                     <Para>
-                        Zones C and D often represent the most significant points of contention in traditional
-                        sighting committees, where the difference between naked-eye and optical-aid sighting
-                        determines when a country declares the start of a month.
+                        {t("methodology.s2_zoneNote")}
                     </Para>
 
                     <SectionDivider />
@@ -337,28 +310,21 @@ W  = SD × (1 − cos(elongation))`}
                     {/* ── 3. Odeh ─────────────────────────────────────── */}
                     <SectionHeading id="odeh">{t("methodology.toc_3")}</SectionHeading>
                     <Para>
-                        The <strong style={{ color: "var(--foreground)" }}>Odeh criterion</strong> was developed
-                        by Mohammad Odeh in 2004 as a refinement based on a larger dataset of 737 sightings, many
-                        collected through the Islamic Crescents' Observation Project (ICOP). It is displayed in
-                        Pro Mode as a secondary classification to cross-validate borderline predictions.
+                        {t("methodology.s3_intro")}
                     </Para>
 
-                    <SubHeading>V-value Formula</SubHeading>
+                    <SubHeading>{t("methodology.sub_vValue")}</SubHeading>
                     <FormulaBlock>
                         {`V = ARCV − (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)`}
                     </FormulaBlock>
                     <Para>
-                        The Odeh criterion uses airless topocentric ARCV values - stripping away refraction during
-                        the initial calculation phase to provide a standardised geometric baseline before
-                        atmospheric corrections are applied.
+                        {t("methodology.s3_vDesc")}
                     </Para>
 
-                    <SubHeading>Zone Classification</SubHeading>
+                    <SubHeading>{t("methodology.sub_zoneClass2")}</SubHeading>
                     <OdehTable />
                     <Para>
-                        In regions where Yallop and Odeh diverge, the map may mark borderline areas as
-                        uncertain - acknowledging that local variations in atmospheric transparency and observer
-                        eye sensitivity become the dominant factors.
+                        {t("methodology.s3_zoneNote")}
                     </Para>
 
                     <SectionDivider />
@@ -366,38 +332,22 @@ W  = SD × (1 − cos(elongation))`}
                     {/* ── 4. Hijri Calendar ─────────────────────────────── */}
                     <SectionHeading id="calendar">{t("methodology.toc_4")}</SectionHeading>
                     <Para>
-                        The Hijri Calendar page supports three distinct calculation engines that each represent
-                        a fundamentally different philosophy of Islamic timekeeping.
+                        {t("methodology.s4_intro")}
                     </Para>
 
-                    <SubHeading>Engine 1 - Astronomical (astronomy-engine)</SubHeading>
+                    <SubHeading>{t("methodology.sub_engine1")}</SubHeading>
                     <Para>
-                        Uses a conjunction-based algorithm to detect the physical new moon. The
-                        function <code style={{ color: "var(--gold-dim)" }}>findNewMoonNear()</code> employs a
-                        two-pass search using astronomy-engine's phase computations:
-                        a coarse 6-hour sweep followed by a 30-minute fine sweep to locate the phase minimum.
-                        Months are counted relative to an epoch of 1 Muharram 1446 AH ≈ 7 July 2024. This
-                        represents true physical reality and may differ from civic calendars by ±1 day.
+                        {t("methodology.s4_engine1")}
                     </Para>
 
-                    <SubHeading>Engine 2 - Umm al-Qura</SubHeading>
+                    <SubHeading>{t("methodology.sub_engine2")}</SubHeading>
                     <Para>
-                        The official civic calendar of Saudi Arabia, used for administrative and religious
-                        announcements. Powered by the pre-computed KACST tables via the{" "}
-                        <code style={{ color: "var(--gold-dim)" }}>@umalqura/core</code> package. Since 1423 AH
-                        (2002 CE), the Umm al-Qura calendar requires two conditions: the geocentric conjunction
-                        must occur before sunset in Mecca, and the moon must set after the sun in Mecca. This
-                        means the calendar does not require actual naked-eye visibility - in roughly 75% of cases
-                        where it starts a month, the crescent is too thin to be seen without instruments.
+                        {t("methodology.s4_engine2")}
                     </Para>
 
-                    <SubHeading>Engine 3 - Tabular (Kuwaiti)</SubHeading>
+                    <SubHeading>{t("methodology.sub_engine3")}</SubHeading>
                     <Para>
-                        The standard arithmetic approximation widely used in software applications. Implemented
-                        via Julian Date conversions (<code style={{ color: "var(--gold-dim)" }}>gregorianToJD</code>,{" "}
-                        <code style={{ color: "var(--gold-dim)" }}>jdToHijri</code>). Uses the Kuwaiti algorithm
-                        which provides a practical, deterministic date without requiring any astronomical
-                        computation. Fastest to compute and most portable, but least physically accurate.
+                        {t("methodology.s4_engine3")}
                     </Para>
 
 
@@ -407,44 +357,26 @@ W  = SD × (1 − cos(elongation))`}
                     {/* ── 5. Best Time ─────────────────────────────────── */}
                     <SectionHeading id="besttime">{t("methodology.toc_5")}</SectionHeading>
                     <Para>
-                        The <code style={{ color: "var(--gold-dim)" }}>computeBestObservationTime(date, location)</code> function
-                        determines the optimal time window for crescent moon observation at any location on Earth.
+                        {t("methodology.s5_intro")}
                     </Para>
 
-                    <SubHeading>Algorithm</SubHeading>
+                    <SubHeading>{t("methodology.sub_algorithm")}</SubHeading>
                     <Para>
-                        The function scans from <strong style={{ color: "var(--foreground)" }}>sunset</strong> to{" "}
-                        <strong style={{ color: "var(--foreground)" }}>moonset</strong> (or sunset + 2 hours if
-                        moonset is unavailable or before sunset) in <strong style={{ color: "var(--foreground)" }}>5-minute steps</strong>.
-                        At each step it evaluates three factors:
+                        {t("methodology.s5_algDesc")}
                     </Para>
                     <ul
                         className="text-sm mb-4 space-y-2 pl-4"
                         style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}
                     >
-                        <li>
-                            <strong style={{ color: "var(--foreground)" }}>Moon altitude</strong> - must be above
-                            the horizon (&gt; 0°). Penalised heavily for very low altitudes where atmospheric
-                            extinction increases airmass ∝ 1/sin(alt).
-                        </li>
-                        <li>
-                            <strong style={{ color: "var(--foreground)" }}>Sky darkness factor</strong> - scores
-                            the twilight level: 1.0 (astronomical twilight, sun &lt; −12°), 0.8 (nautical, sun &lt;
-                            −6°), 0.5 (civil, sun &lt; 0°), 0.1 (day).
-                        </li>
-                        <li>
-                            <strong style={{ color: "var(--foreground)" }}>Altitude factor</strong> - penalises
-                            very low altitudes where atmospheric extinction is highest.
-                        </li>
+                        <li>{t("methodology.s5_moonAlt")}</li>
+                        <li>{t("methodology.s5_skyDark")}</li>
+                        <li>{t("methodology.s5_altFact")}</li>
                     </ul>
                     <FormulaBlock>
                         {`score = moonAlt × darknessFactor × altFactor`}
                     </FormulaBlock>
                     <Para>
-                        The time step with the highest composite score is returned as the optimal observation
-                        moment, along with the full window, moon/sun altitudes, and a{" "}
-                        <code style={{ color: "var(--gold-dim)" }}>viable</code> flag indicating whether any
-                        valid observation window exists on that date.
+                        {t("methodology.s5_scoreDesc")}
                     </Para>
 
                     <SectionDivider />
@@ -452,26 +384,24 @@ W  = SD × (1 − cos(elongation))`}
                     {/* ── 6. Grid ──────────────────────────────────────── */}
                     <SectionHeading id="grid">{t("methodology.toc_6")}</SectionHeading>
                     <Para>
-                        The <code style={{ color: "var(--gold-dim)" }}>generateVisibilityGrid()</code> function
-                        computes crescent visibility for a regular latitude/longitude grid covering the entire
-                        Earth's surface.
+                        {t("methodology.s6_intro")}
                     </Para>
 
-                    <SubHeading>Resolution Levels</SubHeading>
+                    <SubHeading>{t("methodology.sub_resLevels")}</SubHeading>
                     <div className="overflow-x-auto my-4">
                         <table className="w-full text-xs border-collapse">
                             <thead>
                                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Resolution</th>
-                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Grid Points</th>
-                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Use Case</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.gridTH_res")}</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.gridTH_pts")}</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.gridTH_use")}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {[
-                                    ["8°", "900", "Preview pass (~100ms) - immediate visual feedback"],
-                                    ["4°", "3,600", "Standard pass - default map rendering"],
-                                    ["2°", "14,400", "High-quality pass (~800ms) - full detail"],
+                                    ["8°", "900", t("methodology.grid_r1")],
+                                    ["4°", "3,600", t("methodology.grid_r2")],
+                                    ["2°", "14,400", t("methodology.grid_r3")],
                                 ].map(([res, pts, use]) => (
                                     <tr key={res} style={{ borderBottom: "1px solid color-mix(in oklch, var(--border) 50%, transparent)" }}>
                                         <td className="py-2 px-3 font-mono" style={{ color: "var(--gold-dim)" }}>{res}</td>
@@ -483,112 +413,70 @@ W  = SD × (1 − cos(elongation))`}
                         </table>
                     </div>
                     <Para>
-                        The computation is entirely offloaded to a{" "}
-                        <strong style={{ color: "var(--foreground)" }}>Web Worker</strong>, ensuring the UI
-                        remains at 60 FPS during the expensive calculation. The worker uses a two-pass progressive
-                        rendering strategy: an immediate 8° preview, replaced by the 2° high-fidelity pass
-                        approximately 800ms later.
+                        {t("methodology.s6_worker")}
                     </Para>
                     <Para>
-                        Computed textures are cached in an LRU map keyed by{" "}
-                        <code style={{ color: "var(--gold-dim)" }}>"YYYY-M-D-WxH-RES"</code> (24-entry cache),
-                        so navigating back to a previously viewed date requires no recomputation.
+                        {t("methodology.s6_cache")}
                     </Para>
 
                     <SectionDivider />
 
                     {/* ── 7. ICOP ──────────────────────────────────────── */}
-                    <SectionHeading id="icop">7. ICOP Historical Archive</SectionHeading>
+                    <SectionHeading id="icop">{t("methodology.toc_7")}</SectionHeading>
                     <Para>
-                        The <strong style={{ color: "var(--foreground)" }}>Islamic Crescents' Observation Project
-                            (ICOP)</strong> is an international initiative maintained by the International
-                        Astronomical Center (IAC) that has collected crowdsourced lunar sighting reports since
-                        1998. Hilal Vision's Archive page features over{" "}
-                        <strong style={{ color: "var(--foreground)" }}>1,000 authentic sighting records</strong>{" "}
-                        spanning 1438–1465 AH, making it one of the most comprehensive public datasets of
-                        verified crescent observations.
+                        {t("methodology.s7_p1")}
                     </Para>
                     <Para>
-                        These real-world sightings serve as empirical ground truth against which Hilal Vision's
-                        theoretical Yallop/Odeh predictions can be validated. The side-by-side comparison - theory
-                        versus actual crowdsourced report - allows users to assess the predictive power of the
-                        mathematical models and understand why borderline (Zone C/D) predictions sometimes
-                        disagree with physical reality.
+                        {t("methodology.s7_p2")}
                     </Para>
 
                     <SectionDivider />
 
                     {/* ── 8. Telemetry ─────────────────────────────────── */}
-                    <SectionHeading id="telemetry">8. Crowdsourced Telemetry & Smart Validation</SectionHeading>
+                    <SectionHeading id="telemetry">{t("methodology.toc_8")}</SectionHeading>
                     <Para>
-                        Hilal Vision allows authenticated users to submit real-time crescent sighting reports
-                        that are stored in a MySQL database and displayed on the live map.
+                        {t("methodology.s8_intro")}
                     </Para>
 
-                    <SubHeading>Smart Zone F Rejection</SubHeading>
+                    <SubHeading>{t("methodology.sub_zoneFReject")}</SubHeading>
                     <Para>
-                        A key architectural safeguard: when a physical sighting is claimed, the backend
-                        mathematically computes the geometric position of the sun and moon at the precise
-                        submitted timestamp and location. If the mathematics determine that the moon is
-                        definitively below the horizon (Zone F), the server rejects the payload - preventing
-                        malicious or erroneous data from corrupting the crowdsourced dataset.
+                        {t("methodology.s8_zoneF")}
                     </Para>
 
-                    <SubHeading>Rate Limiting</SubHeading>
+                    <SubHeading>{t("methodology.sub_rateLimit")}</SubHeading>
                     <Para>
-                        Submissions are protected by{" "}
-                        <strong style={{ color: "var(--foreground)" }}>Upstash Redis</strong> sliding window
-                        rate limiting - a maximum of 5 reports per IP address per minute. This prevents
-                        DDoS attacks and preserves data integrity during high-traffic periods (e.g. the eve of
-                        Ramadan).
+                        {t("methodology.s8_rate")}
                     </Para>
 
-                    <SubHeading>Meteorological Enrichment</SubHeading>
+                    <SubHeading>{t("methodology.sub_meteoEnrich")}</SubHeading>
                     <Para>
-                        Each submitted report is automatically enriched with real-time meteorological data from
-                        Open-Meteo - including cloud cover percentage, surface pressure, and aerosol optical
-                        depth at the observer's exact coordinates. This ancillary data enables future sightability
-                        score modeling that combines astronomical prediction with atmospheric conditions.
+                        {t("methodology.s8_meteo")}
                     </Para>
 
                     <SectionDivider />
 
                     {/* ── 9. Refraction ────────────────────────────────── */}
-                    <SectionHeading id="refraction">9. Atmospheric Refraction & DEM Integration</SectionHeading>
+                    <SectionHeading id="refraction">{t("methodology.toc_9")}</SectionHeading>
                     <Para>
-                        Atmospheric refraction is the bending of light as it passes through layers of air with
-                        increasing density near Earth's surface. At the horizon, this effect reaches approximately{" "}
-                        <strong style={{ color: "var(--foreground)" }}>34 arcminutes</strong> - enough to make the
-                        sun or moon appear fully above the horizon when they are geometrically below it.
+                        {t("methodology.s9_intro")}
                     </Para>
                     <Para>
-                        The Horizon View page models refraction using Saemundsson's inverse formula, correcting
-                        for local temperature and atmospheric pressure:
+                        {t("methodology.s9_refDesc")}
                     </Para>
                     <FormulaBlock>
                         {`R₀ = 1.02 / tan(h + 10.3 / (h + 5.11))   [arcminutes]
 R  = R₀ × (P / 1010) × (283 / (273 + T))`}
                     </FormulaBlock>
                     <Para>
-                        Where <code>h</code> is the apparent altitude in degrees, <code>P</code> is atmospheric
-                        pressure in hPa, and <code>T</code> is temperature in Celsius. Real-time P and T values
-                        are fetched from Open-Meteo's forecast API. Without this correction, the simulated moon
-                        would appear lower than its physically observed position - particularly critical for
-                        near-horizon sightings.
+                        {t("methodology.s9_refVars")}
                     </Para>
 
-                    <SubHeading>Atmospheric Overrides</SubHeading>
+                    <SubHeading>{t("methodology.sub_atmosOverride")}</SubHeading>
                     <Para>
-                        Both the 2D Map and 3D Globe pages feature a collapsible{" "}
-                        <strong style={{ color: "var(--foreground)" }}>Atmospheric Overrides</strong> panel.
-                        Users can manually set temperature (°C), pressure (hPa), and observer elevation (m),
-                        or toggle <strong style={{ color: "var(--foreground)" }}>Auto-fetch</strong> to pull
-                        real-time values from Open-Meteo's weather API based on the selected location.
+                        {t("methodology.s9_atmos1")}
                     </Para>
                     <Para>
-                        These parameters feed into the refraction correction formula. The delta between
-                        standard refraction (10°C, 1010 hPa) and the corrected refraction is applied to
-                        both sun and moon altitude calculations:
+                        {t("methodology.s9_atmos2")}
                     </Para>
                     <FormulaBlock>
                         {`R_std = 34/60°  (standard near-horizon refraction)
@@ -596,21 +484,15 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
 Δrefraction = R_true − R_std`}
                     </FormulaBlock>
 
-                    <SubHeading>Digital Elevation Model (DEM)</SubHeading>
+                    <SubHeading>{t("methodology.sub_dem")}</SubHeading>
                     <Para>
-                        The application integrates the{" "}
-                        <strong style={{ color: "var(--foreground)" }}>Open-Meteo Elevation API</strong> to
-                        fetch the true terrain elevation at any clicked point. This provides accurate horizon
-                        dip calculations via the formula:
+                        {t("methodology.s9_dem1")}
                     </Para>
                     <FormulaBlock>
                         {`dip = 1.76 × √(elevation)   [arcminutes]`}
                     </FormulaBlock>
                     <Para>
-                        A DEM tRPC endpoint (<code style={{ color: "var(--gold-dim)" }}>dem.getDem</code>)
-                        queries the Open-Meteo Elevation API, caching results and returning the terrain
-                        elevation in meters above sea level. This elevation is displayed in the
-                        enhanced map click tooltip and factored into all sun/moon altitude calculations.
+                        {t("methodology.s9_dem2")}
                     </Para>
 
                     <SectionDivider />
@@ -618,28 +500,22 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
                     {/* ── 10. Data Export & Public API ──────────────── */}
                     <SectionHeading id="export">{t("methodology.toc_10")}</SectionHeading>
 
-                    <SubHeading>CSV & JSON Export</SubHeading>
+                    <SubHeading>{t("methodology.sub_csvJson")}</SubHeading>
                     <Para>
-                        The Archive page provides one-click export buttons for both{" "}
-                        <strong style={{ color: "var(--foreground)" }}>ICOP observation data</strong> (City,
-                        Country, Result, Optical Aid) and{" "}
-                        <strong style={{ color: "var(--foreground)" }}>computed visibility tables</strong> (City,
-                        Country, Zone, Q-Value). The Live Sighting Feed widget also includes a download
-                        button with CSV and JSON options for exporting crowdsourced sighting reports.
+                        {t("methodology.s10_csv")}
                     </Para>
 
-                    <SubHeading>Public REST API</SubHeading>
+                    <SubHeading>{t("methodology.sub_restApi")}</SubHeading>
                     <Para>
-                        Hilal Vision exposes standalone Express REST endpoints for programmatic access to
-                        astronomical data:
+                        {t("methodology.s10_api")}
                     </Para>
                     <div className="overflow-x-auto my-4">
                         <table className="w-full text-xs border-collapse">
                             <thead>
                                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Endpoint</th>
-                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Parameters</th>
-                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Returns</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.apiTH_endpoint")}</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.apiTH_params")}</th>
+                                    <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("methodology.apiTH_returns")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -657,8 +533,7 @@ R_true = R_std × (P / 1010) × (283 / (273 + T))
                         </table>
                     </div>
                     <Para>
-                        All inputs are validated with Zod schemas. Invalid or out-of-range parameters return
-                        structured error responses with descriptive messages.
+                        {t("methodology.s10_zodNote")}
                     </Para>
 
                     <SectionDivider />
