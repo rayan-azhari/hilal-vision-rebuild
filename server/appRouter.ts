@@ -86,18 +86,7 @@ function getRateLimiter(): IRateLimiter {
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-async function fetchWithTimeout(url: string, timeoutMs = 2000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(id);
-    return response;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
-}
+// Native AbortSignal.timeout handles both headers and body hangs effectively
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 
@@ -108,7 +97,7 @@ export const demRouter = router({
     .query(async ({ input }) => {
       try {
         const url = `https://api.open-meteo.com/v1/elevation?latitude=${input.lat}&longitude=${input.lng}`;
-        const res = await fetchWithTimeout(url, 2000);
+        const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
         if (!res.ok) return { elevation: 0 };
         const data = (await res.json()) as any;
         return { elevation: data.elevation?.[0] ?? 0 };
@@ -191,18 +180,28 @@ export const appRouter = router({
         // Autonomously fetch meteorological snap from Open-Meteo if not provided (2s strict timeout)
         try {
           const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${input.lat}&longitude=${input.lng}&current=temperature_2m,surface_pressure,cloud_cover`;
-          const weatherRes = await fetchWithTimeout(weatherUrl, 2000);
-          if (weatherRes.ok) {
-            const data = (await weatherRes.json()) as any;
+          const aodUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${input.lat}&longitude=${input.lng}&current=aerosol_optical_depth`;
+
+          const fetchJson = async (url: string) => {
+            const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+            if (!res.ok) return null;
+            return res.json();
+          };
+
+          const [weatherResult, aodResult] = await Promise.allSettled([
+            fetchJson(weatherUrl),
+            fetchJson(aodUrl)
+          ]);
+
+          if (weatherResult.status === "fulfilled" && weatherResult.value) {
+            const data = weatherResult.value as any;
             if (input.temperature === undefined) input.temperature = data.current?.temperature_2m;
             if (input.pressure === undefined) input.pressure = data.current?.surface_pressure;
             if (input.cloudFraction === undefined) input.cloudFraction = data.current?.cloud_cover;
           }
 
-          const aodUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${input.lat}&longitude=${input.lng}&current=aerosol_optical_depth`;
-          const aodRes = await fetchWithTimeout(aodUrl, 2000);
-          if (aodRes.ok) {
-            const aodData = (await aodRes.json()) as any;
+          if (aodResult.status === "fulfilled" && aodResult.value) {
+            const aodData = aodResult.value as any;
             if (input.pm25 === undefined) input.pm25 = aodData.current?.aerosol_optical_depth;
           }
         } catch (err) {
