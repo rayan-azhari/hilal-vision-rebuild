@@ -156,7 +156,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     }}
                   >
                     <Icon className="w-3.5 h-3.5" />
-                    {label}
+                    {label === "Home" ? t("nav.homeBase") : label === "Visibility" ? t("nav.globeAndMaps") : label === "Moon Phase" ? t("nav.moonPhase") : label === "Hijri Calendar" ? t("nav.hijriCalendar") : label === "Horizon View" ? t("nav.horizonView") : label === "Archive" ? t("nav.icopArchive") : label}
                   </div>
                 </Link>
               );
@@ -422,9 +422,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <label className="text-xs uppercase font-bold tracking-widest ps-1" style={{ color: "var(--gold-dim)" }}>Explore Content</label>
                 <div className="p-2 rounded-3xl bg-white/[0.03] border border-white/5 grid grid-cols-1 gap-1">
                   {[
-                    { href: "/", label: "Home Base", icon: Home },
-                    { href: "/horizon", label: "Horizon Simulator", icon: Compass },
-                    { href: "/archive", label: "Observation Archive", icon: Archive },
+                    { href: "/", label: t("nav.homeBase"), icon: Home },
+                    { href: "/horizon", label: t("nav.horizonView"), icon: Compass },
+                    { href: "/archive", label: t("nav.icopArchive"), icon: Archive },
                   ].map(item => (
                     <Link key={item.href} href={item.href}>
                       <div onClick={() => setMobileOpen(false)} className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[15px] font-medium transition-colors" style={{ color: routePath === item.href ? "var(--space)" : "var(--foreground)", background: routePath === item.href ? "var(--gold)" : "transparent" }}>
@@ -519,13 +519,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/visibility">
           <div className="flex flex-col items-center gap-1.5 p-2 min-w-[64px] transition-colors" style={{ color: routePath === "/visibility" || routePath === "/map" || routePath === "/globe" ? "var(--gold)" : "var(--muted-foreground)" }}>
             <Map className="w-[22px] h-[22px]" />
-            <span className="text-[10px] font-semibold">Map</span>
+            <span className="text-[10px] font-semibold">{i18n.language === 'ar' ? 'خريطة' : i18n.language === 'ur' ? 'نقشہ' : 'Map'}</span>
           </div>
         </Link>
         <Link href="/moon">
           <div className="flex flex-col items-center gap-1.5 p-2 min-w-[64px] transition-colors" style={{ color: routePath === "/moon" ? "var(--gold)" : "var(--muted-foreground)" }}>
             <Moon className="w-[22px] h-[22px]" fill={routePath === "/moon" ? "currentColor" : "none"} />
-            <span className="text-[10px] font-semibold">Moon</span>
+            <span className="text-[10px] font-semibold">{i18n.language === 'ar' ? 'قمر' : i18n.language === 'ur' ? 'چاند' : 'Moon'}</span>
           </div>
         </Link>
 
@@ -551,13 +551,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/calendar">
           <div className="flex flex-col items-center gap-1.5 p-2 min-w-[64px] transition-colors" style={{ color: routePath === "/calendar" ? "var(--gold)" : "var(--muted-foreground)" }}>
             <Calendar className="w-[22px] h-[22px]" />
-            <span className="text-[10px] font-semibold">Hijri</span>
+            <span className="text-[10px] font-semibold">{i18n.language === 'ar' ? 'هجري' : i18n.language === 'ur' ? 'ہجری' : 'Hijri'}</span>
           </div>
         </Link>
 
         <button onClick={() => setMobileOpen(true)} className="flex flex-col items-center gap-1.5 p-2 min-w-[64px] transition-colors" style={{ color: mobileOpen ? "var(--gold)" : "var(--muted-foreground)" }}>
           <Menu className="w-[22px] h-[22px]" />
-          <span className="text-[10px] font-semibold">Menu</span>
+          <span className="text-[10px] font-semibold">{i18n.language === 'ar' ? 'قائمة' : i18n.language === 'ur' ? 'مینو' : 'Menu'}</span>
         </button>
       </nav>
 
@@ -614,11 +614,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="flex items-center gap-4 flex-wrap justify-center">
                 {[
-                  { href: "/about", label: "About" },
+                  { href: "/about", label: t("about.title") },
                   { href: "/methodology", label: "Methodology" },
                   { href: "/support", label: "Support" },
-                  { href: "/privacy", label: "Privacy" },
-                  { href: "/terms", label: "Terms" },
+                  { href: "/privacy", label: t("privacy.title") },
+                  { href: "/terms", label: t("terms.title") },
                 ].map(({ href, label }) => (
                   <Link key={href} href={href}>
                     <span
