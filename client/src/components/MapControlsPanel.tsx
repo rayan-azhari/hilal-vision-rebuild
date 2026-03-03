@@ -1,4 +1,5 @@
 import { ChevronDown, Eye, Cloud, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import ProGate from "./ProGate";
 
 interface MapControlsPanelProps {
@@ -44,10 +45,12 @@ export function MapControlsPanel({
     pressureOverride,
     setPressureOverride,
 }: MapControlsPanelProps) {
+    const { t } = useTranslation();
+
     return (
         <div className="breezy-card overflow-visible p-4 animate-breezy-enter">
             <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Map Controls</span>
+                <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.title")}</span>
                 {isLoading && (
                     <div className="w-3 h-3 rounded-full border border-t-transparent animate-spin" style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }} />
                 )}
@@ -56,7 +59,7 @@ export function MapControlsPanel({
                 {/* Hour Offset */}
                 <div>
                     <div className="flex justify-between items-center mb-2">
-                        <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Hour Offset</label>
+                        <label className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.hourOffset")}</label>
                         <span className="text-xs font-mono" style={{ color: "var(--gold)" }}>
                             {hourOffset >= 0 ? "+" : ""}{hourOffset}h
                         </span>
@@ -81,7 +84,7 @@ export function MapControlsPanel({
 
                 {/* Resolution */}
                 <div>
-                    <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Resolution</label>
+                    <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.resolution")}</label>
                     <div className="relative">
                         <select
                             value={resolution}
@@ -93,9 +96,9 @@ export function MapControlsPanel({
                                 color: "var(--foreground)",
                             }}
                         >
-                            <option value={2} style={{ background: "var(--space-mid)" }}>Fine (2°)</option>
-                            <option value={4} style={{ background: "var(--space-mid)" }}>Normal (4°)</option>
-                            <option value={6} style={{ background: "var(--space-mid)" }}>Fast (6°)</option>
+                            <option value={2} style={{ background: "var(--space-mid)" }}>{t("mapControls.resolutions.fine")}</option>
+                            <option value={4} style={{ background: "var(--space-mid)" }}>{t("mapControls.resolutions.normal")}</option>
+                            <option value={6} style={{ background: "var(--space-mid)" }}>{t("mapControls.resolutions.fast")}</option>
                         </select>
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
                     </div>
@@ -103,7 +106,7 @@ export function MapControlsPanel({
 
                 {/* Criterion switch */}
                 <div>
-                    <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>Criterion</label>
+                    <label className="block text-xs mb-1.5" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.criterion")}</label>
                     <div className="relative">
                         <select
                             value={visibilityCriterion}
@@ -115,8 +118,8 @@ export function MapControlsPanel({
                                 color: "var(--foreground)",
                             }}
                         >
-                            <option value="yallop" style={{ background: "var(--space-mid)" }}>Yallop (1997)</option>
-                            <option value="odeh" style={{ background: "var(--space-mid)" }}>Odeh (2004)</option>
+                            <option value="yallop" style={{ background: "var(--space-mid)" }}>{t("mapControls.criteria.yallop")}</option>
+                            <option value="odeh" style={{ background: "var(--space-mid)" }}>{t("mapControls.criteria.odeh")}</option>
                         </select>
                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--gold-dim)" }} />
                     </div>
@@ -126,7 +129,7 @@ export function MapControlsPanel({
             {/* Overlays */}
             <div className="pt-2 border-t space-y-2 mt-2" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 <div className="flex items-center justify-between text-xs py-1">
-                    <span className="text-muted-foreground flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> Visibility Map</span>
+                    <span className="text-muted-foreground flex items-center gap-1.5"><Eye className="w-3.5 h-3.5" /> {t("mapControls.visibilityMap")}</span>
                     <button
                         onClick={() => setShowVisibility(!showVisibility)}
                         className="w-8 h-4 rounded-full transition-colors relative"
@@ -143,7 +146,7 @@ export function MapControlsPanel({
                 </div>
 
                 <div className="flex items-center justify-between text-xs py-1">
-                    <span className="text-muted-foreground flex items-center gap-1.5"><Cloud className="w-3.5 h-3.5" /> Cloud Cover</span>
+                    <span className="text-muted-foreground flex items-center gap-1.5"><Cloud className="w-3.5 h-3.5" /> {t("mapControls.cloudCover")}</span>
                     <button
                         onClick={() => isPremium ? setShowClouds(!showClouds) : setShowUpgradeModal(true)}
                         className="w-8 h-4 rounded-full transition-colors relative"
@@ -161,10 +164,10 @@ export function MapControlsPanel({
             </div>
 
             {/* Atmospheric Overrides */}
-            <ProGate featureName="Atmospheric Overrides">
+            <ProGate featureName={t("mapControls.atmosphericOverrides")}>
                 <div className="pt-3 border-t space-y-3 mt-3" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Atmospheric Overrides</span>
+                        <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.atmosphericOverrides")}</span>
                         <label className="flex items-center gap-1.5 cursor-pointer">
                             <input
                                 type="checkbox"
@@ -176,13 +179,13 @@ export function MapControlsPanel({
                                     background: autoFetchWeather ? "var(--gold)" : "transparent"
                                 }}
                             />
-                            <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>Auto-fetch</span>
+                            <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.autoFetch")}</span>
                         </label>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                         <div>
-                            <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>Temp (°C)</label>
+                            <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.temp")}</label>
                             <input
                                 type="number"
                                 value={tempOverride}
@@ -192,11 +195,11 @@ export function MapControlsPanel({
                                 }}
                                 className="w-full px-2 py-1.5 rounded text-xs bg-transparent border"
                                 style={{ borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
-                                placeholder="e.g. 15"
+                                placeholder={t("mapControls.tempPlaceholder")}
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>Pressure (hPa)</label>
+                            <label className="block text-[10px] mb-1" style={{ color: "var(--muted-foreground)" }}>{t("mapControls.pressure")}</label>
                             <input
                                 type="number"
                                 value={pressureOverride}
@@ -206,7 +209,7 @@ export function MapControlsPanel({
                                 }}
                                 className="w-full px-2 py-1.5 rounded text-xs bg-transparent border"
                                 style={{ borderColor: "color-mix(in oklch, var(--gold) 20%, transparent)" }}
-                                placeholder="e.g. 1013"
+                                placeholder={t("mapControls.pressurePlaceholder")}
                             />
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useProTier } from "@/contexts/ProTierContext";
 import { Crown, Sparkles, ArrowRight } from "lucide-react";
 
@@ -20,6 +21,7 @@ interface ProGateProps {
  * Pro users see the content normally.
  */
 export default function ProGate({ children, featureName, fallback, inline }: ProGateProps) {
+    const { t } = useTranslation();
     const { isPremium, setShowUpgradeModal } = useProTier();
 
     if (isPremium) return <>{children}</>;
@@ -39,7 +41,7 @@ export default function ProGate({ children, featureName, fallback, inline }: Pro
           transition-all duration-300 cursor-pointer group"
             >
                 <Crown className="w-3 h-3" />
-                <span>Pro</span>
+                <span>{t("proGate.pro")}</span>
             </span>
         );
     }
@@ -84,11 +86,10 @@ export default function ProGate({ children, featureName, fallback, inline }: Pro
                     {/* Text */}
                     <div className="text-center space-y-1.5">
                         <h3 className="text-base font-semibold text-[var(--foreground)]">
-                            Unlock {featureName}
+                            {t("proGate.unlock", { featureName })}
                         </h3>
                         <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
-                            Upgrade to <span className="text-amber-400 font-medium">Hilal Vision Pro</span> for
-                            full access to advanced tools and analytics.
+                            {t("proGate.upgradeDesc1")} <span className="text-amber-400 font-medium">{t("proGate.hilalVisionPro")}</span> {t("proGate.upgradeDesc2")}
                         </p>
                     </div>
 
@@ -97,13 +98,13 @@ export default function ProGate({ children, featureName, fallback, inline }: Pro
             bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-medium
             group-hover:from-amber-400 group-hover:to-amber-500
             transition-all duration-300 shadow-md shadow-amber-500/25">
-                        <span>Upgrade to Pro</span>
+                        <span>{t("proGate.upgradeButton")}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </div>
 
                     {/* Price hint */}
                     <p className="text-xs text-[var(--muted-foreground)]">
-                        From $2.99/month · Cancel anytime
+                        {t("proGate.priceHint")}
                     </p>
                 </button>
             </div>

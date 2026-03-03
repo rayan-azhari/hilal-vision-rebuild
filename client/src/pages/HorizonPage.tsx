@@ -11,6 +11,7 @@ import {
   type SunMoonData,
 } from "@/lib/astronomy";
 import { trpc } from "@/lib/trpc";
+import { useTranslation } from "react-i18next";
 import * as Astronomy from "astronomy-engine";
 
 function drawHorizon(
@@ -18,7 +19,8 @@ function drawHorizon(
   data: SunMoonData,
   date: Date,
   loc: { lat: number; lng: number },
-  dipDeg: number
+  dipDeg: number,
+  t: any
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -77,7 +79,7 @@ function drawHorizon(
     ctx.font = `${Math.round(9 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(150,150,150,0.4)";
     ctx.textAlign = "left";
-    ctx.fillText("geometric 0°", 4, geoY - 2);
+    ctx.fillText(t("horizon.geometric0"), 4, geoY - 2);
   }
 
   // Stars
@@ -108,7 +110,7 @@ function drawHorizon(
 
   // Azimuth labels
   const azLabels = [210, 240, 270, 300, 330];
-  const dirLabels: Record<number, string> = { 210: "SSW", 240: "WSW", 270: "W", 300: "WNW", 330: "NNW" };
+  const dirLabels: Record<number, string> = { 210: t("horizon.ssw"), 240: t("horizon.wsw"), 270: t("horizon.w"), 300: t("horizon.wnw"), 330: t("horizon.nnw") };
   ctx.font = `${Math.round(11 * s)}px Inter, sans-serif`;
   ctx.fillStyle = "rgba(200,160,80,0.5)";
   ctx.textAlign = "center";
@@ -172,7 +174,7 @@ function drawHorizon(
   ctx.font = `bold ${Math.round(11 * s)}px Inter, sans-serif`;
   ctx.fillStyle = "rgba(255,160,50,0.8)";
   ctx.textAlign = "center";
-  ctx.fillText("☀ Sun", sunX, Math.min(sunY - 12, H * 0.72));
+  ctx.fillText("☀ " + t("horizon.sun"), sunX, Math.min(sunY - 12, H * 0.72));
 
   // Moon position
   const moonX = azToX(data.moonAz);
@@ -221,7 +223,7 @@ function drawHorizon(
     ctx.font = `bold ${Math.round(11 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(220,200,120,0.9)";
     ctx.textAlign = "center";
-    ctx.fillText("☽ Moon", moonX, moonY - mr - Math.round(6 * s));
+    ctx.fillText("☽ " + t("horizon.moon"), moonX, moonY - mr - Math.round(6 * s));
 
     // Altitude label
     ctx.font = `${Math.round(10 * s)}px Inter, sans-serif`;
@@ -233,7 +235,7 @@ function drawHorizon(
     ctx.font = `${Math.round(11 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(200,180,100,0.4)";
     ctx.textAlign = "center";
-    ctx.fillText("☽ Moon below horizon", W / 2, H * 0.75 - 10);
+    ctx.fillText("☽ " + t("horizon.moonBelowHorizon"), W / 2, H * 0.75 - 10);
   }
 
   // Arc of vision line
@@ -253,7 +255,7 @@ function drawHorizon(
     ctx.font = `${Math.round(10 * s)}px Inter, sans-serif`;
     ctx.fillStyle = "rgba(200,160,80,0.6)";
     ctx.textAlign = "center";
-    ctx.fillText(`ARCV: ${data.arcv.toFixed(1)}°`, midX, midY - 8);
+    ctx.fillText(`${t("horizon.arcv")}: ${data.arcv.toFixed(1)}°`, midX, midY - 8);
   }
 
   // Compass rose (bottom right)
@@ -262,13 +264,14 @@ function drawHorizon(
   ctx.font = `bold ${Math.round(10 * s)}px Inter, sans-serif`;
   ctx.fillStyle = "rgba(200,160,80,0.5)";
   ctx.textAlign = "center";
-  ctx.fillText("W", cx2, cy2);
+  ctx.fillText(t("horizon.w"), cx2, cy2);
   ctx.fillStyle = "rgba(200,160,80,0.3)";
-  ctx.fillText("N", cx2 - Math.round(14 * s), cy2);
-  ctx.fillText("S", cx2 + Math.round(14 * s), cy2);
+  ctx.fillText(t("horizon.n"), cx2 - Math.round(14 * s), cy2);
+  ctx.fillText(t("horizon.s"), cx2 + Math.round(14 * s), cy2);
 }
 
 export default function HorizonPage() {
+  const { t, i18n } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { date, location: loc } = useGlobalState();
   const [data, setData] = useState<SunMoonData | null>(null);
@@ -293,8 +296,8 @@ export default function HorizonPage() {
     canvas.height = canvas.offsetHeight * window.devicePixelRatio;
     const ctx = canvas.getContext("2d");
     if (ctx) ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    drawHorizon(canvas, data, date, loc, dipDeg);
-  }, [data, date, dipDeg]);
+    drawHorizon(canvas, data, date, loc, dipDeg, t);
+  }, [data, date, dipDeg, t]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -304,7 +307,7 @@ export default function HorizonPage() {
       canvas.height = canvas.offsetHeight * window.devicePixelRatio;
       const ctx = canvas.getContext("2d");
       if (ctx) ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-      drawHorizon(canvas, data, date, loc, dipDeg);
+      drawHorizon(canvas, data, date, loc, dipDeg, t);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -322,11 +325,11 @@ export default function HorizonPage() {
       {/* Header */}
       <PageHeader
         icon={<Compass />}
-        title="Local Horizon View"
-        subtitle="Moon & sun positions at sunset · Sighting window simulator"
+        title={t("horizon.localHorizonView")}
+        subtitle={t("horizon.subtitle")}
       >
-        <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
-          {hijri.day} {hijri.monthNameArabic} {hijri.year} هـ
+        <div className={`text-xs ${i18n.language === 'ar' || i18n.language === 'ur' ? 'font-arabic' : ''} text-right`} style={{ color: "var(--gold-dim)" }}>
+          {hijri.day} {i18n.language === 'ar' || i18n.language === 'ur' ? hijri.monthNameArabic : hijri.monthName} {hijri.year} هـ
         </div>
       </PageHeader>
 
@@ -336,7 +339,7 @@ export default function HorizonPage() {
           <canvas
             ref={canvasRef}
             role="img"
-            aria-label="Horizon view showing sun and moon positions above the local horizon"
+            aria-label={t("horizon.ariaLabel")}
             className="absolute inset-0 w-full h-full"
             style={{ display: "block" }}
           />
@@ -371,7 +374,7 @@ export default function HorizonPage() {
                 style={{ animationDelay: "150ms" }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>Visibility</span>
+                  <span className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>{t("horizon.visibility")}</span>
                   <span
                     className="text-xs font-bold px-2 py-0.5 rounded-full"
                     style={{
@@ -384,23 +387,23 @@ export default function HorizonPage() {
                           data.visibility === "C" ? "#fb923c" : "#f87171",
                     }}
                   >
-                    Zone {data.visibility}
+                    {t("horizon.zone", { zone: data.visibility })}
                   </span>
                 </div>
 
                 {[
-                  { label: "Moon Altitude", value: `${data.moonAlt.toFixed(2)}°` },
-                  { label: "Moon Azimuth", value: `${data.moonAz.toFixed(1)}°` },
-                  { label: "Sun Altitude", value: `${data.sunAlt.toFixed(2)}°` },
-                  { label: "Arc of Vision", value: `${data.arcv.toFixed(2)}°` },
-                  { label: "Elongation", value: `${data.elongation.toFixed(2)}°` },
-                  { label: "Crescent Width", value: `${data.crescent.w.toFixed(3)}'` },
-                  { label: "Yallop q", value: data.qValue.toFixed(4) },
-                  { label: "Terrain Elevation", value: elevation > 0 ? `${elevation.toFixed(0)} m` : "—" },
-                  { label: "Horizon Dip", value: dipDeg > 0.01 ? `${(dipDeg * 60).toFixed(1)}'` : "—" },
-                  { label: "Sunset", value: formatTime(data.sunset) },
-                  { label: "Maghrib", value: formatTime(data.maghrib) },
-                  { label: "Moonset", value: formatTime(data.moonset) },
+                  { label: t("horizon.moonAltitude"), value: `${data.moonAlt.toFixed(2)}°` },
+                  { label: t("horizon.moonAzimuth"), value: `${data.moonAz.toFixed(1)}°` },
+                  { label: t("horizon.sunAltitude"), value: `${data.sunAlt.toFixed(2)}°` },
+                  { label: t("horizon.arcOfVision"), value: `${data.arcv.toFixed(2)}°` },
+                  { label: t("horizon.elongation"), value: `${data.elongation.toFixed(2)}°` },
+                  { label: t("horizon.crescentWidth"), value: `${data.crescent.w.toFixed(3)}'` },
+                  { label: t("horizon.yallopQ"), value: data.qValue.toFixed(4) },
+                  { label: t("horizon.terrainElevation"), value: elevation > 0 ? `${elevation.toFixed(0)} m` : "—" },
+                  { label: t("horizon.horizonDip"), value: dipDeg > 0.01 ? `${(dipDeg * 60).toFixed(1)}'` : "—" },
+                  { label: t("horizon.sunset"), value: formatTime(data.sunset) },
+                  { label: t("horizon.maghrib"), value: formatTime(data.maghrib) },
+                  { label: t("horizon.moonset"), value: formatTime(data.moonset) },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between">
                     <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{label}</span>

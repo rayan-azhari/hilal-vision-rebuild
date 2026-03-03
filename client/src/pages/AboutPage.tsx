@@ -20,95 +20,100 @@ import {
     Github,
     Mail,
 } from "lucide-react";
-
-const TOOLS = [
+import { useTranslation } from "react-i18next";
+const getTools = (t: any) => [
     {
         href: "/visibility",
         icon: Globe,
-        title: "3D Globe & Visibility Map",
-        desc: "Interactive WebGL globe and 2D Leaflet map showing crescent visibility zones worldwide using Yallop q-values. Includes real-time cloud cover overlay and Best-Time-to-Observe calculator.",
+        title: t("about.tools_visTitle"),
+        desc: t("about.tools_visDesc"),
         color: "#60a5fa",
     },
     {
         href: "/moon",
         icon: Moon,
-        title: "Moon Phase Dashboard",
-        desc: "Current lunar phase, illumination, age, Sun & Moon altitude chart, 30-day phase calendar strip, and Yallop/Danjon methodology charts.",
+        title: t("about.tools_moonTitle"),
+        desc: t("about.tools_moonDesc"),
         color: "#facc15",
     },
     {
         href: "/calendar",
         icon: Calendar,
-        title: "Hijri Calendar",
-        desc: "Triple-engine calendar supporting Astronomical (astronomy-engine), Umm al-Qura (KACST), and Tabular algorithms. Includes a 'Compare to Heavens' divergence overlay.",
+        title: t("about.tools_calTitle"),
+        desc: t("about.tools_calDesc"),
         color: "#c084fc",
     },
     {
         href: "/horizon",
         icon: Compass,
-        title: "Horizon View",
-        desc: "Local horizon simulator showing the crescent moon's position relative to the setting sun, with ARCV and DAZ annotations.",
+        title: t("about.tools_horTitle"),
+        desc: t("about.tools_horDesc"),
         color: "#fb923c",
     },
     {
         href: "/archive",
         icon: Archive,
-        title: "ICOP Archive",
-        desc: "1,000+ authentic historical crescent sighting records from the Islamic Crescents' Observation Project (ICOP), spanning 1438–1465 AH.",
+        title: t("about.tools_arcTitle"),
+        desc: t("about.tools_arcDesc"),
         color: "#94a3b8",
     },
 ];
 
-const TECH = [
-    { icon: Globe, label: "React 19 + Vite 7", desc: "Frontend framework and build tool" },
-    { icon: Map, label: "Leaflet + Globe.gl", desc: "2D map and 3D WebGL globe" },
-    { icon: FlaskConical, label: "astronomy-engine", desc: "VSOP87/ELP2000 sun & moon position algorithms (Don Cross)" },
-    { icon: Database, label: "tRPC + Express + MySQL", desc: "Type-safe API and database layer (Drizzle ORM)" },
-    { icon: Shield, label: "Clerk + Upstash Redis", desc: "Authentication and rate limiting" },
-    { icon: Smartphone, label: "Capacitor.js", desc: "Native iOS & Android packaging" },
-    { icon: Languages, label: "react-i18next", desc: "English, Arabic (العربية), and Urdu (اردو)" },
-    { icon: Star, label: "Sentry + PWA", desc: "Error monitoring and offline service worker" },
+const getTech = (t: any) => [
+    { icon: Globe, label: "React 19 + Vite 7", desc: t("about.tech_react") },
+    { icon: Map, label: "Leaflet + Globe.gl", desc: t("about.tech_leaflet") },
+    { icon: FlaskConical, label: "astronomy-engine", desc: t("about.tech_astro") },
+    { icon: Database, label: "tRPC + Express + MySQL", desc: t("about.tech_trpc") },
+    { icon: Shield, label: "Clerk + Upstash Redis", desc: t("about.tech_clerk") },
+    { icon: Smartphone, label: "Capacitor.js", desc: t("about.tech_cap") },
+    { icon: Languages, label: "react-i18next", desc: t("about.tech_i18n") },
+    { icon: Star, label: "Sentry + PWA", desc: t("about.tech_sentry") },
 ];
 
-const CREDITS = [
+const getCredits = (t: any) => [
     {
-        title: "Yallop (1997) Criterion",
-        desc: "B.D. Yallop, HM Nautical Almanac Office - foundational q-value crescent visibility formula.",
+        title: t("about.credit_yallopTitle"),
+        desc: t("about.credit_yallopDesc"),
         href: "https://astronomycenter.net/pdf/yallop_1997.pdf",
     },
     {
-        title: "Odeh (2004) Criterion",
-        desc: "Mohammad Odeh - V-value refinement trained on 737 ICOP sighting observations.",
+        title: t("about.credit_odehTitle"),
+        desc: t("about.credit_odehDesc"),
         href: "https://www.researchgate.net/publication/225099773",
     },
     {
-        title: "Islamic Crescents' Observation Project (ICOP)",
-        desc: "International Astronomical Center - over 1,000 historical crescent sighting records used in the Archive.",
+        title: t("about.credit_icopTitle"),
+        desc: t("about.credit_icopDesc"),
         href: "https://astronomycenter.net/icop.html?l=en",
     },
     {
-        title: "astronomy-engine by Don Cross",
-        desc: "High-precision VSOP87/ELP2000 planetary and lunar position library for JavaScript.",
+        title: t("about.credit_astroTitle"),
+        desc: t("about.credit_astroDesc"),
         href: "https://github.com/cosinekitty/astronomy",
     },
     {
-        title: "Umm al-Qura Calendar (@umalqura/core)",
-        desc: "KACST pre-computed tables for the official Saudi Arabian civic Hijri calendar.",
+        title: t("about.credit_ummTitle"),
+        desc: t("about.credit_ummDesc"),
         href: "https://github.com/umalqura/umalqura",
     },
     {
-        title: "Open-Meteo",
-        desc: "Free, open-source weather API providing real-time cloud cover data.",
+        title: t("about.credit_meteoTitle"),
+        desc: t("about.credit_meteoDesc"),
         href: "https://open-meteo.com",
     },
 ];
 
 export default function AboutPage() {
+    const { t, i18n } = useTranslation();
+    const TOOLS = getTools(t);
+    const TECH = getTech(t);
+    const CREDITS = getCredits(t);
+
     return (
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
-                title="About"
-                description="About Hilal Vision - a precision astronomical platform for predicting Islamic crescent moon sightings worldwide using Yallop & Odeh criteria."
+                title={t("about.title")}
+                description={t("about.description")}
                 path="/about"
             />
 
@@ -131,29 +136,27 @@ export default function AboutPage() {
 
                 <div className="container relative z-10 max-w-3xl">
                     <div
-                        className="text-xs mb-4 font-arabic tracking-wider"
+                        className={`text-xs mb-4 uppercase tracking-wider ${i18n.language === 'en' ? 'font-arabic' : ''}`}
                         style={{ color: "var(--gold-dim)" }}
                     >
-                        رؤية الهلال - About Hilal Vision
+                        {t("about.headerSubtitle")}
                     </div>
                     <h1
                         className="text-4xl md:text-6xl font-light tracking-tight mb-6 leading-tight"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Bridging Ancient Tradition<br />
-                        with Modern Astronomy
+                        {t("about.heroTitle1")}<br />
+                        {t("about.heroTitle2")}
                     </h1>
                     <p
                         className="text-lg leading-relaxed font-light max-w-2xl"
                         style={{ color: "var(--muted-foreground)" }}
                     >
-                        Hilal Vision is a precision astronomical web platform dedicated to predicting and
-                        visualising Islamic crescent moon (
-                        <span className="font-arabic" style={{ color: "var(--gold-dim)" }}>
-                            هلال
+                        {t("about.heroDesc1")}
+                        <span className={`px-1 ${i18n.language === 'en' ? 'font-arabic' : ''}`} style={{ color: "var(--gold-dim)" }}>
+                            {t("about.heroDesc2")}
                         </span>
-                        ) sightings worldwide. It is built for the 1.8 billion Muslims who rely on the lunar
-                        calendar for religious observances, and for the astronomers and scholars who study it.
+                        {t("about.heroDesc3")}
                     </p>
                 </div>
             </section>
@@ -168,8 +171,8 @@ export default function AboutPage() {
             >
                 <PageHeader
                     icon={<Info />}
-                    title="About Hilal Vision"
-                    subtitle="Mission, tools, technology & attributions"
+                    title={t("about.pageHeaderTitle")}
+                    subtitle={t("about.pageHeaderSubtitle")}
                     className="max-w-3xl"
                 />
             </div>
@@ -181,38 +184,30 @@ export default function AboutPage() {
                         className="text-2xl font-light mb-4 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Our Mission
+                        {t("about.missionTitle")}
                     </h2>
                     <div
                         className="prose prose-invert max-w-none space-y-4 text-sm leading-relaxed"
                         style={{ color: "var(--muted-foreground)" }}
                     >
                         <p>
-                            The Islamic lunar calendar is one of humanity's oldest scientific traditions - the
-                            beginning of each sacred month has been determined by the physical sighting of the new
-                            crescent moon for over 1,400 years. Yet in the modern world, this practice is
-                            fragmented: different countries announce the start of Ramadan on different days, and
-                            communities lack transparent, data-driven tools to understand why.
+                            {t("about.missionP1")}
                         </p>
                         <p>
-                            Hilal Vision exists to answer one question with the precision it deserves:{" "}
+                            {t("about.missionP2_1")}
                             <strong style={{ color: "var(--foreground)" }}>
-                                "Will the new crescent moon be visible tonight from my location - and why?"
+                                {t("about.missionP2_2")}
                             </strong>
                         </p>
                         <p>
-                            We implement the internationally recognised{" "}
-                            <strong style={{ color: "var(--foreground)" }}>Yallop (1997)</strong> and{" "}
-                            <strong style={{ color: "var(--foreground)" }}>Odeh (2004)</strong> visibility
-                            criteria - the same standards used by Islamic calendar authorities in the UK, Malaysia,
-                            and the international astronomical community - and present the results with the visual
-                            clarity and interactivity that a 21st-century audience expects.
+                            {t("about.missionP3_1")}
+                            <strong style={{ color: "var(--foreground)" }}>{t("about.missionP3_2")}</strong>
+                            {t("about.missionP3_3")}
+                            <strong style={{ color: "var(--foreground)" }}>{t("about.missionP3_4")}</strong>
+                            {t("about.missionP3_5")}
                         </p>
                         <p>
-                            This platform is not a religious authority. It is a scientific instrument. It presents
-                            mathematical predictions, historical data, and comparative calendrical analysis
-                            side-by-side, empowering individuals and communities to engage critically and
-                            transparently with Islamic timekeeping.
+                            {t("about.missionP4")}
                         </p>
                     </div>
                 </div>
@@ -225,26 +220,26 @@ export default function AboutPage() {
                         className="text-2xl font-light mb-8 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Who Is It For?
+                        {t("about.whoTitle")}
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[
                             {
                                 icon: Moon,
-                                title: "Muslim Communities",
-                                desc: "Get a clear, location-specific prediction for crescent visibility before Ramadan, Eid, and every new Hijri month - without jargon.",
+                                title: t("about.whoMuslimsTitle"),
+                                desc: t("about.whoMuslimsDesc"),
                                 color: "#facc15",
                             },
                             {
                                 icon: FlaskConical,
-                                title: "Astronomers & Researchers",
-                                desc: "Access raw q-values, ARCV/DAZ parameters, Odeh V-values, and the full ICOP historical dataset for validation and research.",
+                                title: t("about.whoAstroTitle"),
+                                desc: t("about.whoAstroDesc"),
                                 color: "#60a5fa",
                             },
                             {
                                 icon: BookOpen,
-                                title: "Islamic Calendar Scholars",
-                                desc: "Compare Astronomical, Umm al-Qura, and Tabular Hijri calendars side-by-side. Understand exactly where and why civic calendars diverge from physical astronomy.",
+                                title: t("about.whoScholarsTitle"),
+                                desc: t("about.whoScholarsDesc"),
                                 color: "#c084fc",
                             },
                         ].map(({ icon: Icon, title, desc, color }) => (
@@ -283,10 +278,10 @@ export default function AboutPage() {
                         className="text-2xl font-light mb-2 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Platform Tools
+                        {t("about.toolsTitle")}
                     </h2>
                     <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-                        Six dedicated tools, each engineered for a specific aspect of lunar astronomy.
+                        {t("about.toolsDesc")}
                     </p>
                     <div className="space-y-3">
                         {TOOLS.map(({ href, icon: Icon, title, desc, color }) => (
@@ -334,10 +329,10 @@ export default function AboutPage() {
                         className="text-2xl font-light mb-2 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Technology
+                        {t("about.techTitle")}
                     </h2>
                     <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-                        Built with modern web technologies for performance, accuracy, and global reach.
+                        {t("about.techDesc")}
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {TECH.map(({ icon: Icon, label, desc }) => (
@@ -388,15 +383,13 @@ export default function AboutPage() {
                                 className="text-base font-semibold mb-1"
                                 style={{ color: "var(--foreground)" }}
                             >
-                                Deep Dive: Scientific Methodology
+                                {t("about.deepDiveTitle")}
                             </h3>
                             <p
                                 className="text-xs leading-relaxed"
                                 style={{ color: "var(--muted-foreground)" }}
                             >
-                                Read the full technical documentation - Yallop and Odeh criteria derivations,
-                                triple-engine Hijri calendar algorithms, the Best-Time-to-Observe scoring function,
-                                atmospheric refraction physics, and ICOP data sourcing.
+                                {t("about.deepDiveDesc")}
                             </p>
                         </div>
                         <Link href="/methodology">
@@ -407,7 +400,7 @@ export default function AboutPage() {
                                     color: "var(--space)",
                                 }}
                             >
-                                Read Methodology
+                                {t("about.deepDiveBtn")}
                                 <ExternalLink className="w-3.5 h-3.5" />
                             </span>
                         </Link>
@@ -422,11 +415,10 @@ export default function AboutPage() {
                         className="text-2xl font-light mb-2 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        How We Compare
+                        {t("about.compareTitle")}
                     </h2>
                     <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-                        No competitor combines all of: 3D globe, weather overlay, real ICOP data, and a
-                        Best-Time-to-Observe engine. Hilal Vision uniquely owns this combination.
+                        {t("about.compareDesc")}
                     </p>
 
                     <div className="overflow-x-auto">
@@ -437,7 +429,7 @@ export default function AboutPage() {
                                         className="text-left py-3 px-3 font-semibold text-xs"
                                         style={{ color: "var(--foreground)", borderBottom: "1px solid var(--border)" }}
                                     >
-                                        Feature
+                                        {t("about.featureLabel")}
                                     </th>
                                     {[
                                         { name: "Hilal Vision", isUs: true },
@@ -462,20 +454,20 @@ export default function AboutPage() {
                             </thead>
                             <tbody>
                                 {[
-                                    { feature: "3D Interactive Globe", vals: [true, false, false, false, false] },
-                                    { feature: "2D Visibility Map", vals: [true, true, false, false, true] },
-                                    { feature: "Weather / Cloud Overlay", vals: [true, false, false, false, false] },
-                                    { feature: "Best-Time Calculator", vals: [true, false, false, false, false] },
-                                    { feature: "Real ICOP Sighting Data", vals: [true, true, false, true, false] },
-                                    { feature: "Crowdsourced Reports", vals: [true, false, false, true, false] },
-                                    { feature: "Triple-Engine Hijri Cal.", vals: [true, false, false, false, false] },
-                                    { feature: "Scientific Detail (q/V)", vals: [true, true, false, false, false] },
-                                    { feature: "Mobile App", vals: [true, false, true, true, false] },
-                                    { feature: "Push Notifications", vals: [false, false, true, true, false] },
-                                    { feature: "Photo Sightings", vals: [false, false, false, true, false] },
-                                    { feature: "AR Moon Finder", vals: [false, false, false, false, false] },
-                                    { feature: "Multi-Language", vals: [true, false, true, false, false] },
-                                    { feature: "Animated Timeline", vals: [false, false, false, false, false] },
+                                    { feature: t("about.feat_3d"), vals: [true, false, false, false, false] },
+                                    { feature: t("about.feat_2d"), vals: [true, true, false, false, true] },
+                                    { feature: t("about.feat_cloud"), vals: [true, false, false, false, false] },
+                                    { feature: t("about.feat_best"), vals: [true, false, false, false, false] },
+                                    { feature: t("about.feat_icop"), vals: [true, true, false, true, false] },
+                                    { feature: t("about.feat_crowd"), vals: [true, false, false, true, false] },
+                                    { feature: t("about.feat_triple"), vals: [true, false, false, false, false] },
+                                    { feature: t("about.feat_sci"), vals: [true, true, false, false, false] },
+                                    { feature: t("about.feat_app"), vals: [true, false, true, true, false] },
+                                    { feature: t("about.feat_push"), vals: [false, false, true, true, false] },
+                                    { feature: t("about.feat_photo"), vals: [false, false, false, true, false] },
+                                    { feature: t("about.feat_ar"), vals: [false, false, false, false, false] },
+                                    { feature: t("about.feat_lang"), vals: [true, false, true, false, false] },
+                                    { feature: t("about.feat_anim"), vals: [false, false, false, false, false] },
                                 ].map(({ feature, vals }, i) => (
                                     <tr
                                         key={feature}
@@ -509,10 +501,10 @@ export default function AboutPage() {
                                                         </span>
                                                     ) : (
                                                         <span
-                                                            className="text-[9px] uppercase font-bold tracking-widest"
+                                                            className="text-[9px] uppercase font-bold tracking-widest whitespace-nowrap"
                                                             style={{ color: "color-mix(in oklch, var(--gold) 60%, transparent)" }}
                                                         >
-                                                            Coming Soon
+                                                            {t("about.comingSoon")}
                                                         </span>
                                                     )
                                                 ) : v ? (
@@ -542,8 +534,7 @@ export default function AboutPage() {
                         className="mt-5 text-xs italic"
                         style={{ color: "var(--muted-foreground)" }}
                     >
-                        Table reflects publicly available features as of February 2026. ✓ = available, - = not
-                        available.
+                        {t("about.tableNote")}
                     </p>
                 </div>
             </section>
@@ -555,10 +546,10 @@ export default function AboutPage() {
                         className="text-2xl font-light mb-2 tracking-wide"
                         style={{ color: "var(--foreground)" }}
                     >
-                        Data Sources & Attributions
+                        {t("about.creditsTitle")}
                     </h2>
                     <p className="text-sm mb-8" style={{ color: "var(--muted-foreground)" }}>
-                        Hilal Vision stands on the shoulders of decades of peer-reviewed astronomical research.
+                        {t("about.creditsDesc")}
                     </p>
                     <div className="space-y-3">
                         {CREDITS.map(({ title, desc, href }) => (
@@ -605,13 +596,13 @@ export default function AboutPage() {
                                 className="text-sm font-semibold mb-1"
                                 style={{ color: "var(--foreground)" }}
                             >
-                                Proprietary Software
+                                {t("about.licenseTitle")}
                             </h3>
                             <p
                                 className="text-xs leading-relaxed mb-4"
                                 style={{ color: "var(--muted-foreground)" }}
                             >
-                                Hilal Vision is proprietary software. All rights are reserved. The source code is closed-source and protected by copyright law.
+                                {t("about.licenseDesc")}
                             </p>
                             <a
                                 href="https://github.com"
@@ -621,7 +612,7 @@ export default function AboutPage() {
                                 style={{ color: "var(--gold-dim)" }}
                             >
                                 <Github className="w-4 h-4" />
-                                View on GitHub
+                                {t("about.viewGithub")}
                                 <ExternalLink className="w-3 h-3" />
                             </a>
                         </div>
@@ -632,14 +623,13 @@ export default function AboutPage() {
                                 className="text-sm font-semibold mb-1"
                                 style={{ color: "var(--foreground)" }}
                             >
-                                Contact & Feedback
+                                {t("about.contactTitle")}
                             </h3>
                             <p
                                 className="text-xs leading-relaxed mb-4"
                                 style={{ color: "var(--muted-foreground)" }}
                             >
-                                Found a bug, have a question about the methodology, or want to contribute sighting
-                                data? We welcome feedback from the astronomical and Islamic community.
+                                {t("about.contactDesc")}
                             </p>
                             <div className="space-y-2">
                                 <Link href="/privacy">
@@ -648,7 +638,7 @@ export default function AboutPage() {
                                         style={{ color: "var(--gold-dim)" }}
                                     >
                                         <Shield className="w-4 h-4" />
-                                        Privacy Policy
+                                        {t("about.privacyLink")}
                                     </span>
                                 </Link>
                                 <Link href="/terms">
@@ -657,7 +647,7 @@ export default function AboutPage() {
                                         style={{ color: "var(--gold-dim)" }}
                                     >
                                         <BookOpen className="w-4 h-4" />
-                                        Terms of Service
+                                        {t("about.termsLink")}
                                     </span>
                                 </Link>
                             </div>

@@ -10,6 +10,7 @@ import {
   type VisibilityZone,
 } from "@/lib/astronomy";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
+import { useTranslation } from "react-i18next";
 
 interface CrescentCountryListProps {
   viewYear: number;
@@ -18,6 +19,7 @@ interface CrescentCountryListProps {
 
 export function CrescentCountryList({ viewYear, viewMonth }: CrescentCountryListProps) {
   const { visibilityCriterion } = useGlobalState();
+  const { t } = useTranslation();
 
   const { grouped, observationDate } = useMemo(() => {
     // The 29th night of the Hijri month is the traditional crescent observation night
@@ -62,11 +64,11 @@ export function CrescentCountryList({ viewYear, viewMonth }: CrescentCountryList
       <div className="flex items-center gap-1.5 mb-1">
         <Eye className="w-4 h-4" style={{ color: "var(--gold)" }} />
         <span className="text-xs font-semibold" style={{ color: "var(--foreground)" }}>
-          Crescent Visibility by Country
+          {t("countryList.title")}
         </span>
       </div>
       <div className="text-[10px] mb-3" style={{ color: "var(--muted-foreground)" }}>
-        29th night · {observationDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} · {visibilityCriterion === "yallop" ? "Yallop" : "Odeh"}
+        {t("countryList.night29")} · {observationDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} · {visibilityCriterion === "yallop" ? t("countryList.yallop") : t("countryList.odeh")}
       </div>
 
       <div className="space-y-1">
@@ -81,7 +83,7 @@ export function CrescentCountryList({ viewYear, viewMonth }: CrescentCountryList
                   style={{ background: VISIBILITY_LABELS[zone].color }}
                 />
                 <span className="font-semibold" style={{ color: "var(--foreground)" }}>
-                  Zone {zone}: {VISIBILITY_LABELS[zone].label}
+                  {t("countryList.zone", { zone, label: t(`visibilityZone.${zone}.label`, { defaultValue: VISIBILITY_LABELS[zone].label }) })}
                 </span>
                 <span className="ml-auto text-[10px]" style={{ color: "var(--muted-foreground)" }}>
                   {countries.length}

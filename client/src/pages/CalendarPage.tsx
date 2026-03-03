@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { SEO } from "@/components/SEO";
 import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { downloadHijriICS } from "@/lib/icsExport";
+import { useTranslation } from "react-i18next";
 import ProGate from "@/components/ProGate";
 import { useProTier } from "@/contexts/ProTierContext";
 import { PageHeader } from "@/components/PageHeader";
@@ -20,17 +21,17 @@ import {
 import { IslamicCountdown } from "@/components/IslamicCountdown";
 import { CrescentCountryList } from "@/components/CrescentCountryList";
 
-const ISLAMIC_EVENTS: Array<{ month: number; day: number; name: string; nameAr: string; type: "major" | "minor" }> = [
-  { month: 1, day: 1, name: "Islamic New Year", nameAr: "رأس السنة الهجرية", type: "major" },
-  { month: 1, day: 10, name: "Day of Ashura", nameAr: "يوم عاشوراء", type: "major" },
-  { month: 3, day: 12, name: "Mawlid al-Nabi", nameAr: "المولد النبوي", type: "major" },
-  { month: 7, day: 27, name: "Laylat al-Mi'raj", nameAr: "ليلة المعراج", type: "minor" },
-  { month: 8, day: 15, name: "Laylat al-Bara'ah", nameAr: "ليلة البراءة", type: "minor" },
-  { month: 9, day: 1, name: "Ramadan Begins", nameAr: "بداية رمضان", type: "major" },
-  { month: 9, day: 27, name: "Laylat al-Qadr", nameAr: "ليلة القدر", type: "major" },
-  { month: 10, day: 1, name: "Eid al-Fitr", nameAr: "عيد الفطر", type: "major" },
-  { month: 12, day: 9, name: "Day of Arafah", nameAr: "يوم عرفة", type: "major" },
-  { month: 12, day: 10, name: "Eid al-Adha", nameAr: "عيد الأضحى", type: "major" },
+const ISLAMIC_EVENTS: Array<{ month: number; day: number; key: string; nameAr: string; type: "major" | "minor" }> = [
+  { month: 1, day: 1, key: "islamicNewYear", nameAr: "رأس السنة الهجرية", type: "major" },
+  { month: 1, day: 10, key: "dayOfAshura", nameAr: "يوم عاشوراء", type: "major" },
+  { month: 3, day: 12, key: "mawlidAlNabi", nameAr: "المولد النبوي", type: "major" },
+  { month: 7, day: 27, key: "laylatAlMiraj", nameAr: "ليلة المعراج", type: "minor" },
+  { month: 8, day: 15, key: "laylatAlBaraA", nameAr: "ليلة البراءة", type: "minor" },
+  { month: 9, day: 1, key: "ramadanBegins", nameAr: "بداية رمضان", type: "major" },
+  { month: 9, day: 27, key: "laylatAlQadr", nameAr: "ليلة القدر", type: "major" },
+  { month: 10, day: 1, key: "eidAlFitr", nameAr: "عيد الفطر", type: "major" },
+  { month: 12, day: 9, key: "dayOfArafah", nameAr: "يوم عرفة", type: "major" },
+  { month: 12, day: 10, key: "eidAlAdha", nameAr: "عيد الأضحى", type: "major" },
 ];
 
 function getTabularDaysInMonth(year: number, month: number): number {
@@ -75,6 +76,7 @@ function getTabularMonthStart(year: number, month: number): Date {
 type CalendarSystem = "astronomical" | "tabular" | "ummalqura";
 
 export default function CalendarPage() {
+  const { t } = useTranslation();
   const today = useMemo(() => new Date(new Date().setHours(12, 0, 0, 0)), []);
 
   const { isPremium, setShowUpgradeModal } = useProTier();
@@ -189,8 +191,8 @@ export default function CalendarPage() {
       />
       <PageHeader
         icon={<Calendar />}
-        title="Islamic Hijri Calendar"
-        subtitle="Hijri ↔ Gregorian · Islamic events · Lunar phases"
+        title={t("calendar.hijriCalendar")}
+        subtitle={t("calendar.subtitle")}
       >
         <div className="flex flex-col items-end gap-2">
           <div className="flex flex-wrap items-center mt-2 lg:mt-0 gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
@@ -201,7 +203,7 @@ export default function CalendarPage() {
                 : "text-muted-foreground hover:text-foreground"
                 }`}
             >
-              Astronomical
+              {t("calendar.astronomical")}
               {!isPremium && <ProGate featureName="Astronomical Engine" inline>‎</ProGate>}
             </button>
             <button
@@ -211,7 +213,7 @@ export default function CalendarPage() {
                 : "text-muted-foreground hover:text-foreground"
                 }`}
             >
-              Umm al-Qura
+              {t("calendar.ummAlQura")}
             </button>
             <button
               onClick={() => isPremium ? setCalendarSystem("tabular") : setShowUpgradeModal(true)}
@@ -220,7 +222,7 @@ export default function CalendarPage() {
                 : "text-muted-foreground hover:text-foreground"
                 }`}
             >
-              Tabular (Kuwaiti)
+              {t("calendar.tabular")}
               {!isPremium && <ProGate featureName="Tabular Engine" inline>‎</ProGate>}
             </button>
           </div>
@@ -235,7 +237,7 @@ export default function CalendarPage() {
             title={`Download ${viewYear} AH Hijri calendar as .ics`}
           >
             <Download className="w-3 h-3" />
-            Add to Calendar
+            {t("calendar.addToCalendar")}
           </button>
         </div>
       </PageHeader>
@@ -295,8 +297,8 @@ export default function CalendarPage() {
                 const dayLabel = [
                   `${cell.day} ${monthInfo?.en ?? ""} ${viewYear} AH`,
                   gregLabel,
-                  isToday ? "today" : "",
-                  hasEvent ? "has Islamic event" : "",
+                  isToday ? t("calendar.today") : "",
+                  hasEvent ? t("calendar.hasEvent") : "",
                 ].filter(Boolean).join(", ");
 
                 return (
@@ -352,9 +354,9 @@ export default function CalendarPage() {
                 style={{ animationDelay: "50ms" }}
               >
                 <div className="text-xs mb-3 flex items-center justify-between" style={{ color: "var(--muted-foreground)" }}>
-                  <span>Selected Day</span>
+                  <span>{t("calendar.selectedDay")}</span>
                   <span className="text-[0.6rem] uppercase tracking-wide border border-[var(--border)] px-1.5 py-0.5 rounded" style={{ background: "var(--space-light)" }}>
-                    {calendarSystem === "astronomical" ? "Astronomical" : calendarSystem === "ummalqura" ? "Umm al-Qura" : "Tabular"}
+                    {calendarSystem === "astronomical" ? t("calendar.astronomical") : calendarSystem === "ummalqura" ? t("calendar.ummAlQura") : t("calendar.tabularShort")}
                   </span>
                 </div>
                 <div className="text-2xl font-bold mb-1" style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>
@@ -366,13 +368,16 @@ export default function CalendarPage() {
                 <div className="text-sm" style={{ color: "var(--foreground)" }}>
                   {selectedGreg.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </div>
-                {selectedMoon && (
-                  <div className="mt-3 pt-3 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
-                    <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                      Moon: {selectedMoon.phaseName} · {Math.round(selectedMoon.illuminatedFraction * 100)}% illuminated
+                {selectedMoon && (() => {
+                  const phaseKey = selectedMoon.phaseName.split(' ').map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1)).join('');
+                  return (
+                    <div className="mt-3 pt-3 border-t" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
+                      <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
+                        {t("calendar.moonPhase", { phase: t(`phases.${phaseKey}` as any, { defaultValue: selectedMoon.phaseName }), illuminated: Math.round(selectedMoon.illuminatedFraction * 100) })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 {selectedEvent && (
                   <div
                     className="mt-3 p-3 rounded-xl"
@@ -387,7 +392,7 @@ export default function CalendarPage() {
                       className="text-sm font-semibold"
                       style={{ color: selectedEvent.type === "major" ? "var(--gold)" : "#60a5fa" }}
                     >
-                      ✦ {selectedEvent.name}
+                      ✦ {t(`calendar.eventsList.${selectedEvent.key}` as any, { defaultValue: selectedEvent.nameAr })}
                     </div>
                     <div className="text-xs font-arabic mt-0.5" style={{ color: "var(--muted-foreground)" }}>
                       {selectedEvent.nameAr}
@@ -401,7 +406,7 @@ export default function CalendarPage() {
               className="breezy-card p-5 animate-breezy-enter"
               style={{ animationDelay: "150ms" }}
             >
-              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>Jump to Year</div>
+              <div className="text-xs font-medium mb-3" style={{ color: "var(--muted-foreground)" }}>{t("calendar.jumpToYear")}</div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewYear(y => y - 1)}
@@ -432,7 +437,7 @@ export default function CalendarPage() {
                   color: "var(--gold)",
                 }}
               >
-                Go to Today
+                {t("calendar.goToToday")}
               </button>
             </div>
 

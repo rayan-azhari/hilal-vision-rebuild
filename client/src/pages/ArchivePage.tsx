@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { SEO } from "@/components/SEO";
 import { Archive, ChevronLeft, ChevronRight, Info, Download } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useProTier } from "@/contexts/ProTierContext";
 import ProGate from "@/components/ProGate";
 import { PageHeader } from "@/components/PageHeader";
@@ -19,15 +20,6 @@ const ZONE_COLORS: Record<VisibilityZone, string> = {
   D: "#f87171",
   E: "#6b7280",
   F: "#1f2937",
-};
-
-const ZONE_LABELS: Record<VisibilityZone, string> = {
-  A: "Easily Visible",
-  B: "Visible",
-  C: "Optical Aid",
-  D: "Telescope Only",
-  E: "Not Visible",
-  F: "Below Horizon",
 };
 
 interface MonthSummary {
@@ -62,6 +54,7 @@ function computeMonthSummary(year: number, month: number): MonthSummary {
 import { trpc } from "@/lib/trpc";
 
 function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const workerRef = useRef<Worker | null>(null);
 
@@ -98,10 +91,11 @@ function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
     };
   }, []);
 
-  return <canvas ref={canvasRef} role="img" aria-label={`World visibility map for ${year} AH month ${month}`} className="w-full rounded-lg" style={{ height: "80px", imageRendering: "pixelated" }} />;
+  return <canvas ref={canvasRef} role="img" aria-label={t("archive.worldMapAria", { year, month })} className="w-full rounded-lg" style={{ height: "80px", imageRendering: "pixelated" }} />;
 }
 
 export default function ArchivePage() {
+  const { t, i18n } = useTranslation();
   const { isPremium, setShowUpgradeModal } = useProTier();
   const [selectedYear, setSelectedYear] = useState(1465);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -210,15 +204,15 @@ export default function ArchivePage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Archive - ${selectedYear} AH`}
-        description={`Crescent visibility archive for ${selectedYear} AH. Browse historical moon sighting data for all 12 Islamic months from 1438 to 1465 AH.`}
+        title={t("archive.titleYear", { year: selectedYear })}
+        description={t("archive.descYear", { year: selectedYear })}
         path="/archive"
       />
       {/* Header */}
       <PageHeader
         icon={<Archive />}
-        title="Crescent Visibility Archive"
-        subtitle="1438–1465 AH · All 12 Islamic months"
+        title={t("archive.crescentVisibilityArchive")}
+        subtitle={t("archive.subtitle")}
       />
 
       <div className="container py-8">
@@ -244,7 +238,7 @@ export default function ArchivePage() {
                     {selectedYear} AH
                   </div>
                   <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                    Hijri Year
+                    {t("archive.hijriYear")}
                   </div>
                 </div>
                 <button
@@ -268,7 +262,7 @@ export default function ArchivePage() {
                         if (isLocked) { setShowUpgradeModal(true); return; }
                         setSelectedYear(y); setSelectedMonth(null); setMonthDetail(null);
                       }}
-                      title={isLocked ? "Years before 1463 AH · Unlock with Pro" : undefined}
+                      title={isLocked ? t("archive.unlockWithPro") : undefined}
                       className="px-2.5 py-1 rounded-lg text-xs font-mono transition-all"
                       style={{
                         background: y === selectedYear
@@ -285,7 +279,7 @@ export default function ArchivePage() {
                       {isLocked && (
                         <>
                           <span aria-hidden="true"> 🔒</span>
-                          <span className="sr-only"> (Pro required)</span>
+                          <span className="sr-only">{t("archive.proRequired")}</span>
                         </>
                       )}
                     </button>
@@ -332,10 +326,10 @@ export default function ArchivePage() {
                       </span>
                     </div>
                     <div className="text-sm font-medium mb-0.5" style={{ color: "var(--foreground)" }}>
-                      {month.en}
+                      {i18n.language === 'ar' || i18n.language === 'ur' ? month.ar : month.en}
                     </div>
-                    <div className="text-xs font-arabic" style={{ color: "var(--gold-dim)" }}>
-                      {month.ar}
+                    <div className={`text-xs ${i18n.language === 'en' ? 'font-arabic' : ''}`} style={{ color: "var(--gold-dim)" }}>
+                      {i18n.language === 'ar' || i18n.language === 'ur' ? month.en : month.ar}
                     </div>
                     <div className="mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
                       {hijriToGregorian(selectedYear, monthNum, 1).toLocaleDateString("en-GB", {
@@ -357,10 +351,10 @@ export default function ArchivePage() {
               >
                 <div className="text-3xl mb-3">☽</div>
                 <div className="text-sm font-medium mb-2" style={{ color: "var(--foreground)" }}>
-                  Select a Month
+                  {t("archive.selectMonth")}
                 </div>
                 <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                  Click any month to see crescent visibility details for major cities worldwide
+                  {t("archive.clickAnyMonth")}
                 </div>
               </div>
             )}
@@ -375,7 +369,7 @@ export default function ArchivePage() {
                     className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
                     style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }}
                   />
-                  <span className="text-xs" style={{ color: "var(--gold)" }}>Loading…</span>
+                  <span className="text-xs" style={{ color: "var(--gold)" }}>{t("common.loading")}</span>
                 </div>
               </div>
             )}
@@ -386,18 +380,18 @@ export default function ArchivePage() {
                   className="breezy-card p-5 animate-breezy-enter"
                   style={{ animationDelay: "50ms" }}
                 >
-                  <div className="text-xs mb-2" style={{ color: "var(--muted-foreground)" }}>Month Details</div>
+                  <div className="text-xs mb-2" style={{ color: "var(--muted-foreground)" }}>{t("archive.monthDetails")}</div>
                   <div
                     className="text-lg font-bold mb-0.5"
-                    style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}
+                    style={{ fontFamily: i18n.language === 'ar' || i18n.language === 'ur' ? "sans-serif" : "Cinzel, serif", color: "var(--gold)" }}
                   >
-                    {HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.en}
+                    {i18n.language === 'ar' || i18n.language === 'ur' ? HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.ar : HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.en}
                   </div>
-                  <div className="text-sm font-arabic mb-3" style={{ color: "var(--gold-dim)" }}>
-                    {HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.ar}
+                  <div className={`text-sm mb-3 ${i18n.language === 'en' ? 'font-arabic' : ''}`} style={{ color: "var(--gold-dim)" }}>
+                    {i18n.language === 'ar' || i18n.language === 'ur' ? HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.en : HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.ar}
                   </div>
                   <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                    New Moon: {monthDetail.newMoonDate.toLocaleDateString("en-GB", {
+                    {t("archive.newMoon")}: {monthDetail.newMoonDate.toLocaleDateString("en-GB", {
                       weekday: "long", day: "numeric", month: "long", year: "numeric"
                     })}
                   </div>
@@ -413,7 +407,7 @@ export default function ArchivePage() {
                       style={{ background: ZONE_COLORS[monthDetail.globalZone] }}
                     />
                     <span className="text-xs font-medium" style={{ color: ZONE_COLORS[monthDetail.globalZone] }}>
-                      Global: {ZONE_LABELS[monthDetail.globalZone]}
+                      {t("archive.global")}: {t(`zones.${monthDetail.globalZone}` as any, { defaultValue: monthDetail.globalZone })}
                     </span>
                   </div>
                 </div>
@@ -427,18 +421,18 @@ export default function ArchivePage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex flex-col">
                         <div className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
-                          Actual Observations (ICOP)
+                          {t("archive.actualObservations")}
                         </div>
                         <span className="text-xs" style={{ color: "var(--gold-dim)" }}>
-                          {icopData.length} records
+                          {t("archive.recordsCount", { count: icopData.length })}
                         </span>
                       </div>
                       <div className="flex gap-2">
                         <button onClick={exportIcopToCSV} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to CSV">
-                          <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>CSV</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                          <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>{t("archive.exportCsv")}</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
                         </button>
                         <button onClick={() => exportToJSON(icopData, 'icop_observations')} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to JSON">
-                          <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>JSON</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                          <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>{t("archive.exportJson")}</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
                         </button>
                       </div>
                     </div>
@@ -459,14 +453,14 @@ export default function ArchivePage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-mono" style={{ color: "var(--muted-foreground)" }}>
-                              {obs.opticalAid === "Unknown (Parsed)" ? "Reported" : obs.opticalAid}
+                              {obs.opticalAid === "Unknown (Parsed)" ? t("archive.reported") : obs.opticalAid}
                             </span>
                             <div
                               className="w-2 h-2 rounded-full"
                               style={{ background: obs.result === "Seen" ? "var(--accent)" : "var(--destructive)" }}
                             />
                             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: obs.result === "Seen" ? "var(--accent)" : "var(--destructive)" }}>
-                              {obs.result}
+                              {obs.result === "Seen" ? t("archive.seen") : t("archive.notSeen")}
                             </span>
                           </div>
                         </div>
@@ -482,14 +476,14 @@ export default function ArchivePage() {
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-xs font-medium" style={{ color: "var(--muted-foreground)" }}>
-                      Computed City Visibility (Theoretical)
+                      {t("archive.computedCityVisibility")}
                     </div>
                     <div className="flex gap-2">
                       <button onClick={exportComputedToCSV} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to CSV">
-                        <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>CSV</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                        <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>{t("archive.exportCsv")}</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
                       </button>
                       <button onClick={() => exportToJSON(monthDetail.cityResults, 'computed_visibility')} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to JSON">
-                        <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>JSON</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
+                        <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>{t("archive.exportJson")}</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
                       </button>
                     </div>
                   </div>
@@ -528,14 +522,14 @@ export default function ArchivePage() {
                 >
                   <div className="flex items-center gap-1.5 mb-2">
                     <Info className="w-3.5 h-3.5" style={{ color: "var(--gold-dim)" }} />
-                    <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>Zone Legend</span>
+                    <span className="text-xs font-medium" style={{ color: "var(--foreground)" }}>{t("archive.zoneLegend")}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-1">
                     {(["A", "B", "C", "D", "E"] as VisibilityZone[]).map(z => (
                       <div key={z} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-sm" style={{ background: ZONE_COLORS[z] }} />
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                          {z}: {ZONE_LABELS[z]}
+                          {z}: {t(`zones.${z}` as any, { defaultValue: z })}
                         </span>
                       </div>
                     ))}

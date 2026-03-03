@@ -13,6 +13,7 @@ import {
 import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
@@ -42,6 +43,7 @@ const HIGH_CONTRAST_ZONE_COLORS: Record<VisibilityZone, string> = {
 };
 
 export default function GlobePage({ shared }: { shared: SharedVisibilityState }) {
+  const { t, i18n } = useTranslation();
   const { hourOffset, setHourOffset } = shared;
   const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
   const { isPremium, setShowUpgradeModal } = useProTier();
@@ -348,22 +350,22 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
   }, []);
 
   return (
-    <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
+    <div className="flex flex-col lg:h-full lg:overflow-hidden" style={{ background: "var(--space)" }}>
       {/* Page header */}
       <PageHeader
         icon={<Globe2 />}
-        title="Interactive 3D Globe"
-        subtitle={`Day/night terminator · Moon visibility overlay (${visibilityCriterion === "yallop" ? "Yallop" : "Odeh"})`}
+        title={t("globePage.title")}
+        subtitle={visibilityCriterion === "yallop" ? t("globePage.subtitleYallop") : t("globePage.subtitleOdeh")}
       >
-        <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
-          <div>{hijri.day} {hijri.monthNameArabic} {hijri.year} هـ</div>
+        <div className={`text-xs ${i18n.language === 'ar' || i18n.language === 'ur' ? 'font-arabic' : ''} text-right`} style={{ color: "var(--gold-dim)" }}>
+          <div>{hijri.day} {i18n.language === 'ar' || i18n.language === 'ur' ? hijri.monthNameArabic : hijri.monthName} {hijri.year} هـ</div>
           <div style={{ color: "var(--muted-foreground)" }}>{hijri.monthName}</div>
         </div>
       </PageHeader>
 
-      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0 lg:overflow-hidden">
         {/* Globe container */}
-        <div className="relative flex-1 min-h-[60vh] lg:min-h-0">
+        <div className="relative flex-none h-[65vh] lg:h-auto lg:flex-1 lg:min-h-0 border-b lg:border-b-0" style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)" }}>
           <div
             ref={globeRef}
             className="absolute inset-0 transition-opacity duration-[2000ms] ease-[cubic-bezier(0.2,0.8,0.2,1)]"
@@ -377,7 +379,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
                   className="w-10 h-10 rounded-full border-2 animate-spin"
                   style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }}
                 />
-                <span className="text-sm" style={{ color: "var(--gold)" }}>Computing visibility…</span>
+                <span className="text-sm" style={{ color: "var(--gold)" }}>{t("globePage.computing")}</span>
               </div>
             </div>
           )}
@@ -394,7 +396,7 @@ export default function GlobePage({ shared }: { shared: SharedVisibilityState })
               }}
             >
               {isAutoRotate ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-              {isAutoRotate ? "Pause" : "Rotate"}
+              {isAutoRotate ? t("globePage.pause") : t("globePage.rotate")}
             </button>
           </div>
         </div>

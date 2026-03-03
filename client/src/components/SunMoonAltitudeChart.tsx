@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot } from "recharts";
+import { useTranslation } from "react-i18next";
 import * as Astronomy from "astronomy-engine";
 import { formatAzimuth } from "@/lib/astronomy";
 import { Sun, Moon } from "lucide-react";
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange }: Props) {
+    const { t } = useTranslation();
 
     const data = useMemo(() => {
         const points = [];
@@ -60,7 +62,7 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
                 <div className="flex flex-col">
 
                     <p className="text-sm mt-1" style={{ color: "var(--muted-foreground)" }}>
-                        Drag slider to change time
+                        {t("skyDomeChart.dragSlider")}
                     </p>
                 </div>
                 <div className="text-right font-mono text-sm data-text" style={{ color: "var(--foreground)" }}>
@@ -77,7 +79,7 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
                         <Tooltip
                             contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px" }}
                             labelFormatter={(val) => formatXAxis(val as number)}
-                            formatter={(value, name) => [`${(value as number).toFixed(1)}°`, name === "sunAlt" ? "Sun Altitude" : "Moon Altitude"]}
+                            formatter={(value, name) => [`${(value as number).toFixed(1)}°`, name === "sunAlt" ? t("skyDomeChart.sunAlt") : t("skyDomeChart.moonAlt")]}
                         />
                         {/* Horizon Line at 0 */}
                         <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeDasharray="3 3" opacity={0.5} />
@@ -129,19 +131,19 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
             {/* Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #facc15 20%, var(--border))", background: "color-mix(in oklch, #facc15 2%, transparent)" }}>
-                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Sun Alt</span>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{t("skyDomeChart.sunAltShort")}</span>
                     <span className="text-xl font-mono font-semibold" style={{ color: "#facc15" }}>{sunAlt.toFixed(1)}°</span>
                 </div>
                 <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #facc15 20%, var(--border))", background: "color-mix(in oklch, #facc15 2%, transparent)" }}>
-                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Sun Az</span>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{t("skyDomeChart.sunAzShort")}</span>
                     <span className="text-xl font-mono font-semibold" style={{ color: "#facc15" }}>{sunAz.toFixed(1)}°</span>
                 </div>
                 <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #60a5fa 20%, var(--border))", background: "color-mix(in oklch, #60a5fa 2%, transparent)" }}>
-                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Alt</span>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{t("skyDomeChart.moonAltShort")}</span>
                     <span className="text-xl font-mono font-semibold" style={{ color: "#60a5fa" }}>{moonAlt.toFixed(1)}°</span>
                 </div>
                 <div className="border rounded-xl p-4 flex flex-col items-center justify-center" style={{ borderColor: "color-mix(in oklch, #60a5fa 20%, var(--border))", background: "color-mix(in oklch, #60a5fa 2%, transparent)" }}>
-                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>Moon Az</span>
+                    <span className="text-xs mb-1" style={{ color: "var(--muted-foreground)" }}>{t("skyDomeChart.moonAzShort")}</span>
                     <span className="text-xl font-mono font-semibold" style={{ color: "#60a5fa" }}>{moonAz.toFixed(1)}°</span>
                 </div>
             </div>

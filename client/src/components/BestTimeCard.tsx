@@ -4,6 +4,7 @@
  */
 import { useMemo } from "react";
 import { Clock, Cloud, Thermometer, Droplets, Wind, Eye } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { computeBestObservationTime, type Location } from "@/lib/astronomy";
 import { trpc } from "@/lib/trpc";
 
@@ -14,6 +15,8 @@ interface BestTimeCardProps {
 }
 
 export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTimeCardProps) {
+    const { t } = useTranslation();
+
     const result = useMemo(
         () => computeBestObservationTime(date, location),
         [date.getTime(), location.lat, location.lng]
@@ -40,10 +43,10 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                 </div>
                 <div>
                     <div className="text-xs font-medium" style={{ color: "var(--foreground)" }}>
-                        Best Time to Observe
+                        {t("bestTime.title")}
                     </div>
                     <div className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>
-                        Optimal crescent viewing window
+                        {t("bestTime.subtitle")}
                     </div>
                 </div>
             </div>
@@ -59,7 +62,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                         }}
                     >
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            Optimal Time
+                            {t("bestTime.optimalTime")}
                         </span>
                         <span
                             className="text-sm font-mono font-bold"
@@ -72,7 +75,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                     {/* Window */}
                     <div className="flex justify-between items-center">
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            Window
+                            {t("bestTime.window")}
                         </span>
                         <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
                             {formatT(result.windowStart)} - {formatT(result.windowEnd)}
@@ -82,7 +85,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                     {/* Moon alt at best time */}
                     <div className="flex justify-between items-center">
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            Moon Alt
+                            {t("bestTime.moonAlt")}
                         </span>
                         <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
                             {result.moonAltAtBest.toFixed(1)}°
@@ -92,7 +95,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                     {/* Sun alt at best time */}
                     <div className="flex justify-between items-center">
                         <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            Sun Alt
+                            {t("bestTime.sunAlt")}
                         </span>
                         <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
                             {result.sunAltAtBest.toFixed(1)}°
@@ -101,9 +104,9 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
 
                     {/* Elevation (if available) */}
                     {location.elevation !== undefined && (
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-white/10" title="Observer altitude adjusts horizon dip calculations">
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-white/10" title={t("bestTime.adjustsHorizon")}>
                             <span className="text-xs flex items-center gap-1" style={{ color: "var(--muted-foreground)" }}>
-                                Elevation <span className="text-[10px] opacity-60">(Pro)</span>
+                                {t("bestTime.elevation")} <span className="text-[10px] opacity-60">({t("bestTime.pro")})</span>
                             </span>
                             <span className="text-xs font-mono" style={{ color: "var(--foreground)" }}>
                                 {Math.round(location.elevation)}m
@@ -116,7 +119,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                         <div className="mt-4 pt-3 border-t border-white/10">
                             <div className="flex items-center justify-between mb-2">
                                 <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>
-                                    Viewing Conditions
+                                    {t("bestTime.viewingConditions")}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <div
@@ -141,14 +144,14 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                                         border: "1px solid color-mix(in oklch, #f87171 20%, transparent)",
                                     }}
                                 >
-                                    ⚠ Poor weather tonight — viewing may be impaired
+                                    {t("bestTime.poorWeather")}
                                 </div>
                             )}
 
                             <div className="space-y-1.5">
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
                                     <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
-                                        <Cloud className="w-3 h-3 text-white/70" /> Cloud Cover
+                                        <Cloud className="w-3 h-3 text-white/70" /> {t("bestTime.cloudCover")}
                                     </span>
                                     <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
                                         {Math.round(weather.cloudCover)}%
@@ -157,7 +160,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
 
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
                                     <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
-                                        <Droplets className="w-3 h-3 text-white/70" /> Humidity
+                                        <Droplets className="w-3 h-3 text-white/70" /> {t("bestTime.humidity")}
                                     </span>
                                     <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
                                         {Math.round(weather.humidity)}%
@@ -166,7 +169,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
 
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
                                     <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
-                                        <Wind className="w-3 h-3 text-white/70" /> Wind
+                                        <Wind className="w-3 h-3 text-white/70" /> {t("bestTime.wind")}
                                     </span>
                                     <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
                                         {Math.round(weather.windSpeed)} km/h
@@ -175,7 +178,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
 
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
                                     <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
-                                        <Eye className="w-3 h-3 text-white/70" /> Visibility
+                                        <Eye className="w-3 h-3 text-white/70" /> {t("bestTime.visibility")}
                                     </span>
                                     <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
                                         {weather.visibilityKm} km
@@ -184,7 +187,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
 
                                 <div className="flex justify-between items-center bg-white/5 px-2 py-1.5 rounded-md">
                                     <span className="text-xs flex items-center gap-1.5" style={{ color: "var(--foreground)" }}>
-                                        <Thermometer className="w-3 h-3 text-white/70" /> Temperature
+                                        <Thermometer className="w-3 h-3 text-white/70" /> {t("bestTime.temperature")}
                                     </span>
                                     <span className="text-xs font-mono font-bold" style={{ color: "var(--foreground)" }}>
                                         {Math.round(weather.temperature)}°C
@@ -212,7 +215,7 @@ export function BestTimeCard({ date, location, animationDelay = "0ms" }: BestTim
                         background: "color-mix(in oklch, var(--space-light) 50%, transparent)",
                     }}
                 >
-                    No viable observation window for this date and location
+                    {t("bestTime.noWindow")}
                 </div>
             )}
         </div>

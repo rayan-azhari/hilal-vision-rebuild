@@ -136,7 +136,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-0.5 ml-2 mr-1">
+          <nav className="hidden lg:flex items-center gap-0.5 ms-2 me-1">
             {navItems.map(({ href, label, icon: Icon }) => {
               const active = routePath === href ||
                 (href === "/visibility" && (routePath === "/map" || routePath === "/globe"));
@@ -164,7 +164,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           {/* Global Location & Date Selectors */}
-          <div className="hidden lg:flex items-center gap-1.5 mr-auto mx-1 flex-1 max-w-[280px]">
+          <div className="hidden lg:flex items-center gap-1.5 me-auto mx-1 flex-1 max-w-[280px]">
             <div className="flex items-center gap-1.5 bg-black/10 px-1 py-1 rounded-xl border border-white/5 w-full">
               <div className="w-full relative min-w-0">
                 <LocationSearch
@@ -172,7 +172,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onSelect={setLocation}
                 />
               </div>
-              <AutoDetectButton onClick={geo.detect} loading={geo.loading} className="mr-1" />
+              <AutoDetectButton onClick={geo.detect} loading={geo.loading} className="me-1" />
             </div>
 
             <input
@@ -347,7 +347,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="lg:hidden p-1.5 ml-1 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
+              className="lg:hidden p-1.5 ms-1 rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
               style={{ color: "var(--foreground)" }}
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
@@ -391,7 +391,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-8 pb-[calc(6rem+env(safe-area-inset-bottom))]">
               {/* Location & Time Box */}
               <div className="flex flex-col gap-3">
-                <label className="text-xs uppercase font-bold tracking-widest pl-1" style={{ color: "var(--gold-dim)" }}>Location & Date</label>
+                <label className="text-xs uppercase font-bold tracking-widest ps-1" style={{ color: "var(--gold-dim)" }}>Location & Date</label>
                 <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col gap-3">
                   <LocationSearch selectedCity={location} onSelect={setLocation} />
                   <div className="flex justify-between items-center gap-2 mt-1">
@@ -419,7 +419,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
               {/* Quick Links */}
               <div className="flex flex-col gap-3">
-                <label className="text-xs uppercase font-bold tracking-widest pl-1" style={{ color: "var(--gold-dim)" }}>Explore Content</label>
+                <label className="text-xs uppercase font-bold tracking-widest ps-1" style={{ color: "var(--gold-dim)" }}>Explore Content</label>
                 <div className="p-2 rounded-3xl bg-white/[0.03] border border-white/5 grid grid-cols-1 gap-1">
                   {[
                     { href: "/", label: "Home Base", icon: Home },
@@ -438,7 +438,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
               {/* Account */}
               <div className="flex flex-col gap-3">
-                <label className="text-xs uppercase font-bold tracking-widest pl-1" style={{ color: "var(--gold-dim)" }}>Account</label>
+                <label className="text-xs uppercase font-bold tracking-widest ps-1" style={{ color: "var(--gold-dim)" }}>Account</label>
                 <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col gap-4">
                   <SignedIn>
                     <div className="flex items-center justify-between">
@@ -462,7 +462,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
               {/* Preferences */}
               <div className="flex flex-col gap-3">
-                <label className="text-xs uppercase font-bold tracking-widest pl-1" style={{ color: "var(--gold-dim)" }}>Preferences</label>
+                <label className="text-xs uppercase font-bold tracking-widest ps-1" style={{ color: "var(--gold-dim)" }}>Preferences</label>
                 <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/5 flex flex-col gap-4">
                   <div className="grid grid-cols-2 gap-3">
                     <button onClick={toggleTheme} className="flex items-center justify-center gap-2 p-3.5 rounded-2xl bg-white/5 transition-colors text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>

@@ -2,6 +2,7 @@ import { SEO } from "@/components/SEO";
 import { PageHeader } from "@/components/PageHeader";
 import { Shield, Mail } from "lucide-react";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 function Heading({ children }: { children: React.ReactNode }) {
     return (
@@ -28,13 +29,14 @@ function Ul({ children }: { children: React.ReactNode }) {
 }
 
 export default function PrivacyPage() {
+    const { t } = useTranslation();
     const updated = "23 February 2026";
 
     return (
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
-                title="Privacy Policy"
-                description="Hilal Vision Privacy Policy - how we collect, use, and protect your data."
+                title={t("privacy.title")}
+                description={t("privacy.description")}
                 path="/privacy"
             />
 
@@ -44,8 +46,8 @@ export default function PrivacyPage() {
             >
                 <PageHeader
                     icon={<Shield />}
-                    title="Privacy Policy"
-                    subtitle={`Last updated: ${updated}`}
+                    title={t("privacy.title")}
+                    subtitle={t("privacy.lastUpdated", { date: updated })}
                     className="max-w-2xl"
                 />
             </div>
@@ -60,79 +62,65 @@ export default function PrivacyPage() {
                     }}
                 >
                     <Para>
-                        Hilal Vision ("we", "us", "our") is committed to protecting your privacy. This policy
-                        explains what data we collect, how we use it, and your rights regarding that data. By
-                        using Hilal Vision you agree to the practices described below.
+                        {t("privacy.intro1")}
                     </Para>
                     <Para>
-                        If you have questions, contact us at{" "}
+                        {t("privacy.intro2")}
                         <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>.
                     </Para>
                 </div>
 
-                <Heading>1. Data We Collect</Heading>
+                <Heading>{t("privacy.h1")}</Heading>
                 <Para>
-                    We collect the minimum data necessary to provide the service:
+                    {t("privacy.p1")}
                 </Para>
                 <Ul>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Account information</strong> - Name and
-                        email address, collected by Clerk Auth when you sign in with Google, Apple, or email/password.
-                        We do not store passwords directly.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.collect_accountTitle")}</strong>{t("privacy.collect_accountDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Location data</strong> - GPS coordinates
-                        you voluntarily provide when using the Auto-Detect feature or submitting a sighting report.
-                        Location is not stored continuously; it is used only at the moment of calculation or
-                        report submission.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.collect_locationTitle")}</strong>{t("privacy.collect_locationDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Sighting reports</strong> - Observation
-                        time, GPS coordinates, sighting result (Seen / Not Seen), and optional notes that you
-                        submit voluntarily.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.collect_sightingTitle")}</strong>{t("privacy.collect_sightingDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Usage data</strong> - Anonymised event
-                        telemetry via Sentry (error reports, page performance metrics). No personally identifiable
-                        information is attached.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.collect_usageTitle")}</strong>{t("privacy.collect_usageDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>IP address</strong> - Temporarily logged
-                        by Upstash Redis for rate-limiting submitted sighting reports (sliding window, 5 requests/minute).
-                        Not stored permanently.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.collect_ipTitle")}</strong>{t("privacy.collect_ipDesc")}
                     </li>
                 </Ul>
 
-                <Heading>2. How We Use Your Data</Heading>
+                <Heading>{t("privacy.h2")}</Heading>
                 <Ul>
-                    <li>To provide crescent visibility predictions for your location.</li>
-                    <li>To store and display your voluntary crescent sighting reports on the public map.</li>
-                    <li>To authenticate and manage your account securely via Clerk.</li>
-                    <li>To prevent abuse via IP-based rate limiting (Upstash Redis).</li>
-                    <li>To diagnose application errors and improve performance (Sentry).</li>
+                    <li>{t("privacy.use1")}</li>
+                    <li>{t("privacy.use2")}</li>
+                    <li>{t("privacy.use3")}</li>
+                    <li>{t("privacy.use4")}</li>
+                    <li>{t("privacy.use5")}</li>
                 </Ul>
                 <Para>
-                    We do <strong style={{ color: "var(--foreground)" }}>not</strong> sell your data, use it
-                    for advertising, or share it with third parties beyond the sub-processors listed below.
+                    {t("privacy.p2_1")}<strong style={{ color: "var(--foreground)" }}>{t("privacy.p2_not")}</strong>{t("privacy.p2_2")}
                 </Para>
 
-                <Heading>3. Third-Party Sub-Processors</Heading>
+                <Heading>{t("privacy.h3")}</Heading>
                 <div className="overflow-x-auto my-4">
                     <table className="w-full text-xs border-collapse">
                         <thead>
                             <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                                <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Service</th>
-                                <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Purpose</th>
-                                <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>Data Shared</th>
+                                <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("privacy.th1")}</th>
+                                <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("privacy.th2")}</th>
+                                <th className="text-left py-2 px-3 font-semibold" style={{ color: "var(--foreground)" }}>{t("privacy.th3")}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {[
-                                ["Clerk Auth", "User authentication", "Name, email, session tokens"],
-                                ["Upstash Redis", "Rate limiting", "IP address (temporary)"],
-                                ["Sentry", "Error monitoring", "Anonymised error events"],
-                                ["Open-Meteo", "Weather / cloud data", "Latitude & longitude only"],
-                                ["Vercel", "Hosting & CDN", "Request logs (standard)"],
+                                [t("privacy.svc1_name"), t("privacy.svc1_purpose"), t("privacy.svc1_data")],
+                                [t("privacy.svc2_name"), t("privacy.svc2_purpose"), t("privacy.svc2_data")],
+                                [t("privacy.svc3_name"), t("privacy.svc3_purpose"), t("privacy.svc3_data")],
+                                [t("privacy.svc4_name"), t("privacy.svc4_purpose"), t("privacy.svc4_data")],
+                                [t("privacy.svc5_name"), t("privacy.svc5_purpose"), t("privacy.svc5_data")],
                             ].map(([svc, purpose, data]) => (
                                 <tr key={svc} style={{ borderBottom: "1px solid color-mix(in oklch, var(--border) 50%, transparent)" }}>
                                     <td className="py-2 px-3 font-medium" style={{ color: "var(--foreground)" }}>{svc}</td>
@@ -144,68 +132,53 @@ export default function PrivacyPage() {
                     </table>
                 </div>
 
-                <Heading>4. Cookies</Heading>
+                <Heading>{t("privacy.h4")}</Heading>
                 <Para>
-                    Hilal Vision uses only functional cookies - specifically the Clerk authentication session
-                    cookie required to keep you signed in. We do not use tracking or advertising cookies.
-                    Blocking cookies will prevent sign-in but will not affect astronomical calculations, which
-                    are fully client-side and require no account.
+                    {t("privacy.cookie1")}
                 </Para>
                 <Para>
-                    If you access Hilal Vision from the European Union, the UK, or another jurisdiction that
-                    requires cookie consent, we will request your explicit consent before setting any cookies
-                    beyond strictly necessary ones.
+                    {t("privacy.cookie2")}
                 </Para>
 
-                <Heading>5. Data Retention</Heading>
+                <Heading>{t("privacy.h5")}</Heading>
                 <Ul>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Account data</strong> - Retained until
-                        you delete your account via Clerk.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.retention_accountTitle")}</strong>{t("privacy.retention_accountDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Sighting reports</strong> - Retained
-                        indefinitely as part of the public scientific dataset. Reports you submit are attributed
-                        to your account and visible on the map.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.retention_sightingTitle")}</strong>{t("privacy.retention_sightingDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Rate-limit records</strong> - IP entries
-                        expire automatically after 60 seconds.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.retention_rateTitle")}</strong>{t("privacy.retention_rateDesc")}
                     </li>
                     <li>
-                        <strong style={{ color: "var(--foreground)" }}>Error logs</strong> - Retained for 30
-                        days by Sentry.
+                        <strong style={{ color: "var(--foreground)" }}>{t("privacy.retention_errorTitle")}</strong>{t("privacy.retention_errorDesc")}
                     </li>
                 </Ul>
 
-                <Heading>6. Your Rights</Heading>
+                <Heading>{t("privacy.h6")}</Heading>
                 <Para>
-                    Depending on your jurisdiction (GDPR, UK DPA 2018, CCPA, etc.), you may have rights to:
+                    {t("privacy.rights_p1")}
                 </Para>
                 <Ul>
-                    <li>Access the personal data we hold about you.</li>
-                    <li>Correct inaccurate data.</li>
-                    <li>Request deletion of your account and associated data.</li>
-                    <li>Export your sighting reports.</li>
-                    <li>Object to or restrict processing.</li>
+                    <li>{t("privacy.rights_1")}</li>
+                    <li>{t("privacy.rights_2")}</li>
+                    <li>{t("privacy.rights_3")}</li>
+                    <li>{t("privacy.rights_4")}</li>
+                    <li>{t("privacy.rights_5")}</li>
                 </Ul>
                 <Para>
-                    To exercise any of these rights, contact{" "}
-                    <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>. We will
-                    respond within 30 days.
+                    {t("privacy.rights_p2_1")}<span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>{t("privacy.rights_p2_2")}
                 </Para>
 
-                <Heading>7. Children</Heading>
+                <Heading>{t("privacy.h7")}</Heading>
                 <Para>
-                    Hilal Vision is not directed at children under 13. We do not knowingly collect personal
-                    data from children. If you believe a child has submitted data, contact us immediately.
+                    {t("privacy.children1")}
                 </Para>
 
-                <Heading>8. Changes to This Policy</Heading>
+                <Heading>{t("privacy.h8")}</Heading>
                 <Para>
-                    We may update this policy from time to time. The "Last updated" date at the top of this
-                    page reflects the most recent revision. Significant changes will be announced via an
-                    in-app notification.
+                    {t("privacy.changes1")}
                 </Para>
 
                 {/* Links */}
@@ -215,14 +188,14 @@ export default function PrivacyPage() {
                     <Mail className="w-5 h-5 shrink-0" style={{ color: "var(--gold-dim)" }} />
                     <div>
                         <div className="text-sm font-medium mb-0.5" style={{ color: "var(--foreground)" }}>
-                            Privacy questions?
+                            {t("privacy.footer_title")}
                         </div>
                         <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            Email{" "}
+                            {t("privacy.footer_email")}
                             <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>
-                            {" "}- Also see our{" "}
+                            {t("privacy.footer_alsoSee")}
                             <Link href="/terms">
-                                <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>Terms of Service</span>
+                                <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>{t("privacy.footer_terms")}</span>
                             </Link>
                         </div>
                     </div>

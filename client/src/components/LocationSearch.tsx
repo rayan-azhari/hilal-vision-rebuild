@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, MapPin, Loader2 } from "lucide-react";
 
 export interface GeoLocation {
@@ -16,6 +17,7 @@ interface LocationSearchProps {
 }
 
 export function LocationSearch({ selectedCity, onSelect, className = "" }: LocationSearchProps) {
+    const { t } = useTranslation();
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<GeoLocation[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -101,7 +103,7 @@ export function LocationSearch({ selectedCity, onSelect, className = "" }: Locat
                         if (results.length > 0) setIsOpen(true);
                     }}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search location..."
+                    placeholder={t("locationSearch.placeholder")}
                     className="w-full pl-9 pr-3 py-2 rounded-lg text-sm appearance-none"
                     style={{
                         background: "var(--space-light)",
@@ -156,7 +158,7 @@ export function LocationSearch({ selectedCity, onSelect, className = "" }: Locat
                         border: "1px solid color-mix(in oklch, var(--gold) 20%, transparent)",
                     }}
                 >
-                    No locations found.
+                    {t("locationSearch.noLocations")}
                 </div>
             )}
         </div>

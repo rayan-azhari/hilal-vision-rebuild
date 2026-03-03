@@ -11,6 +11,7 @@ import { VisibilityDotScale, IlluminationArc, LunarAgeProgress, AzimuthCompass, 
 import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
 import { SkyDomeChart } from "@/components/SkyDomeChart";
 import { PhysicsExplanations } from "@/components/PhysicsExplanations";
+import { useTranslation } from "react-i18next";
 import ProGate from "@/components/ProGate";
 
 function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number }) {
@@ -153,6 +154,7 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
 }
 
 export default function MoonPage() {
+  const { t, i18n } = useTranslation();
   const { location, date } = useGlobalState();
   const [moonInfo, setMoonInfo] = useState(() => getMoonPhaseInfo(date));
   const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(date, location));
@@ -184,35 +186,38 @@ export default function MoonPage() {
     const update = () => {
       const now = new Date();
       const diff = moonInfo.nextNewMoon.getTime() - now.getTime();
-      if (diff <= 0) { setCountdown("Now!"); return; }
+      if (diff <= 0) { setCountdown(t("moonPage.now")); return; }
       const d = Math.floor(diff / 86400000);
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setCountdown(`${d}d ${h}h ${m}m ${s}s`);
+      setCountdown(t("moonPage.countdownFormat", { d, h, m, s }));
     };
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, [moonInfo.nextNewMoon]);
+  }, [moonInfo.nextNewMoon, t]);
 
   const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
   // Phase progress arc
   const phasePercent = moonInfo.phase * 100;
 
+  const phaseKey = moonInfo.phaseName.split(' ').map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1)).join('');
+  const translatedPhase = t(`phases.${phaseKey}` as any, { defaultValue: moonInfo.phaseName });
+
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title={`Moon Phase - ${moonInfo.phaseName} (${Math.round(moonInfo.illuminatedFraction * 100)}%)`}
-        description={`Current lunar phase: ${moonInfo.phaseName}, ${Math.round(moonInfo.illuminatedFraction * 100)}% illuminated, ${(moonInfo.moonAge / 24).toFixed(1)} days old. View lunar data and astronomical details.`}
+        title={t("moonPage.titleName", { phase: translatedPhase, illum: Math.round(moonInfo.illuminatedFraction * 100) })}
+        description={t("moonPage.descriptionDesc", { phase: translatedPhase, illum: Math.round(moonInfo.illuminatedFraction * 100), age: (moonInfo.moonAge / 24).toFixed(1) })}
         path="/moon"
       />
       {/* Header */}
       <PageHeader
         icon={<Moon />}
-        title="Moon Phase Dashboard"
-        subtitle="Lunar phase · Illumination · Astronomical data"
+        title={t("moonPage.dashboardTitle")}
+        subtitle={t("moonPage.dashboardSubtitle")}
       />
 
       <div className="container py-8 flex flex-col gap-6 relative z-10">
@@ -221,7 +226,7 @@ export default function MoonPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Sun & Moon Altitude Tracker — Free Feature */}
           <BreezyFullCard
-            title="Sun & Moon Altitude Tracker"
+            title={t("moonPage.sunMoonAltitudeTracker")}
             icon={<Clock className="w-4 h-4" />}
             className="animate-breezy-enter h-full"
           >
@@ -233,7 +238,7 @@ export default function MoonPage() {
           {/* Sky Dome — Pro Feature */}
           <ProGate featureName="Sky Dome">
             <BreezyFullCard
-              title="The Sky Dome"
+              title={t("moonPage.theSkyDome")}
               icon={<Eye className="w-4 h-4" />}
               className="animate-breezy-enter h-full"
             >
@@ -247,16 +252,16 @@ export default function MoonPage() {
         {/* Times row (Ephemeris) — Pro Feature */}
         <ProGate featureName="Ephemeris Data">
           <BreezyFullCard
-            title="Ephemeris"
+            title={t("moonPage.ephemeris")}
             icon={<Sun />}
             className="animate-breezy-enter"
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
               {[
-                { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
-                { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
-                { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
-                { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
+                { label: t("moonPage.sunrise"), value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
+                { label: t("moonPage.sunset"), value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
+                { label: t("moonPage.moonrise"), value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
+                { label: t("moonPage.moonset"), value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
               ].map(({ label, value, icon, color }) => (
                 <div key={label} className="text-center py-4 px-2 rounded-xl" style={{ background: "var(--card-surface-alt)" }}>
                   <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
@@ -284,18 +289,18 @@ export default function MoonPage() {
 
             <div className="mt-6 text-center">
               <div
-                className="text-xl font-bold mb-1"
-                style={{ fontFamily: "Cinzel, serif", color: "var(--foreground)" }}
+                className={`text-xl font-bold mb-1 ${i18n.language === 'en' ? '' : 'font-arabic'}`}
+                style={{ fontFamily: i18n.language === 'en' ? "Cinzel, serif" : "sans-serif", color: "var(--foreground)" }}
               >
-                {moonInfo.phaseName}
+                {translatedPhase}
               </div>
               {moonInfo && (
                 <p className="mt-2 text-sm text-muted-foreground animate-breezy-enter" style={{ animationDelay: '200ms' }}>
-                  {Math.round(moonInfo.illuminatedFraction * 100)}% illuminated • {(moonInfo.moonAge / 24).toFixed(1)} days old
+                  {t("moonPage.illuminatedAndAge", { illum: Math.round(moonInfo.illuminatedFraction * 100), age: (moonInfo.moonAge / 24).toFixed(1) })}
                 </p>
               )}
-              <div className="text-sm font-arabic mb-3" style={{ color: "var(--gold-dim)" }}>
-                {moonInfo.phaseArabic}
+              <div className={`text-sm mb-3 ${i18n.language === 'en' ? 'font-arabic' : ''}`} style={{ color: "var(--gold-dim)" }}>
+                {i18n.language === 'ar' || i18n.language === 'ur' ? moonInfo.phaseName : moonInfo.phaseArabic}
               </div>
 
               {/* Phase progress bar */}
@@ -312,7 +317,7 @@ export default function MoonPage() {
                 />
               </div>
               <div className="text-xs mt-1 data-text" style={{ color: "var(--muted-foreground)" }}>
-                {phasePercent.toFixed(1)}% through lunar cycle
+                {t("moonPage.throughLunarCycle", { percent: phasePercent.toFixed(1) })}
               </div>
             </div>
           </div>
@@ -320,48 +325,48 @@ export default function MoonPage() {
           {/* Stats grid */}
           <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
             <BreezyDetailCard
-              title="Illumination"
+              title={t("moonPage.illumination")}
               icon={<Moon />}
               decorativeVisual={<IlluminationArc illumination={moonInfo.illuminatedFraction * 100} />}
               primaryValue={Math.round(moonInfo.illuminatedFraction * 100).toString()}
               primaryUnit="%"
-              statusLabel={moonInfo.phaseName}
+              statusLabel={translatedPhase}
               className="animate-breezy-enter"
               accentColour="var(--gold)"
             />
             <BreezyDetailCard
-              title="Lunar Age"
+              title={t("moonPage.lunarAge")}
               icon={<Clock />}
               decorativeVisual={<LunarAgeProgress age={(moonInfo.moonAge / 24)} />}
               primaryValue={(moonInfo.moonAge / 24).toFixed(1)}
-              primaryUnit="Days"
-              statusLabel={`Phase Angle: ${(moonInfo.phase * 360).toFixed(1)}°`}
+              primaryUnit={t("moonPage.days")}
+              statusLabel={t("moonPage.phaseAngle", { angle: (moonInfo.phase * 360).toFixed(1) })}
               className="animate-breezy-enter"
               accentColour="#60a5fa"
             />
             <BreezyDetailCard
-              title={`Visibility (${location.name})`}
+              title={t("moonPage.visibilityCity", { city: location.name })}
               icon={<Eye />}
               decorativeVisual={<VisibilityDotScale zone={sunMoon.visibility as any} />}
               primaryValue={sunMoon.visibility}
-              primaryUnit="Zone"
-              statusLabel={`Yallop q = ${sunMoon.qValue.toFixed(2)}`}
+              primaryUnit={t("moonPage.zone")}
+              statusLabel={t("moonPage.yallopQ", { q: sunMoon.qValue.toFixed(2) })}
               className="animate-breezy-enter"
               accentColour={sunMoon.visibility === "A" || sunMoon.visibility === "B" ? "#4ade80" : "#f87171"}
             />
 
             <BreezyDetailCard
-              title="Moon Altitude"
+              title={t("moonPage.moonAltitude")}
               icon={<ArrowRight className="transform -rotate-45" />}
               decorativeVisual={<AzimuthCompass azimuth={sunMoon.moonAz} />}
               primaryValue={sunMoon.moonAlt.toFixed(1)}
               primaryUnit="°"
-              statusLabel={`Azimuth: ${sunMoon.moonAz.toFixed(1)}°`}
+              statusLabel={t("moonPage.azimuth", { az: sunMoon.moonAz.toFixed(1) })}
               className="animate-breezy-enter"
               accentColour="#4ade80"
             />
             <BreezyDetailCard
-              title="Elongation"
+              title={t("moonPage.elongation")}
               icon={<ArrowRight />}
               decorativeVisual={<ElongationVisual elongation={sunMoon.elongation} />}
               primaryValue={sunMoon.elongation.toFixed(1)}
@@ -370,7 +375,7 @@ export default function MoonPage() {
               accentColour="#c084fc"
             />
             <BreezyDetailCard
-              title="Next New Moon"
+              title={t("moonPage.nextNewMoon")}
               icon={<Moon />}
               decorativeVisual={<CountdownCircle daysLeft={parseInt(countdown.split(' ')[0]) || 0} totalDays={29.53} />}
               primaryValue={countdown.split(' ')[0] || "0d"}
@@ -388,7 +393,7 @@ export default function MoonPage() {
 
           {/* 30-day phase calendar */}
           <BreezyFullCard
-            title="30-Day Phase Calendar"
+            title={t("moonPage.thirtyDayPhaseCalendar")}
             icon={<Clock />}
             className="lg:col-span-3 animate-breezy-enter"
           >

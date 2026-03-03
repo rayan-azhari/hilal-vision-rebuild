@@ -2,6 +2,7 @@ import { SEO } from "@/components/SEO";
 import { PageHeader } from "@/components/PageHeader";
 import { BookOpen, Mail } from "lucide-react";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 function Heading({ children }: { children: React.ReactNode }) {
     return (
@@ -28,13 +29,14 @@ function Ul({ children }: { children: React.ReactNode }) {
 }
 
 export default function TermsPage() {
+    const { t } = useTranslation();
     const updated = "23 February 2026";
 
     return (
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
-                title="Terms of Service"
-                description="Hilal Vision Terms of Service - acceptable use, liability, and End-User License Agreement."
+                title={t("terms.title")}
+                description={t("terms.description")}
                 path="/terms"
             />
 
@@ -44,8 +46,8 @@ export default function TermsPage() {
             >
                 <PageHeader
                     icon={<BookOpen />}
-                    title="Terms of Service"
-                    subtitle={`Last updated: ${updated}`}
+                    title={t("terms.title")}
+                    subtitle={t("terms.lastUpdated", { date: updated })}
                     className="max-w-2xl"
                 />
             </div>
@@ -60,144 +62,90 @@ export default function TermsPage() {
                     }}
                 >
                     <Para>
-                        These Terms of Service ("Terms") govern your use of Hilal Vision ("the Platform").
-                        By accessing or using the Platform you agree to these Terms. If you do not agree,
-                        please do not use the Platform.
+                        {t("terms.intro1")}
                     </Para>
                     <Para>
-                        Questions? Contact us at{" "}
+                        {t("terms.intro2")}
                         <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>
                     </Para>
                 </div>
 
-                <Heading>1. Acceptance of Terms</Heading>
+                <Heading>{t("terms.h1")}</Heading>
                 <Para>
-                    By using Hilal Vision - whether as a guest or a registered account holder - you confirm
-                    that you are at least 13 years of age and that you accept these Terms. If you are using
-                    the Platform on behalf of an organisation, you represent that you have authority to bind
-                    that organisation.
+                    {t("terms.p1")}
                 </Para>
 
-                <Heading>2. Description of Service</Heading>
-                <Para>
-                    Hilal Vision is a precision astronomical web platform for predicting and visualising Islamic
-                    crescent moon (hilal) sightings. It provides:
-                </Para>
+                <Heading>{t("terms.h2")}</Heading>
+                <Para>{t("terms.p2")}</Para>
                 <Ul>
-                    <li>Mathematical crescent visibility predictions based on Yallop and Odeh criteria.</li>
-                    <li>Interactive 3D globe and 2D map visualisations.</li>
-                    <li>A Hijri calendar with multiple calculation engines.</li>
-                    <li>A historical ICOP sighting archive.</li>
-                    <li>A crowdsourced sighting report system for authenticated users.</li>
+                    <li>{t("terms.service1")}</li>
+                    <li>{t("terms.service2")}</li>
+                    <li>{t("terms.service3")}</li>
+                    <li>{t("terms.service4")}</li>
+                    <li>{t("terms.service5")}</li>
                 </Ul>
                 <Para>
-                    The Platform is provided for informational and scientific purposes only. It is{" "}
-                    <strong style={{ color: "var(--foreground)" }}>not a religious authority</strong> and does
-                    not issue official Hijri calendar rulings. Users should consult qualified Islamic scholars
-                    for religious determinations.
+                    {t("terms.p2_1")}<strong style={{ color: "var(--foreground)" }}>{t("terms.p2_not")}</strong>{t("terms.p2_2")}
                 </Para>
 
-                <Heading>3. Acceptable Use</Heading>
-                <Para>You agree not to:</Para>
+                <Heading>{t("terms.h3")}</Heading>
+                <Para>{t("terms.use_intro")}</Para>
                 <Ul>
-                    <li>Submit false crescent sighting reports with the intent to deceive or corrupt the dataset.</li>
-                    <li>Attempt to bypass the mathematical Zone F validation or rate-limiting safeguards.</li>
-                    <li>Use the Platform to conduct or facilitate DDoS attacks, scraping abuse, or automated spam.</li>
-                    <li>Impersonate another user or misrepresent your identity.</li>
-                    <li>Use the Platform for any unlawful purpose or in violation of applicable law.</li>
-                    <li>Attempt to reverse-engineer, decompile, or tamper with the Platform's security measures.</li>
+                    <li>{t("terms.use1")}</li>
+                    <li>{t("terms.use2")}</li>
+                    <li>{t("terms.use3")}</li>
+                    <li>{t("terms.use4")}</li>
+                    <li>{t("terms.use5")}</li>
+                    <li>{t("terms.use6")}</li>
                 </Ul>
                 <Para>
-                    We reserve the right to suspend or terminate accounts that violate these rules without notice.
+                    {t("terms.use_outro")}
                 </Para>
 
-                <Heading>4. User-Generated Content</Heading>
-                <Para>
-                    When you submit a crescent sighting report, you grant Hilal Vision a worldwide,
-                    royalty-free, irrevocable licence to display, store, and use that report as part of the
-                    Platform's public scientific dataset. Sighting reports may be visible to all users of
-                    the Platform.
-                </Para>
-                <Para>
-                    You are responsible for the accuracy of reports you submit. Submitting knowingly false
-                    reports is a violation of these Terms and may result in account suspension.
-                </Para>
+                <Heading>{t("terms.h4")}</Heading>
+                <Para>{t("terms.content1")}</Para>
+                <Para>{t("terms.content2")}</Para>
 
-                <Heading>5. Accuracy Disclaimer</Heading>
-                <Para>
-                    Hilal Vision provides mathematical predictions based on established astronomical algorithms
-                    (Yallop 1997, Odeh 2004, astronomy-engine VSOP87/ELP2000). While we strive for accuracy, we make no warranties -
-                    express or implied - regarding the correctness, completeness, or fitness for any particular
-                    purpose of any prediction, calendar date, or sighting data.
-                </Para>
-                <Para>
-                    Atmospheric conditions, local topography, and human visual acuity can cause actual sighting
-                    outcomes to differ from predictions. The Platform should not be used as the sole basis for
-                    any religious or civic decision.
-                </Para>
+                <Heading>{t("terms.h5")}</Heading>
+                <Para>{t("terms.acc1")}</Para>
+                <Para>{t("terms.acc2")}</Para>
 
-                <Heading>6. Intellectual Property & End-User License Agreement</Heading>
+                <Heading>{t("terms.h6")}</Heading>
+                <Para>{t("terms.ip1")}</Para>
                 <Para>
-                    All content, features, and functionality of Hilal Vision are owned by its developers
-                    and are protected by international copyright, trademark, patent, trade secret, and other
-                    intellectual property laws. You are granted a limited, non-exclusive, non-transferable
-                    licence to access and use the Platform. You may not copy, modify, distribute, sell, or
-                    lease any part of our Platform or its underlying software.
-                </Para>
-                <Para>
-                    Third-party data included in the Platform (e.g., ICOP sighting records, Umm al-Qura
-                    calendar tables) remains subject to the original terms of their respective sources. See our{" "}
+                    {t("terms.ip2_1")}
                     <Link href="/about">
-                        <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>About page</span>
-                    </Link>{" "}
-                    for full attribution.
+                        <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>{t("terms.aboutLink")}</span>
+                    </Link>
+                    {t("terms.ip2_2")}
                 </Para>
 
-                <Heading>7. Limitation of Liability</Heading>
-                <Para>
-                    To the maximum extent permitted by applicable law, Hilal Vision and its contributors shall
-                    not be liable for any indirect, incidental, special, consequential, or punitive damages
-                    arising out of your use of (or inability to use) the Platform - including but not limited
-                    to loss of data, missed religious observances, or reliance on incorrect predictions.
-                </Para>
-                <Para>
-                    The Platform is provided "as is" and "as available" without warranty of any kind.
-                </Para>
+                <Heading>{t("terms.h7")}</Heading>
+                <Para>{t("terms.liab1")}</Para>
+                <Para>{t("terms.liab2")}</Para>
 
-                <Heading>8. Third-Party Services</Heading>
-                <Para>
-                    The Platform integrates third-party services including Clerk Auth, Open-Meteo, Upstash,
-                    and Sentry. Your use of these services is subject to their respective terms and privacy
-                    policies. We are not responsible for the practices of third-party service providers.
-                </Para>
+                <Heading>{t("terms.h8")}</Heading>
+                <Para>{t("terms.third1")}</Para>
 
-                <Heading>9. Modifications to Terms</Heading>
-                <Para>
-                    We may update these Terms from time to time. The "Last updated" date at the top reflects
-                    the most recent revision. Continued use of the Platform after any changes constitutes
-                    acceptance of the revised Terms. Significant changes will be announced via an in-app
-                    notification.
-                </Para>
+                <Heading>{t("terms.h9")}</Heading>
+                <Para>{t("terms.mod1")}</Para>
 
-                <Heading>10. Governing Law</Heading>
-                <Para>
-                    These Terms are governed by and construed in accordance with applicable law. Any disputes
-                    shall be resolved through good-faith negotiation in the first instance.
-                </Para>
+                <Heading>{t("terms.h10")}</Heading>
+                <Para>{t("terms.gov1")}</Para>
 
                 {/* Footer links */}
                 <div className="breezy-card mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <Mail className="w-5 h-5 shrink-0" style={{ color: "var(--gold-dim)" }} />
                     <div>
                         <div className="text-sm font-medium mb-0.5" style={{ color: "var(--foreground)" }}>
-                            Questions about these Terms?
+                            {t("terms.footer_title")}
                         </div>
                         <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            Email{" "}
+                            {t("terms.footer_email")}
                             <span style={{ color: "var(--gold-dim)" }}>moonsightinglive@gmail.com</span>
-                            {" "}- Also see our{" "}
+                            {t("terms.footer_alsoSee")}
                             <Link href="/privacy">
-                                <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>Privacy Policy</span>
+                                <span className="underline cursor-pointer" style={{ color: "var(--gold-dim)" }}>{t("terms.footer_privacy")}</span>
                             </Link>
                         </div>
                     </div>

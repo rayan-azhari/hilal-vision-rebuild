@@ -4,6 +4,7 @@ import GlobePage from "./GlobePage";
 import MapPage from "./MapPage";
 import { useProTier } from "@/contexts/ProTierContext";
 import ProGate from "@/components/ProGate";
+import { useTranslation } from "react-i18next";
 
 export interface SharedVisibilityState {
     hourOffset: number;
@@ -14,16 +15,17 @@ export default function VisibilityPage() {
     const { isPremium, setShowUpgradeModal } = useProTier();
     const [view, setView] = useState<"globe" | "map">("map");
     const [hourOffset, setHourOffset] = useState(0);
+    const { t } = useTranslation();
 
     const shared: SharedVisibilityState = {
         hourOffset, setHourOffset,
     };
 
     return (
-        <div className="relative flex flex-col pt-12 lg:pt-0 h-[calc(100vh-10rem)] lg:h-[calc(100vh-7rem)] overflow-hidden">
+        <div className="relative flex flex-col pt-12 lg:pt-0 min-h-[calc(100vh-10rem)] lg:h-[calc(100vh-7rem)] lg:overflow-hidden overflow-x-hidden">
             <SEO
-                title="Visibility - 3D Globe & 2D Map"
-                description="Interactive crescent moon visibility predictions on a 3D globe and 2D map with cloud cover overlay and best observation time calculator."
+                title={t("visibility.title")}
+                description={t("visibility.description")}
                 path="/visibility"
             />
             <div
@@ -46,8 +48,8 @@ export default function VisibilityPage() {
                         color: view === "globe" ? "var(--background)" : "var(--muted-foreground)"
                     }}
                 >
-                    3D Globe
-                    {!isPremium && <ProGate featureName="3D Globe" inline>‎</ProGate>}
+                    {t("visibility.globeBtn")}
+                    {!isPremium && <ProGate featureName={t("visibility.globeBtn")} inline>‎</ProGate>}
                 </button>
                 <button
                     onClick={() => setView("map")}
@@ -57,7 +59,7 @@ export default function VisibilityPage() {
                         color: view === "map" ? "var(--background)" : "var(--muted-foreground)"
                     }}
                 >
-                    2D Map
+                    {t("visibility.mapBtn")}
                 </button>
             </div>
 

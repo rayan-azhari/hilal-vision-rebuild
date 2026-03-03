@@ -11,6 +11,7 @@ import {
 import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useTheme } from "@/contexts/ThemeContext";
 import { trpc } from "@/lib/trpc";
+import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import type { SharedVisibilityState } from "./VisibilityPage";
@@ -53,6 +54,7 @@ const ZONE_HEX: Record<VisibilityZone, string> = {
 
 
 export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
+  const { t, i18n } = useTranslation();
   const { hourOffset, setHourOffset } = shared;
   const { date, location: selectedCity, visibilityCriterion, setVisibilityCriterion } = useGlobalState();
   const { isPremium, setShowUpgradeModal } = useProTier();
@@ -420,22 +422,22 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
   }, [observations, theme]);
 
   return (
-    <div className="h-full flex flex-col" style={{ background: "var(--space)" }}>
+    <div className="flex flex-col lg:h-full lg:overflow-hidden" style={{ background: "var(--space)" }}>
       {/* Header */}
       <PageHeader
         icon={<Map />}
-        title="Crescent Visibility Map"
-        subtitle={`Global visibility heatmap · ${visibilityCriterion === "yallop" ? "Yallop (1997)" : "Odeh (2004)"} criterion`}
+        title={t("mapPage.title")}
+        subtitle={visibilityCriterion === "yallop" ? t("mapPage.subtitleYallop") : t("mapPage.subtitleOdeh")}
       >
-        <div className="text-xs font-arabic text-right" style={{ color: "var(--gold-dim)" }}>
-          <div>{hijri.day} {hijri.monthNameArabic} {hijri.year} هـ</div>
+        <div className={`text-xs ${i18n.language === 'ar' || i18n.language === 'ur' ? 'font-arabic' : ''} text-right`} style={{ color: "var(--gold-dim)" }}>
+          <div>{hijri.day} {i18n.language === 'ar' || i18n.language === 'ur' ? hijri.monthNameArabic : hijri.monthName} {hijri.year} هـ</div>
           <div style={{ color: "var(--muted-foreground)" }}>{hijri.monthName}</div>
         </div>
       </PageHeader>
 
-      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 lg:min-h-0 lg:overflow-hidden">
         {/* Map */}
-        <div className="relative flex-1 min-h-[60vh] lg:min-h-0">
+        <div className="relative flex-none h-[65vh] lg:h-auto lg:flex-1 lg:min-h-0 border-b lg:border-b-0" style={{ borderColor: "color-mix(in oklch, var(--gold) 12%, transparent)" }}>
           <div ref={mapRef} className="absolute inset-0" style={{ zIndex: 1, touchAction: "none" }} />
 
           {/* Selected point popup */}
@@ -452,7 +454,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
               <div className="flex items-center gap-2 mb-3 pb-2 border-b" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
                 <div className="w-3 h-3 rounded-sm" style={{ background: highContrast ? HIGH_CONTRAST_ZONE_COLORS[selectedPoint.data.visibility as VisibilityZone] : ZONE_COLORS[selectedPoint.data.visibility as VisibilityZone] }} />
                 <span className="font-bold text-sm" style={{ color: "var(--foreground)" }}>
-                  Zone {selectedPoint.data.visibility}
+                  {t("mapPage.zone", { visibility: selectedPoint.data.visibility })}
                 </span>
                 <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
                   {selectedPoint.lat.toFixed(2)}°, {selectedPoint.lng.toFixed(2)}°
@@ -461,28 +463,28 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
 
               <div className="space-y-1">
                 <div className="flex justify-between">
-                  <span style={{ color: "var(--muted-foreground)" }}>q-Value</span>
+                  <span style={{ color: "var(--muted-foreground)" }}>{t("mapPage.qValue")}</span>
                   <span className="font-mono font-medium" style={{ color: "var(--gold)" }}>{selectedPoint.data.qValue.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: "var(--muted-foreground)" }}>Age</span>
+                  <span style={{ color: "var(--muted-foreground)" }}>{t("mapPage.age")}</span>
                   <span className="font-mono">{selectedPoint.data.moonAge.toFixed(1)} h</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: "var(--muted-foreground)" }}>Moon Altitude</span>
+                  <span style={{ color: "var(--muted-foreground)" }}>{t("mapPage.moonAltitude")}</span>
                   <span className="font-mono">{selectedPoint.data.moonAlt.toFixed(2)}°</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: "var(--muted-foreground)" }}>Elongation</span>
+                  <span style={{ color: "var(--muted-foreground)" }}>{t("mapPage.elongation")}</span>
                   <span className="font-mono">{selectedPoint.data.elongation.toFixed(2)}°</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: "var(--muted-foreground)" }}>Crescent Width</span>
+                  <span style={{ color: "var(--muted-foreground)" }}>{t("mapPage.crescentWidth")}</span>
                   <span className="font-mono">{selectedPoint.data.crescent.w.toFixed(2)}'</span>
                 </div>
                 {selectedPoint.elevation !== undefined && (
                   <div className="flex justify-between border-t pt-1 mt-1" style={{ borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
-                    <span style={{ color: "var(--muted-foreground)" }}>Local Elevation</span>
+                    <span style={{ color: "var(--muted-foreground)" }}>{t("mapPage.localElevation")}</span>
                     <span className="font-mono">{Math.round(selectedPoint.elevation)} m</span>
                   </div>
                 )}
@@ -493,16 +495,16 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-10" />
                   <img
                     src={selectedPoint.data.imageUrl}
-                    alt="Sighting Photograph"
+                    alt={t("mapPage.attachedPhoto")}
                     className="w-full h-32 object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute bottom-1 right-2 text-[8px] text-white/70 z-20">Attached Photo</div>
+                  <div className="absolute bottom-1 right-2 text-[8px] text-white/70 z-20">{t("mapPage.attachedPhoto")}</div>
                 </div>
               )}
 
               <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] leading-tight border-t" style={{ color: "var(--muted-foreground)", borderColor: "color-mix(in oklch, var(--gold) 10%, transparent)" }}>
-                {VISIBILITY_LABELS[selectedPoint.data.visibility as VisibilityZone].desc}
+                {t(`visibilityZone.${selectedPoint.data.visibility}.desc`)}
               </div>
 
               <button
@@ -510,7 +512,7 @@ export default function MapPage({ shared }: { shared: SharedVisibilityState }) {
                 className="w-full mt-3 py-1.5 rounded text-[10px] font-medium transition-colors hover:bg-white/5"
                 style={{ color: "var(--gold-dim)" }}
               >
-                ✕ Close
+                {t("mapPage.close")}
               </button>
             </div>
           )}
