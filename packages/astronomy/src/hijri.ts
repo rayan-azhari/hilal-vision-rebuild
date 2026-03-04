@@ -1,7 +1,7 @@
 import uq from "@umalqura/core";
 import { HijriDate } from "@hilal/types";
-import { findNewMoonNear } from "./moonPhase.js";
-import { HIJRI_MONTHS, SYNODIC_MS } from "./constants.js";
+import { findNewMoonNear } from "./moonPhase";
+import { HIJRI_MONTHS, SYNODIC_MS } from "./constants";
 
 const HIJRI_EPOCH_YEAR = 1446;
 const HIJRI_EPOCH_MONTH = 1; // Muharram

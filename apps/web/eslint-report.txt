@@ -1,0 +1,22 @@
+[0m[0m
+[0m[4mC:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\apps\web\src\app\calendar\page.tsx[24m[0m
+[0m  [2m124:8[22m  [33mwarning[39m  React Hook useMemo has an unnecessary dependency: 'viewMonth'. Either exclude it or remove the dependency array  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\apps\web\src\app\moon\page.tsx[24m[0m
+[0m  [2m109:39[22m  [33mwarning[39m  'fraction' is defined but never used                                                            [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m191:9[22m   [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')[0m
+[0m[0m
+[0m[4mC:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\apps\web\src\components\MoonGlobe.tsx[24m[0m
+[0m  [2m10:56[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\apps\web\src\components\SunMoonAltitudeChart.tsx[24m[0m
+[0m  [2m90:97[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m98:98[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\apps\web\src\server\routers\weather.ts[24m[0m
+[0m  [2m8:21[22m  [33mwarning[39m  'lat' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m8:26[22m  [33mwarning[39m  'lng' is assigned a value but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[31m[1m✖ 8 problems (3 errors, 5 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  0 errors and 1 warning potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

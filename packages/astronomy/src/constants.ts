@@ -1,5 +1,7 @@
 import { VisibilityZone } from "@hilal/types";
 
+export const SYNODIC_MS = 29.53058867 * 24 * 60 * 60 * 1000;
+
 export const HIJRI_MONTHS = [
     { en: "Muharram", ar: "مُحَرَّم", short: "MUH" },
     { en: "Safar", ar: "صَفَر", short: "SFR" },

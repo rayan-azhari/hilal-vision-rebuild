@@ -1,5 +1,5 @@
 import * as Astronomy from "astronomy-engine";
-import { toRad, toDeg } from "./utils.js";
+import { toRad, toDeg } from "./utils";
 
 /**
  * Calculate the solar declination and equation of time for a given date.

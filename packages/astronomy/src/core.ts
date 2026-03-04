@@ -1,5 +1,5 @@
 import { VisibilityZone, CrescentWidth } from "@hilal/types";
-import { toRad, toDeg } from "./utils.js";
+import { toRad, toDeg } from "./utils";
 
 /**
  * Calculate crescent width using Yallop formula.

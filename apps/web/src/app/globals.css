@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
+@theme {
+  /* Hilal Vision - Breezy Weather Colors (OKLCH) */
+  --color-primary-50: oklch(0.97 0.01 240);
+  --color-primary-100: oklch(0.93 0.03 240);
+  --color-primary-200: oklch(0.88 0.05 240);
+  --color-primary-300: oklch(0.81 0.08 240);
+  --color-primary-400: oklch(0.72 0.12 240);
+  --color-primary-500: oklch(0.61 0.16 240);
+  --color-primary-600: oklch(0.51 0.14 240);
+  --color-primary-700: oklch(0.42 0.11 240);
+  --color-primary-800: oklch(0.34 0.08 240);
+  --color-primary-900: oklch(0.28 0.06 240);
+  --color-primary-950: oklch(0.19 0.04 240);
+
+  --color-background-light: oklch(0.98 0.01 240);
+  --color-background-dark: oklch(0.15 0.03 260);
+  
+  --color-vis-a: oklch(0.88 0.15 140);
+  --color-vis-b: oklch(0.85 0.16 90);
+  --color-vis-c: oklch(0.75 0.18 55);
+  --color-vis-d: oklch(0.65 0.20 25);
+  --color-vis-e: oklch(0.55 0.02 260);
+  --color-vis-f: oklch(0.30 0.05 260);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Amiri", serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: oklch(0.98 0.01 240);
+  --foreground: oklch(0.2 0.05 240);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: oklch(0.15 0.03 260);
+  --foreground: oklch(0.95 0.02 260);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--color-gray-200);
+}
+
+.dark * {
+  border-color: var(--color-gray-800);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Custom Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }

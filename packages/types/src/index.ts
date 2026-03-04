@@ -1,4 +1,4 @@
-export * from "./schemas.js";
+export * from "./schemas";
 
 export interface Location {
     lat: number;

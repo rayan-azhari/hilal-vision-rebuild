@@ -1,6 +1,6 @@
 import * as Astronomy from "astronomy-engine";
 import { Location, SunMoonData } from "@hilal/types";
-import { crescentWidth, yallopQ, odehV, classifyYallop, classifyOdeh } from "./core.js";
+import { crescentWidth, yallopQ, odehV, classifyYallop, classifyOdeh } from "./core";
 
 /**
  * Get the time of astronomical sunset for a location and date.

@@ -1,6 +1,6 @@
 import { VisibilityZone } from "@hilal/types";
-import { computeSunMoonAtSunset } from "./sunMoon.js";
-import { classifyYallop, classifyOdeh } from "./core.js";
+import { computeSunMoonAtSunset } from "./sunMoon";
+import { classifyYallop, classifyOdeh } from "./core";
 
 /**
  * Generate a world visibility grid for a given date.
