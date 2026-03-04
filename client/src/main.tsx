@@ -25,6 +25,7 @@ const API_BASE = Capacitor.isNativePlatform()
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      refetchOnWindowFocus: false, // Prevents serverless function invocation spikes when users switch tabs
       retry: (failureCount, error) => {
         // Retry transient server errors (non-JSON 500s) up to 2 times
         if (error instanceof TRPCClientError && error.message.includes("is not valid JSON")) {

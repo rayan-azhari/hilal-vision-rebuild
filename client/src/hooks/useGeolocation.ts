@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
 
 export interface GeoPosition {
     lat: number;
@@ -25,14 +27,62 @@ export function useGeolocation(autoDetect = false): UseGeolocationReturn {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const detect = useCallback(() => {
-        if (!navigator.geolocation) {
-            setError("Geolocation is not supported by your browser");
-            return;
-        }
-
+    const detect = useCallback(async () => {
         setLoading(true);
         setError(null);
+
+        // Native Capacitor Geolocation logic
+        if (Capacitor.isNativePlatform()) {
+            try {
+                const check = await Geolocation.checkPermissions();
+                if (check.location !== "granted") {
+                    const req = await Geolocation.requestPermissions();
+                    if (req.location !== "granted") {
+                        setError("Location access denied. Please allow location permissions.");
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: false, timeout: 10000 });
+                const loc: GeoPosition = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                };
+                if (pos.coords.altitude !== null) {
+                    loc.elevation = pos.coords.altitude;
+                }
+
+                // Reverse geocoding fallback
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lng}&format=json&zoom=10`, { headers: { "User-Agent": "HilalVision/1.0" } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state;
+                        const country = data.address?.country;
+                        loc.name = city ? `${city}, ${country}` : country || "Your Location";
+                    }
+                } catch {
+                    loc.name = "Your Location";
+                }
+
+                setPosition(loc);
+                setLoading(false);
+                return;
+            } catch (err: any) {
+                console.error("Native Geolocation error", err);
+                setError("Unable to detect your location via device GPS.");
+                setLoading(false);
+                return;
+            }
+        }
+
+        // Web/Browser fallback logic
+        if (!navigator.geolocation) {
+            setError("Geolocation is not supported by your browser");
+            setLoading(false);
+            return;
+        }
 
         navigator.geolocation.getCurrentPosition(
             async (pos) => {

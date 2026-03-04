@@ -47,7 +47,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 ## Recent Architecture Highlights
 
 1. **Web Worker Visibility Engine**: The heavy astronomical calculations (3,600+ sun-moon evaluations per frame) are completely offloaded to a Web Worker, ensuring a 60FPS buttery-smooth UI map experience.
-2. **Capacitor Mobile Native**: The identical codebase compiles beautifully into native iOS and Android applications.
+2. **Capacitor Mobile Native**: The identical codebase compiles beautifully into native iOS and Android applications. Native geolocation queries (`@capacitor/geolocation`) and Clerk OAuth redirects are seamlessly handled by runtime environment detection.
 3. **Clerk Authentication**: Secure user management replacing legacy custom OAuth.
 4. **Smart Telemetry Validation**: Sighting reports are algorithmically verified against astronomical reality. If a user maliciously claims to see the moon when it is physically below the horizon (Zone F), the mathematical engine rejects the payload.
 5. **Fail-Open Resilience**: External dependencies like the Upstash Redis rate limiter and Open-Meteo API fetchers are wrapped in strict cache-fallbacks and `AbortController` timeouts to ensure telemetry submissions never hard-crash if third-party services degrade.

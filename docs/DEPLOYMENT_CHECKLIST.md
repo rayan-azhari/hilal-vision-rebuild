@@ -87,7 +87,24 @@ npx pnpm add <missing-package>
 
 ---
 
-### 2. Vercel "pnpm-lock.yaml is not up to date"
+### 3. Vercel Serverless Timeouts (`FUNCTION_INVOCATION_FAILED`)
+
+**Symptom:**
+```
+TRPCClientError A server error has occurred
+FUNCTION_INVOCATION_FAILED
+```
+
+**Root Cause:** Vercel serverless functions have a strict 10-second limit. If the backend hangs (often due to React Query `refetchOnWindowFocus` spamming the database or external APIs timing out), the function crashes. In Vercel, the Drizzle ORM MySQL pool can quickly exhaust its 3-connection limit if the frontend sends spikes of queries.
+
+**Fix:**
+- Set `refetchOnWindowFocus: false` in the React Query configuration (`client/src/main.tsx`).
+- Ensure external API calls (e.g. Open-Meteo) use `AbortSignal.timeout(2000)`.
+- Ensure `server/db.ts` uses `connectionLimit: 3` and `connectTimeout: 5000` to fail fast instead of hanging.
+
+---
+
+### 4. Vercel "pnpm-lock.yaml is not up to date"
 
 **Symptom:**
 ```

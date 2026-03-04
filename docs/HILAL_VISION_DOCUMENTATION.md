@@ -109,7 +109,15 @@ hilal-vision/
 └── DOCUMENTATION.md        ← This file
 ```
 
-### 2.5 Public REST API
+### 2.5 Mobile Native Architecture (Capacitor)
+
+The codebase effortlessly compiles to native iOS and Android applications via Capacitor.
+To accommodate native WebViews (which run on a `capacitor://localhost` or `https://localhost` origin):
+1. **tRPC CORS:** Native auth uses Clerk JWT tokens, not cookies. The tRPC client leverages `credentials: Capacitor.isNativePlatform() ? "omit" : "include"` to prevent CORS violation (`Access-Control-Allow-Origin: *` cannot be combined with credentials).
+2. **OAuth Redirects:** The `getLoginUrl()` function dynamically switches the OAuth callback URI to `https://moon-dashboard-one.vercel.app` on native to ensure Clerk does not incorrectly redirect back to the non-existent device `localhost`.
+3. **Geolocation Tracking:** The browser's `navigator.geolocation` API is restricted inside mobile WebViews. The app imports the native `@capacitor/geolocation` plugin and automatically routes through it when `Capacitor.isNativePlatform()` is true.
+
+### 2.6 Public REST API
 
 In addition to the tRPC layer, standalone Express REST endpoints are mounted at `/api/v1/`:
 
