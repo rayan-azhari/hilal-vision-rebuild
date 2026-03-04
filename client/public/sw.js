@@ -127,10 +127,23 @@ async function networkFirst(request, cacheName, timeoutMs) {
         if (cached) return cached;
 
         // Return a valid tRPC batch error so superjson.deserialize() succeeds on the client
-        const isApiCall = new URL(request.url).pathname.startsWith("/api/");
-        const body = isApiCall
-            ? JSON.stringify([{ error: { json: { message: "You appear to be offline. Please check your connection.", code: -32603, data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 503, path: null } } } }])
-            : '{"error":"offline"}';
+        const url = new URL(request.url);
+        const isApiCall = url.pathname.startsWith("/api/");
+
+        let body;
+        if (isApiCall) {
+            let numProcedures = 1;
+            if (url.pathname.startsWith("/api/trpc/")) {
+                const trpcPath = url.pathname.replace("/api/trpc/", "");
+                if (trpcPath) {
+                    numProcedures = trpcPath.split(",").length;
+                }
+            }
+            const errorObj = { error: { json: { message: "You appear to be offline. Please check your connection.", code: -32603, data: { code: "INTERNAL_SERVER_ERROR", httpStatus: 503, path: null } } } };
+            body = JSON.stringify(Array(numProcedures).fill(errorObj));
+        } else {
+            body = '{"error":"offline"}';
+        }
         return new Response(body, {
             status: 503,
             headers: { "Content-Type": "application/json" },

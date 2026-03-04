@@ -6,7 +6,7 @@ import { weatherRouter } from "./routers/weather.js";
 import { notificationsRouter } from "./routers/notifications.js";
 import { z } from "zod";
 import { getDb } from "./db.js";
-import { observationReports } from "../drizzle/schema.js";
+import { observationReports, emailSignups } from "../drizzle/schema.js";
 import { desc, count } from "drizzle-orm";
 import { computeSunMoonAtSunset } from "../shared/astronomy.js";
 
@@ -338,15 +338,18 @@ export const appRouter = router({
     subscribeEmail: publicProcedure
       .input(z.object({ email: z.string().email() }))
       .mutation(async ({ input }) => {
-        const redis = getRedis();
-        if (!redis) {
+        const db = await getDb();
+        if (!db) {
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable" });
         }
         try {
-          await redis.sadd("waitlist:emails", input.email.toLowerCase().trim());
+          const email = input.email.toLowerCase().trim();
+          await db.insert(emailSignups)
+            .values({ email })
+            .onDuplicateKeyUpdate({ set: { email } });
           return { success: true };
         } catch (error: any) {
-          console.error("[Marketing] Failed to save waitlist email:", error);
+          console.error("[Marketing] Failed to save email signup:", error);
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to subscribe. Please try again." });
         }
       }),
