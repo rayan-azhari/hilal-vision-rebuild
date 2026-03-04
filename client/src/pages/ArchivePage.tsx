@@ -428,7 +428,7 @@ export default function ArchivePage() {
                         </span>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={exportIcopToCSV} className="p-1 rounded hover:bg-white/5 transition-colors" titleKey="seo.archive.title">
+                        <button onClick={exportIcopToCSV} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to CSV">
                           <span className="text-[10px] font-mono mr-1" style={{ color: "var(--gold-dim)" }}>{t("archive.exportCsv")}</span><Download className="w-3 h-3 inline pb-0.5" style={{ color: "var(--gold-dim)" }} />
                         </button>
                         <button onClick={() => exportToJSON(icopData, 'icop_observations')} className="p-1 rounded hover:bg-white/5 transition-colors" title="Export to JSON">

@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 interface SEOProps {
     titleKey?: string;
     descriptionKey?: string;
+    title?: string;
+    description?: string;
     path?: string;
     ogImage?: string;
     type?: "website" | "article";
@@ -16,16 +18,18 @@ const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
 export function SEO({
     titleKey = "seo.home.title",
     descriptionKey = "seo.home.desc",
+    title: rawTitle,
+    description: rawDescription,
     path = "/",
     ogImage = DEFAULT_OG_IMAGE,
     type = "website",
 }: SEOProps) {
     const { t, i18n } = useTranslation();
 
-    const title = t(titleKey);
-    const description = t(descriptionKey);
+    const title = rawTitle || t(titleKey);
+    const description = rawDescription || t(descriptionKey);
 
-    const isHome = titleKey === "seo.home.title";
+    const isHome = titleKey === "seo.home.title" && !rawTitle;
     const fullTitle = isHome
         ? `${SITE_NAME} - ${t('home.tagline', { defaultValue: 'Islamic Moon Visibility & Sighting' })}`
         : `${title} | ${SITE_NAME}`;
