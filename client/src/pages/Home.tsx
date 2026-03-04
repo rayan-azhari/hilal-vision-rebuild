@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { SEO } from "@/components/SEO";
-import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Heart, Crown } from "lucide-react";
+import { Globe, Map, Moon, Calendar, Compass, Archive, ArrowRight, Heart, Crown, Smartphone, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getMoonPhaseInfo, gregorianToHijri, formatTime, HIJRI_MONTHS } from "@/lib/astronomy";
 import { BreezyDetailCard } from "@/components/BreezyDetailCard";
@@ -11,14 +11,18 @@ import { SightingFeed } from "@/components/SightingFeed";
 import { TonightCard } from "@/components/TonightCard";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useTranslation } from "react-i18next";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 const FEATURE_DEFS = [
-  { href: "/globe",    icon: Globe,    key: "globe",    color: "#60a5fa" },
-  { href: "/map",      icon: Map,      key: "map",      color: "#4ade80" },
-  { href: "/moon",     icon: Moon,     key: "moon",     color: "#facc15" },
+  { href: "/globe", icon: Globe, key: "globe", color: "#60a5fa" },
+  { href: "/map", icon: Map, key: "map", color: "#4ade80" },
+  { href: "/moon", icon: Moon, key: "moon", color: "#facc15" },
   { href: "/calendar", icon: Calendar, key: "calendar", color: "#c084fc" },
-  { href: "/horizon",  icon: Compass,  key: "horizon",  color: "#fb923c" },
-  { href: "/archive",  icon: Archive,  key: "archive",  color: "#94a3b8" },
+  { href: "/horizon", icon: Compass, key: "horizon", color: "#fb923c" },
+  { href: "/archive", icon: Archive, key: "archive", color: "#94a3b8" },
 ];
 
 const ZONE_LEGEND = [
@@ -70,6 +74,23 @@ export default function Home() {
   const [moonInfo] = useState(() => getMoonPhaseInfo(now));
   const [hijri] = useState(() => gregorianToHijri(now));
   const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+
+  const subscribeEmail = trpc.marketing.subscribeEmail.useMutation({
+    onSuccess: () => {
+      toast.success(t("home.mobileApp.success"));
+      setEmail("");
+    },
+    onError: (err) => {
+      toast.error(t("home.mobileApp.error") || err.message);
+    }
+  });
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    subscribeEmail.mutate({ email });
+  };
 
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -80,8 +101,8 @@ export default function Home() {
   return (
     <div className="min-h-screen" style={{ background: "var(--space)" }}>
       <SEO
-        title="Home"
-        description="Precision Islamic crescent moon visibility predictions with interactive 3D globe, Hijri calendar, and real-time sighting reports. Powered by Yallop & Odeh criteria."
+        titleKey="seo.home.title"
+        descriptionKey="seo.home.desc"
         path="/"
       />
       {/* Hero */}
@@ -274,6 +295,88 @@ export default function Home() {
                 <div className="text-xs font-mono" style={{ color }}>{q}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile App Waitlist Teaser */}
+      <section className="py-12 border-t mt-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="container">
+          <div
+            className="relative overflow-hidden rounded-2xl p-8 md:p-12 flex flex-col items-center text-center max-w-4xl mx-auto"
+            style={{
+              background: "radial-gradient(ellipse at center, oklch(0.12 0.03 265) 0%, var(--space-mid) 100%)",
+              border: "1px solid color-mix(in oklch, var(--gold) 10%, transparent)",
+            }}
+          >
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6" style={{ background: "color-mix(in oklch, var(--gold) 15%, transparent)" }}>
+              <Smartphone className="w-8 h-8" style={{ color: "var(--gold)" }} />
+            </div>
+
+            <h2 className="text-2xl md:text-3xl font-medium mb-3" style={{ color: "var(--foreground)" }}>
+              {t("home.mobileApp.title", { defaultValue: "Take Hilal Vision Anywhere" })}
+            </h2>
+            <p className="text-sm md:text-base mb-8 max-w-lg mx-auto leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              {t("home.mobileApp.desc", { defaultValue: "The world's most advanced Islamic crescent visibility tools in your pocket. Mobile apps coming to iOS and Android." })}
+            </p>
+
+            {/* Email Signup Form */}
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row w-full max-w-md gap-3 mb-10">
+              <Input
+                type="email"
+                placeholder={t("home.mobileApp.placeholder", { defaultValue: "Enter your email address" })}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 h-12"
+                style={{
+                  background: "var(--space)",
+                  borderColor: "var(--border)",
+                  color: "var(--foreground)",
+                }}
+              />
+              <Button
+                type="submit"
+                disabled={subscribeEmail.isPending}
+                className="h-12 px-6 font-medium transition-all"
+                style={{
+                  background: "linear-gradient(135deg, var(--gold-glow), var(--gold))",
+                  color: "var(--space)",
+                }}
+              >
+                {subscribeEmail.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("home.mobileApp.button", { defaultValue: "Join Waitlist" })}
+              </Button>
+            </form>
+
+            {/* App Store Coming Soon Badges */}
+            <div className="flex flex-wrap justify-center gap-4 opacity-50 pointer-events-none grayscale hover:grayscale-0 transition-all duration-300">
+              {/* Fake Apple Badge SVG */}
+              <div className="flex items-center gap-3 px-5 py-2.5 rounded-xl border border-white/20 bg-black text-white hover:bg-zinc-900 cursor-not-allowed">
+                <svg viewBox="0 0 384 512" className="w-6 h-6 fill-current">
+                  <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.3 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.3zM286 98c16-19.4 26.6-46 23.6-72.3-21.7 1-49 14.1-65.7 32.7-14.7 16-27.2 43.1-23.7 68.8 24.4 1.9 49.8-9.8 65.8-29.2z" />
+                </svg>
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] leading-none uppercase">{t("home.mobileApp.comingSoon", { defaultValue: "Coming Soon" })}</span>
+                  <span className="text-sm font-semibold leading-tight">App Store</span>
+                </div>
+              </div>
+
+              {/* Fake Google Play Badge SVG */}
+              <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/20 bg-black text-white hover:bg-zinc-900 cursor-not-allowed">
+                <svg viewBox="0 0 512 512" className="w-6 h-6 block">
+                  <path fill="#4caf50" d="M34.9 31.8c-3.1 3.3-4.9 8.2-4.9 14.9v418.6c0 6.7 1.8 11.6 4.9 14.9l.4.4 233.1-233.3v-2.3l-233.1-233.3-.4.2z" />
+                  <path fill="#ffc107" d="M346.9 344L268.4 265.5v-18.9l78.5-78.5 1.1-.6 93.3 53c26.6 15.1 26.6 39.8 0 55l-94.4 53.5z" />
+                  <path fill="#f44336" d="M268.4 265.6L34.9 499.1c9.4 10 24.6 10.6 42.1.7l270-155.6-78.6-78.6z" />
+                  <path fill="#2196f3" d="M268.4 246.5l78.5 78.5 270-155.6c-17.5-9.9-32.8-9.3-42.1.7zL268.4 246.5z" />
+                </svg>
+                <div className="flex flex-col text-left justify-center pl-1">
+                  <span className="text-[10px] leading-none uppercase">{t("home.mobileApp.comingSoon", { defaultValue: "Coming Soon" })}</span>
+                  <span className="text-sm font-semibold leading-tight tracking-tight">Google Play</span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

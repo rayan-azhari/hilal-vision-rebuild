@@ -78,3 +78,13 @@ export const stripeCustomers = mysqlTable("stripe_customers", {
 
 export type StripeCustomer = typeof stripeCustomers.$inferSelect;
 export type InsertStripeCustomer = typeof stripeCustomers.$inferInsert;
+
+// Waitlist / newsletter signups for Mobile App release or other news
+export const emailSignups = mysqlTable("email_signups", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EmailSignup = typeof emailSignups.$inferSelect;
+export type InsertEmailSignup = typeof emailSignups.$inferInsert;

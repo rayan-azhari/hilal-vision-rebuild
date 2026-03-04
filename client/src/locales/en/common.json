@@ -100,6 +100,15 @@
                 "title": "Archive",
                 "desc": "Crescent visibility maps for all Islamic months from 1438 to 1465 AH"
             }
+        },
+        "mobileApp": {
+            "title": "Take Hilal Vision Anywhere",
+            "desc": "The world's most advanced Islamic crescent visibility tools in your pocket. Mobile apps coming to iOS and Android.",
+            "placeholder": "Enter your email address",
+            "button": "Join the Waitlist",
+            "success": "Success! You're on the waitlist.",
+            "error": "Failed to join waitlist. Please try again.",
+            "comingSoon": "Coming Soon"
         }
     },
     "tonight": {
@@ -1093,5 +1102,51 @@
         "apiTH_params": "Parameters",
         "apiTH_returns": "Returns",
         "s10_zodNote": "All inputs are validated with Zod schemas. Invalid or out-of-range parameters return structured error responses."
+    },
+    "seo": {
+        "home": {
+            "title": "Home",
+            "desc": "Precision Islamic crescent moon visibility predictions with interactive 3D globe, Hijri calendar, and real-time sighting reports. Powered by Yallop & Odeh criteria."
+        },
+        "visibility": {
+            "title": "Visibility Map",
+            "desc": "Interactive global crescent moon visibility map based on Yallop and Odeh criteria. Features real-time cloud cover and crowdsourced sighting reports."
+        },
+        "moon": {
+            "title": "Moon Phases",
+            "desc": "Track the current lunar phase, illumination, and age. View the sun and moon altitude chart with physical ephemeris data."
+        },
+        "calendar": {
+            "title": "Hijri Calendar",
+            "desc": "Interactive Islamic calendar comparing Astronomical, Umm al-Qura, and Tabular dates. Converts Hijri to Gregorian and highlights major Islamic events."
+        },
+        "horizon": {
+            "title": "Horizon View",
+            "desc": "Simulate the local horizon to see the precise position of the crescent moon relative to the setting sun. Adjust for terrain elevation and atmospheric refraction."
+        },
+        "archive": {
+            "title": "Observation Archive",
+            "desc": "Browse a historical archive of crescent moon visibility data from 1438 to 1465 AH, including real-world sighting reports from ICOP."
+        },
+        "about": {
+            "title": "About",
+            "desc": "Learn about the mission, tools, and technical methodology behind Hilal Vision."
+        },
+        "methodology": {
+            "title": "Methodology",
+            "desc": "Detailed scientific documentation covering the Yallop and Odeh criteria, atmospheric refraction, and our triple-engine Hijri calendar calculation."
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "desc": "Hilal Vision Privacy Policy - how we collect, use, and protect your data."
+        },
+        "terms": {
+            "title": "Terms of Service",
+            "desc": "Hilal Vision Terms of Service - acceptable use, liability, and End-User License Agreement."
+        },
+        "support": {
+            "title": "Support Us",
+            "desc": "Help keep Hilal Vision accessible and accurate by upgrading to Pro or making a one-time Sadaqah Jariyah donation."
+        }
     }
 }

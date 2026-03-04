@@ -103,8 +103,8 @@ export default function SupportPage() {
     return (
         <div className="min-h-screen" style={{ background: "var(--space)" }}>
             <SEO
-                title="Support Hilal Vision"
-                description="Support Hilal Vision's mission to bridge ancient lunar tradition with modern astronomy. Explore Pro features or contribute as Sadaqah Jariyah."
+                titleKey="seo.support.title"
+                descriptionKey="seo.support.desc"
                 path="/support"
             />
 

@@ -1,31 +1,42 @@
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 
 interface SEOProps {
-    title?: string;
-    description?: string;
+    titleKey?: string;
+    descriptionKey?: string;
     path?: string;
     ogImage?: string;
     type?: "website" | "article";
 }
 
 const SITE_NAME = "Hilal Vision";
-const DEFAULT_DESCRIPTION =
-    "Precision Islamic crescent moon visibility predictions, interactive 3D globe, Hijri calendar, and real-time sighting reports.";
 const BASE_URL = "https://moonsighting.live";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-default.png`;
 
 export function SEO({
-    title,
-    description = DEFAULT_DESCRIPTION,
+    titleKey = "seo.home.title",
+    descriptionKey = "seo.home.desc",
     path = "/",
     ogImage = DEFAULT_OG_IMAGE,
     type = "website",
 }: SEOProps) {
-    const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} - Islamic Moon Visibility & Sighting`;
+    const { t, i18n } = useTranslation();
+
+    const title = t(titleKey);
+    const description = t(descriptionKey);
+
+    const isHome = titleKey === "seo.home.title";
+    const fullTitle = isHome
+        ? `${SITE_NAME} - ${t('home.tagline', { defaultValue: 'Islamic Moon Visibility & Sighting' })}`
+        : `${title} | ${SITE_NAME}`;
+
     const canonicalUrl = `${BASE_URL}${path}`;
+
+    const ogLocale = i18n.language === 'ar' ? 'ar_AR' : i18n.language === 'ur' ? 'ur_PK' : 'en_US';
 
     return (
         <Helmet>
+            <html lang={i18n.language} dir={i18n.dir()} />
             <title>{fullTitle}</title>
             <meta name="description" content={description} />
             <link rel="canonical" href={canonicalUrl} />
@@ -37,7 +48,7 @@ export function SEO({
             <meta property="og:url" content={canonicalUrl} />
             <meta property="og:image" content={ogImage} />
             <meta property="og:site_name" content={SITE_NAME} />
-            <meta property="og:locale" content="en_US" />
+            <meta property="og:locale" content={ogLocale} />
 
             {/* JSON-LD Structured Data */}
             <script type="application/ld+json">
