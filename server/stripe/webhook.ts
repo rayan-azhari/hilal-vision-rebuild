@@ -1,3 +1,4 @@
+import { setCorsHeaders } from "../../server/_cors.js";
 import Stripe from "stripe";
 import { createClerkClient } from "@clerk/backend";
 import { upsertStripeCustomer, getStripeCustomerByStripeId } from "../../server/db.js";

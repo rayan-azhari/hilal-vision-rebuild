@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "crypto";
 import { createClerkClient } from "@clerk/backend";
 import type { IncomingMessage, ServerResponse } from "http";
+import { setCorsHeaders } from "../../server/_cors.js";
 
 function safeCompare(a: string, b: string): boolean {
     try {

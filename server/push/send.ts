@@ -13,7 +13,7 @@ import { getDb } from "../../server/db.js";
 import { pushTokens } from "../../drizzle/schema.js";
 import { inArray } from "drizzle-orm";
 import { ENV } from "../../server/_core/env.js";
-import { setCorsHeaders } from "../_cors.js";
+import { setCorsHeaders } from "../../server/_cors.js";
 
 function safeCompare(a: string, b: string): boolean {
     try {

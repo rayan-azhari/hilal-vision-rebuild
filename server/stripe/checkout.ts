@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { createClerkClient, verifyToken } from "@clerk/backend";
-import { setCorsHeaders } from "../_cors.js";
+import { setCorsHeaders } from "../../server/_cors.js";
 import type { IncomingMessage, ServerResponse } from "http";
 
 export const config = {

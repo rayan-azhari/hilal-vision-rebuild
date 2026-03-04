@@ -14,7 +14,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import { ENV } from "../../server/_core/env.js";
 import { getUmmAlQuraHijri, getMoonPhaseInfo, predictLunarEclipse } from "../../shared/astronomy.js";
-import { setCorsHeaders } from "../_cors.js";
+import { setCorsHeaders } from "../../server/_cors.js";
 import { Redis } from "@upstash/redis";
 
 // Use Vercel's auto-provisioned production URL env var; fall back to the canonical domain.
