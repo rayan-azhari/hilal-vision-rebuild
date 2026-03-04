@@ -44,9 +44,9 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  // On native, navigate to the sign-in route so Clerk modal can open.
-  // On web, Clerk's components handle auth before this typically fires.
-  window.location.href = Capacitor.isNativePlatform() ? "/sign-in" : "/sign-in";
+  // On native, navigate to the Hosted URL so the user can sign in.
+  // On web, redirect to root so the modal triggers.
+  window.location.href = Capacitor.isNativePlatform() ? "https://moon-dashboard-one.vercel.app" : "/";
 };
 
 const isTransientServerError = (err: unknown) =>

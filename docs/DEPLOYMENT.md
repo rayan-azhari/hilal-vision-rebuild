@@ -254,3 +254,7 @@ npx cap sync ios
 **API returns 404**: Verify `vercel.json` rewrites are correct and `api/trpc/[trpc].ts` exists.
 
 **Tiles not loading**: The Leaflet map requires CARTO CDN access. Ensure no CSP headers block `*.basemaps.cartocdn.com`.
+
+**Waitlist / New Database Features fail silently or crash router**: Ensure `pnpm db:push` has been run against the production MySQL database to deploy newly added tables (e.g. `emailSignups`).
+
+**Android App SignIn looping or showing "Site cannot be reached"**: Check `client/src/components/Layout.tsx` and `client/src/main.tsx`. Capacitor WebViews run on `localhost` which Google OAuth rejects as a valid redirect URI. Ensure `fallbackRedirectUrl` in Clerk `<SignInButton>` is set to the Vercel hosted domain (`https://moon-dashboard-one.vercel.app`) on Native platforms via `Capacitor.isNativePlatform()`.

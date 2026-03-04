@@ -12,6 +12,7 @@ import { LocationSearch } from "./LocationSearch";
 import { AutoDetectButton } from "./AutoDetectButton";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useProTier } from "@/contexts/ProTierContext";
+import { Capacitor } from "@capacitor/core";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -332,7 +333,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <SignedOut>
               <div className="hidden sm:block">
-                <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
+                <SignInButton
+                  mode="modal"
+                  fallbackRedirectUrl={Capacitor.isNativePlatform() ? "https://moon-dashboard-one.vercel.app" : "/"}
+                  signUpFallbackRedirectUrl={Capacitor.isNativePlatform() ? "https://moon-dashboard-one.vercel.app" : "/"}
+                >
                   <button
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all mx-1 whitespace-nowrap flex-shrink-0"
                     style={{
@@ -448,7 +453,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </div>
                   </SignedIn>
                   <SignedOut>
-                    <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
+                    <SignInButton
+                      mode="modal"
+                      fallbackRedirectUrl={Capacitor.isNativePlatform() ? "https://moon-dashboard-one.vercel.app" : "/"}
+                      signUpFallbackRedirectUrl={Capacitor.isNativePlatform() ? "https://moon-dashboard-one.vercel.app" : "/"}
+                    >
                       <button
                         className="py-3.5 rounded-2xl text-[13px] font-bold transition-colors w-full flex items-center justify-center"
                         style={{ color: "var(--space)", background: "var(--gold)" }}

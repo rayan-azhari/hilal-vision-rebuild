@@ -54,7 +54,19 @@
 
 ---
 
+### Round 42 — Maintenance & Fixes
+- [x] **Waitlist Sign-up:** Synced `emailSignups` table schema to production database via `pnpm db:push` to resolve router crash on duplicate key update.
+- [x] **Android Auth Loopback:** Fixed Clerk `<SignInButton>` redirect issue on Capacitor (`localhost`) by dynamically overriding `fallbackRedirectUrl` to Vercel hosted URL.
+
+---
+
 ## Future Backlog
+
+### Infrastructure Improvements
+- [ ] **Connection Pooling:** Migrate Drizzle MySQL2 to HTTP Serverless proxy (PlanetScale/Railway) to avoid Vercel connection pool exhaustion.
+- [ ] **Automated Migrations:** Automate `pnpm db:push` in the CI/CD pipeline/Vercel build step.
+- [ ] **Native Deep Linking:** Implement true native deep linking using `@capacitor/browser` for Clerk OAuth callbacks to avoid bouncing out to the system browser.
+- [ ] **Redis Rate Limiter Edge Optimization:** Move the Upstash Redis fallback to a persistent edge database instead of Node's in-memory Map to survive Vercel cold starts.
 
 ### Mobile & Stores
 - [ ] iOS TestFlight → App Store Connect review submission
