@@ -1,5 +1,6 @@
 import { systemRouter } from "./_core/systemRouter.js";
 import { publicProcedure, router } from "./_core/trpc.js";
+import { TRPCError } from "@trpc/server";
 import { archiveRouter } from "./routers/archive.js";
 import { weatherRouter } from "./routers/weather.js";
 import { notificationsRouter } from "./routers/notifications.js";
@@ -82,6 +83,23 @@ function getRateLimiter(): IRateLimiter {
     _ratelimit = localFallbackLimiter;
   }
   return _ratelimit || localFallbackLimiter;
+}
+
+// ─── Lazy Redis for general-purpose use (waitlist, etc.) ─────────────────────
+let _redis: Redis | null = null;
+
+function getRedis(): Redis | null {
+  if (_redis) return _redis;
+  if (!ENV.upstashRedisRestUrl || !ENV.upstashRedisRestToken) return null;
+  try {
+    _redis = new Redis({
+      url: ENV.upstashRedisRestUrl,
+      token: ENV.upstashRedisRestToken,
+    });
+  } catch {
+    _redis = null;
+  }
+  return _redis;
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -320,21 +338,16 @@ export const appRouter = router({
     subscribeEmail: publicProcedure
       .input(z.object({ email: z.string().email() }))
       .mutation(async ({ input }) => {
-        // Use Upstash Redis to store waitlist emails (avoids needing a MySQL table)
-        if (!ENV.upstashRedisRestUrl || !ENV.upstashRedisRestToken) {
-          throw new Error("Redis not configured");
+        const redis = getRedis();
+        if (!redis) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable" });
         }
         try {
-          const redis = new Redis({
-            url: ENV.upstashRedisRestUrl,
-            token: ENV.upstashRedisRestToken,
-          });
-          // SADD automatically deduplicates — adding an existing email is a no-op
           await redis.sadd("waitlist:emails", input.email.toLowerCase().trim());
           return { success: true };
         } catch (error: any) {
           console.error("[Marketing] Failed to save waitlist email:", error);
-          throw new Error("Failed to subscribe email", { cause: error });
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to subscribe. Please try again." });
         }
       }),
   }),
