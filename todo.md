@@ -57,6 +57,8 @@
 ### Round 42 — Maintenance & Fixes
 - [x] **Waitlist Sign-up:** Synced `emailSignups` table schema to production database via `pnpm db:push` to resolve router crash on duplicate key update.
 - [x] **Android Auth Loopback:** Fixed Clerk `<SignInButton>` redirect issue on Capacitor (`localhost`) by dynamically overriding `fallbackRedirectUrl` to Vercel hosted URL.
+- [x] **SW API Bypass:** Removed Service Worker interception of `/api/` routes — eliminates synthetic offline errors and superjson format mismatches during Vercel cold starts.
+- [x] **Client Error Re-wrapping Removal:** Removed duplicate non-JSON error wrapping from `main.tsx` — server handler (`api/index.ts`) is now the single source of truth for tRPC error formatting.
 
 ---
 

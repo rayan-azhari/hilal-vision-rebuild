@@ -251,10 +251,14 @@ npx cap sync ios
 
 **Build fails**: Ensure `npx vite build` works locally. Check that all `import` paths resolve.
 
-**API returns 404**: Verify `vercel.json` rewrites are correct and `api/trpc/[trpc].ts` exists.
+**API returns 404**: Verify `vercel.json` rewrites are correct and `api/index.ts` exists.
 
 **Tiles not loading**: The Leaflet map requires CARTO CDN access. Ensure no CSP headers block `*.basemaps.cartocdn.com`.
 
 **Waitlist / New Database Features fail silently or crash router**: Ensure `pnpm db:push` has been run against the production MySQL database to deploy newly added tables (e.g. `emailSignups`).
 
 **Android App SignIn looping or showing "Site cannot be reached"**: Check `client/src/components/Layout.tsx` and `client/src/main.tsx`. Capacitor WebViews run on `localhost` which Google OAuth rejects as a valid redirect URI. Ensure `fallbackRedirectUrl` in Clerk `<SignInButton>` is set to the Vercel hosted domain (`https://moon-dashboard-one.vercel.app`) on Native platforms via `Capacitor.isNativePlatform()`.
+
+**"Unable to transform response from server" (Sentry)**: This occurs when a non-JSON error response reaches the tRPC client and superjson cannot deserialize it. The server handler (`api/index.ts`) catches unhandled errors and returns properly formatted `{ error: { json: { ... } } }` responses. **Do NOT** add client-side error re-wrapping in `main.tsx` — this creates a second location that must match superjson's exact format, and any mismatch crashes the client. The Service Worker (`sw.js`) also bypasses `/api/` routes entirely to avoid a third format-sync point.
+
+**"You appear to be offline" on Android (Sentry)**: Previously caused by the Service Worker intercepting API calls with a timeout — during Vercel cold starts the timeout would expire and the SW would return a synthetic offline error. Fixed by making the SW bypass all `/api/` requests (they pass straight through to the network).

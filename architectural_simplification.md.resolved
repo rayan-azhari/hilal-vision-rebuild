@@ -1,0 +1,106 @@
+# Architectural Simplification — Reducing Failure Points
+
+## The Core Problem
+
+Hilal Vision has **3 separate layers** that each independently try to craft tRPC-compatible JSON error responses, and they must all produce **exactly the same format** or the client crashes. This is the #1 source of your Sentry errors.
+
+```mermaid
+flowchart LR
+    A[Client tRPC] -->|request| B[Service Worker]
+    B -->|timeout?| C{Offline?}
+    C -->|yes| D["SW crafts fake JSON response"]
+    C -->|no| E[Vercel Serverless]
+    E -->|crash?| F{500 HTML?}
+    F -->|yes| G["main.tsx crafts fake JSON response"]
+    F -->|no| H["api/index.ts crafts JSON error"]
+    D --> I["superjson.deserialize()"]
+    G --> I
+    H --> I
+    I -->|format mismatch| J["❌ Unable to transform response"]
+```
+
+**Three places craft synthetic tRPC errors, and if ANY ONE gets the JSON shape wrong, the client crashes:**
+
+| Layer | File | Error it produces |
+|-------|------|-------------------|
+| Service Worker | [sw.js](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/client/public/sw.js) line 142 | `{ error: { json: { message, code, data } } }` ✅ |
+| Client fetch wrapper | [main.tsx](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/client/src/main.tsx) line 110 | `{ error: { message, code, data } }` ❌ **missing [.json](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/vercel.json)** |
+| Server catch handler | [api/index.ts](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/api/index.ts) line 58 | `{ error: { json: { message, code, data } } }` ✅ |
+
+> [!CAUTION]
+> The [main.tsx](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/client/src/main.tsx) fallback was missing the [.json](file:///c:/Users/rayan/Desktop/Antigravity%20workspaces/Moon-dashboard/vercel.json) wrapper — this is the direct cause of the **"Unable to transform response from server"** Sentry error on `moonsighting.live`. We patched this in the last commit, but the fundamental problem is having **3 places** that need to be kept in sync manually.
+
+---
+
+## The 5 Failure Chains (Ranked by Impact)
+
+### 1. 🔴 The superjson "Triple Format" Trap (CRITICAL)
+**Problem:** Three independent code locations must produce identically-shaped JSON for the tRPC client to parse.
+**Simplification:** Eliminate 2 of the 3 layers by:
+- **Remove the SW interception of `/api/` calls entirely.** API data should never be cached — it's always dynamic (sighting feeds, elevation, weather). The SW should only cache static assets (JS, CSS, fonts, tiles, images).
+- **Move the `main.tsx` non-JSON fallback logic INTO the `api/index.ts` server handler** where it belongs. The server already catches crashes at line 53. The client shouldn't need to re-wrap responses.
+
+**Result:** Only 1 place produces error JSON → 0 format mismatch risk.
+
+---
+
+### 2. 🔴 Capacitor Dual-Runtime Authentication (CRITICAL)
+**Problem:** The app runs in two fundamentally different environments (browser vs. Android WebView), and auth behaves differently in each:
+- Web: Clerk modal opens inline, cookies handle session
+- Android: Clerk modal opens in system browser, redirects back to `https://localhost` (unreachable)
+
+**Current "fix":** Redirect Android users to the Vercel hosted site entirely. This **abandons** the native app experience — users sign in on a website, not in their app.
+
+**Simplification:** Pick ONE auth strategy for native:
+- **Option A (Recommended):** Use `@capacitor/browser` to open an in-app browser tab to Clerk's hosted sign-in page, then capture the session token via a deep link callback (`hilalvision://auth-callback`). This keeps auth inside the app.
+- **Option B:** Use Clerk's `getToken()` headless API to implement a fully custom sign-in UI that never opens a browser at all.
+
+---
+
+### 3. 🟡 MySQL Connection Pool Exhaustion (HIGH)
+**Problem:** `db.ts` creates a `mysql2` connection pool with `connectionLimit: 3`. Under load, Vercel spins up N lambda instances, each with its own pool → `3 × N` connections. Railway Free Tier has a ~20 connection limit.
+
+**Simplification:** Replace `mysql2` pool with **PlanetScale's HTTP serverless driver** (`@planetscale/database`) or **Drizzle's HTTP proxy mode**. These use stateless HTTP requests instead of persistent TCP connections → **0 pool management, 0 connection exhaustion**.
+
+---
+
+### 4. 🟡 Manual Schema Deployment (MEDIUM)
+**Problem:** `pnpm db:push` must be run manually. Forgetting it → the waitlist crash you experienced.
+
+**Simplification:** Add to `vercel.json` build command:
+```json
+"buildCommand": "npx vite build && npx drizzle-kit push"
+```
+This ensures every Vercel deploy automatically pushes schema changes.
+
+---
+
+### 5. 🟢 Service Worker Caching API Responses (LOW)
+**Problem:** The SW caches API responses with a network-first strategy and a timeout. If Vercel cold-starts take >15s, the SW returns a synthetic offline error. The Android WebView then shows "You appear to be offline" even though the device has connectivity.
+
+**Simplification:** **Stop caching API calls in the SW.** Let them pass through directly:
+
+```diff
+ // In sw.js fetch handler:
+- if (url.pathname.startsWith("/api/")) {
+-     event.respondWith(networkFirst(event.request, API_CACHE, 15000));
+-     return;
+- }
++ // API calls bypass the service worker entirely
++ if (url.pathname.startsWith("/api/")) return;
+```
+
+---
+
+## Recommended Action Plan (Priority Order)
+
+| # | Action | Effort | Impact | Files Changed |
+|---|--------|--------|--------|---------------|
+| 1 | Remove SW interception of `/api/` routes | 5 min | 🔴 Eliminates offline ghost errors | `sw.js` |
+| 2 | Remove `main.tsx` client-side error re-wrapping | 10 min | 🔴 Eliminates transform crashes | `main.tsx` |
+| 3 | Auto-run `drizzle-kit push` in Vercel build | 2 min | 🟡 Prevents future DB drift | `vercel.json` |
+| 4 | Migrate to HTTP-based DB driver | 2 hrs | 🟡 Eliminates connection pooling | `db.ts`, `package.json` |
+| 5 | Implement deep link auth for Capacitor | 4 hrs | 🔴 Fixes Android sign-in properly | `Layout.tsx`, `capacitor.config.ts`, Android manifest |
+
+> [!IMPORTANT]
+> **Items 1 and 2 alone will fix both active Sentry errors.** They can be done in under 15 minutes and pushed immediately.

@@ -60,11 +60,10 @@ self.addEventListener("fetch", (event) => {
     // Skip chrome-extension and other non-http(s) requests
     if (!url.protocol.startsWith("http")) return;
 
-    // API calls: Network-first with cache fallback
-    if (url.pathname.startsWith("/api/")) {
-        event.respondWith(networkFirst(event.request, API_CACHE, 15000));
-        return;
-    }
+    // API calls: bypass service worker entirely — dynamic data should never
+    // be cached or timeout-wrapped. Eliminates synthetic offline errors and
+    // superjson format mismatch crashes during Vercel cold starts.
+    if (url.pathname.startsWith("/api/")) return;
 
     // Map tiles: Cache-first
     if (url.hostname.includes("basemaps.cartocdn.com")) {

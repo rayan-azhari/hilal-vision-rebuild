@@ -80,51 +80,17 @@ const trpcClient = trpc.createClient({
       url: `${API_BASE}/api/trpc`,
       transformer: superjson,
       async fetch(input, init) {
-        const res = await globalThis.fetch(input, {
+        // Native WebView origin is https://localhost, which is cross-origin vs the
+        // Vercel API. "include" + "Allow-Origin: *" is a CORS violation that causes
+        // every request to fail with "You appear to be offline". Native auth goes
+        // through Clerk tokens/headers, not browser cookies, so "omit" is correct.
+        return globalThis.fetch(input, {
           ...(init ?? {}),
-          // Native WebView origin is https://localhost, which is cross-origin vs the
-          // Vercel API. "include" + "Allow-Origin: *" is a CORS violation that causes
-          // every request to fail with "You appear to be offline". Native auth goes
-          // through Clerk tokens/headers, not browser cookies, so "omit" is correct.
           credentials: Capacitor.isNativePlatform() ? "omit" : "include",
         });
-
-        // Vercel sometimes returns plain text error pages (e.g. "A server error
-        // occurred") when the serverless function crashes on cold start. Wrap
-        // these in a JSON error response so the tRPC client doesn't choke on
-        // invalid JSON parsing. The response array must have one entry per
-        // procedure in the batch, otherwise tRPC throws "Missing result".
-        const ct = res.headers.get("content-type") ?? "";
-        if (!res.ok && !ct.includes("application/json")) {
-          const text = await res.text();
-
-          // Count procedures in batch: URL path is /api/trpc/proc1,proc2,...
-          let batchSize = 1;
-          try {
-            const url = typeof input === "string" ? input : (input as Request).url;
-            const pathname = new URL(url, window.location.origin).pathname;
-            const procs = pathname.replace(/^.*\/trpc\//, "");
-            if (procs) batchSize = procs.split(",").length;
-          } catch { /* default to 1 */ }
-
-          const errorEntry = {
-            error: {
-              json: {
-                message: text || "Server error",
-                code: -32603,
-                data: { code: "INTERNAL_SERVER_ERROR", httpStatus: res.status, path: null },
-              }
-            },
-          };
-          const body = Array.from({ length: batchSize }, () => errorEntry);
-
-          return new Response(
-            JSON.stringify(body),
-            { status: res.status, headers: { "content-type": "application/json" } },
-          );
-        }
-
-        return res;
+        // NOTE: Non-JSON error wrapping (for Vercel cold-start HTML 500s) is handled
+        // server-side in api/index.ts catch block. Do NOT re-wrap here — doing so
+        // creates a second location that must match superjson's expected format.
       },
     }),
   ],
