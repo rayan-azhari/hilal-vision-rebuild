@@ -230,31 +230,10 @@ export const appRouter = router({
         const jitterLat = Math.round((input.lat + (Math.random() * 0.01 - 0.005)) * 100) / 100;
         const jitterLng = Math.round((input.lng + (Math.random() * 0.01 - 0.005)) * 100) / 100;
 
-        let imageUrl: string | undefined = undefined;
+        // Image upload via Manus Forge storage was removed (legacy).
+        // Sighting reports are still fully submitted without photos.
+        const imageUrl: string | undefined = undefined;
 
-        // Process image upload if provided
-        if (input.imageBase64) {
-          try {
-            // Strip the data:image/[type];base64, prefix if present
-            const matches = input.imageBase64.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
-            const base64Data = matches ? matches[2] : input.imageBase64;
-            const mimeType = matches ? `image/${matches[1]}` : "image/jpeg";
-            const buffer = Buffer.from(base64Data, "base64");
-
-            // Upload via storage proxy
-            // Note: need to import { storagePut } from "./storage.js"; at top level
-            const { storagePut } = await import("./storage.js");
-            const upload = await storagePut(
-              `observations/${Date.now()}-${ctx.user?.id || "anon"}.jpg`,
-              buffer,
-              mimeType
-            );
-            imageUrl = upload.url;
-          } catch (err) {
-            console.error("Failed to upload siding image:", err);
-            // We can still proceed with submitting the text report, just without the image
-          }
-        }
 
         await db.insert(observationReports).values({
           userId: ctx.user?.id,
