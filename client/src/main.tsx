@@ -109,9 +109,11 @@ const trpcClient = trpc.createClient({
 
           const errorEntry = {
             error: {
-              message: text || "Server error",
-              code: -32603,
-              data: { code: "INTERNAL_SERVER_ERROR", httpStatus: res.status, path: null },
+              json: {
+                message: text || "Server error",
+                code: -32603,
+                data: { code: "INTERNAL_SERVER_ERROR", httpStatus: res.status, path: null },
+              }
             },
           };
           const body = Array.from({ length: batchSize }, () => errorEntry);

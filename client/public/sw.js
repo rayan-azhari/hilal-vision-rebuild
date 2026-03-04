@@ -62,7 +62,7 @@ self.addEventListener("fetch", (event) => {
 
     // API calls: Network-first with cache fallback
     if (url.pathname.startsWith("/api/")) {
-        event.respondWith(networkFirst(event.request, API_CACHE, 5000));
+        event.respondWith(networkFirst(event.request, API_CACHE, 15000));
         return;
     }
 
@@ -80,7 +80,7 @@ self.addEventListener("fetch", (event) => {
 
     // Open-Meteo Weather: Network-first (short cache)
     if (url.hostname === "api.open-meteo.com") {
-        event.respondWith(networkFirst(event.request, API_CACHE, 5000));
+        event.respondWith(networkFirst(event.request, API_CACHE, 15000));
         return;
     }
 
