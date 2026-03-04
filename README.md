@@ -36,7 +36,7 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 - **Design System:** Breezy Weather Design (`.breezy-card`, Space-Navy/Gold themes)
 - **Mapping & Scientific Viz:** Leaflet, Globe.gl, Three.js, astronomy-engine
 - **Backend:** Node.js, Express, tRPC (Type-safe API)
-- **Database:** Drizzle ORM (MySQL - `observation_reports` table)
+- **Database:** Drizzle ORM (MySQL via Railway)
 - **Authentication:** Clerk
 - **Rate Limiting:** Upstash Redis
 - **i18n:** react-i18next + i18next-browser-languagedetector
@@ -89,13 +89,12 @@ A precision astronomical platform for predicting and visualizing Islamic crescen
 ```bash
 # Install dependencies (MUST use pnpm)
 pnpm install
-# or if pnpm is not installed globally:
-npx pnpm install
 
 # Start the development server
 pnpm dev
 
-# Database migration (optional, for telemetry)
+# Database Setup (Railway MySQL recommended)
+# Add your DATABASE_URL to .env.local then run:
 pnpm db:push
 
 # Production build (self-hosted)

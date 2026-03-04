@@ -8,24 +8,40 @@ Hilal Vision deploys to Vercel as a **hybrid application**:
 | -------- | ------------------- | -------------------------------------------------- |
 | Frontend | React 19 + Vite     | Static build → CDN (`dist/public/`)                |
 | API      | tRPC + Express      | Node.js serverless function (`api/trpc/[trpc].ts`) |
-| Database | Drizzle ORM + MySQL | External (optional - only needed for telemetry)    |
+| Database | Drizzle ORM + MySQL | External — Recommended: **Railway** (Free tier)    |
 
 ## Quick Start
 
 ```bash
-# 1. Push to GitHub
+# 1. Set up a free MySQL database on Railway (see section below)
+
+# 2. Push to GitHub
 git add -u && git commit -m "deploy" && git push
 
-# 2. Import at https://vercel.com/new
+# 3. Import at https://vercel.com/new
 #    Vercel auto-detects settings from vercel.json
 
-# 3. Set environment variables in Vercel UI:
-#    DATABASE_URL - MySQL connection string
+# 4. Set environment variables in Vercel UI:
+#    DATABASE_URL - Railway Public MySQL connection string
 #    UPSTASH_REDIS_REST_URL - Upstash Redis URL
 #    UPSTASH_REDIS_REST_TOKEN - Upstash Redis Token
 #    CLERK_SECRET_KEY - Clerk backend secret
 #    VITE_CLERK_PUBLISHABLE_KEY - Clerk frontend key
 ```
+
+## Database Setup (Railway)
+
+Hilal Vision requires a MySQL database to persistently store sighting reports, push notification tokens, and waitlist signups. The easiest free option is **Railway**:
+
+1. Go to [railway.com/new/database](https://railway.com/new/database)
+2. Click **MySQL** and sign in with GitHub.
+3. Once created, click on the MySQL service → **Variables** tab.
+4. Copy the **`MYSQL_PUBLIC_URL`** (it will look like `mysql://root:password@monorail.proxy.rlwy.net:PORT/railway`).
+5. Add this as `DATABASE_URL` in your `.env.local` and in Vercel environment variables.
+6. **Run migrations locally** to create the tables:
+   ```bash
+   pnpm db:push
+   ```
 
 ## Configuration Files
 
@@ -88,7 +104,7 @@ The serverless function wraps the existing tRPC router using `@trpc/server/adapt
 
 | Variable                     | Required | Description                                                           |
 | ---------------------------- | -------- | --------------------------------------------------------------------- |
-| `DATABASE_URL`               | No       | MySQL connection string. Without it, telemetry data is not persisted. |
+| `DATABASE_URL`               | Yes      | MySQL connection string (from Railway). Required for sightings, waitlist, and push tokens. |
 | `NODE_ENV`                   | Auto     | Set to `production` by Vercel                                         |
 | `UPSTASH_REDIS_REST_URL`     | Yes      | Upstash Redis connection URL                                          |
 | `UPSTASH_REDIS_REST_TOKEN`   | Yes      | Upstash Redis token                                                   |
