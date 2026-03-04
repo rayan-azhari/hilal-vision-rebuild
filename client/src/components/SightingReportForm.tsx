@@ -10,6 +10,7 @@ import { useUser, SignInButton } from "@clerk/clerk-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { AutoDetectButton } from "@/components/AutoDetectButton";
 import { parse as parseExif } from "exifr";
+import { getLoginUrl } from "@/const";
 
 export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
     const { isSignedIn } = useUser();
@@ -140,7 +141,7 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 <p className="text-sm text-muted-foreground">
                     You must be signed in to submit a sighting report. This helps us ensure data quality and avoid spam.
                 </p>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" fallbackRedirectUrl={getLoginUrl()} signUpFallbackRedirectUrl={getLoginUrl()}>
                     <Button size="lg" className="w-full">Sign in to Report</Button>
                 </SignInButton>
             </div>

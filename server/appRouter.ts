@@ -5,7 +5,7 @@ import { weatherRouter } from "./routers/weather.js";
 import { notificationsRouter } from "./routers/notifications.js";
 import { z } from "zod";
 import { getDb } from "./db.js";
-import { observationReports, emailSignups } from "../drizzle/schema.js";
+import { observationReports } from "../drizzle/schema.js";
 import { desc, count } from "drizzle-orm";
 import { computeSunMoonAtSunset } from "../shared/astronomy.js";
 
@@ -320,21 +320,19 @@ export const appRouter = router({
     subscribeEmail: publicProcedure
       .input(z.object({ email: z.string().email() }))
       .mutation(async ({ input }) => {
-        const db = await getDb();
-        if (!db) {
-          throw new Error("Database not available");
+        // Use Upstash Redis to store waitlist emails (avoids needing a MySQL table)
+        if (!ENV.upstashRedisRestUrl || !ENV.upstashRedisRestToken) {
+          throw new Error("Redis not configured");
         }
-
         try {
-          await db.insert(emailSignups).values({
-            email: input.email,
+          const redis = new Redis({
+            url: ENV.upstashRedisRestUrl,
+            token: ENV.upstashRedisRestToken,
           });
+          // SADD automatically deduplicates — adding an existing email is a no-op
+          await redis.sadd("waitlist:emails", input.email.toLowerCase().trim());
           return { success: true };
         } catch (error: any) {
-          // Check for MySQL unique constraint violation error code (ER_DUP_ENTRY)
-          if (error?.code === "ER_DUP_ENTRY" || error?.message?.includes("Duplicate entry")) {
-            return { success: true }; // Treat duplicates as successful silently
-          }
           console.error("[Marketing] Failed to save waitlist email:", error);
           throw new Error("Failed to subscribe email", { cause: error });
         }

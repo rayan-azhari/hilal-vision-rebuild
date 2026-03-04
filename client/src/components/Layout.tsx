@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SightingReportForm } from "./SightingReportForm";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { getLoginUrl } from "@/const";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
 import { LocationSearch } from "./LocationSearch";
 import { AutoDetectButton } from "./AutoDetectButton";
@@ -331,7 +332,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <SignedOut>
               <div className="hidden sm:block">
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" fallbackRedirectUrl={getLoginUrl()} signUpFallbackRedirectUrl={getLoginUrl()}>
                   <button
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all mx-1 whitespace-nowrap flex-shrink-0"
                     style={{
@@ -447,7 +448,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </div>
                   </SignedIn>
                   <SignedOut>
-                    <SignInButton mode="modal">
+                    <SignInButton mode="modal" fallbackRedirectUrl={getLoginUrl()} signUpFallbackRedirectUrl={getLoginUrl()}>
                       <button
                         className="py-3.5 rounded-2xl text-[13px] font-bold transition-colors w-full flex items-center justify-center"
                         style={{ color: "var(--space)", background: "var(--gold)" }}
