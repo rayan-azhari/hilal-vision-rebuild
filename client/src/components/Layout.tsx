@@ -12,8 +12,6 @@ import { LocationSearch } from "./LocationSearch";
 import { AutoDetectButton } from "./AutoDetectButton";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useProTier } from "@/contexts/ProTierContext";
-import { Capacitor } from "@capacitor/core";
-import { getLoginUrl } from "@/const";
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -334,9 +332,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <SignedOut>
               <div className="hidden sm:block">
-                {Capacitor.isNativePlatform() ? (
+                <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
                   <button
-                    onClick={() => window.location.href = getLoginUrl()}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all mx-1 whitespace-nowrap flex-shrink-0"
                     style={{
                       background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
@@ -345,19 +342,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   >
                     Sign In
                   </button>
-                ) : (
-                  <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
-                    <button
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all mx-1 whitespace-nowrap flex-shrink-0"
-                      style={{
-                        background: "color-mix(in oklch, var(--foreground) 10%, transparent)",
-                        color: "var(--foreground)",
-                      }}
-                    >
-                      Sign In
-                    </button>
-                  </SignInButton>
-                )}
+                </SignInButton>
               </div>
             </SignedOut>
 
@@ -463,25 +448,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </div>
                   </SignedIn>
                   <SignedOut>
-                    {Capacitor.isNativePlatform() ? (
+                    <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
                       <button
                         className="py-3.5 rounded-2xl text-[13px] font-bold transition-colors w-full flex items-center justify-center"
                         style={{ color: "var(--space)", background: "var(--gold)" }}
-                        onClick={() => { window.location.href = getLoginUrl(); setMobileOpen(false); }}
+                        onClick={() => setMobileOpen(false)}
                       >
                         Sign In / Register
                       </button>
-                    ) : (
-                      <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
-                        <button
-                          className="py-3.5 rounded-2xl text-[13px] font-bold transition-colors w-full flex items-center justify-center"
-                          style={{ color: "var(--space)", background: "var(--gold)" }}
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          Sign In / Register
-                        </button>
-                      </SignInButton>
-                    )}
+                    </SignInButton>
                   </SignedOut>
                 </div>
               </div>

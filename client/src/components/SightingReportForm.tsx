@@ -10,8 +10,6 @@ import { useUser, SignInButton } from "@clerk/clerk-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { AutoDetectButton } from "@/components/AutoDetectButton";
 import { parse as parseExif } from "exifr";
-import { Capacitor } from "@capacitor/core";
-import { getLoginUrl } from "@/const";
 
 
 export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -143,13 +141,9 @@ export function SightingReportForm({ onSuccess }: { onSuccess?: () => void }) {
                 <p className="text-sm text-muted-foreground">
                     You must be signed in to submit a sighting report. This helps us ensure data quality and avoid spam.
                 </p>
-                {Capacitor.isNativePlatform() ? (
-                    <Button size="lg" className="w-full" onClick={(e) => { e.preventDefault(); window.location.href = getLoginUrl(); }}>Sign in to Report</Button>
-                ) : (
-                    <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
-                        <Button size="lg" className="w-full">Sign in to Report</Button>
-                    </SignInButton>
-                )}
+                <SignInButton mode="modal" fallbackRedirectUrl="/" signUpFallbackRedirectUrl="/">
+                    <Button size="lg" className="w-full">Sign in to Report</Button>
+                </SignInButton>
             </div>
         );
     }
