@@ -2,7 +2,6 @@ import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from '@shared/const';
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context.js";
-import { ENV } from "./env.js";
 
 const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
@@ -27,25 +26,4 @@ const requireUser = t.middleware(async opts => {
 });
 
 export const protectedProcedure = t.procedure.use(requireUser);
-
-const requireAdmin = t.middleware(async opts => {
-  const { ctx, next } = opts;
-
-  if (!ctx.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
-  }
-
-  if (!ENV.ownerOpenId || ctx.user.id !== ENV.ownerOpenId) {
-    throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
-  }
-
-  return next({
-    ctx: {
-      ...ctx,
-      user: ctx.user,
-    },
-  });
-});
-
-export const adminProcedure = t.procedure.use(requireAdmin);
 export const createCallerFactory = t.createCallerFactory;
