@@ -10,7 +10,6 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getLoginUrl } from "./const";
 import "leaflet/dist/leaflet.css";
 import "./index.css";
 import "@/lib/i18n";
@@ -45,7 +44,9 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  window.location.href = getLoginUrl();
+  // On native, navigate to the sign-in route so Clerk modal can open.
+  // On web, Clerk's components handle auth before this typically fires.
+  window.location.href = Capacitor.isNativePlatform() ? "/sign-in" : "/sign-in";
 };
 
 const isTransientServerError = (err: unknown) =>

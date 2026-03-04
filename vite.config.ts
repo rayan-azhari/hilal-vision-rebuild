@@ -27,6 +27,7 @@ export default defineConfig({
     tailwindcss(),
     Sitemap({
       hostname: "https://moonsighting.live",
+      outDir: path.resolve(import.meta.dirname, "dist/public"),
       dynamicRoutes: [
         "/",
         "/globe",
