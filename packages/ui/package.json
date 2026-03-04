@@ -1,0 +1,16 @@
+{
+    "name": "@hilal/ui",
+    "version": "1.0.0",
+    "private": true,
+    "exports": {
+        ".": "./src/index.ts",
+        "./tokens": "./src/tokens/index.ts"
+    },
+    "scripts": {
+        "lint": "eslint ."
+    },
+    "devDependencies": {
+        "typescript": "^5.5.0",
+        "tailwindcss": "4.1.14"
+    }
+}

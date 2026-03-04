@@ -1,0 +1,17 @@
+{
+    "name": "@hilal/types",
+    "version": "1.0.0",
+    "private": true,
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "zod": "^4.1.12"
+    },
+    "devDependencies": {
+        "typescript": "^5.5.0"
+    }
+}

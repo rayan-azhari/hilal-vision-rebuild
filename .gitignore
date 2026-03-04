@@ -1,12 +1,1 @@
-node_modules/
-dist/
-.env
-.env.*
-.DS_Store
-package-lock.json
-.vercel
-.env*.local
-
-# Firebase service account keys (NEVER commit these)
-*-firebase-adminsdk-*.json
-firebase-service-account.json
+node_modules

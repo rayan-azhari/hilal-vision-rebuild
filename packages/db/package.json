@@ -1,0 +1,21 @@
+{
+    "name": "@hilal/db",
+    "version": "1.0.0",
+    "private": true,
+    "exports": {
+        ".": "./src/schema.ts"
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "db:push": "drizzle-kit push",
+        "db:studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "drizzle-orm": "^0.44.5",
+        "@neondatabase/serverless": "^0.9.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.5.0",
+        "drizzle-kit": "^0.31.4"
+    }
+}
