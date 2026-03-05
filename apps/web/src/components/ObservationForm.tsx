@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Loader2, CheckCircle2, Upload, Camera } from "lucide-react";
-import { trpc } from "@/server/trpc";
+import { trpc } from "@/lib/trpc";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { AutoDetectButton } from "@/components/AutoDetectButton";

@@ -1,7 +1,6 @@
 import { Calendar, Map, Activity, ArrowRight, Smartphone, Heart, Crown, Moon } from "lucide-react";
 import Link from "next/link";
 import { getMoonPhaseInfo, gregorianToHijri } from "@hilal/astronomy";
-import { MoonGlobe } from "@/components/MoonGlobe";
 
 const FEATURE_DEFS = [
   { href: "/visibility", icon: Map, key: "visibilityMap", title: "Global Visibility Map", desc: "Interactive charts powered by Yallop and Odeh criteria." },
@@ -59,9 +58,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 3D Globe */}
-          <div className="flex-1 w-full max-w-[500px] aspect-square relative z-10 hidden lg:block">
-            <MoonGlobe />
+          {/* 3D Globe Replacement (SSR Safe) */}
+          <div className="flex-1 w-full max-w-[500px] aspect-square relative z-10 hidden lg:flex items-center justify-center">
+            <div className="w-64 h-64 rounded-full relative shadow-[inset_-20px_0_40px_rgba(255,255,255,0.8),_0_0_80px_rgba(255,255,255,0.2)] animate-pulse"
+              style={{ background: "radial-gradient(circle at 30% 30%, transparent 40%, var(--gold) 100%)" }} />
           </div>
 
         </div>

@@ -8,6 +8,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ProTierSync } from "@/components/ProTierSync";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { SightingModal } from "@/components/SightingModal";
+import { TRPCProvider } from "@/components/TRPCProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -62,18 +63,21 @@ export default function RootLayout({
         <body
           className={`${inter.variable} ${outfit.variable} ${amiri.variable} font-sans antialiased`}
         >
-          <ProTierSync />
-          <UpgradeModal />
-          <SightingModal />
-          <I18nProvider>
-            <Header />
-            <main className="min-h-screen pt-16">
-              {children}
-            </main>
-            <Footer />
-          </I18nProvider>
+          <TRPCProvider>
+            <ProTierSync />
+            <UpgradeModal />
+            <SightingModal />
+            <I18nProvider>
+              <Header />
+              <main className="min-h-screen pt-16">
+                {children}
+              </main>
+              <Footer />
+            </I18nProvider>
+          </TRPCProvider>
         </body>
       </html>
     </ClerkProvider>
   );
 }
+
