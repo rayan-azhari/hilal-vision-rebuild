@@ -13,7 +13,7 @@ import { VisibilityDotScale, IlluminationArc, LunarAgeProgress, AzimuthCompass, 
 import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
 import { SkyDomeChart } from "@/components/SkyDomeChart";
 import { PhysicsExplanations } from "@/components/PhysicsExplanations";
-import ProGate from "@/components/ProGate";
+import { ProGate } from "@/components/ProGate";
 
 function formatTime(date: Date | null) {
     if (!date) return "--:--";
