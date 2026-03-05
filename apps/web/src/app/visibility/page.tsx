@@ -1,3 +1,5 @@
+"use client";
+
 import { VisibilityMap } from "@/components/VisibilityMap";
 import { BestTimeCard } from "@/components/BestTimeCard";
 import { useAppStore } from "@/store/useAppStore";

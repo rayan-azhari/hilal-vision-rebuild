@@ -52,7 +52,7 @@ function MoonIllustration({ phase, size = 200 }: { phase: number; size?: number 
     ];
 
     return (
-        <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
+        <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} suppressHydrationWarning>
             <defs>
                 <radialGradient id="moonGlow" cx="50%" cy="30%" r="70%">
                     <stop offset="0%" stopColor="#E5D3B3" stopOpacity="0.9" />
@@ -128,7 +128,7 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
                         className="flex flex-col items-center gap-1 flex-shrink-0"
                         style={{ minWidth: "36px" }}
                     >
-                        <svg viewBox="0 0 28 28" width={28} height={28}>
+                        <svg viewBox="0 0 28 28" width={28} height={28} suppressHydrationWarning>
                             <circle cx={cx} cy={cy} r={r} fill="oklch(0.15 0.02 265)" />
                             <path d={litPath} fill="#C1A87D" opacity="0.85" />
                         </svg>

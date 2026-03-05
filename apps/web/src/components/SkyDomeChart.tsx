@@ -84,7 +84,7 @@ export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props
             </div>
 
             <div className="relative w-full h-72 flex items-center justify-center pt-2 mt-2">
-                <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full h-full drop-shadow-xl" style={{ maxHeight: "100%", filter: "drop-shadow(0 0 20px rgba(0,0,0,0.2))" }}>
+                <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full h-full drop-shadow-xl" style={{ maxHeight: "100%", filter: "drop-shadow(0 0 20px rgba(0,0,0,0.2))" }} suppressHydrationWarning>
                     <defs>
                         <clipPath id="horizonClip">
                             <circle cx={CX} cy={CY} r={R_HORIZON} />

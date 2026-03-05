@@ -15,7 +15,7 @@ export function ProGate({ children, fallback, featureName = "This feature" }: Pr
     const isAdmin = useAppStore((s) => s.isAdmin);
     const setShowUpgradeModal = useAppStore((s) => s.setShowUpgradeModal);
 
-    const TESTING_DISABLE_PRO_GATE = false;
+    const TESTING_DISABLE_PRO_GATE = process.env.NODE_ENV === "development";
     const isPremium = TESTING_DISABLE_PRO_GATE || clerkHasPro || nativeHasPro || isAdmin;
 
     if (isPremium) {
