@@ -273,6 +273,12 @@ importers:
         specifier: ^2.1.19
         version: 2.1.19
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.0.0
+        version: 9.39.3
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.3(jiti@2.6.1)
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
@@ -292,9 +298,15 @@ importers:
         specifier: ^0.44.5
         version: 0.44.7(@neondatabase/serverless@0.9.5)(@types/pg@8.11.6)(@upstash/redis@1.36.3)(expo-sqlite@55.0.10(expo@55.0.4)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(bufferutil@4.1.0)(react@19.2.0))(react@19.2.0))
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.0.0
+        version: 9.39.3
       drizzle-kit:
         specifier: ^0.31.4
         version: 0.31.9
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.3(jiti@2.6.1)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -308,6 +320,12 @@ importers:
         specifier: ^4.1.12
         version: 4.3.6
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.0.0
+        version: 9.39.3
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.3(jiti@2.6.1)
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
