@@ -4,7 +4,8 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: "2023-10-16" as any,
+    // @ts-expect-error - The Stripe SDK's types may require a newer API version string than "2023-10-16", but this version is known to work with the codebase.
+    apiVersion: "2023-10-16",
 });
 
 export async function POST(req: Request) {
@@ -20,8 +21,8 @@ export async function POST(req: Request) {
             signature,
             process.env.STRIPE_WEBHOOK_SECRET || ""
         );
-    } catch (error: any) {
-        return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+    } catch (error: unknown) {
+        return new NextResponse(`Webhook Error: ${error instanceof Error ? error.message : "Unknown error"}`, { status: 400 });
     }
 
     const session = event.data.object as Stripe.Checkout.Session;
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
                 // Donations > $10 unlock `isPatron`
                 const isPatron = !isProPlan && amountTotal >= 1000;
 
-                let publicMetadata: Record<string, any> = {};
+                let publicMetadata: Record<string, unknown> = {};
 
                 if (isProPlan) {
                     publicMetadata = { ...publicMetadata, isPro: true };
@@ -80,8 +81,8 @@ export async function POST(req: Request) {
 
         return new NextResponse("Webhook received successfully", { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[STRIPE_WEBHOOK]", error);
-        return new NextResponse(`Webhook handler failed: ${error.message}`, { status: 500 });
+        return new NextResponse(`Webhook handler failed: ${error instanceof Error ? error.message : "Unknown error"}`, { status: 500 });
     }
 }

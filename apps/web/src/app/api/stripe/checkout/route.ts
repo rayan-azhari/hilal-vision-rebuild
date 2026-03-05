@@ -3,7 +3,8 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: "2023-10-16" as any,
+    // @ts-expect-error - The Stripe SDK's types may require a newer API version string than "2023-10-16", but this version is known to work with the codebase.
+    apiVersion: "2023-10-16",
 });
 
 export async function POST(req: Request) {

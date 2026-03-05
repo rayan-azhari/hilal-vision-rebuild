@@ -8,3 +8,4 @@ export * from "./hijri";
 export * from "./terminator";
 export * from "./bestTime";
 export * from "./eclipse";
+export * from "@hilal/types";

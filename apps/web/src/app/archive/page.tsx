@@ -26,6 +26,19 @@ interface MonthSummary {
     globalZone: VisibilityZone;
 }
 
+interface IcopObservation {
+    city: string;
+    country: string;
+    result: "Seen" | "Not Seen" | "Cloudy";
+    opticalAid: string;
+}
+
+interface IcopMonthData {
+    hijriYear: number;
+    hijriMonth: number;
+    observations: IcopObservation[];
+}
+
 function computeMonthSummary(year: number, month: number): MonthSummary {
     const newMoonDate = hijriToGregorian(year, month, 1);
 
@@ -51,9 +64,9 @@ export default function ArchivePage() {
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     // Fetch ICOP data from static JSON file
-    const [icopData, setIcopData] = useState<any[] | null>(null);
+    const [icopData, setIcopData] = useState<IcopObservation[] | null>(null);
     const [isLoadingIcop, setIsLoadingIcop] = useState(false);
-    const icopCacheRef = useRef<any[] | null>(null);
+    const icopCacheRef = useRef<IcopMonthData[] | null>(null);
 
     const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
 
@@ -62,7 +75,7 @@ export default function ArchivePage() {
 
         // If already cached, filter from cache
         if (icopCacheRef.current) {
-            const monthData = icopCacheRef.current.find((d: any) => d.hijriYear === selectedYear && d.hijriMonth === selectedMonth);
+            const monthData = icopCacheRef.current.find((d) => d.hijriYear === selectedYear && d.hijriMonth === selectedMonth);
             setIcopData(monthData?.observations ?? null);
             return;
         }
@@ -71,9 +84,9 @@ export default function ArchivePage() {
         setIsLoadingIcop(true);
         fetch("/icop-history.json")
             .then((r) => r.json())
-            .then((allData: any[]) => {
+            .then((allData: IcopMonthData[]) => {
                 icopCacheRef.current = allData;
-                const monthData = allData.find((d: any) => d.hijriYear === selectedYear && d.hijriMonth === selectedMonth);
+                const monthData = allData.find((d) => d.hijriYear === selectedYear && d.hijriMonth === selectedMonth);
                 setIcopData(monthData?.observations ?? null);
             })
             .catch(() => setIcopData(null))
@@ -93,8 +106,8 @@ export default function ArchivePage() {
     const exportIcopToCSV = () => {
         if (!icopData || icopData.length === 0) return;
         const headers = ["City", "Country", "Result", "Optical Aid"];
-        const rows = icopData.map((d: any) => [d.city, d.country, d.result, d.opticalAid]);
-        const csvContent = [headers.join(","), ...rows.map((e) => e.map((val: string) => `"${val}"`).join(","))].join("\n");
+        const rows = icopData.map((d) => [d.city, d.country, d.result, d.opticalAid]);
+        const csvContent = [headers.join(","), ...rows.map((e) => e.map((val) => `"${val}"`).join(","))].join("\n");
 
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const url = URL.createObjectURL(blob);
@@ -162,8 +175,8 @@ export default function ArchivePage() {
                                         setMonthDetail(null);
                                     }}
                                     className={`px-3 py-1.5 rounded-xl text-sm font-semibold transition-all ${y === selectedYear
-                                            ? "bg-primary-500 text-white shadow-lg shadow-primary-500/30"
-                                            : "glass border border-foreground/10 text-foreground/60 hover:text-foreground"
+                                        ? "bg-primary-500 text-white shadow-lg shadow-primary-500/30"
+                                        : "glass border border-foreground/10 text-foreground/60 hover:text-foreground"
                                         }`}
                                 >
                                     {y}
@@ -183,8 +196,8 @@ export default function ArchivePage() {
                                     key={monthNum}
                                     onClick={() => handleMonthClick(monthNum)}
                                     className={`rounded-2xl p-5 text-left transition-all duration-300 border ${isSelected
-                                            ? "glass border-primary-500/50 shadow-xl shadow-primary-500/10 scale-[1.02]"
-                                            : "glass border-foreground/5 hover:border-foreground/20 hover:scale-[1.01]"
+                                        ? "glass border-primary-500/50 shadow-xl shadow-primary-500/10 scale-[1.02]"
+                                        : "glass border-foreground/5 hover:border-foreground/20 hover:scale-[1.01]"
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-3">
@@ -285,7 +298,7 @@ export default function ArchivePage() {
                                     </div>
 
                                     <div className="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                                        {icopData.map((obs: any, idx: number) => (
+                                        {icopData.map((obs, idx) => (
                                             <div
                                                 key={idx}
                                                 className="flex items-center justify-between px-4 py-3 rounded-xl bg-foreground/5 border-l-4"
