@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Outfit, Amiri } from "next/font/google";
 import "./globals.css";
+import I18nProvider from "@/components/I18nProvider";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ProTierSync } from "@/components/ProTierSync";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { SightingModal } from "@/components/SightingModal";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#233342",
   width: "device-width",
   initialScale: 1,
 };
@@ -40,14 +47,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${inter.variable} ${outfit.variable} ${amiri.variable} font-sans antialiased`}
-      >
-        <main className="min-h-screen">
-          {children}
-        </main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <script dangerouslySetInnerHTML={{
+            __html: `
+            if (localStorage.getItem('hilal-app-storage')?.includes('"isDarkMode":true')) {
+              document.documentElement.classList.add('dark');
+            } else if (!localStorage.getItem('hilal-app-storage')) {
+              document.documentElement.classList.add('dark');
+            }
+          `}} />
+        </head>
+        <body
+          className={`${inter.variable} ${outfit.variable} ${amiri.variable} font-sans antialiased`}
+        >
+          <ProTierSync />
+          <UpgradeModal />
+          <SightingModal />
+          <I18nProvider>
+            <Header />
+            <main className="min-h-screen pt-16">
+              {children}
+            </main>
+            <Footer />
+          </I18nProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

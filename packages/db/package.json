@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "exports": {
-        ".": "./src/schema.ts"
+        ".": "./src/index.ts",
+        "./schema": "./src/schema.ts"
     },
     "scripts": {
         "lint": "eslint .",

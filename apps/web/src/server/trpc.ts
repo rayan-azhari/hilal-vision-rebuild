@@ -1,13 +1,8 @@
-import { initTRPC } from "@trpc/server";
-
+import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
+import { auth } from "@clerk/nextjs/server";
 
-/**
- * Initialization of tRPC backend
- * Should be done only once per backend!
- */
 const t = initTRPC.create({
-  // Omitting superjson since the plan says to use standard JSON in Route Handlers
   errorFormatter({ shape, error }) {
     return {
       ...shape,
@@ -20,9 +15,17 @@ const t = initTRPC.create({
   },
 });
 
-/**
- * Export reusable router and procedure helpers
- * that can be used throughout the router
- */
 export const router = t.router;
 export const publicProcedure = t.procedure;
+
+const isAuthed = t.middleware(async ({ next }) => {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: { userId },
+  });
+});
+
+export const protectedProcedure = t.procedure.use(isAuthed);
