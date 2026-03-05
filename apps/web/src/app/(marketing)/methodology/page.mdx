@@ -1,0 +1,83 @@
+---
+title: "Scientific & Astronomical Methodology"
+description: "A complete technical reference for every algorithm, formula, and data source powering Hilal Vision's astronomical calculations."
+---
+
+# Scientific & Astronomical Methodology
+
+A complete technical reference for every algorithm, formula, and data source powering Hilal Vision's astronomical calculations.
+
+## 1. The Problem
+
+The Islamic calendar is strictly lunar. A new month legally begins only when the thin crescent moon (Hilal) generated immediately following a conjunction (New Moon) is physically sighted soon after sunset. Predicting whether this first sliver of light can be seen from a specific location on Earth involves solving a complex atmospheric optics problem.
+
+The moon must be far enough from the sun (Elongation) to have a lit crescent, high enough above the horizon (Altitude) to escape the thickest haze, and bright enough to contrast against the twilight sky. If it is too low, the atmosphere extinguishes the light; if too close to the sun, the glare washes it out.
+
+## 2. The Yallop (1997) Criterion
+
+The Hilal Dashboard employs the rigorous **Yallop (1997) criterion** to predict lunar crescent visibility. Dr. B.D. Yallop of the HM Nautical Almanac Office developed this statistical model based on 295 historical observations.
+
+The q-value elegantly predicts visibility across specific zones ranging from naked-eye certain (Zone A) to wholly invisible (Zone F).
+
+### Input Parameters
+
+- **ARCV (Arc of Vision)**: Altitude difference between Moon and Sun at sunset.
+- **W (Crescent Width)**: Topocentric crescent width (in arcminutes).
+
+### Crescent Width
+
+```
+SD = arcsin(1737.4 / moonDist) × 60   [arcminutes]
+W  = SD × (1 − cos(elongation))
+```
+
+### q-Value
+
+```
+q = (ARCV − (11.8371 − 6.3226·W + 0.7319·W² − 0.1018·W³)) / 10
+```
+
+### Visibility Zones (Yallop)
+
+- **A (Easily Visible)**: `q ≥ +0.216`
+- **B (Visible)**: `−0.014 ≤ q < +0.216`
+- **C (Optical Aid Required)**: `−0.160 ≤ q < −0.014`
+- **D (Telescope Only)**: `−0.232 ≤ q < −0.160`
+- **E (Not Visible)**: `q < −0.232`
+- **F (Below Horizon)**: Moon below horizon / set before sun.
+
+## 3. The Odeh (2004) Criterion
+
+The **Odeh (2004) criterion** was developed by Mohammad Sh. Odeh of the Islamic Crescents' Observation Project (ICOP), refining Yallop's model with 737 observations including modern CCD and telescopic sightings.
+
+### V-Value
+
+```
+V = ARCV − (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)
+```
+
+### Visibility Zones (Odeh)
+
+- **A**: `V ≥ +5.65` (Crescent easily visible to the naked eye)
+- **B**: `+2.00 ≤ V < +5.65` (Visible under perfect atmospheric conditions)
+- **C**: `−0.96 ≤ V < +2.00` (May need optical aid to locate the crescent)
+- **D**: `V < −0.96` (Not visible, even with optical aid)
+
+## 4. Physical Limitations (Danjon Limit)
+
+In 1932, French astronomer André Danjon discovered that sighting a crescent is physically impossible if the lunar elongation (angular distance between the sun and moon) is less than **7 degrees**.
+
+At an elongation of exactly 7°, the shadowed mountains on the lunar surface entirely occlude the lit valleys, rendering the crescent discontinuous and invisible from Earth. Our engine enforces this limit implicitly.
+
+## 5. Atmospheric Refraction & Altitude
+
+Our geometry computations via **astronomy-engine** (VSOP87/ELP2000) account for standard atmospheric refraction — which "lifts" objects above the true horizon.
+
+True Altitude (H_true) is calculated geometrically relative to the center of the Earth. Refracted Altitude (H_app) factors in the bending of light through the Earth's atmosphere, which is largest precisely when viewing objects like the Hilal hugging the horizon.
+
+## 6. Hijri Calendar Engine
+
+The calendar leverages three distinct timing methodologies:
+- **Astronomical**: Calculates the start of the month strictly based on the moon passing conjunction, adjusted for local sighting probability.
+- **Umm al-Qura**: The official Saudi Arabian civic calendar which relies on pre-computed algorithms (if moon sets after sun on 29th, new month begins).
+- **Tabular**: A deterministic arithmetic calendar (Kuwaiti) used by Microsoft and many global civic institutions.

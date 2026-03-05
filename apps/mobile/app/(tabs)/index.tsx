@@ -1,14 +1,16 @@
-import { StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from "react-native";
+import { Link } from "expo-router";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-
-export default function TabOneScreen() {
+export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <Text style={styles.title}>Hilal Vision (Mobile)</Text>
+      <Text style={styles.subtitle}>
+        Sign in to view real-time Moon tracking & Crescent Visibility.
+      </Text>
+      <Link href="/(auth)/sign-in" style={styles.button}>
+        Sign In
+      </Link>
     </View>
   );
 }
@@ -16,16 +18,30 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#0F172A",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 28,
+    color: "#F8FAFC",
+    fontWeight: "600",
+    marginBottom: 8,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  subtitle: {
+    fontSize: 16,
+    color: "#94A3B8",
+    textAlign: "center",
+    marginBottom: 32,
+  },
+  button: {
+    backgroundColor: "#FACC15",
+    color: "#0F172A",
+    fontWeight: "bold",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    overflow: "hidden",
   },
 });

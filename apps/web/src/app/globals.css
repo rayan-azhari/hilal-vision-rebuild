@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   /* Hilal Vision - Breezy Weather Colors (OKLCH) */
