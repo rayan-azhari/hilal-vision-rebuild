@@ -1,0 +1,253 @@
+# Methodology & Algorithms
+
+*Scientific Documentation — علم الفلك*
+
+A complete technical reference for every algorithm, formula, and data source powering Hilal Vision's astronomical calculations.
+
+---
+
+## Contents
+
+1. [The Crescent Visibility Problem](#1-the-crescent-visibility-problem)
+2. [Yallop (1997) Criterion](#2-yallop-1997-criterion)
+3. [Odeh (2004) Criterion](#3-odeh-2004-criterion)
+4. [Triple-Engine Hijri Calendar](#4-triple-engine-hijri-calendar)
+5. [Best-Time-to-Observe Calculator](#5-best-time-to-observe-calculator)
+6. [World Visibility Grid](#6-world-visibility-grid)
+7. [ICOP Archive](#7-icop-archive)
+8. [Crowdsourced Telemetry & Validation](#8-crowdsourced-telemetry--validation)
+9. [Atmospheric Refraction & DEM](#9-atmospheric-refraction--dem)
+10. [Data Export & Public API](#10-data-export--public-api)
+11. [References](#11-references)
+
+---
+
+## 1. The Crescent Visibility Problem
+
+The Islamic lunar calendar begins each month with the physical sighting of the new crescent moon at sunset. At the moment of astronomical conjunction — when the Sun and Moon share the same geocentric ecliptic longitude — the moon is entirely invisible from Earth. Visibility only becomes possible as the moon moves away from the Sun's glare, forming a thin illuminated sliver.
+
+Whether that sliver is actually observable depends on a complex interplay of geometry, atmospheric physics, and the observer's location on Earth. Simple single-parameter models based solely on moon age or lag time are historically unreliable. A moon that is 24 hours old may be invisible if its ecliptic latitude is unfavourable, while a younger moon at a high latitude may be easily seen. Modern predictive engines therefore rely on bi-parametric polynomial criteria that combine altitude and crescent width.
+
+---
+
+## 2. Yallop (1997) Criterion
+
+The Yallop criterion was developed by B.D. Yallop of HM Nautical Almanac Office in 1997 and is the primary visibility classification used throughout Hilal Vision. It is widely adopted by Islamic calendar authorities in the UK, Malaysia, and internationally.
+
+### Input Parameters
+
+Two parameters are computed at the "Best Time" — approximately 4/9ths of the lag time (duration between sunset and moonset) after sunset:
+
+- **ARCV** — Arc of Vision: the moon's altitude above the horizon minus the sun's altitude at the moment of evaluation (degrees).
+- **W** — Topocentric Crescent Width: the width of the illuminated crescent in arcminutes.
+
+### Crescent Width Formula
+
+The crescent width W is derived from the moon's angular semi-diameter SD and its elongation from the Sun:
+
+```
+SD = arcsin(1737.4 / moonDist) × 60   [arcminutes]
+W  = SD × (1 − cos(elongation))
+```
+
+Where `moonDist` is the geocentric lunar distance in kilometres. The semi-diameter at mean distance is approximately 15.5 arcminutes.
+
+### q-value Formula
+
+```
+q = (ARCV − (11.8371 − 6.3226·W + 0.7319·W² − 0.1018·W³)) / 10
+```
+
+The polynomial models the minimum ARCV required for a crescent of width W to be visible. The q-value represents how far above or below this threshold the actual ARCV falls.
+
+### Visibility Zone Classification
+
+| Zone | q-value Range | Interpretation |
+|:---:|---|---|
+| A | q ≥ +0.216 | Easily visible with naked eye |
+| B | −0.014 ≤ q < +0.216 | Visible under perfect conditions |
+| C | −0.160 ≤ q < −0.014 | Binoculars may be needed to find crescent |
+| D | −0.232 ≤ q < −0.160 | Visible only with telescope |
+| E | q < −0.232 | Not visible even with optical aid |
+| F | Moon below horizon | Impossible — below horizon at sunset |
+
+Zones C and D often represent the most significant points of contention in traditional sighting committees, where the difference between naked-eye and optical-aid sighting determines when a country declares the start of a month.
+
+---
+
+## 3. Odeh (2004) Criterion
+
+The Odeh criterion was developed by Mohammad Odeh in 2004 as a refinement based on a larger dataset of 737 sightings, many collected through the Islamic Crescents' Observation Project (ICOP). It is displayed in Pro Mode as a secondary classification to cross-validate borderline predictions.
+
+### V-value Formula
+
+```
+V = ARCV − (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)
+```
+
+The Odeh criterion uses airless topocentric ARCV values — stripping away refraction during the initial calculation phase to provide a standardised geometric baseline before atmospheric corrections are applied.
+
+### Zone Classification
+
+| Zone | V-value Range | Interpretation |
+|:---:|---|---|
+| A | V ≥ +5.65 | Visible by naked eye |
+| B | +2.00 ≤ V < +5.65 | Visible by optical aid; possibly naked eye |
+| C | −0.96 ≤ V < +2.00 | Visible by optical aid only |
+| D | V < −0.96 | Not visible even with optical aid |
+
+In regions where Yallop and Odeh diverge, the map may mark borderline areas as uncertain — acknowledging that local variations in atmospheric transparency and observer eye sensitivity become the dominant factors.
+
+---
+
+## 4. Triple-Engine Hijri Calendar
+
+The Hijri Calendar page supports three distinct calculation engines that each represent a fundamentally different philosophy of Islamic timekeeping.
+
+### Engine 1 — Astronomical (astronomy-engine)
+
+Uses a conjunction-based algorithm to detect the physical new moon. Months are counted relative to an epoch of 1 Muharram 1446 AH. This represents true physical reality and may differ from civic calendars by ±1 day.
+
+### Engine 2 — Umm al-Qura
+
+The official civic calendar of Saudi Arabia. Since 1423 AH (2002 CE), it requires two conditions: the geocentric conjunction must occur before sunset in Mecca, and the moon must set after the sun in Mecca.
+
+### Engine 3 — Tabular (Kuwaiti)
+
+The standard arithmetic approximation widely used in software. Uses the Kuwaiti algorithm which provides a practical, deterministic date without requiring any astronomical computation. Fastest to compute but least physically accurate.
+
+---
+
+## 5. Best-Time-to-Observe Calculator
+
+Determines the optimal time window for crescent moon observation at any location on Earth.
+
+### Algorithm
+
+The function scans from sunset to moonset in 5-minute steps. At each step it evaluates three factors:
+
+- **Moon altitude** — must be above the horizon. Penalised heavily for very low altitudes.
+- **Sky darkness factor** — scores the twilight level.
+- **Altitude factor** — penalises very low altitudes where atmospheric extinction is highest.
+
+```
+score = moonAlt × darknessFactor × altFactor
+```
+
+The time step with the highest composite score is returned as the optimal observation moment.
+
+---
+
+## 6. World Visibility Grid
+
+Computes crescent visibility for a regular latitude/longitude grid covering the entire Earth's surface.
+
+### Resolution Levels
+
+| Resolution | Grid Points | Use Case |
+|---|---|---|
+| 8° | 900 | Preview pass (~100ms) — immediate visual feedback |
+| 4° | 3,600 | Standard pass — default map rendering |
+| 2° | 14,400 | High-quality pass (~800ms) — full detail |
+
+The computation is entirely offloaded to a Web Worker, ensuring the UI remains responsive. The worker uses a two-pass progressive rendering strategy.
+
+Computed textures are cached in an LRU map so navigating back to a previously viewed date requires no recomputation.
+
+---
+
+## 7. ICOP Archive
+
+The Islamic Crescents' Observation Project (ICOP) is an international initiative that has collected crowdsourced lunar sighting reports since 1998. Hilal Vision's Archive page features over 1,000 authentic sighting records spanning 1438–1465 AH.
+
+These real-world sightings serve as empirical ground truth against which Hilal Vision's theoretical predictions can be validated.
+
+---
+
+## 8. Crowdsourced Telemetry & Validation
+
+Hilal Vision allows authenticated users to submit real-time crescent sighting reports that are stored in a PostgreSQL database and displayed on the live map.
+
+### Smart Zone F Rejection
+
+When a physical sighting is claimed, the backend computes the geometric position of the sun and moon. If the moon is definitively below the horizon (Zone F), the server rejects the payload.
+
+### Rate Limiting
+
+Submissions are protected by Upstash Redis sliding window rate limiting — a maximum of 5 reports per IP address per minute.
+
+### Meteorological Enrichment
+
+Each submitted report is automatically enriched with real-time meteorological data from Open-Meteo — including cloud cover, surface pressure, and aerosol optical depth.
+
+---
+
+## 9. Atmospheric Refraction & DEM
+
+Atmospheric refraction is the bending of light near Earth's surface. At the horizon, this effect reaches approximately 34 arcminutes — enough to make the sun or moon appear above the horizon when geometrically below it.
+
+The Horizon View page models refraction using Saemundsson's inverse formula, correcting for local temperature and atmospheric pressure:
+
+```
+R₀ = 1.02 / tan(h + 10.3 / (h + 5.11))   [arcminutes]
+R  = R₀ × (P / 1010) × (283 / (273 + T))
+```
+
+Real-time pressure and temperature values are fetched from Open-Meteo's forecast API. Without this correction, the simulated moon would appear lower than its physically observed position.
+
+### Atmospheric Overrides
+
+Both the 2D Map and 3D Globe pages feature an Atmospheric Overrides panel. Users can manually set temperature, pressure, and elevation, or toggle Auto-fetch from Open-Meteo.
+
+These parameters feed into the refraction correction formula. The delta between standard and corrected refraction is applied to sun and moon altitude calculations:
+
+```
+R_std    = 34/60°   (standard near-horizon refraction)
+R_true   = R_std × (P / 1010) × (283 / (273 + T))
+Δrefraction = R_true − R_std
+```
+
+### Digital Elevation Model (DEM)
+
+The application integrates the Open-Meteo Elevation API to fetch the true terrain elevation at any clicked point, providing accurate horizon dip calculations:
+
+```
+dip = 1.76 × √(elevation)   [arcminutes]
+```
+
+This elevation is displayed in the enhanced map click tooltip and factored into all sun/moon altitude calculations.
+
+---
+
+## 10. Data Export & Public API
+
+### CSV & JSON Export
+
+The Archive page provides one-click export buttons for both ICOP observation data and computed visibility tables.
+
+### Public REST API
+
+Hilal Vision exposes standalone REST endpoints for programmatic access to astronomical data:
+
+| Endpoint | Parameters | Returns |
+|---|---|---|
+| `/api/v1/visibility` | `lat`, `lng`, `date` (ISO) | Visibility zone (A–F), q-value, ARCV, W, elongation |
+| `/api/v1/moon-phases` | `lat`, `lng`, `date` (ISO) | Phase, illumination, age, altitude, azimuth, rise/set times |
+
+All inputs are validated with Zod schemas. Invalid or out-of-range parameters return structured error responses.
+
+---
+
+## 11. References
+
+**[Yallop, B.D. (1997)](https://astronomycenter.net/pdf/yallop_1997.pdf)** — *A Method for Predicting the First Sighting of the New Crescent Moon*. HM Nautical Almanac Office — NAO Technical Note No. 69.
+
+**[Odeh, M.S. (2004)](https://www.researchgate.net/publication/225099773)** — *New Criterion for Lunar Crescent Visibility*. Experimental Astronomy, 18(1–3): 39–64.
+
+**[Meeus, J. (1998)](https://www.willbell.com/math/mc1.htm)** — *Astronomical Algorithms, 2nd Edition*. Willmann-Bell. Foundational reference for astronomical algorithms.
+
+**[Cross, D.](https://github.com/cosinekitty/astronomy)** — *astronomy-engine*. High-precision astronomy algorithms. JavaScript and C implementations of VSOP87 & ELP2000.
+
+**[International Astronomical Center](https://astronomycenter.net/icop.html?l=en)** — *Islamic Crescents' Observation Project (ICOP)*. International database of crescent sighting reports since 1998.
+
+**[Khan, A.A. (2001)](https://astronomycenter.net/pdf/khan_2001.pdf)** — *Crescent Sighting Using the Umm al-Qura Calendar in Saudi Arabia*. Astronomy Center Technical Papers.

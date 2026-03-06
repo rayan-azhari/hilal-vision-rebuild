@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { contours as d3Contours } from "d3-contour";
-import { geoPath as d3GeoPath } from "d3-geo";
-import type { FeatureCollection, MultiPolygon } from "geojson";
+import type { FeatureCollection } from "geojson";
 
 export interface VisibilityQData {
     qValues: Float32Array;
@@ -64,7 +63,7 @@ function qDataToGeoJSON(
         // Transform grid coords (px → lng/lat)
         // d3 contours outputs in pixel space of the grid
         // We need to convert to geographic coordinates
-        const transformedCoords = (contour as any).coordinates.map((polygon: number[][][]) =>
+        const transformedCoords = (contour as { coordinates: number[][][][] }).coordinates.map((polygon: number[][][]) =>
             polygon.map((ring: number[][]) =>
                 ring.map(([px, py]: number[]) => {
                     const lng = -180 + (px / width) * 360;

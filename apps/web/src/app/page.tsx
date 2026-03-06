@@ -1,6 +1,10 @@
+"use client";
+
 import { Calendar, Map, Activity, ArrowRight, Smartphone, Heart, Crown, Moon } from "lucide-react";
 import Link from "next/link";
 import { getMoonPhaseInfo, gregorianToHijri } from "@hilal/astronomy";
+import { MoonIllustration } from "@/components/MoonIllustration";
+import { useAppStore } from "@/store/useAppStore";
 
 const FEATURE_DEFS = [
   { href: "/visibility", icon: Map, key: "visibilityMap", title: "Global Visibility Map", desc: "Interactive charts powered by Yallop and Odeh criteria." },
@@ -17,9 +21,9 @@ const ZONE_LEGEND = [
 ];
 
 export default function Home() {
-  const now = new Date();
-  const moonInfo = getMoonPhaseInfo(now);
-  const hijri = gregorianToHijri(now);
+  const date = useAppStore((s) => s.date);
+  const moonInfo = getMoonPhaseInfo(date);
+  const hijri = gregorianToHijri(date);
 
   return (
     <div className="relative">
@@ -58,10 +62,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 3D Globe Replacement (SSR Safe) */}
+          {/* Actual Moon Illustration Replacement */}
           <div className="flex-1 w-full max-w-[500px] aspect-square relative z-10 hidden lg:flex items-center justify-center">
-            <div className="w-64 h-64 rounded-full relative shadow-[inset_-20px_0_40px_rgba(255,255,255,0.8),_0_0_80px_rgba(255,255,255,0.2)] animate-pulse"
-              style={{ background: "radial-gradient(circle at 30% 30%, transparent 40%, var(--gold) 100%)" }} />
+            <div
+              style={{ filter: "drop-shadow(0 0 40px oklch(0.78 0.15 75 / 0.35))" }}
+              className="animate-float"
+            >
+              <MoonIllustration phase={moonInfo.phase} size={300} />
+            </div>
           </div>
 
         </div>
@@ -168,7 +176,7 @@ export default function Home() {
               Take Hilal Vision Anywhere
             </h2>
             <p className="text-lg text-foreground/60 mb-10 max-w-xl mx-auto leading-relaxed">
-              The world's most advanced Islamic crescent visibility tools in your pocket. Mobile apps coming to iOS and Android.
+              The world&apos;s most advanced Islamic crescent visibility tools in your pocket. Mobile apps coming to iOS and Android.
             </p>
 
             {/* App Store Coming Soon Badges */}

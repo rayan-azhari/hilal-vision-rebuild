@@ -1,6 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import * as schema from "./schema.js";
+import * as schema from "./schema";
 
 function getDbConnection() {
     if (!process.env.DATABASE_URL) {
@@ -11,4 +11,4 @@ function getDbConnection() {
 }
 
 export const db = typeof process !== "undefined" && process.env.DATABASE_URL ? getDbConnection() : null;
-export * from "./schema.js";
+export * from "./schema";

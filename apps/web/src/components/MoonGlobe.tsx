@@ -14,8 +14,7 @@ export default function MoonGlobe() {
         const container = globeRef.current;
         if (!container) return;
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore: Globe.gl types incorrectly flag this as uncallable
+        // @ts-expect-error - globe.gl typings expect a constructor but it is called as a function in their docs
         const globe = Globe()(container)
             .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-water.png')
             .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')

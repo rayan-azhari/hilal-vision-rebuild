@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Loader2, CheckCircle2, Upload, Camera } from "lucide-react";
+import { MapPin, Loader2, CheckCircle2, Upload } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { AutoDetectButton } from "@/components/AutoDetectButton";
 import { parse as parseExif } from "exifr";
 
 export function ObservationForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -35,7 +34,7 @@ export function ObservationForm({ onSuccess }: { onSuccess?: () => void }) {
         reader.readAsDataURL(file);
 
         try {
-            const exif = await parseExif(file, { gps: true, tiff: true, exif: true, ifd0: true } as any);
+            const exif = await parseExif(file, { gps: true, tiff: true, exif: true, ifd0: true } as Record<string, unknown>);
             if (!exif) {
                 setErrors((p) => ({ ...p, exif: "No EXIF data found in image." }));
                 return;
@@ -202,7 +201,7 @@ export function ObservationForm({ onSuccess }: { onSuccess?: () => void }) {
                             <button
                                 key={opt.id}
                                 type="button"
-                                onClick={() => setVisualSuccess(opt.id as any)}
+                                onClick={() => setVisualSuccess(opt.id as "naked_eye" | "optical_aid" | "not_seen")}
                                 className="flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all text-center"
                                 style={{
                                     borderColor: visualSuccess === opt.id ? opt.color : "var(--border)",

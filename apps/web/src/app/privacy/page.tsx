@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: "Privacy Policy — Hilal Vision",
@@ -81,7 +82,7 @@ export default function PrivacyPage() {
             <hr />
             <p className="text-sm text-foreground/40">
                 Questions about privacy? Contact us at <a href="mailto:support@hilalvision.com">support@hilalvision.com</a>.
-                See also our <a href="/terms">Terms of Service</a>.
+                By using our services, you also agree to our <Link href="/terms" className="text-primary-400 hover:underline">Terms of Service</Link>.
             </p>
         </article>
     );

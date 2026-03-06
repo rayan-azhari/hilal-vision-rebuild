@@ -14,8 +14,6 @@ import {
     odehV,
     classifyYallop,
     classifyOdeh,
-    ZONE_RGB,
-    HIGH_CONTRAST_ZONE_RGB,
 } from "@hilal/astronomy";
 import type { VisibilityZone } from "@hilal/types";
 
@@ -78,13 +76,18 @@ self.onmessage = (e: MessageEvent) => {
             const lng = -180 + ((px + 0.5) / W) * 360;
             const utcNoon = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12, 0, 0);
             const startOfDay = new Date(utcNoon - (lng / 15) * 3600 * 1000);
-            const { value } = computeVisibilityAtPoint(startOfDay, lat, lng, criterion || "yallop");
 
             const pxIdx = py * W + px;
-            qValues[pxIdx] = value;
+            try {
+                const { value } = computeVisibilityAtPoint(startOfDay, lat, lng, criterion || "yallop");
+                qValues[pxIdx] = value;
+            } catch {
+                qValues[pxIdx] = -99; // fallback: treat as below horizon
+            }
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (self as any).postMessage(
         { qValues, width: W, height: H },
         [qValues.buffer]

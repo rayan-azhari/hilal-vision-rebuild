@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && head -15 {}')",
+      "Bash(ls \"c:/Users/rayan/Desktop/Antigravity workspaces/Moon-dashboard/apps/web/src/app/\\(marketing\\)/[slug]\")",
+      "Bash(find \"c:/Users/rayan/Desktop/Antigravity workspaces/Moon-dashboard/apps/web/src/app/\\(marketing\\)\" -type f)",
+      "Bash(node -e \"const d=require\\(''./apps/web/content/about.mdx''\\); console.log\\(''ok''\\)\")",
+      "Bash(python3 -c \":*)",
+      "Bash(node -e \":*)",
+      "Bash(node -e \"const fs=require\\(''fs''\\); const data=JSON.parse\\(fs.readFileSync\\(''_legacy/client/src/locales/en/common.json'',''utf8''\\)\\); console.log\\(JSON.stringify\\(Object.keys\\(data\\).slice\\(0,20\\)\\)\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\(''fs''\\).readFileSync\\(''/dev/stdin'',''utf8''\\)\\); const all={...d.dependencies,...d.devDependencies}; [''@upstash/ratelimit'',''@upstash/redis'',''@clerk/nextjs''].forEach\\(k=>console.log\\(k+'':'', all[k]||''NOT FOUND''\\)\\)\")",
+      "Bash(test -f \"c:/Users/rayan/Desktop/Antigravity workspaces/Moon-dashboard/apps/web/src/components/MapControlsPanel.tsx\")",
+      "Bash(node -e \"const m = require\\(''@vis.gl/react-maplibre''\\); console.log\\(Object.keys\\(m\\).filter\\(k=>k.includes\\(''opup''\\)\\)\\)\")",
+      "Bash(npx pnpm add firebase-admin --filter web)",
+      "Bash(npx pnpm dev)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/visibility)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/moon)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/archive)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/horizon)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/privacy)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/terms)",
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\")"
+    ]
+  }
+}

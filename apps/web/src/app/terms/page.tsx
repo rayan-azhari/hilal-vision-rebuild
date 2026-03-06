@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { FileText, Shield, Scale, AlertTriangle, AlertCircle, RefreshCw } from "lucide-react";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: "Terms of Service — Hilal Vision",
@@ -55,6 +57,7 @@ export default function TermsPage() {
             <h2>5. Accounts and Security</h2>
             <p>
                 Authentication is provided via Clerk. You are responsible for safeguarding your login credentials.
+                For more information on how we handle your data, please see our <Link href="/privacy" className="text-primary-400 hover:underline">Privacy Policy</Link>.
             </p>
 
             <h2>6. Intellectual Property</h2>
@@ -85,7 +88,7 @@ export default function TermsPage() {
             <hr />
             <p className="text-sm text-foreground/40">
                 Questions? Contact us at <a href="mailto:support@hilalvision.com">support@hilalvision.com</a>.
-                See also our <a href="/privacy">Privacy Policy</a>.
+                See also our <Link href="/privacy" className="text-primary-400 hover:underline">Privacy Policy</Link>.
             </p>
         </article>
     );

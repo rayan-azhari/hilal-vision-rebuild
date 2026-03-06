@@ -14,10 +14,6 @@ export default function MarketingLayout({
                     {children}
                 </article>
             </main>
-            {/* Simple footer for marketing pages */}
-            <footer className="border-t border-white/10 py-8 text-center text-sm text-white/50">
-                <p>&copy; {new Date().getFullYear()} Hilal Vision. All rights reserved.</p>
-            </footer>
         </div>
     );
 }

@@ -39,14 +39,14 @@ export const notificationsRouter = router({
         .input(pushSubscriptionSchema)
         .mutation(async ({ input, ctx }) => {
             let ip = "unknown";
-            // @ts-ignore - Assuming req is available in context or we fallback
+            // @ts-expect-error - Assuming req is available in context or we fallback
             if (ctx.req && ctx.req.headers) {
-                // @ts-ignore
+                // @ts-expect-error - Next request types dont officially expose headers
                 const forwarded = ctx.req.headers.get("x-forwarded-for");
                 if (forwarded) {
                     ip = forwarded.split(",")[0].trim();
                 } else {
-                    // @ts-ignore
+                    // @ts-expect-error - Next request types dont officially expose headers
                     const real = ctx.req.headers.get("x-real-ip");
                     if (real) ip = real;
                 }

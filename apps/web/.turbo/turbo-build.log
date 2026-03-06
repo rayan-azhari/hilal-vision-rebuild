@@ -1,0 +1,65 @@
+
+> web@0.1.0 build C:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\apps\web
+> next build
+
+   ▲ Next.js 15.5.12
+
+   Creating an optimized production build ...
+ ✓ (serwist) Bundling the service worker script with the URL '/sw.js' and the scope '/'...
+ ✓ Compiled successfully in 15.4s
+   Linting and checking validity of types ...
+
+./src/app/archive/page.tsx
+4:46  Warning: 'Info' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/horizon/page.tsx
+200:15  Warning: 'isWaxing' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+280:8  Warning: React Hook useEffect has a missing dependency: 'loc'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+290:8  Warning: React Hook useEffect has a missing dependency: 'loc'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+304:8  Warning: React Hook useEffect has a missing dependency: 'loc'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/support/page.tsx
+2:32  Warning: 'MonitorSmartphone' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/terms/page.tsx
+2:10  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+2:20  Warning: 'Shield' is defined but never used.  @typescript-eslint/no-unused-vars
+2:28  Warning: 'Scale' is defined but never used.  @typescript-eslint/no-unused-vars
+2:35  Warning: 'AlertTriangle' is defined but never used.  @typescript-eslint/no-unused-vars
+2:50  Warning: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+2:63  Warning: 'RefreshCw' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/AutoDetectButton.tsx
+43:26  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/BestTimeCard.tsx
+4:17  Warning: 'Cloud' is defined but never used.  @typescript-eslint/no-unused-vars
+4:24  Warning: 'Thermometer' is defined but never used.  @typescript-eslint/no-unused-vars
+4:37  Warning: 'Droplets' is defined but never used.  @typescript-eslint/no-unused-vars
+4:47  Warning: 'Wind' is defined but never used.  @typescript-eslint/no-unused-vars
+4:53  Warning: 'Eye' is defined but never used.  @typescript-eslint/no-unused-vars
+15:9  Warning: React Hook useMemo has missing dependencies: 'date' and 'location'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+15:10  Warning: React Hook useMemo has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+
+./src/components/Header.tsx
+5:16  Warning: 'MapPin' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/MapControlsPanel.tsx
+10:11  Warning: 'resolution' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+11:11  Warning: 'setResolution' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+./src/components/SightingFeed.tsx:214:29
+Type error: Type '{}' is not assignable to type 'Key | null | undefined'.
+
+[0m [90m 212 |[39m                     [36mreturn[39m (
+ [90m 213 |[39m                         [33m<[39m[33mdiv[39m
+[31m[1m>[22m[39m[90m 214 |[39m                             key[33m=[39m{s[33m.[39mid [33m||[39m i}
+ [90m     |[39m                             [31m[1m^[22m[39m
+ [90m 215 |[39m                             className[33m=[39m[32m"flex items-start gap-3 p-3 rounded-xl bg-card border border-foreground/5 relative overflow-hidden group"[39m
+ [90m 216 |[39m                         [33m>[39m
+ [90m 217 |[39m                             [33m<[39m[33mdiv[39m className[33m=[39m[32m"absolute left-0 top-0 bottom-0 w-1"[39m style[33m=[39m{{ background[33m:[39m color }} [33m/[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

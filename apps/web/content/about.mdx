@@ -1,0 +1,123 @@
+# Bridging Ancient Tradition with Modern Astronomy
+
+Hilal Vision is a precision astronomical web platform dedicated to predicting and visualising Islamic crescent moon (هلال) sightings worldwide. It is built for the 1.8 billion Muslims who rely on the lunar calendar for religious observances, and for the astronomers and scholars who study it.
+
+---
+
+## Our Mission
+
+The Islamic lunar calendar is one of humanity's oldest scientific traditions — the beginning of each sacred month has been determined by the physical sighting of the new crescent moon for over 1,400 years. Yet in the modern world, this practice is fragmented: different countries announce the start of Ramadan on different days, and communities lack transparent, data-driven tools to understand why.
+
+Hilal Vision exists to answer one question with the precision it deserves: **"Will the new crescent moon be visible tonight from my location — and why?"**
+
+We implement the internationally recognised **Yallop (1997)** and **Odeh (2004)** visibility criteria — the same standards used by Islamic calendar authorities in the UK, Malaysia, and the international astronomical community — and present the results with the visual clarity and interactivity that a 21st-century audience expects.
+
+This platform is not a religious authority. It is a scientific instrument. It presents mathematical predictions, historical data, and comparative calendrical analysis side-by-side, empowering individuals and communities to engage critically and transparently with Islamic timekeeping.
+
+---
+
+## Who Is It For?
+
+**Muslim Communities** — Get a clear, location-specific prediction for crescent visibility before Ramadan, Eid, and every new Hijri month — without jargon.
+
+**Astronomers & Researchers** — Access raw q-values, ARCV/DAZ parameters, Odeh V-values, and the full ICOP historical dataset for validation and research.
+
+**Islamic Calendar Scholars** — Compare Astronomical, Umm al-Qura, and Tabular Hijri calendars side-by-side. Understand exactly where and why civic calendars diverge from physical astronomy.
+
+---
+
+## Platform Tools
+
+Six dedicated tools, each engineered for a specific aspect of lunar astronomy.
+
+**[3D Globe & Visibility Map](/visibility)** — Interactive WebGL globe and 2D MapLibre map showing crescent visibility zones worldwide using Yallop q-values. Includes real-time cloud cover overlay and Best-Time-to-Observe calculator.
+
+**[Moon Phase Dashboard](/moon)** — Current lunar phase, illumination, age, Sun & Moon altitude chart, 30-day phase calendar strip, and Yallop/Danjon methodology charts.
+
+**[Hijri Calendar](/calendar)** — Triple-engine calendar supporting Astronomical (astronomy-engine), Umm al-Qura (KACST), and Tabular algorithms. Includes a "Compare to Heavens" divergence overlay.
+
+**[Horizon View](/horizon)** — Local horizon simulator showing the crescent moon's position relative to the setting sun, with ARCV and DAZ annotations.
+
+**[ICOP Archive](/archive)** — 1,000+ authentic historical crescent sighting records from the Islamic Crescents' Observation Project (ICOP), spanning 1438–1465 AH.
+
+---
+
+## Technology
+
+Built with modern web technologies for performance, accuracy, and global reach.
+
+| Technology | Role |
+|---|---|
+| React 19 + Next.js 15 | Core framework and App Router routing |
+| MapLibre GL JS | Interactive 2D map and contour rendering |
+| Globe.gl (WebGL) | 3D interactive globe with atmosphere |
+| astronomy-engine | High-precision orbital mechanics (VSOP87/ELP2000) |
+| Drizzle ORM + Neon | Type-safe PostgreSQL with PostGIS spatial indexing |
+| Clerk Auth | Authentication and session management |
+| Zustand | Lightweight global state management |
+| Capacitor.js | Cross-platform iOS/Android compilation |
+| react-i18next | Multi-language localisation (EN, AR, UR) |
+| Serwist + PWA | Offline-ready service workers |
+
+---
+
+## Scientific Methodology
+
+Read the full technical documentation — Yallop and Odeh criteria derivations, triple-engine Hijri calendar algorithms, the Best-Time-to-Observe scoring function, atmospheric refraction physics, and ICOP data sourcing.
+
+→ [Read the Methodology](/methodology)
+
+---
+
+## How We Compare
+
+No competitor combines all of: 3D globe, weather overlay, real ICOP data, and a Best-Time-to-Observe engine. Hilal Vision uniquely owns this combination.
+
+| Feature | Hilal Vision | Moonsighting.com | IslamicFinder | LuneSighting | HilalMap |
+|---|:---:|:---:|:---:|:---:|:---:|
+| 3D Interactive Globe | ✓ | — | — | — | — |
+| 2D Visibility Map | ✓ | ✓ | — | — | ✓ |
+| Weather / Cloud Overlay | ✓ | — | — | — | — |
+| Best-Time Calculator | ✓ | — | — | — | — |
+| Real ICOP Sighting Data | ✓ | ✓ | — | ✓ | — |
+| Crowdsourced Reports | ✓ | — | — | ✓ | — |
+| Triple-Engine Hijri Cal. | ✓ | — | — | — | — |
+| Scientific Detail (q/V) | ✓ | ✓ | — | — | — |
+| Mobile App | ✓ | — | ✓ | ✓ | — |
+| Push Notifications | Coming Soon | — | ✓ | ✓ | — |
+| Multi-Language | ✓ | — | ✓ | — | — |
+
+*Table reflects publicly available features as of February 2026. ✓ = available, — = not available.*
+
+---
+
+## Data Sources & Attributions
+
+Hilal Vision stands on the shoulders of decades of peer-reviewed astronomical research.
+
+**[Yallop (1997) Criterion](https://astronomycenter.net/pdf/yallop_1997.pdf)** — B.D. Yallop, HM Nautical Almanac Office. Foundational q-value crescent visibility formula.
+
+**[Odeh (2004) Criterion](https://www.researchgate.net/publication/225099773)** — Mohammad Odeh. V-value refinement trained on 737 ICOP sighting observations.
+
+**[Islamic Crescents' Observation Project](https://astronomycenter.net/icop.html?l=en)** — International Astronomical Center. Over 1,000 historical crescent sighting records.
+
+**[astronomy-engine](https://github.com/cosinekitty/astronomy)** — Don Cross. High-precision VSOP87/ELP2000 planetary and lunar position library for JavaScript.
+
+**[Umm al-Qura Calendar](https://github.com/umalqura/umalqura)** — KACST pre-computed tables for the official Saudi Arabian civic Hijri calendar.
+
+**[Open-Meteo](https://open-meteo.com)** — Free, open-source weather API providing real-time cloud cover and atmospheric pressure data.
+
+---
+
+## License
+
+Hilal Vision is proprietary software. All rights are reserved. The source code is closed-source and protected by copyright law.
+
+---
+
+## Contact & Feedback
+
+Found a bug, have a question about the methodology, or want to contribute sighting data? We welcome feedback from the astronomical and Islamic community.
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)

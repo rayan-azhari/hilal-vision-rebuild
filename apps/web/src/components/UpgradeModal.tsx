@@ -43,8 +43,8 @@ export function UpgradeModal() {
 
             const { url } = await res.json();
             if (url) window.location.href = url;
-        } catch (err: any) {
-            toast.error("Could not start checkout", { description: err.message });
+        } catch (err) {
+            toast.error("Could not start checkout", { description: (err as Error).message });
             setCheckoutLoading(false);
         }
     };
@@ -89,7 +89,7 @@ export function UpgradeModal() {
                         ].map((plan) => (
                             <button
                                 key={plan.id}
-                                onClick={() => setSelectedPlan(plan.id as any)}
+                                onClick={() => setSelectedPlan(plan.id as "monthly" | "annual" | "lifetime")}
                                 className="relative flex flex-col items-center p-3 rounded-xl border-2 transition-all cursor-pointer text-left"
                                 style={{
                                     borderColor: selectedPlan === plan.id ? "var(--gold)" : "var(--border)",

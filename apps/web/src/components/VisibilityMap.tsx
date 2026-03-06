@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
-import Map, { NavigationControl, Source, Layer, useMap } from "@vis.gl/react-maplibre";
+import { useEffect, useState, useMemo } from "react";
+import Map, { NavigationControl, Source, Layer, Popup, useMap } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAppStore } from "@/store/useAppStore";
 import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
 import { ProGate } from "@/components/ProGate";
+import { trpc } from "@/lib/trpc";
 import { Loader2, Eye, Cloud } from "lucide-react";
-import type { FillLayerSpecification } from "maplibre-gl";
+import type { FillLayerSpecification, CircleLayerSpecification } from "maplibre-gl";
 
 const ZONE_COLORS: Record<string, string> = {
     A: "#4ade80",
@@ -27,6 +28,20 @@ const ZONE_OPACITIES: Record<string, number> = {
     E: 0.30,
     F: 0.15,
 };
+
+const PIN_COLORS: Record<string, string> = {
+    naked_eye: "#4ade80",
+    optical_aid: "#60a5fa",
+    not_seen: "#9ca3af",
+};
+
+interface PinProperties {
+    id: number;
+    visualSuccess: string;
+    color: string;
+    observationTime: string;
+    notes: string | null;
+}
 
 /**
  * Cloud overlay component that renders the cloud texture as a raster overlay.
@@ -79,11 +94,36 @@ function CloudOverlayLayer({ imageUrl }: { imageUrl: string | null }) {
 export function VisibilityMap() {
     const isDarkMode = useAppStore((s) => s.isDarkMode);
     const date = useAppStore((s) => s.date);
+    const location = useAppStore((s) => s.location);
     const criterion = useAppStore((s) => s.visibilityCriterion);
 
-    const [showVisibility, setShowVisibility] = useState(true);
-    const [showClouds, setShowClouds] = useState(false);
-    const [resolution] = useState(4);
+    const showVisibility = useAppStore((s) => s.showVisibility);
+    const setShowVisibility = useAppStore((s) => s.setShowVisibility);
+    const showClouds = useAppStore((s) => s.showClouds);
+    const setShowClouds = useAppStore((s) => s.setShowClouds);
+    const resolution = useAppStore((s) => s.resolution);
+
+    const [viewState, setViewState] = useState({
+        longitude: location.lng || 39.8579,
+        latitude: location.lat || 21.3891,
+        zoom: location.lat ? 5 : 2,
+    });
+
+    const [selectedPin, setSelectedPin] = useState<{
+        lng: number;
+        lat: number;
+        properties: PinProperties;
+    } | null>(null);
+
+    useEffect(() => {
+        if (location.lat && location.lng) {
+            setViewState({
+                longitude: location.lng,
+                latitude: location.lat,
+                zoom: 5
+            });
+        }
+    }, [location.lat, location.lng]);
 
     const dateTs = date.getTime();
 
@@ -95,6 +135,34 @@ export function VisibilityMap() {
     );
 
     const { cloudTextureUrl, isLoading: isCloudsLoading } = useCloudOverlay(dateTs, showClouds);
+
+    // Fetch recent observations for crowdsourced pins
+    const { data: observations } = trpc.telemetry.getRecentObservations.useQuery(undefined, {
+        refetchOnWindowFocus: false,
+        refetchInterval: 60_000,
+    });
+
+    // Build GeoJSON for observation pins
+    const pinsGeoJSON = useMemo(() => {
+        if (!observations || observations.length === 0) return null;
+        return {
+            type: "FeatureCollection" as const,
+            features: observations.map((obs) => ({
+                type: "Feature" as const,
+                properties: {
+                    id: obs.id,
+                    visualSuccess: obs.visualSuccess ?? "not_seen",
+                    color: PIN_COLORS[obs.visualSuccess ?? "not_seen"] ?? "#9ca3af",
+                    observationTime: obs.observationTime?.toISOString?.() ?? String(obs.observationTime),
+                    notes: obs.notes ?? null,
+                } satisfies PinProperties,
+                geometry: {
+                    type: "Point" as const,
+                    coordinates: [obs.lng, obs.lat],
+                },
+            })),
+        };
+    }, [observations]);
 
     const mapStyle = isDarkMode
         ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
@@ -124,6 +192,14 @@ export function VisibilityMap() {
             "F", ZONE_OPACITIES.F,
             0.2,
         ],
+    };
+
+    const pinLayerPaint: CircleLayerSpecification["paint"] = {
+        "circle-radius": 6,
+        "circle-color": ["get", "color"],
+        "circle-stroke-width": 1.5,
+        "circle-stroke-color": isDarkMode ? "#000" : "#fff",
+        "circle-opacity": 0.9,
     };
 
     return (
@@ -175,13 +251,22 @@ export function VisibilityMap() {
             )}
 
             <Map
-                initialViewState={{
-                    longitude: 39.8579,
-                    latitude: 21.3891,
-                    zoom: 2,
-                }}
+                {...viewState}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onMove={evt => setViewState((evt as any).viewState)}
                 mapStyle={mapStyle}
                 interactive={true}
+                interactiveLayerIds={pinsGeoJSON ? ["observation-pins"] : []}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onClick={(evt: any) => {
+                    const feature = evt.features?.[0];
+                    if (feature?.geometry?.type === "Point") {
+                        const [lng, lat] = feature.geometry.coordinates as [number, number];
+                        setSelectedPin({ lng, lat, properties: feature.properties as PinProperties });
+                    } else {
+                        setSelectedPin(null);
+                    }
+                }}
             >
                 <NavigationControl position="bottom-right" />
 
@@ -191,9 +276,50 @@ export function VisibilityMap() {
                         <Layer
                             id="visibility-zones-fill"
                             type="fill"
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             paint={fillColor as any}
                         />
                     </Source>
+                )}
+
+                {/* Observation pins (crowdsourced sightings) */}
+                {pinsGeoJSON && (
+                    <Source id="observation-pins-source" type="geojson" data={pinsGeoJSON}>
+                        <Layer
+                            id="observation-pins"
+                            type="circle"
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            paint={pinLayerPaint as any}
+                        />
+                    </Source>
+                )}
+
+                {/* Pin popup */}
+                {selectedPin && (
+                    <Popup
+                        longitude={selectedPin.lng}
+                        latitude={selectedPin.lat}
+                        onClose={() => setSelectedPin(null)}
+                        closeButton={true}
+                        anchor="bottom"
+                        offset={10}
+                    >
+                        <div style={{ padding: "4px 2px", fontSize: "11px", minWidth: "140px" }}>
+                            <div style={{ fontWeight: 700, color: selectedPin.properties.color, marginBottom: "4px" }}>
+                                {selectedPin.properties.visualSuccess.replace(/_/g, " ").toUpperCase()}
+                            </div>
+                            <div style={{ opacity: 0.7, marginBottom: "2px" }}>
+                                {new Date(selectedPin.properties.observationTime).toLocaleString(undefined, {
+                                    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                                })}
+                            </div>
+                            {selectedPin.properties.notes && (
+                                <div style={{ fontStyle: "italic", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "4px", marginTop: "4px" }}>
+                                    {selectedPin.properties.notes}
+                                </div>
+                            )}
+                        </div>
+                    </Popup>
                 )}
 
                 {/* Cloud overlay */}

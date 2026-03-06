@@ -45,7 +45,7 @@ export const weatherRouter = router({
                             return;
                         }
 
-                        const json = (await res.json()) as any;
+                        const json = (await res.json()) as { hourly?: { cloud_cover?: number[] } } | { hourly?: { cloud_cover?: number[] } }[];
                         const locations = Array.isArray(json) ? json : [json];
 
                         for (let j = 0; j < batch.length; j++) {
@@ -97,7 +97,7 @@ export const weatherRouter = router({
                 if (!res.ok) {
                     throw new Error(`Open-Meteo fetch failed: ${res.status}`);
                 }
-                const json = (await res.json()) as any;
+                const json = (await res.json()) as { current?: { cloud_cover?: number; temperature_2m?: number; relative_humidity_2m?: number; wind_speed_10m?: number; visibility?: number; } };
 
                 const cloudCover: number = json.current?.cloud_cover ?? 0;
                 const temperature: number = json.current?.temperature_2m ?? 0;

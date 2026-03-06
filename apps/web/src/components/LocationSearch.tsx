@@ -59,7 +59,7 @@ export function LocationSearch({ selectedCity, onSelect, className = "" }: Locat
                 const data = await res.json();
 
                 if (data.results) {
-                    const formatted: Location[] = data.results.map((r: any) => ({
+                    const formatted: Location[] = data.results.map((r: Record<string, unknown>) => ({
                         name: `${r.name}${r.admin1 ? `, ${r.admin1}` : ""}${r.country ? `, ${r.country}` : ""}`,
                         lat: r.latitude,
                         lng: r.longitude,
@@ -79,7 +79,7 @@ export function LocationSearch({ selectedCity, onSelect, className = "" }: Locat
         }, 400);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [query]);
+    }, [query, selectedCity.name, selectedCity.lat, selectedCity.lng]);
 
     return (
         <div className={`relative ${className}`} ref={wrapperRef}>

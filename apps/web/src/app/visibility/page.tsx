@@ -2,6 +2,7 @@
 
 import { VisibilityMap } from "@/components/VisibilityMap";
 import { BestTimeCard } from "@/components/BestTimeCard";
+import { MapControlsPanel } from "@/components/MapControlsPanel";
 import { useAppStore } from "@/store/useAppStore";
 
 export default function VisibilityPage() {
@@ -22,6 +23,8 @@ export default function VisibilityPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Map Sidebar / Controls */}
                     <div className="lg:col-span-1 space-y-6">
+                        <MapControlsPanel />
+
                         <BestTimeCard date={date} location={{ lat: location.lat, lng: location.lng }} />
 
                         <div className="p-6 rounded-2xl glass-card border border-foreground/10 shadow-lg">

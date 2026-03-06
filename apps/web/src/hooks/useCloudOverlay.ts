@@ -132,7 +132,7 @@ export function useCloudOverlay(dateTs: number, enabled: boolean = true) {
                         continue;
                     }
 
-                    const json = (await res.json()) as any;
+                    const json = (await res.json()) as { hourly?: { cloud_cover?: number[] } } | { hourly?: { cloud_cover?: number[] } }[];
                     const locations = Array.isArray(json) ? json : [json];
 
                     for (let j = 0; j < batch.length; j++) {
