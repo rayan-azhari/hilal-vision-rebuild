@@ -7,7 +7,10 @@
 
    Creating an optimized production build ...
  ✓ (serwist) Bundling the service worker script with the URL '/sw.js' and the scope '/'...
- ✓ Compiled successfully in 11.7s
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of C:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\node_modules\.pnpm\@next+mdx@15.1.6_@mdx-js+lo_24775e79982d4b5700022a067efbaaa9\node_modules\@next\mdx\mdx-js-loader.js for build dependencies failed at 'import(require.resolve(plugin[0], { paths: [projectRoot] }))'.
+<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (192kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully in 13.2s
    Linting and checking validity of types ...
 
 ./src/app/archive/page.tsx
