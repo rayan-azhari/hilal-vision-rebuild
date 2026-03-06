@@ -139,6 +139,27 @@ import { Pool } from "pg";
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 ```
 
+### Drizzle Query Operator Imports — MANDATORY
+**Always import drizzle operators (`eq`, `inArray`, `desc`, `sql`, etc.) from `@hilal/db`, never directly from `drizzle-orm`.**
+
+`@hilal/db` re-exports all query helpers from its own `drizzle-orm` instance. If you import from the top-level `drizzle-orm`, TypeScript may resolve a different package instance, causing:
+```
+Type error: Argument of type 'SQL<unknown>' is not assignable to parameter of type 'SQL<unknown>'.
+  Types have separate declarations of a private property 'shouldInlineParams'.
+```
+
+```typescript
+// ✅ Correct — both db and operators from the same package instance
+import { db, eq, inArray, desc, sql, and, or } from "@hilal/db";
+import { someTable } from "@hilal/db"; // schema also from @hilal/db
+
+// ❌ Wrong — mixing instances causes private-type mismatch at build time
+import { db } from "@hilal/db";
+import { eq } from "drizzle-orm"; // ← NEVER do this
+```
+
+Available operator re-exports from `@hilal/db`: `eq, ne, lt, lte, gt, gte, and, or, not, isNull, isNotNull, inArray, notInArray, like, ilike, sql, asc, desc`.
+
 ### PostGIS Point Insertion — LONGITUDE FIRST
 PostGIS uses `(longitude, latitude)` order — the opposite of what most people expect:
 ```sql
@@ -177,9 +198,31 @@ Production keys are set in Vercel env vars. **Never test Stripe payments with li
 - Exception: anonymous donations use `price_data` inline (no Price ID required)
 - Plans need Price IDs from env: `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_PRICE_LIFETIME`
 
+### Stripe Lazy Initialization — MANDATORY
+**Never instantiate `new Stripe(...)` at module level.** Next.js `next build` runs static analysis that executes module-level code. If `STRIPE_SECRET_KEY` is absent at build time, Stripe throws `"Neither apiKey nor config.authenticator provided"` and the build fails.
+
+```typescript
+// ✅ Correct — lazy factory function, called inside the handler
+export const dynamic = "force-dynamic";
+
+function getStripe() {
+    // @ts-expect-error - known API version mismatch
+    return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2023-10-16" });
+}
+
+export async function POST(req: Request) {
+    const stripe = getStripe(); // constructed only at request time
+    // ...
+}
+
+// ❌ Wrong — module-level init crashes the build when env var is absent
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { ... });
+```
+
 ### Webhook Route Requirements
 ```typescript
 // apps/web/src/app/api/stripe/webhook/route.ts
+export const dynamic = "force-dynamic";
 export const runtime = "nodejs";  // ← REQUIRED — raw body parsing needs Node.js
 ```
 Without this, Vercel uses the Edge runtime which doesn't support `stripe.webhooks.constructEvent(rawBody, ...)`.
