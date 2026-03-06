@@ -21,7 +21,14 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/privacy)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/terms)",
       "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\")",
-      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix\\(lint\\): exclude public/ from ESLint — sw.js is a generated Serwist file\")"
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix\\(lint\\): exclude public/ from ESLint — sw.js is a generated Serwist file\")",
+      "Bash(gh run view 10 --log-failed)",
+      "Bash(gh run list --limit 3)",
+      "Bash(gh run list --limit 5)",
+      "Bash(where gh)",
+      "Bash(npx pnpm turbo run build --filter=web)",
+      "Bash(node -e \"const d = require\\(''./node_modules/drizzle-orm''\\); console.log\\(typeof d.desc, typeof d.sql, typeof d.eq, typeof d.inArray\\)\")",
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix\\(build\\): resolve drizzle-orm dual-instance types, Stripe lazy init, VisibilityMap observationTime type\")"
     ]
   }
 }

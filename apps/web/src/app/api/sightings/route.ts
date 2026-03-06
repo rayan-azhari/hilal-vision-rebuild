@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { db } from "@hilal/db";
-import { observationReports } from "@hilal/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { db, eq, sql, observationReports } from "@hilal/db";
 import { computeSunMoonAtSunset } from "@hilal/astronomy";
 
 // ─── In-memory rate limiter (5 req / min / IP) ───────────────────────────────

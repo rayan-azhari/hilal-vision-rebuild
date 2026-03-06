@@ -153,7 +153,7 @@ export function VisibilityMap() {
                     id: obs.id,
                     visualSuccess: obs.visualSuccess ?? "not_seen",
                     color: PIN_COLORS[obs.visualSuccess ?? "not_seen"] ?? "#9ca3af",
-                    observationTime: obs.observationTime?.toISOString?.() ?? String(obs.observationTime),
+                    observationTime: obs.observationTime ?? "",
                     notes: obs.notes ?? null,
                 } satisfies PinProperties,
                 geometry: {

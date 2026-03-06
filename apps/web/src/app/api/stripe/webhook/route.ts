@@ -3,10 +3,13 @@ import Stripe from "stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    // @ts-expect-error - The Stripe SDK's types may require a newer API version string than "2023-10-16", but this version is known to work with the codebase.
-    apiVersion: "2023-10-16",
-});
+export const dynamic = "force-dynamic";
+
+// Lazy init — must not construct Stripe at module level (build-time env vars absent)
+function getStripe() {
+    // @ts-expect-error - The Stripe SDK's types may require a newer API version string than "2023-10-16"
+    return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2023-10-16" });
+}
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -16,7 +19,7 @@ export async function POST(req: Request) {
     let event: Stripe.Event;
 
     try {
-        event = stripe.webhooks.constructEvent(
+        event = getStripe().webhooks.constructEvent(
             body,
             signature,
             process.env.STRIPE_WEBHOOK_SECRET || ""

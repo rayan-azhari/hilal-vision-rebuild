@@ -12,3 +12,6 @@ function getDbConnection() {
 
 export const db = typeof process !== "undefined" && process.env.DATABASE_URL ? getDbConnection() : null;
 export * from "./schema";
+// Re-export drizzle query helpers so consumers use the same drizzle-orm instance as @hilal/db,
+// avoiding "Types have separate declarations of a private property" build errors.
+export { eq, ne, lt, lte, gt, gte, and, or, not, isNull, isNotNull, inArray, notInArray, like, ilike, sql, asc, desc } from "drizzle-orm";

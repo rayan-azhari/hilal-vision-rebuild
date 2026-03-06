@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    // @ts-expect-error - The Stripe SDK's types may require a newer API version string than "2023-10-16", but this version is known to work with the codebase.
-    apiVersion: "2023-10-16",
-});
+export const dynamic = "force-dynamic";
+
+// Lazy init — must not construct Stripe at module level (build-time env vars absent)
+function getStripe() {
+    // @ts-expect-error - The Stripe SDK's types may require a newer API version string than "2023-10-16"
+    return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2023-10-16" });
+}
 
 export async function POST(req: Request) {
     try {
@@ -60,7 +63,7 @@ export async function POST(req: Request) {
 
         const email = user.emailAddresses[0]?.emailAddress;
 
-        const session = await stripe.checkout.sessions.create({
+        const session = await getStripe().checkout.sessions.create({
             success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/visibility?success=true`,
             cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/visibility?canceled=true`,
             customer_email: email,

@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, protectedProcedure, router } from "../trpc";
-import { db } from "@hilal/db";
-import { observationReports, users } from "@hilal/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
+import { db, eq, sql, desc, observationReports, users } from "@hilal/db";
 import { computeSunMoonAtSunset } from "@hilal/astronomy";
 
 // ─── In-memory rate limiter (5 submissions / min / userId) ───────────────────

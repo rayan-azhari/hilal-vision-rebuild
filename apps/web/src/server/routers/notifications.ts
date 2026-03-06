@@ -1,10 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../trpc";
 import { pushSubscriptionSchema } from "@hilal/types";
-import { pushTokens } from "@hilal/db";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import { eq } from "drizzle-orm";
+import { db, eq, pushTokens } from "@hilal/db";
 
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
 // Simple in-memory rate limiter for token registration (10 per IP per minute).
@@ -59,7 +56,7 @@ export const notificationsRouter = router({
                 });
             }
 
-            if (!process.env.DATABASE_URL) {
+            if (!db) {
                 console.error("DATABASE_URL missing in notificationsRouter");
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
@@ -67,22 +64,19 @@ export const notificationsRouter = router({
                 });
             }
 
-            const sql = neon(process.env.DATABASE_URL);
-            const dbInstance = drizzle(sql);
-
             // In a real app with Auth, we would extract Clerk userId from ctx
             const userId = null;
 
             try {
                 // Upsert logic: If token exists, do nothing (or we could update the userId/device)
-                const existing = await dbInstance
+                const existing = await db
                     .select()
                     .from(pushTokens)
                     .where(eq(pushTokens.token, input.token))
                     .limit(1);
 
                 if (existing.length === 0) {
-                    await dbInstance.insert(pushTokens).values({
+                    await db.insert(pushTokens).values({
                         token: input.token,
                         userId: userId,
                         deviceType: input.deviceType,

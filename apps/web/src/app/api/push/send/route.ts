@@ -9,9 +9,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
-import { db } from "@hilal/db";
-import { pushTokens } from "@hilal/db/schema";
-import { inArray } from "drizzle-orm";
+import { db, inArray, pushTokens } from "@hilal/db";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
