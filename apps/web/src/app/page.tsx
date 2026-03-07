@@ -2,9 +2,14 @@
 
 import { Calendar, Map, Activity, ArrowRight, Smartphone, Heart, Crown, Moon } from "lucide-react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { getMoonPhaseInfo, gregorianToHijri } from "@hilal/astronomy";
-import { MoonIllustration } from "@/components/MoonIllustration";
 import { useAppStore } from "@/store/useAppStore";
+
+const MoonIllustration = dynamic(
+  () => import("@/components/MoonIllustration").then((m) => m.MoonIllustration),
+  { ssr: false }
+);
 
 const FEATURE_DEFS = [
   { href: "/visibility", icon: Map, key: "visibilityMap", title: "Global Visibility Map", desc: "Interactive charts powered by Yallop and Odeh criteria." },

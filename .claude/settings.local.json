@@ -31,7 +31,8 @@
       "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix\\(build\\): resolve drizzle-orm dual-instance types, Stripe lazy init, VisibilityMap observationTime type\")",
       "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"docs: update migration knowledge with drizzle operator imports, Stripe lazy init, and env.local placement\")",
       "Bash(npx pnpm add -D @types/geojson --filter web)",
-      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix\\(build\\): add missing @types/geojson dependency for useVisibilityWorker\")"
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix\\(build\\): add missing @types/geojson dependency for useVisibilityWorker\")",
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"fix: hydration mismatch, Turbopack worker transpilation, Odeh zone D/E boundaries\")"
     ]
   }
 }

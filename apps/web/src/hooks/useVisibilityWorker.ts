@@ -22,7 +22,7 @@ function qDataToGeoJSON(
 
     const thresholds = criterion === "yallop"
         ? [-2.0, -0.999, -0.232, -0.160, -0.014, 0.216]
-        : [-10.0, -0.999, -0.96, 2.00, 5.65];
+        : [-10.0, -1.64, -0.96, 2.00, 5.65];
 
     const ZONE_COLORS: Record<string, string> = {
         A: "rgba(74,222,128,0.55)",
@@ -45,8 +45,8 @@ function qDataToGeoJSON(
             if (value >= 5.65) return "A";
             if (value >= 2.00) return "B";
             if (value >= -0.96) return "C";
-            if (value >= -0.999) return "D";
-            return "F";
+            if (value >= -1.64) return "D";
+            return "E";
         }
     };
 

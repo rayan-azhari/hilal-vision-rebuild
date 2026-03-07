@@ -10,7 +10,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@hilal/astronomy", "@hilal/types", "@hilal/ui", "@hilal/db"],
+  transpilePackages: ["@hilal/astronomy", "@hilal/types", "@hilal/ui", "@hilal/db", "astronomy-engine"],
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 };
 
