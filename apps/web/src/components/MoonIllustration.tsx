@@ -51,7 +51,7 @@ export function MoonIllustration({ phase, size = 200 }: { phase: number; size?: 
             <circle cx={cx} cy={cy} r={r + 16} fill="none" stroke="var(--gold)" strokeWidth="0.5" opacity="0.05" />
 
             <circle cx={cx} cy={cy} r={r} fill={`url(#darkSide-${size})`} />
-            <path d={litPath} fill={`url(#moonGlow-${size})`} clipPath={`url(#moonClip-${size})`} />
+            <path d={litPath} fill={`url(#moonGlow-${size})`} clipPath={`url(#moonClip-${size})`} suppressHydrationWarning />
 
             <g clipPath={`url(#moonClip-${size})`} opacity="0.3">
                 {craters.map((c, i) => (
@@ -68,6 +68,7 @@ export function MoonIllustration({ phase, size = 200 }: { phase: number; size?: 
                 stroke="var(--gold)"
                 strokeWidth="0.5"
                 opacity="0.4"
+                suppressHydrationWarning
             />
         </svg>
     );

@@ -8,7 +8,7 @@ const PRODUCT_LINKS = [
     { href: "/moon", label: "Moon Phase" },
     { href: "/calendar", label: "Hijri Calendar" },
     { href: "/horizon", label: "Horizon View" },
-    { href: "/archive", label: "Archive" },
+    { href: "/archive", label: "ICOP Archive" },
 ];
 
 const RESOURCE_LINKS = [

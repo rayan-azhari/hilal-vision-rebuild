@@ -89,7 +89,7 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
                         {/* Sun Current Position */}
                         <ReferenceDot x={minutes} y={sunAlt} r={0} stroke="none" shape={(props: { cx?: number, cy?: number }) => (
                             <g transform={`translate(${(props.cx || 0) - 10}, ${(props.cy || 0) - 10})`}>
-                                <circle cx="10" cy="10" r="14" fill="oklch(0.12 0.02 265)" stroke="#facc15" strokeWidth="1" opacity={0.8} />
+                                <circle cx="10" cy="10" r="14" fill="transparent" stroke="#facc15" strokeWidth="1" opacity={0.8} />
                                 <Sun className="w-5 h-5" color="#facc15" />
                             </g>
                         )} />
@@ -97,7 +97,7 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
                         {/* Moon Current Position */}
                         <ReferenceDot x={minutes} y={moonAlt} r={0} stroke="none" shape={(props: { cx?: number, cy?: number }) => (
                             <g transform={`translate(${(props.cx || 0) - 10}, ${(props.cy || 0) - 10})`}>
-                                <circle cx="10" cy="10" r="14" fill="oklch(0.12 0.02 265)" stroke="#60a5fa" strokeWidth="1" opacity={0.8} />
+                                <circle cx="10" cy="10" r="14" fill="transparent" stroke="#60a5fa" strokeWidth="1" opacity={0.8} />
                                 <Moon className="w-5 h-5" color="#60a5fa" />
                             </g>
                         )} />

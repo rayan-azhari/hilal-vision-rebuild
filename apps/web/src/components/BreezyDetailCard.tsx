@@ -25,7 +25,6 @@ export function BreezyDetailCard({
         <div
             className={`breezy-card flex flex-col gap-3 transition-colors duration-300 ${className ?? ""}`}
             style={{
-                background: "oklch(0.10 0.018 265)",
                 border: "1px solid color-mix(in oklch, var(--border) 40%, transparent)",
                 borderRadius: "1rem",
                 padding: "1.25rem",
@@ -46,7 +45,7 @@ export function BreezyDetailCard({
                         {title}
                     </span>
                     {titleAr && (
-                        <span className="text-[10px] font-arabic text-[#C1A87D]/70">
+                        <span className="text-[10px] font-arabic" style={{ color: "color-mix(in oklch, var(--gold) 70%, transparent)" }}>
                             {titleAr}
                         </span>
                     )}
@@ -54,7 +53,10 @@ export function BreezyDetailCard({
                 {detailsHref && (
                     <a
                         href={detailsHref}
-                        className="text-[10px] flex items-center gap-0.5 transition-colors text-[#C1A87D]/50 hover:text-[#C1A87D]"
+                        className="text-[10px] flex items-center gap-0.5 transition-colors"
+                        style={{ color: "color-mix(in oklch, var(--gold) 50%, transparent)" }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "var(--gold)"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "color-mix(in oklch, var(--gold) 50%, transparent)"; }}
                     >
                         Details <span>→</span>
                     </a>

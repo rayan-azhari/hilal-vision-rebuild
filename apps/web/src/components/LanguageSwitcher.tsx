@@ -30,6 +30,7 @@ export default function LanguageSwitcher() {
                     key={lang.code}
                     onClick={() => handleChange(lang.code)}
                     className="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all"
+                    suppressHydrationWarning
                     style={
                         i18n.language === lang.code
                             ? { background: "color-mix(in oklch, var(--gold) 20%, transparent)", color: "var(--gold)", boxShadow: "0 0 6px color-mix(in oklch, var(--gold) 20%, transparent)" }

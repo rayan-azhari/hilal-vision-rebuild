@@ -89,9 +89,13 @@ export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props
                         <clipPath id="horizonClip">
                             <circle cx={CX} cy={CY} r={R_HORIZON} />
                         </clipPath>
+                        <radialGradient id="skyDomeGradient" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="oklch(0.25 0.07 245)" />
+                            <stop offset="100%" stopColor="oklch(0.12 0.04 245)" />
+                        </radialGradient>
                     </defs>
 
-                    <circle cx={CX} cy={CY} r={R_HORIZON} fill="oklch(0.12 0.02 265)" stroke="color-mix(in oklch, var(--border) 40%, transparent)" strokeWidth="1" />
+                    <circle cx={CX} cy={CY} r={R_HORIZON} fill="url(#skyDomeGradient)" stroke="color-mix(in oklch, var(--border) 40%, transparent)" strokeWidth="1" />
 
                     {[15, 30, 45, 60, 75].map(alt => (
                         <circle
@@ -121,6 +125,7 @@ export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props
                                 strokeWidth="1"
                                 opacity={0.15}
                                 strokeDasharray="2 4"
+                                suppressHydrationWarning
                             />
                         );
                     })}
@@ -135,31 +140,31 @@ export function SkyDomeChart({ date, location, minutes, onMinutesChange }: Props
                         <text x={CX - R_HORIZON - 14} y={CY}>W</text>
                     </g>
 
-                    <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2" strokeDasharray="4 4" opacity="0.15" />
-                    <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 4" opacity="0.1" />
+                    <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2" strokeDasharray="4 4" opacity="0.15" suppressHydrationWarning />
+                    <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 4" opacity="0.1" suppressHydrationWarning />
 
                     <g clipPath="url(#horizonClip)">
-                        <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2" opacity="0.6" />
-                        <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2" opacity="0.5" />
+                        <path d={sunPathD} fill="none" stroke="#facc15" strokeWidth="2" opacity="0.6" suppressHydrationWarning />
+                        <path d={moonPathD} fill="none" stroke="#60a5fa" strokeWidth="2" opacity="0.5" suppressHydrationWarning />
 
-                        <g transform={`translate(${currentSunPos.x}, ${currentSunPos.y})`} opacity={sunAlt >= 0 ? 1 : 0}>
-                            <circle cx="0" cy="0" r="14" fill="oklch(0.10 0.018 265)" stroke="#facc15" strokeWidth="1" opacity={0.8} />
+                        <g transform={`translate(${currentSunPos.x}, ${currentSunPos.y})`} opacity={sunAlt >= 0 ? 1 : 0} suppressHydrationWarning>
+                            <circle cx="0" cy="0" r="14" fill="transparent" stroke="#facc15" strokeWidth="1" opacity={0.8} />
                             <Sun className="w-5 h-5" color="#facc15" x="-10" y="-10" />
                         </g>
 
-                        <g transform={`translate(${currentMoonPos.x}, ${currentMoonPos.y})`} opacity={moonAlt >= 0 ? 1 : 0}>
-                            <circle cx="0" cy="0" r="14" fill="oklch(0.10 0.018 265)" stroke="#60a5fa" strokeWidth="1" opacity={0.8} />
+                        <g transform={`translate(${currentMoonPos.x}, ${currentMoonPos.y})`} opacity={moonAlt >= 0 ? 1 : 0} suppressHydrationWarning>
+                            <circle cx="0" cy="0" r="14" fill="transparent" stroke="#60a5fa" strokeWidth="1" opacity={0.8} />
                             <Moon className="w-5 h-5" color="#60a5fa" x="-10" y="-10" />
                         </g>
                     </g>
 
-                    <g transform={`translate(${currentSunPos.x}, ${currentSunPos.y})`} opacity={sunAlt < 0 ? 0.4 : 0}>
-                        <circle cx="0" cy="0" r="8" fill="oklch(0.10 0.018 265)" stroke="#facc15" strokeWidth="1" />
+                    <g transform={`translate(${currentSunPos.x}, ${currentSunPos.y})`} opacity={sunAlt < 0 ? 0.4 : 0} suppressHydrationWarning>
+                        <circle cx="0" cy="0" r="8" fill="transparent" stroke="#facc15" strokeWidth="1" />
                         <Sun className="w-3 h-3" color="#facc15" x="-6" y="-6" />
                     </g>
 
-                    <g transform={`translate(${currentMoonPos.x}, ${currentMoonPos.y})`} opacity={moonAlt < 0 ? 0.4 : 0}>
-                        <circle cx="0" cy="0" r="8" fill="oklch(0.10 0.018 265)" stroke="#60a5fa" strokeWidth="1" />
+                    <g transform={`translate(${currentMoonPos.x}, ${currentMoonPos.y})`} opacity={moonAlt < 0 ? 0.4 : 0} suppressHydrationWarning>
+                        <circle cx="0" cy="0" r="8" fill="transparent" stroke="#60a5fa" strokeWidth="1" />
                         <Moon className="w-3 h-3" color="#60a5fa" x="-6" y="-6" />
                     </g>
                 </svg>

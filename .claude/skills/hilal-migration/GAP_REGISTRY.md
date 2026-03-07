@@ -1,6 +1,6 @@
 # Hilal Vision — Migration Gap Registry
 
-**Last updated:** 2026-03-06 (G-10, G-11, G-09, G-18, G-05, G-12, G-14, G-13, G-07, G-15 complete)
+**Last updated:** 2026-03-07 (G-10, G-11, G-09, G-18, G-05, G-12, G-14, G-13, G-07, G-15, G-24, G-25, G-02, G-03, G-21, G-23 complete)
 **Source of truth:** Update this file whenever a gap is opened, closed, or re-prioritized.
 
 Statuses: `Open` | `In Progress` | `Complete` | `Blocked`
@@ -12,8 +12,8 @@ Statuses: `Open` | `In Progress` | `Complete` | `Blocked`
 | ID | Domain | Gap Description | Legacy Source | New Target | Status |
 |----|--------|-----------------|---------------|------------|--------|
 | G-01 | Pages | GlobePage as a dedicated `/globe` route (465 lines legacy) — full 3D globe with atmosphere, day/night terminator, cloud overlay, atmospheric overrides, zone texture | `_legacy/client/src/pages/GlobePage.tsx` | `apps/web/src/app/globe/page.tsx` — MISSING | Open |
-| G-02 | Data | `icop-history.json` — 1,000+ ICOP historical crescent observations. Archive page fetches this but the file doesn't exist | `_legacy/` ICOP scraper (Cheerio) | `apps/web/public/icop-history.json` — MISSING | Open |
-| G-03 | Workers | `archiveMiniMap.worker.ts` — renders ICOP observation points onto a mini-globe texture for the Archive page | `_legacy/client/src/workers/archiveMiniMap.worker.ts` | `apps/web/src/workers/archiveMiniMap.worker.ts` — MISSING | Open |
+| G-02 | Data | `icop-history.json` — 1,000+ ICOP historical crescent observations. Archive page fetches this but the file doesn't exist | `_legacy/` ICOP scraper (Cheerio) | `apps/web/public/icop-history.json` — 14 months, 1028 records (1440/9–1446/10). Static snapshot; no live ICOP API exists. | Complete |
+| G-03 | Workers | `archiveMiniMap.worker.ts` — renders visibility mini-map for the Archive page | `_legacy/client/src/workers/archiveMiniMap.worker.ts` | `apps/web/src/app/archive/page.tsx` — inline canvas component (Turbopack worker incompatibility; 966 pts synced on main thread) | Complete |
 | G-04 | Mobile | Entire mobile app (Expo Router + React Native) — not started. Capacitor wrapping the legacy Vite app is the current mobile strategy | `_legacy/android/`, `_legacy/ios/`, Capacitor config | `apps/mobile/` — NOT STARTED | Open |
 | G-05 | Hooks | `useAtmosphericData` — manages temp/pressure/elevation overrides + auto-fetch from Open-Meteo elevation API | `_legacy/client/src/hooks/useAtmosphericData.ts` | `apps/web/src/hooks/useAtmosphericData.ts` | Complete |
 | G-06 | API | S3/R2 image upload pipeline — photo upload for sighting reports is a placeholder | `_legacy/` image handling | `apps/web/src/app/api/` — placeholder only | Open |
@@ -38,11 +38,11 @@ Statuses: `Open` | `In Progress` | `Complete` | `Blocked`
 | G-18 | Backend | `telemetry.getRecentObservations` tRPC query — fetch recent public sightings for feed and map pins | `_legacy/server/appRouter.ts` | `apps/web/src/server/routers/telemetry.ts` | Complete |
 | G-19 | i18n | Missing translation keys for CalendarPage, ArchivePage, HorizonPage, GlobePage, MapPage, MoonPage | `_legacy/client/src/locales/{en,ar,ur}/common.json` | `apps/web/src/locales/` — these page sections missing | Open |
 | G-20 | UI | Light theme cross-page polish — dark mode is well-implemented; light mode needs review across all pages | All legacy pages | All `apps/web/src/app/` pages | Open |
-| G-21 | Auth | Clerk Sign In button conditional rendering — needs verification that auth state shows correctly | `_legacy/client/src/components/Layout.tsx` | `apps/web/src/components/Header.tsx` | Open |
+| G-21 | Auth | Clerk Sign In button conditional rendering — needs verification that auth state shows correctly | `_legacy/client/src/components/Layout.tsx` | `apps/web/src/components/Header.tsx` | Complete |
 | G-22 | Backend | Email signup endpoint — waitlist/newsletter registration | `_legacy/drizzle/schema.ts` `emailSignups` table | Not in new API routes | Open |
-| G-23 | UI | Moon color consistency — `var(--gold)` must be used wherever a moon/crescent is displayed | `_legacy/` consistent use of gold | `apps/web/src/components/MoonGlobe.tsx`, `MoonIllustration.tsx` — needs audit | Open |
-| G-24 | UI | Main page moon phase — home page moon illustration must reflect actual current moon phase | `_legacy/client/src/pages/Home.tsx` | `apps/web/src/app/page.tsx` | Open |
-| G-25 | Map | Visibility map auto-location — 2D map should default to detected location if geolocation is enabled | `_legacy/client/src/pages/MapPage.tsx` | `apps/web/src/app/visibility/page.tsx` | Open |
+| G-23 | UI | Moon color consistency — `var(--gold)` must be used wherever a moon/crescent is displayed | `_legacy/` consistent use of gold | `apps/web/src/components/MoonIllustration.tsx` already correct; `BreezyDetailCard`, `BreezyFullCard`, `moon/page.tsx` all fixed | Complete |
+| G-24 | UI | Main page moon phase — home page moon illustration must reflect actual current moon phase | `_legacy/client/src/pages/Home.tsx` | `apps/web/src/app/page.tsx` | Complete |
+| G-25 | Map | Visibility map auto-location — 2D map should default to detected location if geolocation is enabled | `_legacy/client/src/pages/MapPage.tsx` | `apps/web/src/components/VisibilityMap.tsx` | Complete |
 | G-26 | Backend | Push notifications tRPC router — subscribe/unsubscribe for FCM tokens | `_legacy/server/routers/notifications.ts` | `apps/web/src/server/routers/notifications.ts` — partial | Open |
 
 ---

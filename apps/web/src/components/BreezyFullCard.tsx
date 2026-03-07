@@ -26,7 +26,7 @@ export function BreezyFullCard({
         <div
             className={`breezy-card-full p-6 rounded-2xl ${className ?? ""}`}
             style={{
-                background: "oklch(0.10 0.018 265)",
+                background: "var(--card)",
                 border: "1px solid color-mix(in oklch, var(--border) 40%, transparent)",
             }}
         >
@@ -34,13 +34,13 @@ export function BreezyFullCard({
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-2">
                     {icon && (
-                        <span className="w-4 h-4 flex items-center justify-center shrink-0 [&>svg]:w-full [&>svg]:h-full text-[#C1A87D]/50">{icon}</span>
+                        <span className="w-4 h-4 flex items-center justify-center shrink-0 [&>svg]:w-full [&>svg]:h-full" style={{ color: "color-mix(in oklch, var(--gold) 50%, transparent)" }}>{icon}</span>
                     )}
                     <span className="text-sm font-medium text-foreground">
                         {title}
                     </span>
                     {titleAr && (
-                        <span className="text-xs font-arabic text-[#C1A87D]/70">
+                        <span className="text-xs font-arabic" style={{ color: "color-mix(in oklch, var(--gold) 70%, transparent)" }}>
                             {titleAr}
                         </span>
                     )}
@@ -52,10 +52,16 @@ export function BreezyFullCard({
                         {tabs.map(tab => (
                             <button
                                 key={tab.value}
-                                className={`text-xs px-3 py-1.5 rounded-full transition-colors ${activeTab === tab.value
-                                        ? "bg-[#C1A87D]/20 text-[#C1A87D] border border-[#C1A87D]/40"
-                                        : "bg-foreground/5 text-muted-foreground border border-transparent hover:bg-foreground/10"
-                                    }`}
+                                className="text-xs px-3 py-1.5 rounded-full transition-colors border"
+                                style={activeTab === tab.value ? {
+                                    background: "color-mix(in oklch, var(--gold) 20%, transparent)",
+                                    color: "var(--gold)",
+                                    borderColor: "color-mix(in oklch, var(--gold) 40%, transparent)",
+                                } : {
+                                    background: "color-mix(in oklch, var(--foreground) 5%, transparent)",
+                                    color: "var(--muted-foreground)",
+                                    borderColor: "transparent",
+                                }}
                                 onClick={() => onTabChange?.(tab.value)}
                             >
                                 {tab.label}

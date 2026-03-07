@@ -306,7 +306,7 @@ export default function HorizonPage() {
     const hijri = gregorianToHijri(date);
 
     return (
-        <div className="min-h-screen pt-24 pb-12 flex flex-col max-w-[1400px] mx-auto px-4">
+        <div className="min-h-screen pt-6 pb-12 flex flex-col max-w-[1400px] mx-auto px-4">
             {/* Header */}
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="flex flex-col">

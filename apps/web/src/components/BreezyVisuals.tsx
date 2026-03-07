@@ -125,6 +125,7 @@ export function IlluminationArc({ illumination }: { illumination: number }) {
                     strokeDasharray={c}
                     strokeDashoffset={c - activeLength}
                     className="transition-all duration-1000 ease-out"
+                    suppressHydrationWarning
                 />
             </svg>
         </div>
@@ -143,6 +144,7 @@ export function LunarAgeProgress({ age }: { age: number }) {
                     width: `${progress}%`,
                     background: "linear-gradient(90deg, #A88D5D, #E5D3B3)"
                 }}
+                suppressHydrationWarning
             />
         </div>
     );

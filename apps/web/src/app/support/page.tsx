@@ -20,7 +20,7 @@ export default function SupportPage() {
     ];
 
     return (
-        <div className="pt-24 pb-16 max-w-[1200px] mx-auto px-4 min-h-screen">
+        <div className="pt-6 pb-16 max-w-[1200px] mx-auto px-4 min-h-screen">
             {/* Hero */}
             <div className="text-center mb-16">
                 <p className="text-sm font-bold text-primary-400 uppercase tracking-widest mb-4">

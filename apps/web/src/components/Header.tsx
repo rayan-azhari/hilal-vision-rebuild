@@ -2,7 +2,7 @@
 
 import { ThemeToggle } from "./ThemeToggle";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { Moon, MapPin, Calendar as CalendarIcon, Filter, Menu, X, Eye } from "lucide-react";
+import { Moon, Calendar as CalendarIcon, Filter, Menu, X, Eye, Globe2, Compass, Archive as ArchiveIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -25,12 +25,12 @@ export function Header() {
     const setShowSightingModal = useAppStore((state) => state.setShowSightingModal);
 
     const navItems = [
-        { href: "/visibility", label: "Visibility" },
-        { href: "/moon", label: "Moon" },
-        { href: "/calendar", label: "Calendar" },
-        { href: "/horizon", label: "Horizon" },
-        { href: "/archive", label: "Archive" },
-        { href: "/support", label: "Support" },
+        { href: "/visibility", label: "Visibility Map", Icon: Globe2 },
+        { href: "/moon", label: "Moon Phase", Icon: Moon },
+        { href: "/calendar", label: "Hijri Calendar", Icon: CalendarIcon },
+        { href: "/horizon", label: "Horizon View", Icon: Compass },
+        { href: "/archive", label: "ICOP Archive", Icon: ArchiveIcon },
+        { href: "/support", label: "Support", Icon: null },
     ];
 
     return (
@@ -53,11 +53,12 @@ export function Header() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${pathname.startsWith(item.href)
+                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1 ${pathname.startsWith(item.href)
                                     ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
                                     : "text-foreground/70 hover:text-foreground hover:bg-foreground/5"
                                     }`}
                             >
+                                {item.Icon && <item.Icon className="w-3 h-3 flex-shrink-0" />}
                                 {item.label}
                             </Link>
                         ))}
@@ -195,11 +196,12 @@ export function Header() {
                                     key={item.href}
                                     href={item.href}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${pathname.startsWith(item.href)
+                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${pathname.startsWith(item.href)
                                         ? "bg-primary-500 text-white"
                                         : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                                         }`}
                                 >
+                                    {item.Icon && <item.Icon className="w-4 h-4 flex-shrink-0" />}
                                     {item.label}
                                 </Link>
                             ))}
@@ -215,9 +217,18 @@ export function Header() {
                         I saw it!
                     </button>
 
-                    <button className="w-full py-3 rounded-xl bg-foreground text-background font-bold mt-2">
-                        Sign In / Register
-                    </button>
+                    {isLoaded && !userId && (
+                        <SignInButton mode="modal">
+                            <button className="w-full py-3 rounded-xl bg-foreground text-background font-bold mt-2">
+                                Sign In
+                            </button>
+                        </SignInButton>
+                    )}
+                    {isLoaded && userId && (
+                        <div className="flex justify-center mt-2">
+                            <UserButton />
+                        </div>
+                    )}
                 </div>
             )}
         </header>

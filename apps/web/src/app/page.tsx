@@ -3,8 +3,8 @@
 import { Calendar, Map, Activity, ArrowRight, Smartphone, Heart, Crown, Moon } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import { getMoonPhaseInfo, gregorianToHijri } from "@hilal/astronomy";
-import { useAppStore } from "@/store/useAppStore";
 
 const MoonIllustration = dynamic(
   () => import("@/components/MoonIllustration").then((m) => m.MoonIllustration),
@@ -26,9 +26,12 @@ const ZONE_LEGEND = [
 ];
 
 export default function Home() {
-  const date = useAppStore((s) => s.date);
-  const moonInfo = getMoonPhaseInfo(date);
-  const hijri = gregorianToHijri(date);
+  // Always show TODAY's moon phase — store date may be set to a different date
+  // for visibility calculations and must not affect the home page display.
+  // useState initializer runs once per mount, safe from hydration issues
+  // because moon phase / Hijri date won't change within a single server→client cycle.
+  const [moonInfo] = useState(() => getMoonPhaseInfo(new Date()));
+  const [hijri] = useState(() => gregorianToHijri(new Date()));
 
   return (
     <div className="relative">

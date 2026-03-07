@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Moon, Sun, ArrowRight, Clock, Eye } from "lucide-react";
 import { getMoonPhaseInfo, computeSunMoonAtSunset } from "@hilal/astronomy";
 import { useAppStore } from "@/store/useAppStore";
@@ -59,12 +57,12 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
                     >
                         <svg viewBox="0 0 28 28" width={28} height={28} suppressHydrationWarning>
                             <circle cx={cx} cy={cy} r={r} fill="oklch(0.15 0.02 265)" />
-                            <path d={litPath} fill="#C1A87D" opacity="0.85" />
+                            <path d={litPath} fill="var(--gold)" opacity="0.85" suppressHydrationWarning />
                         </svg>
                         <span
                             className="text-xs"
                             style={{
-                                color: isToday ? "#C1A87D" : "var(--muted-foreground)",
+                                color: isToday ? "var(--gold)" : "var(--muted-foreground)",
                                 fontWeight: isToday ? 600 : 400,
                             }}
                         >
@@ -83,13 +81,17 @@ export default function MoonPage() {
     const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(date, location));
     const [countdown, setCountdown] = useState("");
 
-    const [sharedMinutes, setSharedMinutes] = useState(() => {
+    // SSR-safe default (noon) — updated to current time on client via useEffect
+    const [sharedMinutes, setSharedMinutes] = useState(12 * 60);
+
+    // Set sharedMinutes to current time on initial mount (client only)
+    useEffect(() => {
         const now = new Date();
         if (now.toDateString() === date.toDateString()) {
-            return now.getHours() * 60 + now.getMinutes();
+            setSharedMinutes(now.getHours() * 60 + now.getMinutes());
         }
-        return 12 * 60;
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         setMoonInfo(getMoonPhaseInfo(date));
@@ -122,14 +124,13 @@ export default function MoonPage() {
     const phasePercent = moonInfo.phase * 100;
 
     return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <main className="flex-1 container pt-24 pb-16 max-w-7xl mx-auto px-4 border-l border-r border-border/20">
+        <div className="pt-6 pb-16 max-w-7xl mx-auto px-4 border-l border-r border-border/20">
 
                 <div className="flex flex-col mb-12 relative">
-                    <div className="absolute top-0 left-0 w-32 h-32 bg-[#C1A87D]/5 rounded-full blur-[60px] pointer-events-none -translate-x-12 -translate-y-12" />
+                    <div className="absolute top-0 left-0 w-32 h-32 rounded-full blur-[60px] pointer-events-none -translate-x-12 -translate-y-12" style={{ background: "color-mix(in oklch, var(--gold) 5%, transparent)" }} />
                     <div className="z-10 relative">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-foreground/5 border border-border/40 text-xs font-medium text-muted-foreground mb-4">
-                            <Moon className="w-3.5 h-3.5 text-[#C1A87D]" />
+                            <Moon className="w-3.5 h-3.5" style={{ color: "var(--gold)" }} />
                             <span>Precision Analytics</span>
                         </div>
                         <h1 className="text-4xl md:text-5xl font-display font-medium tracking-tight mb-3">
@@ -196,7 +197,7 @@ export default function MoonPage() {
                         {/* Moon illustration */}
                         <div
                             className="breezy-card lg:col-span-1 p-8 flex flex-col items-center justify-center rounded-2xl border border-border/40"
-                            style={{ minHeight: "360px", background: "oklch(0.10 0.018 265)" }}
+                            style={{ minHeight: "360px" }}
                         >
                             <div
                                 style={{ filter: "drop-shadow(0 0 40px oklch(0.78 0.15 75 / 0.35))" }}
@@ -214,7 +215,7 @@ export default function MoonPage() {
                                 <p className="mt-2 text-sm text-muted-foreground">
                                     {Math.round(moonInfo.illuminatedFraction * 100)}% Illuminated • {(moonInfo.moonAge / 24).toFixed(1)} Days Old
                                 </p>
-                                <div className="text-sm mb-3 font-arabic text-[#C1A87D]/80">
+                                <div className="text-sm mb-3 font-arabic" style={{ color: "color-mix(in oklch, var(--gold) 80%, transparent)" }}>
                                     {moonInfo.phaseArabic}
                                 </div>
 
@@ -226,8 +227,9 @@ export default function MoonPage() {
                                         className="h-full rounded-full transition-all duration-500"
                                         style={{
                                             width: `${phasePercent}%`,
-                                            background: "linear-gradient(90deg, #C1A87D, #E5D3B3)",
+                                            background: "linear-gradient(90deg, var(--gold), var(--gold-glow))",
                                         }}
+                                        suppressHydrationWarning
                                     />
                                 </div>
                                 <div className="text-xs mt-1 text-muted-foreground">
@@ -245,7 +247,7 @@ export default function MoonPage() {
                                 primaryValue={Math.round(moonInfo.illuminatedFraction * 100).toString()}
                                 primaryUnit="%"
                                 statusLabel={moonInfo.phaseName}
-                                accentColour="#C1A87D"
+                                accentColour="var(--gold)"
                             />
                             <BreezyDetailCard
                                 title={"Lunar Age"}
@@ -312,8 +314,6 @@ export default function MoonPage() {
                     <PhysicsExplanations />
 
                 </div>
-            </main>
-            <Footer />
         </div>
     );
 }

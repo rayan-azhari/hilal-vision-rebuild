@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Archive, ChevronLeft, ChevronRight, Info, Download } from "lucide-react";
-import { hijriToGregorian, computeSunMoonAtSunset, HIJRI_MONTHS, MAJOR_CITIES, type VisibilityZone } from "@hilal/astronomy";
+import { Archive, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import Map, { useMap } from "@vis.gl/react-maplibre";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { hijriToGregorian, gregorianToHijri, computeSunMoonAtSunset, HIJRI_MONTHS, MAJOR_CITIES, type VisibilityZone } from "@hilal/astronomy";
+import { useAppStore } from "@/store/useAppStore";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
     A: "#4ade80",
@@ -11,6 +14,16 @@ const ZONE_COLORS: Record<VisibilityZone, string> = {
     D: "#f87171",
     E: "#6b7280",
     F: "#1f2937",
+};
+
+// RGBA values for the mini-map canvas pixels (~60% opacity for non-F zones)
+const ZONE_RGBA: Record<VisibilityZone, [number, number, number, number]> = {
+    A: [74, 222, 128, 153],
+    B: [250, 204, 21, 153],
+    C: [251, 146, 60, 153],
+    D: [248, 113, 113, 153],
+    E: [107, 114, 128, 153],
+    F: [31, 41, 55, 80],
 };
 
 interface MonthSummary {
@@ -39,6 +52,143 @@ interface IcopMonthData {
     observations: IcopObservation[];
 }
 
+/**
+ * Imperative raster layer — adds the visibility texture as an image source
+ * on the mini-map, identical to VisibilityZoneLayer in VisibilityMap.tsx.
+ */
+function MiniMapZoneLayer({ textureUrl }: { textureUrl: string | null }) {
+    const { current: map } = useMap();
+
+    useEffect(() => {
+        if (!map) return;
+        const m = map.getMap();
+        const sourceId = "mini-visibility-source";
+        const layerId = "mini-visibility-layer";
+
+        function addLayer() {
+            try {
+                if (m.getLayer(layerId)) m.removeLayer(layerId);
+                if (m.getSource(sourceId)) m.removeSource(sourceId);
+                if (!textureUrl) return;
+
+                m.addSource(sourceId, {
+                    type: "image",
+                    url: textureUrl,
+                    coordinates: [
+                        [-180, 85.051129],
+                        [180, 85.051129],
+                        [180, -85.051129],
+                        [-180, -85.051129],
+                    ],
+                });
+                m.addLayer({
+                    id: layerId,
+                    type: "raster",
+                    source: sourceId,
+                    paint: { "raster-opacity": 0.85, "raster-fade-duration": 0 },
+                });
+            } catch (err) {
+                console.error("[MiniMapZoneLayer]", err);
+            }
+        }
+
+        if (m.isStyleLoaded()) {
+            addLayer();
+        } else {
+            m.once("style.load", addLayer);
+        }
+
+        return () => {
+            try {
+                if (m.getLayer(layerId)) m.removeLayer(layerId);
+                if (m.getSource(sourceId)) m.removeSource(sourceId);
+            } catch { /* map may be destroyed */ }
+        };
+    }, [map, textureUrl]);
+
+    return null;
+}
+
+/**
+ * Full-width MapLibre visibility map for the selected Hijri month.
+ * Computes an RGBA pixel grid (8° resolution, Mercator projection) then
+ * blurs + upscales it to a 1024×512 texture — same pipeline as
+ * useVisibilityWorker — and overlays it on a real CartoDB basemap.
+ */
+function VisibilityMiniMap({ year, month }: { year: number; month: number }) {
+    const isDarkMode = useAppStore((s) => s.isDarkMode);
+    const [textureUrl, setTextureUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        const date = hijriToGregorian(year, month, 1);
+
+        // Mercator pixel grid (matches useVisibilityWorker projection)
+        const resolution = 8;
+        const W = Math.floor(360 / resolution);
+        const H = Math.floor(180 / resolution);
+        const pixels = new Uint8ClampedArray(W * H * 4);
+        const maxLat = 85.051129;
+
+        for (let py = 0; py < H; py++) {
+            for (let px = 0; px < W; px++) {
+                const mercY = Math.PI - ((py + 0.5) / H) * 2 * Math.PI;
+                let lat = (2 * Math.atan(Math.exp(mercY)) - Math.PI / 2) * (180 / Math.PI);
+                lat = Math.max(-maxLat, Math.min(maxLat, lat));
+                const lng = -180 + ((px + 0.5) / W) * 360;
+
+                const data = computeSunMoonAtSunset(date, { lat, lng });
+                const zone = data.visibility;
+                const [r, g, b] = ZONE_RGBA[zone];
+                const alpha = zone === "F" ? 40 : 180;
+
+                const off = (py * W + px) * 4;
+                pixels[off] = r;
+                pixels[off + 1] = g;
+                pixels[off + 2] = b;
+                pixels[off + 3] = alpha;
+            }
+        }
+
+        // Upscale with blur (same as pixelsToTextureUrl in useVisibilityWorker)
+        const offCanvas = document.createElement("canvas");
+        offCanvas.width = W;
+        offCanvas.height = H;
+        const offCtx = offCanvas.getContext("2d");
+        if (!offCtx) return;
+        offCtx.putImageData(new ImageData(pixels, W, H), 0, 0);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 1024;
+        canvas.height = 512;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.filter = "blur(12px)";
+        ctx.drawImage(offCanvas, -1024, 0, 1024, 512);
+        ctx.drawImage(offCanvas, 0, 0, 1024, 512);
+        ctx.drawImage(offCanvas, 1024, 0, 1024, 512);
+
+        setTextureUrl(canvas.toDataURL());
+    }, [year, month]);
+
+    const mapStyle = isDarkMode
+        ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+        : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+
+    return (
+        <div style={{ height: "420px" }} className="w-full">
+            <Map
+                initialViewState={{ longitude: 0, latitude: 20, zoom: 0.8 }}
+                mapStyle={mapStyle}
+                interactive={false}
+                attributionControl={false}
+                style={{ width: "100%", height: "100%" }}
+            >
+                <MiniMapZoneLayer textureUrl={textureUrl} />
+            </Map>
+        </div>
+    );
+}
+
 function computeMonthSummary(year: number, month: number): MonthSummary {
     const newMoonDate = hijriToGregorian(year, month, 1);
 
@@ -58,7 +208,7 @@ function computeMonthSummary(year: number, month: number): MonthSummary {
 }
 
 export default function ArchivePage() {
-    const [selectedYear, setSelectedYear] = useState(1465);
+    const [selectedYear, setSelectedYear] = useState(1446); // SSR-safe default; updated on mount
     const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
     const [monthDetail, setMonthDetail] = useState<MonthSummary | null>(null);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
@@ -69,6 +219,22 @@ export default function ArchivePage() {
     const icopCacheRef = useRef<IcopMonthData[] | null>(null);
 
     const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
+
+    // Default to current Hijri year and month on mount, and auto-load it
+    useEffect(() => {
+        const today = gregorianToHijri(new Date());
+        const year = today.year;
+        const month = today.month;
+        setSelectedYear(year);
+        setSelectedMonth(month);
+        setIsLoadingDetail(true);
+        setTimeout(() => {
+            const summary = computeMonthSummary(year, month);
+            setMonthDetail(summary);
+            setIsLoadingDetail(false);
+        }, 50);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (selectedMonth === null) return;
@@ -120,7 +286,7 @@ export default function ArchivePage() {
     };
 
     return (
-        <div className="pt-24 pb-12 max-w-[1400px] mx-auto px-4 min-h-screen">
+        <div className="pt-6 pb-12 max-w-[1400px] mx-auto px-4 min-h-screen">
             {/* Header */}
             <div className="mb-12 flex flex-col items-center text-center">
                 <div className="w-16 h-16 rounded-2xl bg-primary-500/20 text-primary-400 flex items-center justify-center mb-6 shadow-xl shadow-primary-500/10">
@@ -278,6 +444,7 @@ export default function ArchivePage() {
                                         Global: Zone {monthDetail.globalZone}
                                     </span>
                                 </div>
+
                             </div>
 
                             {/* ICOP Actual Observations */}
@@ -361,6 +528,36 @@ export default function ArchivePage() {
                     )}
                 </div>
             </div>
+
+            {/* Full-width visibility map — shown once a month is selected */}
+            {monthDetail && !isLoadingDetail && (
+                <div className="mt-6 glass rounded-3xl border border-foreground/10 shadow-xl overflow-hidden">
+                    <div className="px-6 pt-5 pb-3 flex items-center justify-between">
+                        <div>
+                            <div className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-1">
+                                Global Visibility Map
+                            </div>
+                            <div className="text-base font-bold text-foreground">
+                                {HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.en} {monthDetail.hijriYear} AH
+                                <span className="ml-3 text-sm font-normal text-foreground/50">
+                                    — {monthDetail.newMoonDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border"
+                            style={{
+                                backgroundColor: `color-mix(in srgb, ${ZONE_COLORS[monthDetail.globalZone]} 15%, transparent)`,
+                                borderColor: `color-mix(in srgb, ${ZONE_COLORS[monthDetail.globalZone]} 35%, transparent)`,
+                                color: ZONE_COLORS[monthDetail.globalZone],
+                            }}
+                        >
+                            Zone {monthDetail.globalZone}
+                        </div>
+                    </div>
+                    <VisibilityMiniMap year={monthDetail.hijriYear} month={monthDetail.hijriMonth} />
+                </div>
+            )}
         </div>
     );
 }

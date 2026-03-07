@@ -2,8 +2,6 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import {
     gregorianToHijri,
     hijriToGregorian,
@@ -177,9 +175,7 @@ export default function CalendarPage() {
     }, [calendarSystem, today]);
 
     return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <Header />
-            <main className="flex-1 container pt-24 pb-8 max-w-7xl mx-auto px-4 border-l border-r border-border/20">
+        <div className="pt-6 pb-8 max-w-7xl mx-auto px-4 border-l border-r border-border/20">
 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 relative">
                     <div className="absolute top-0 left-0 w-32 h-32 bg-[#C1A87D]/5 rounded-full blur-[60px] pointer-events-none -translate-x-12 -translate-y-12" />
@@ -406,7 +402,6 @@ export default function CalendarPage() {
                         <CrescentCountryList viewYear={viewYear} viewMonth={viewMonth} />
                     </div>
                 </div>
-            </main>
         </div>
     );
 }

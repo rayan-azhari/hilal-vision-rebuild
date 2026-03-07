@@ -1,33 +1,23 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import Map, { NavigationControl, Source, Layer, Popup, useMap } from "@vis.gl/react-maplibre";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useCallback } from "react";
+import Map, { NavigationControl, Popup, useMap } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type maplibregl from "maplibre-gl";
+import type GeoJSON from "geojson";
 import { useAppStore } from "@/store/useAppStore";
 import { useVisibilityWorker } from "@/hooks/useVisibilityWorker";
 import { useCloudOverlay } from "@/hooks/useCloudOverlay";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import { ProGate } from "@/components/ProGate";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Eye, Cloud } from "lucide-react";
-import type { FillLayerSpecification, CircleLayerSpecification } from "maplibre-gl";
 
-const ZONE_COLORS: Record<string, string> = {
-    A: "#4ade80",
-    B: "#facc15",
-    C: "#fb923c",
-    D: "#f87171",
-    E: "#6b7280",
-    F: "#233342",
-};
-
-const ZONE_OPACITIES: Record<string, number> = {
-    A: 0.55,
-    B: 0.50,
-    C: 0.50,
-    D: 0.45,
-    E: 0.30,
-    F: 0.15,
-};
+// Default store location — Mecca. If location still equals this on mount
+// and geolocation succeeds, auto-pan the map to the user's actual position.
+const MECCA_LAT = 21.3891;
+const MECCA_LNG = 39.8579;
 
 const PIN_COLORS: Record<string, string> = {
     naked_eye: "#4ade80",
@@ -41,6 +31,134 @@ interface PinProperties {
     color: string;
     observationTime: string;
     notes: string | null;
+}
+
+/**
+ * Imperative visibility zone overlay using image source (legacy canvas approach).
+ * Renders the pre-computed RGBA texture as a raster image on the map.
+ */
+function VisibilityZoneLayer({
+    textureUrl,
+    visible,
+}: {
+    textureUrl: string | null;
+    visible: boolean;
+}) {
+    const { current: map } = useMap();
+
+    useEffect(() => {
+        if (!map) return;
+        const m = map.getMap();
+        const sourceId = "visibility-zones-source";
+        const layerId = "visibility-zones-layer";
+
+        function addLayer() {
+            try {
+                if (m.getLayer(layerId)) m.removeLayer(layerId);
+                if (m.getSource(sourceId)) m.removeSource(sourceId);
+
+                if (!textureUrl || !visible) return;
+
+                m.addSource(sourceId, {
+                    type: "image",
+                    url: textureUrl,
+                    coordinates: [
+                        [-180, 85.051129],
+                        [180, 85.051129],
+                        [180, -85.051129],
+                        [-180, -85.051129],
+                    ],
+                });
+
+                m.addLayer({
+                    id: layerId,
+                    type: "raster",
+                    source: sourceId,
+                    paint: {
+                        "raster-opacity": 0.85,
+                        "raster-fade-duration": 0,
+                    },
+                });
+            } catch (err) {
+                console.error("[VisibilityZoneLayer] Error adding layer:", err);
+            }
+        }
+
+        if (m.isStyleLoaded()) {
+            addLayer();
+        } else {
+            m.once("style.load", addLayer);
+        }
+
+        return () => {
+            try {
+                if (m.getLayer(layerId)) m.removeLayer(layerId);
+                if (m.getSource(sourceId)) m.removeSource(sourceId);
+            } catch { /* map may be destroyed */ }
+        };
+    }, [map, textureUrl, visible]);
+
+    return null;
+}
+
+/**
+ * Imperative observation pins overlay.
+ */
+function ObservationPinsLayer({
+    pinsGeoJSON,
+    isDarkMode,
+    onPinClick,
+}: {
+    pinsGeoJSON: { type: "FeatureCollection"; features: unknown[] } | null;
+    isDarkMode: boolean;
+    onPinClick: (lng: number, lat: number, properties: PinProperties) => void;
+}) {
+    const { current: map } = useMap();
+
+    useEffect(() => {
+        if (!map) return;
+        const m = map.getMap();
+        const sourceId = "observation-pins-source";
+        const layerId = "observation-pins";
+
+        if (m.getLayer(layerId)) m.removeLayer(layerId);
+        if (m.getSource(sourceId)) m.removeSource(sourceId);
+
+        if (!pinsGeoJSON || pinsGeoJSON.features.length === 0) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        m.addSource(sourceId, { type: "geojson", data: pinsGeoJSON as any });
+        m.addLayer({
+            id: layerId,
+            type: "circle",
+            source: sourceId,
+            paint: {
+                "circle-radius": 6,
+                "circle-color": ["get", "color"],
+                "circle-stroke-width": 1.5,
+                "circle-stroke-color": isDarkMode ? "#000" : "#fff",
+                "circle-opacity": 0.9,
+            },
+        });
+
+        const handleClick = (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => {
+            const feature = e.features?.[0];
+            if (feature?.geometry.type === "Point") {
+                const [lng, lat] = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+                onPinClick(lng, lat, feature.properties as unknown as PinProperties);
+            }
+        };
+
+        m.on("click", layerId, handleClick);
+
+        return () => {
+            m.off("click", layerId, handleClick);
+            if (m.getLayer(layerId)) m.removeLayer(layerId);
+            if (m.getSource(sourceId)) m.removeSource(sourceId);
+        };
+    }, [map, pinsGeoJSON, isDarkMode, onPinClick]);
+
+    return null;
 }
 
 /**
@@ -125,9 +243,24 @@ export function VisibilityMap() {
         }
     }, [location.lat, location.lng]);
 
+    // G-25: Auto-pan to detected geolocation on first load if still at Mecca default.
+    const { position: geoPosition } = useGeolocation();
+    const autocentered = useRef(false);
+    useEffect(() => {
+        if (
+            geoPosition &&
+            !autocentered.current &&
+            location.lat === MECCA_LAT &&
+            location.lng === MECCA_LNG
+        ) {
+            autocentered.current = true;
+            setViewState({ longitude: geoPosition.lng, latitude: geoPosition.lat, zoom: 5 });
+        }
+    }, [geoPosition, location.lat, location.lng]);
+
     const dateTs = date.getTime();
 
-    const { geoJSON, isComputing } = useVisibilityWorker(
+    const { textureUrl, isComputing } = useVisibilityWorker(
         dateTs,
         resolution,
         showVisibility,
@@ -168,39 +301,9 @@ export function VisibilityMap() {
         ? "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
         : "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
-    // Build fill-color expression from GeoJSON zone properties
-    const fillColor: FillLayerSpecification["paint"] = {
-        "fill-color": [
-            "match",
-            ["get", "zone"],
-            "A", ZONE_COLORS.A,
-            "B", ZONE_COLORS.B,
-            "C", ZONE_COLORS.C,
-            "D", ZONE_COLORS.D,
-            "E", ZONE_COLORS.E,
-            "F", ZONE_COLORS.F,
-            "#000000",
-        ],
-        "fill-opacity": [
-            "match",
-            ["get", "zone"],
-            "A", ZONE_OPACITIES.A,
-            "B", ZONE_OPACITIES.B,
-            "C", ZONE_OPACITIES.C,
-            "D", ZONE_OPACITIES.D,
-            "E", ZONE_OPACITIES.E,
-            "F", ZONE_OPACITIES.F,
-            0.2,
-        ],
-    };
-
-    const pinLayerPaint: CircleLayerSpecification["paint"] = {
-        "circle-radius": 6,
-        "circle-color": ["get", "color"],
-        "circle-stroke-width": 1.5,
-        "circle-stroke-color": isDarkMode ? "#000" : "#fff",
-        "circle-opacity": 0.9,
-    };
+    const handlePinClick = useCallback((lng: number, lat: number, properties: PinProperties) => {
+        setSelectedPin({ lng, lat, properties });
+    }, []);
 
     return (
         <div className="w-full h-[600px] rounded-2xl overflow-hidden border shadow-2xl relative" style={{ borderColor: "color-mix(in oklch, var(--gold) 15%, transparent)" }}>
@@ -256,43 +359,13 @@ export function VisibilityMap() {
                 onMove={evt => setViewState((evt as any).viewState)}
                 mapStyle={mapStyle}
                 interactive={true}
-                interactiveLayerIds={pinsGeoJSON ? ["observation-pins"] : []}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onClick={(evt: any) => {
-                    const feature = evt.features?.[0];
-                    if (feature?.geometry?.type === "Point") {
-                        const [lng, lat] = feature.geometry.coordinates as [number, number];
-                        setSelectedPin({ lng, lat, properties: feature.properties as PinProperties });
-                    } else {
-                        setSelectedPin(null);
-                    }
-                }}
+                onClick={() => setSelectedPin(null)}
             >
                 <NavigationControl position="bottom-right" />
 
-                {/* Visibility zone GeoJSON overlay */}
-                {geoJSON && showVisibility && (
-                    <Source id="visibility-zones" type="geojson" data={geoJSON}>
-                        <Layer
-                            id="visibility-zones-fill"
-                            type="fill"
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            paint={fillColor as any}
-                        />
-                    </Source>
-                )}
-
-                {/* Observation pins (crowdsourced sightings) */}
-                {pinsGeoJSON && (
-                    <Source id="observation-pins-source" type="geojson" data={pinsGeoJSON}>
-                        <Layer
-                            id="observation-pins"
-                            type="circle"
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            paint={pinLayerPaint as any}
-                        />
-                    </Source>
-                )}
+                {/* Imperative layers (declarative <Source>/<Layer> broken in react-maplibre v8 + Turbopack) */}
+                <VisibilityZoneLayer textureUrl={textureUrl} visible={showVisibility} />
+                <ObservationPinsLayer pinsGeoJSON={pinsGeoJSON} isDarkMode={isDarkMode} onPinClick={handlePinClick} />
 
                 {/* Pin popup */}
                 {selectedPin && (
