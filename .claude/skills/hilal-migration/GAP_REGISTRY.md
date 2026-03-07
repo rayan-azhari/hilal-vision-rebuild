@@ -1,6 +1,6 @@
 # Hilal Vision — Migration Gap Registry
 
-**Last updated:** 2026-03-07 (G-10, G-11, G-09, G-18, G-05, G-12, G-14, G-13, G-07, G-15, G-24, G-25, G-02, G-03, G-21, G-23 complete)
+**Last updated:** 2026-03-07 (G-10, G-11, G-09, G-18, G-05, G-12, G-14, G-13, G-07, G-15, G-24, G-25, G-02, G-03, G-21, G-23, G-26, G-22 complete)
 **Source of truth:** Update this file whenever a gap is opened, closed, or re-prioritized.
 
 Statuses: `Open` | `In Progress` | `Complete` | `Blocked`
@@ -39,11 +39,11 @@ Statuses: `Open` | `In Progress` | `Complete` | `Blocked`
 | G-19 | i18n | Missing translation keys for CalendarPage, ArchivePage, HorizonPage, GlobePage, MapPage, MoonPage | `_legacy/client/src/locales/{en,ar,ur}/common.json` | `apps/web/src/locales/` — these page sections missing | Open |
 | G-20 | UI | Light theme cross-page polish — dark mode is well-implemented; light mode needs review across all pages | All legacy pages | All `apps/web/src/app/` pages | Open |
 | G-21 | Auth | Clerk Sign In button conditional rendering — needs verification that auth state shows correctly | `_legacy/client/src/components/Layout.tsx` | `apps/web/src/components/Header.tsx` | Complete |
-| G-22 | Backend | Email signup endpoint — waitlist/newsletter registration | `_legacy/drizzle/schema.ts` `emailSignups` table | Not in new API routes | Open |
+| G-22 | Backend | Email signup endpoint — waitlist/newsletter registration | `_legacy/drizzle/schema.ts` `emailSignups` table | `apps/web/src/app/api/email-signup/route.ts` — POST with Zod validation, rate limit, onConflictDoNothing | Complete |
 | G-23 | UI | Moon color consistency — `var(--gold)` must be used wherever a moon/crescent is displayed | `_legacy/` consistent use of gold | `apps/web/src/components/MoonIllustration.tsx` already correct; `BreezyDetailCard`, `BreezyFullCard`, `moon/page.tsx` all fixed | Complete |
 | G-24 | UI | Main page moon phase — home page moon illustration must reflect actual current moon phase | `_legacy/client/src/pages/Home.tsx` | `apps/web/src/app/page.tsx` | Complete |
 | G-25 | Map | Visibility map auto-location — 2D map should default to detected location if geolocation is enabled | `_legacy/client/src/pages/MapPage.tsx` | `apps/web/src/components/VisibilityMap.tsx` | Complete |
-| G-26 | Backend | Push notifications tRPC router — subscribe/unsubscribe for FCM tokens | `_legacy/server/routers/notifications.ts` | `apps/web/src/server/routers/notifications.ts` — partial | Open |
+| G-26 | Backend | Push notifications tRPC router — subscribe/unsubscribe for FCM tokens | `_legacy/server/routers/notifications.ts` | `apps/web/src/server/routers/notifications.ts` — subscribe + unsubscribe, Clerk userId, Next.js headers() for IP rate limiting | Complete |
 
 ---
 

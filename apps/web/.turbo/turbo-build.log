@@ -7,10 +7,7 @@
 
    Creating an optimized production build ...
  ✓ (serwist) Bundling the service worker script with the URL '/sw.js' and the scope '/'...
-<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Parsing of C:\Users\rayan\Desktop\Antigravity workspaces\Moon-dashboard\node_modules\.pnpm\@next+mdx@15.1.6_@mdx-js+lo_24775e79982d4b5700022a067efbaaa9\node_modules\@next\mdx\mdx-js-loader.js for build dependencies failed at 'import(require.resolve(plugin[0], { paths: [projectRoot] }))'.
-<w> Build dependencies behind this expression are ignored and might cause incorrect cache invalidation.
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (192kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
- ✓ Compiled successfully in 13.2s
+ ✓ Compiled successfully in 8.8s
    Linting and checking validity of types ...
 
 ./src/app/archive/page.tsx
@@ -79,33 +76,33 @@ The width(-1) and height(-1) of chart should be greater than 0,
    Collecting build traces ...
 
 Route (app)                                 Size  First Load JS
-┌ ○ /                                    5.62 kB         176 kB
-├ ○ /_not-found                             1 kB         105 kB
-├ ● /[slug]                                735 B         105 kB
+┌ ○ /                                    6.11 kB         176 kB
+├ ○ /_not-found                            996 B         105 kB
+├ ● /[slug]                                732 B         105 kB
 ├   ├ /about
 ├   ├ /methodology
 ├   ├ /privacy
 ├   └ [+2 more paths]
-├ ƒ /api/cron/moon-alerts                  154 B         104 kB
-├ ƒ /api/cron/visibility                   154 B         104 kB
-├ ƒ /api/push/send                         154 B         104 kB
-├ ƒ /api/sightings                         154 B         104 kB
-├ ƒ /api/stripe/checkout                   154 B         104 kB
-├ ƒ /api/stripe/webhook                    154 B         104 kB
-├ ƒ /api/trpc/[trpc]                       154 B         104 kB
-├ ƒ /api/visibility                        154 B         104 kB
-├ ○ /archive                             3.83 kB         169 kB
-├ ○ /calendar                            4.93 kB         229 kB
-├ ○ /horizon                             4.16 kB         171 kB
+├ ƒ /api/cron/moon-alerts                  145 B         104 kB
+├ ƒ /api/cron/visibility                   145 B         104 kB
+├ ƒ /api/push/send                         145 B         104 kB
+├ ƒ /api/sightings                         145 B         104 kB
+├ ƒ /api/stripe/checkout                   145 B         104 kB
+├ ƒ /api/stripe/webhook                    145 B         104 kB
+├ ƒ /api/trpc/[trpc]                       145 B         104 kB
+├ ƒ /api/visibility                        145 B         104 kB
+├ ○ /archive                             3.83 kB         168 kB
+├ ○ /calendar                            4.92 kB         228 kB
+├ ○ /horizon                             4.15 kB         171 kB
 ├ ○ /moon                                 122 kB         299 kB
-├ ○ /privacy                               169 B         108 kB
-├ ○ /support                               154 B         104 kB
-├ ○ /terms                                 169 B         108 kB
-└ ○ /visibility                          16.3 kB         205 kB
+├ ○ /privacy                               165 B         108 kB
+├ ○ /support                               145 B         104 kB
+├ ○ /terms                                 165 B         108 kB
+└ ○ /visibility                          16.6 kB         205 kB
 + First Load JS shared by all             104 kB
-  ├ chunks/2a282fa6-e9135516baf4f397.js  54.2 kB
-  ├ chunks/8413-74f5a1e6acc4fc09.js      47.8 kB
-  └ other shared chunks (total)          2.15 kB
+  ├ chunks/2a282fa6-e2dcfd0dca9e2a6d.js  54.2 kB
+  ├ chunks/413-1d276d715ff12f2b.js       47.8 kB
+  └ other shared chunks (total)          2.11 kB
 
 
 ƒ Middleware                             85.2 kB

@@ -2,11 +2,13 @@ import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../trpc";
 import { pushSubscriptionSchema } from "@hilal/types";
 import { db, eq, pushTokens } from "@hilal/db";
+import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
+import { z } from "zod";
 
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
 // Simple in-memory rate limiter for token registration (10 per IP per minute).
-// In a serverless Edge environment, this is instance-bound, meaning if it scales
-// to multi-instances the limit is per-instance, which is fine for basic flood protection.
+// In a serverless environment this is instance-bound, which is fine for basic flood protection.
 const subscribeRateCache = new Map<string, { count: number; resetTime: number }>();
 
 function checkSubscribeRateLimit(ip: string): boolean {
@@ -32,43 +34,38 @@ function checkSubscribeRateLimit(ip: string): boolean {
 }
 
 export const notificationsRouter = router({
+    /**
+     * Subscribe a device to push notifications by registering its FCM token.
+     * Anonymous subscriptions are allowed — userId is linked if the user is signed in.
+     */
     subscribe: publicProcedure
         .input(pushSubscriptionSchema)
-        .mutation(async ({ input, ctx }) => {
-            let ip = "unknown";
-            // @ts-expect-error - Assuming req is available in context or we fallback
-            if (ctx.req && ctx.req.headers) {
-                // @ts-expect-error - Next request types dont officially expose headers
-                const forwarded = ctx.req.headers.get("x-forwarded-for");
-                if (forwarded) {
-                    ip = forwarded.split(",")[0].trim();
-                } else {
-                    // @ts-expect-error - Next request types dont officially expose headers
-                    const real = ctx.req.headers.get("x-real-ip");
-                    if (real) ip = real;
-                }
-            }
+        .mutation(async ({ input }) => {
+            // Clerk userId is optional — anonymous subscriptions are valid
+            const { userId } = await auth();
+
+            // Rate limit by IP via Next.js headers()
+            const reqHeaders = await headers();
+            const forwarded = reqHeaders.get("x-forwarded-for");
+            const real = reqHeaders.get("x-real-ip");
+            const ip = forwarded?.split(",")[0].trim() ?? real ?? "unknown";
 
             if (!checkSubscribeRateLimit(ip)) {
                 throw new TRPCError({
                     code: "TOO_MANY_REQUESTS",
-                    message: "Too many token registration attempts. Please wait."
+                    message: "Too many token registration attempts. Please wait.",
                 });
             }
 
             if (!db) {
-                console.error("DATABASE_URL missing in notificationsRouter");
+                console.error("DATABASE_URL missing in notificationsRouter.subscribe");
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
-                    message: "Database connection unavailable"
+                    message: "Database connection unavailable",
                 });
             }
 
-            // In a real app with Auth, we would extract Clerk userId from ctx
-            const userId = null;
-
             try {
-                // Upsert logic: If token exists, do nothing (or we could update the userId/device)
                 const existing = await db
                     .select()
                     .from(pushTokens)
@@ -78,17 +75,53 @@ export const notificationsRouter = router({
                 if (existing.length === 0) {
                     await db.insert(pushTokens).values({
                         token: input.token,
-                        userId: userId,
+                        userId: userId ?? null,
                         deviceType: input.deviceType,
                     });
+                } else if (userId && !existing[0].userId) {
+                    // Upgrade anonymous token to link it with the now-authenticated user
+                    await db
+                        .update(pushTokens)
+                        .set({ userId })
+                        .where(eq(pushTokens.token, input.token));
                 }
+
                 return { success: true };
             } catch (error) {
                 console.error("[Push] Failed to save token:", error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "Failed to save push token",
-                    cause: error
+                    cause: error,
+                });
+            }
+        }),
+
+    /**
+     * Unsubscribe a device by deleting its FCM token.
+     * Called when the user explicitly opts out of notifications.
+     */
+    unsubscribe: publicProcedure
+        .input(z.object({ token: z.string().min(10) }))
+        .mutation(async ({ input }) => {
+            if (!db) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Database connection unavailable",
+                });
+            }
+
+            try {
+                await db
+                    .delete(pushTokens)
+                    .where(eq(pushTokens.token, input.token));
+                return { success: true };
+            } catch (error) {
+                console.error("[Push] Failed to remove token:", error);
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Failed to remove push token",
+                    cause: error,
                 });
             }
         }),
