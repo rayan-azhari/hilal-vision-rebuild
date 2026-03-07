@@ -101,7 +101,7 @@ export function SightingFeed() {
                 <div className="relative ml-2">
                     <button
                         onClick={() => setShowExportMenu((v) => !v)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"
                         title="Download Data"
                     >
                         <Download className="w-4 h-4" style={{ color: "var(--muted-foreground)" }} />
@@ -116,14 +116,14 @@ export function SightingFeed() {
                         >
                             <button
                                 onClick={exportToCSV}
-                                className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors"
+                                className="w-full text-left px-4 py-2 text-xs hover:bg-foreground/5 transition-colors"
                                 style={{ color: "var(--foreground)" }}
                             >
                                 {t("feed.exportCsv", "Export CSV")}
                             </button>
                             <button
                                 onClick={exportToJSON}
-                                className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors"
+                                className="w-full text-left px-4 py-2 text-xs hover:bg-foreground/5 transition-colors"
                                 style={{ color: "var(--foreground)" }}
                             >
                                 {t("feed.exportJson", "Export JSON")}
@@ -136,7 +136,7 @@ export function SightingFeed() {
             <button
                 onClick={handleSubscribe}
                 disabled={isSubscribing}
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-foreground/10 transition-colors"
                 title={t("feed.enableNotif", "Enable Notifications")}
             >
                 <Bell className="w-4 h-4" style={{ color: "var(--muted-foreground)" }} />
@@ -146,7 +146,7 @@ export function SightingFeed() {
                 {sightings && sightings.length > 0 && (
                     <button
                         onClick={() => setIsPaused((p) => !p)}
-                        className="w-5 h-5 flex items-center justify-center rounded hover:bg-white/10 transition-colors"
+                        className="w-5 h-5 flex items-center justify-center rounded hover:bg-foreground/10 transition-colors"
                         title={isPaused ? t("feed.resumeRefresh", "Resume") : t("feed.pauseRefresh", "Pause")}
                     >
                         {isPaused

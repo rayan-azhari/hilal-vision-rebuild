@@ -66,7 +66,9 @@
       "Bash(git add apps/web/src/components/BreezyDetailCard.tsx apps/web/src/components/BreezyFullCard.tsx apps/web/src/components/SunMoonAltitudeChart.tsx apps/web/src/components/VisibilityMap.tsx .claude/skills/hilal-migration/GAP_REGISTRY.md apps/web/src/app/page.tsx apps/web/src/components/LanguageSwitcher.tsx)",
       "Bash(git add apps/web/src/hooks/useVisibilityWorker.ts apps/web/package.json pnpm-lock.yaml)",
       "Bash(git commit:*)",
-      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"feat\\(backend\\): complete G-26 push notifications router + G-22 email signup endpoint\")"
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"feat\\(backend\\): complete G-26 push notifications router + G-22 email signup endpoint\")",
+      "Bash(node -e \"const f = require\\(''./apps/web/src/locales/en/common.json''\\); console.log\\(Object.keys\\(f\\)\\)\")",
+      "Bash(bash \"C:\\\\Users\\\\rayan\\\\.claude\\\\plugins\\\\cache\\\\mhattingpete-claude-skills\\\\engineering-workflow-skills\\\\1.2.0\\\\skills\\\\git-pushing\\\\scripts\\\\smart_commit.sh\" \"feat\\(ui+i18n\\): G-20 light theme polish + G-19 useTranslation wired into all pages\")"
     ]
   }
 }

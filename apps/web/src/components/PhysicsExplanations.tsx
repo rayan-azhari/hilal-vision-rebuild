@@ -75,7 +75,7 @@ export function PhysicsExplanations() {
                                 <XAxis dataKey="w" stroke="currentColor" className="text-muted-foreground" fontSize={12} label={{ value: "Crescent Width (W)", position: 'insideBottom', fill: 'currentColor', offset: -15 }} />
                                 <YAxis stroke="currentColor" className="text-muted-foreground" fontSize={12} label={{ value: "Arc of Vision (ARCV)", angle: -90, position: 'insideLeft', fill: 'currentColor' }} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: 'oklch(0.15 0.02 265)', borderColor: '#C1A87D', borderRadius: '8px' }}
+                                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: '#C1A87D', borderRadius: '8px' }}
                                     itemStyle={{ fontSize: '12px' }}
                                 />
                                 <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: '11px', paddingBottom: '8px' }} />
@@ -112,7 +112,7 @@ export function PhysicsExplanations() {
                                 <XAxis dataKey="w" stroke="currentColor" className="text-muted-foreground" fontSize={12} label={{ value: "Crescent Width (W)", position: 'insideBottom', fill: 'currentColor', offset: -15 }} />
                                 <YAxis stroke="currentColor" className="text-muted-foreground" fontSize={12} label={{ value: "Arc of Vision (ARCV)", angle: -90, position: 'insideLeft', fill: 'currentColor' }} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: 'oklch(0.15 0.02 265)', borderColor: '#C1A87D', borderRadius: '8px' }}
+                                    contentStyle={{ backgroundColor: 'var(--card)', borderColor: '#C1A87D', borderRadius: '8px' }}
                                     itemStyle={{ fontSize: '12px' }}
                                 />
                                 <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: '11px', paddingBottom: '8px' }} />

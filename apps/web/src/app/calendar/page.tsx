@@ -16,6 +16,7 @@ import {
 import { type HijriDate } from "@hilal/types";
 import { IslamicCountdown } from "@/components/IslamicCountdown";
 import { CrescentCountryList } from "@/components/CrescentCountryList";
+import { useTranslation } from "react-i18next";
 
 const ISLAMIC_EVENTS: Array<{ month: number; day: number; key: string; nameAr: string; type: "major" | "minor" }> = [
     { month: 1, day: 1, key: "islamicNewYear", nameAr: "رأس السنة الهجرية", type: "major" },
@@ -78,6 +79,8 @@ export default function CalendarPage() {
     const [viewYear, setViewYear] = useState(() => gregorianToHijri(today).year);
     const [viewMonth, setViewMonth] = useState(() => gregorianToHijri(today).month);
     const [selectedDay, setSelectedDay] = useState<number | null>(() => gregorianToHijri(today).day);
+
+    const { t } = useTranslation();
 
     // Sync today's view when calendar system changes
     useEffect(() => {
@@ -201,7 +204,7 @@ export default function CalendarPage() {
                                     : "text-muted-foreground hover:text-foreground"
                                     }`}
                             >
-                                Astronomical
+                                {t("calendar.astronomical")}
                             </button>
                             <button
                                 onClick={() => setCalendarSystem("ummalqura")}
@@ -210,7 +213,7 @@ export default function CalendarPage() {
                                     : "text-muted-foreground hover:text-foreground"
                                     }`}
                             >
-                                Umm al-Qura
+                                {t("calendar.ummAlQura")}
                             </button>
                             <button
                                 onClick={() => setCalendarSystem("tabular")}
@@ -219,7 +222,7 @@ export default function CalendarPage() {
                                     : "text-muted-foreground hover:text-foreground"
                                     }`}
                             >
-                                Tabular
+                                {t("calendar.tabularShort")}
                             </button>
                         </div>
                         <button
@@ -227,7 +230,7 @@ export default function CalendarPage() {
                             title={`Download ${viewYear} AH Hijri calendar as .ics`}
                         >
                             <Download className="w-3 h-3" />
-                            Add to Calendar
+                            {t("calendar.addToCalendar")}
                         </button>
                     </div>
                 </div>
@@ -239,7 +242,7 @@ export default function CalendarPage() {
                         <div
                             className="flex flex-row items-center justify-between px-6 py-4 border-b border-[#C1A87D]/10"
                         >
-                            <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                            <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-foreground/5 transition-colors">
                                 <ChevronLeft className="w-5 h-5 text-[#C1A87D]/50" />
                             </button>
 
@@ -257,7 +260,7 @@ export default function CalendarPage() {
                                 </div>
                             </div>
 
-                            <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
+                            <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-foreground/5 transition-colors">
                                 <ChevronRight className="w-5 h-5 text-[#C1A87D]/50" />
                             </button>
                         </div>
@@ -330,9 +333,9 @@ export default function CalendarPage() {
                                 style={{ animationDelay: "50ms" }}
                             >
                                 <div className="text-xs mb-3 flex items-center justify-between text-muted-foreground">
-                                    <span>Selected Day</span>
+                                    <span>{t("calendar.selectedDay")}</span>
                                     <span className="text-[0.6rem] uppercase tracking-wide border border-border px-1.5 py-0.5 rounded bg-foreground/5">
-                                        {calendarSystem === "astronomical" ? "Astronomical" : calendarSystem === "ummalqura" ? "Umm al-Qura" : "Tabular"}
+                                        {calendarSystem === "astronomical" ? t("calendar.astronomical") : calendarSystem === "ummalqura" ? t("calendar.ummAlQura") : t("calendar.tabularShort")}
                                     </span>
                                 </div>
                                 <div className="text-2xl font-bold mb-1 font-display text-[#C1A87D]">
@@ -371,11 +374,11 @@ export default function CalendarPage() {
                             className="breezy-card p-5 animate-breezy-enter"
                             style={{ animationDelay: "150ms" }}
                         >
-                            <div className="text-xs font-medium mb-3 text-muted-foreground">Jump to Year</div>
+                            <div className="text-xs font-medium mb-3 text-muted-foreground">{t("calendar.jumpToYear")}</div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setViewYear(y => y - 1)}
-                                    className="p-1.5 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/10 bg-foreground/5 text-[#C1A87D]/80"
+                                    className="p-1.5 rounded-lg hover:bg-foreground/5 transition-colors border border-transparent hover:border-foreground/10 bg-foreground/5 text-[#C1A87D]/80"
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
@@ -386,7 +389,7 @@ export default function CalendarPage() {
                                 </div>
                                 <button
                                     onClick={() => setViewYear(y => y + 1)}
-                                    className="p-1.5 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/10 bg-foreground/5 text-[#C1A87D]/80"
+                                    className="p-1.5 rounded-lg hover:bg-foreground/5 transition-colors border border-transparent hover:border-foreground/10 bg-foreground/5 text-[#C1A87D]/80"
                                 >
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
@@ -395,7 +398,7 @@ export default function CalendarPage() {
                                 onClick={() => { setViewYear(todayDisplay.year); setViewMonth(todayDisplay.month); setSelectedDay(todayDisplay.day); }}
                                 className="w-full mt-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-[#C1A87D]/20 bg-[#C1A87D]/10 border border-[#C1A87D]/20 text-[#C1A87D]"
                             >
-                                Go to Today
+                                {t("calendar.goToToday")}
                             </button>
                         </div>
 

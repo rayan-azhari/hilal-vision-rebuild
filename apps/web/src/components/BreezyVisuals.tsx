@@ -85,9 +85,9 @@ export function VisibilityDotScale({ zone }: { zone: keyof typeof ZONE_COLOURS |
                 return (
                     <div
                         key={z}
-                        className="w-3 h-3 rounded-full transition-all duration-300 border border-white/5"
+                        className="w-3 h-3 rounded-full transition-all duration-300 border border-foreground/5"
                         style={{
-                            backgroundColor: isActive ? ZONE_COLOURS[z] : "rgba(255,255,255,0.05)",
+                            backgroundColor: isActive ? ZONE_COLOURS[z] : "color-mix(in oklch, currentColor 6%, transparent)",
                             boxShadow: isActive ? `0 0 8px ${ZONE_COLOURS[z]}` : "none",
                             transform: isActive ? "scale(1.2)" : "scale(1)",
                             opacity: isActive ? 1 : 0.4,
@@ -113,7 +113,7 @@ export function IlluminationArc({ illumination }: { illumination: number }) {
                 <circle
                     cx={cx} cy={cy} r={r}
                     fill="none"
-                    stroke="rgba(255,255,255,0.05)"
+                    stroke="color-mix(in oklch, currentColor 8%, transparent)"
                     strokeWidth="6"
                 />
                 <circle
@@ -137,7 +137,7 @@ export function LunarAgeProgress({ age }: { age: number }) {
     const progress = Math.min(100, Math.max(0, (age / cycle) * 100));
 
     return (
-        <div className="h-1 w-full max-w-[80px] bg-white/5 rounded-full overflow-hidden self-center">
+        <div className="h-1 w-full max-w-[80px] bg-foreground/5 rounded-full overflow-hidden self-center">
             <div
                 className="h-full rounded-full transition-all duration-1000 ease-out"
                 style={{
@@ -152,12 +152,12 @@ export function LunarAgeProgress({ age }: { age: number }) {
 
 export function AzimuthCompass({ azimuth }: { azimuth: number }) {
     return (
-        <div className="relative w-12 h-12 flex items-center justify-center rounded-full border border-white/10">
+        <div className="relative w-12 h-12 flex items-center justify-center rounded-full border border-foreground/10">
             {/* Compass ticks */}
             {[0, 90, 180, 270].map((deg) => (
                 <div
                     key={deg}
-                    className="absolute w-0.5 h-1.5 bg-white/10"
+                    className="absolute w-0.5 h-1.5 bg-foreground/10"
                     style={{
                         transform: `rotate(${deg}deg) translateY(-20px)`
                     }}
@@ -190,7 +190,7 @@ export function ElongationVisual({ elongation }: { elongation: number }) {
                 <path
                     d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
                     fill="none"
-                    stroke="rgba(255,255,255,0.05)"
+                    stroke="color-mix(in oklch, currentColor 8%, transparent)"
                     strokeWidth="6"
                     strokeLinecap="round"
                 />
@@ -224,7 +224,7 @@ export function CountdownCircle({ daysLeft, totalDays = 29.53 }: { daysLeft: num
                 <circle
                     cx={cx} cy={cy} r={r}
                     fill="none"
-                    stroke="rgba(255,255,255,0.05)"
+                    stroke="color-mix(in oklch, currentColor 8%, transparent)"
                     strokeWidth="4"
                     strokeDasharray="4 4"
                 />

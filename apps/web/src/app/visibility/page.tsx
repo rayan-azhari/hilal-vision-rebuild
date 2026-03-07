@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { VisibilityMap } from "@/components/VisibilityMap";
 import { BestTimeCard } from "@/components/BestTimeCard";
 import { MapControlsPanel } from "@/components/MapControlsPanel";
@@ -8,12 +9,13 @@ import { useAppStore } from "@/store/useAppStore";
 export default function VisibilityPage() {
     const date = useAppStore((s) => s.date);
     const location = useAppStore((s) => s.location);
+    const { t } = useTranslation();
 
     return (
         <div className="min-h-screen flex flex-col">
             <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-display font-bold mb-2">Global Visibility Map</h1>
+                    <h1 className="text-3xl font-display font-bold mb-2">{t("mapPage.title")}</h1>
                     <p className="text-foreground/60 max-w-2xl">
                         Interactive lunar visibility predictions across the globe.
                         Use the controls in the header to change the date, location, or prediction criterion.
@@ -30,12 +32,12 @@ export default function VisibilityPage() {
                         <div className="p-6 rounded-2xl glass-card border border-foreground/10 shadow-lg">
                             <h3 className="font-bold mb-4 font-display" style={{ color: "var(--gold)" }}>Visibility Legend</h3>
                             <div className="space-y-3 pl-1">
-                                <LegendItem color="bg-zone-a" label="Easily visible" />
-                                <LegendItem color="bg-zone-b" label="Visible under perfect conditions" />
-                                <LegendItem color="bg-zone-c" label="May need optical aid" />
-                                <LegendItem color="bg-zone-d" label="Optical aid required" />
-                                <LegendItem color="bg-zone-e" label="Not visible" />
-                                <LegendItem color="bg-zone-f" label="Below Danjon limit" />
+                                <LegendItem color="bg-zone-a" label={t("zones.A")} />
+                                <LegendItem color="bg-zone-b" label={t("zones.B")} />
+                                <LegendItem color="bg-zone-c" label={t("zones.C")} />
+                                <LegendItem color="bg-zone-d" label={t("zones.D")} />
+                                <LegendItem color="bg-zone-e" label={t("zones.E")} />
+                                <LegendItem color="bg-zone-f" label={t("zones.F")} />
                             </div>
                         </div>
                     </div>

@@ -74,7 +74,7 @@ export function SunMoonAltitudeChart({ date, location, minutes, onMinutesChange 
                         <XAxis dataKey="time" type="number" domain={[0, 1440]} ticks={[0, 360, 720, 1080, 1440]} tickFormatter={formatXAxis} stroke="currentColor" className="text-muted-foreground" fontSize={11} tickMargin={10} />
                         <YAxis domain={[-90, 90]} ticks={[-90, -60, -30, 0, 30, 60, 90]} stroke="currentColor" className="text-muted-foreground" fontSize={11} tickMargin={10} />
                         <Tooltip
-                            contentStyle={{ background: "oklch(0.15 0.02 265)", border: "1px solid color-mix(in oklch, var(--border) 40%, transparent)", borderRadius: "8px" }}
+                            contentStyle={{ background: "var(--card)", border: "1px solid color-mix(in oklch, var(--border) 40%, transparent)", borderRadius: "8px" }}
                             labelFormatter={(val) => formatXAxis(val as number)}
                             formatter={(value, name) => [`${(value as number).toFixed(1)}°`, name === "sunAlt" ? "Sun Alt" : "Moon Alt"]}
                         />

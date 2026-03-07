@@ -12,6 +12,7 @@ import { SunMoonAltitudeChart } from "@/components/SunMoonAltitudeChart";
 import { SkyDomeChart } from "@/components/SkyDomeChart";
 import { PhysicsExplanations } from "@/components/PhysicsExplanations";
 import { ProGate } from "@/components/ProGate";
+import { useTranslation } from "react-i18next";
 
 function formatTime(date: Date | null) {
     if (!date) return "--:--";
@@ -32,7 +33,7 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
     const today = new Date();
 
     return (
-        <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-foreground/10 scrollbar-track-transparent">
             {days.map(({ date, phase }, i) => {
                 const isToday = date.toDateString() === today.toDateString();
                 const r = 12;
@@ -77,6 +78,7 @@ function PhaseCalendarStrip({ baseDate }: { baseDate: Date }) {
 
 export default function MoonPage() {
     const { location, date } = useAppStore();
+    const { t } = useTranslation();
     const [moonInfo, setMoonInfo] = useState(() => getMoonPhaseInfo(date));
     const [sunMoon, setSunMoon] = useState(() => computeSunMoonAtSunset(date, location));
     const [countdown, setCountdown] = useState("");
@@ -147,7 +149,7 @@ export default function MoonPage() {
                     {/* Charts Row */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <BreezyFullCard
-                            title={"Sun & Moon Altitude Tracker"}
+                            title={t("moonPage.sunMoonAltitudeTracker")}
                             icon={<Clock className="w-4 h-4" />}
                             className="h-full"
                         >
@@ -158,7 +160,7 @@ export default function MoonPage() {
 
                         <ProGate featureName="Sky Dome">
                             <BreezyFullCard
-                                title={"The Sky Dome"}
+                                title={t("moonPage.theSkyDome")}
                                 icon={<Eye className="w-4 h-4" />}
                                 className="h-full"
                             >
@@ -172,15 +174,15 @@ export default function MoonPage() {
                     {/* Times row (Ephemeris) */}
                     <ProGate featureName="Ephemeris Data">
                         <BreezyFullCard
-                            title={"Ephemeris Events"}
+                            title={t("moonPage.ephemeris")}
                             icon={<Sun />}
                         >
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                                 {[
-                                    { label: "Sunrise", value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
-                                    { label: "Sunset", value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
-                                    { label: "Moonrise", value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
-                                    { label: "Moonset", value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
+                                    { label: t("moonPage.sunrise"), value: formatTime(sunMoon.sunrise), icon: <Sun className="w-4 h-4" />, color: "#fb923c" },
+                                    { label: t("moonPage.sunset"), value: formatTime(sunMoon.sunset), icon: <Sun className="w-4 h-4" />, color: "#f59e0b" },
+                                    { label: t("moonPage.moonrise"), value: formatTime(sunMoon.moonrise), icon: <Moon className="w-4 h-4" />, color: "#60a5fa" },
+                                    { label: t("moonPage.moonset"), value: formatTime(sunMoon.moonset), icon: <Moon className="w-4 h-4" />, color: "#818cf8" },
                                 ].map(({ label, value, icon, color }) => (
                                     <div key={label} className="text-center py-4 px-2 rounded-xl border border-border/30 bg-foreground/5">
                                         <div className="flex justify-center mb-1.5" style={{ color }}>{icon}</div>
@@ -213,7 +215,7 @@ export default function MoonPage() {
                                     {moonInfo.phaseName}
                                 </div>
                                 <p className="mt-2 text-sm text-muted-foreground">
-                                    {Math.round(moonInfo.illuminatedFraction * 100)}% Illuminated • {(moonInfo.moonAge / 24).toFixed(1)} Days Old
+                                    {t("moonPage.illuminatedAndAge", { illum: Math.round(moonInfo.illuminatedFraction * 100), age: (moonInfo.moonAge / 24).toFixed(1) })}
                                 </p>
                                 <div className="text-sm mb-3 font-arabic" style={{ color: "color-mix(in oklch, var(--gold) 80%, transparent)" }}>
                                     {moonInfo.phaseArabic}
@@ -221,7 +223,7 @@ export default function MoonPage() {
 
                                 {/* Phase progress bar */}
                                 <div
-                                    className="w-48 h-1.5 rounded-full mx-auto overflow-hidden bg-white/5"
+                                    className="w-48 h-1.5 rounded-full mx-auto overflow-hidden bg-foreground/5"
                                 >
                                     <div
                                         className="h-full rounded-full transition-all duration-500"
@@ -233,7 +235,7 @@ export default function MoonPage() {
                                     />
                                 </div>
                                 <div className="text-xs mt-1 text-muted-foreground">
-                                    {phasePercent.toFixed(1)}% through cycle
+                                    {t("moonPage.throughLunarCycle", { percent: phasePercent.toFixed(1) })}
                                 </div>
                             </div>
                         </div>
@@ -241,7 +243,7 @@ export default function MoonPage() {
                         {/* Stats grid */}
                         <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                             <BreezyDetailCard
-                                title={"Illumination"}
+                                title={t("moonPage.illumination")}
                                 icon={<Moon />}
                                 decorativeVisual={<IlluminationArc illumination={moonInfo.illuminatedFraction * 100} />}
                                 primaryValue={Math.round(moonInfo.illuminatedFraction * 100).toString()}
@@ -250,35 +252,35 @@ export default function MoonPage() {
                                 accentColour="var(--gold)"
                             />
                             <BreezyDetailCard
-                                title={"Lunar Age"}
+                                title={t("moonPage.lunarAge")}
                                 icon={<Clock />}
                                 decorativeVisual={<LunarAgeProgress age={(moonInfo.moonAge / 24)} />}
                                 primaryValue={(moonInfo.moonAge / 24).toFixed(1)}
-                                primaryUnit={"Days"}
-                                statusLabel={`Phase angle ${(moonInfo.phase * 360).toFixed(1)}°`}
+                                primaryUnit={t("moonPage.days")}
+                                statusLabel={t("moonPage.phaseAngle", { angle: (moonInfo.phase * 360).toFixed(1) })}
                                 accentColour="#60a5fa"
                             />
                             <BreezyDetailCard
-                                title={`${location.name} Visibility`}
+                                title={t("moonPage.visibilityCity", { city: location.name })}
                                 icon={<Eye />}
                                 decorativeVisual={<VisibilityDotScale zone={sunMoon.visibility as "A" | "B" | "C" | "D" | "E" | "F"} />}
                                 primaryValue={sunMoon.visibility}
-                                primaryUnit={"Zone"}
-                                statusLabel={`Yallop q=${sunMoon.qValue.toFixed(2)}`}
+                                primaryUnit={t("moonPage.zone")}
+                                statusLabel={t("moonPage.yallopQ", { q: sunMoon.qValue.toFixed(2) })}
                                 accentColour={sunMoon.visibility === "A" || sunMoon.visibility === "B" ? "#4ade80" : "#f87171"}
                             />
 
                             <BreezyDetailCard
-                                title={"Moon Altitude"}
+                                title={t("moonPage.moonAltitude")}
                                 icon={<ArrowRight className="transform -rotate-45" />}
                                 decorativeVisual={<AzimuthCompass azimuth={sunMoon.moonAz} />}
                                 primaryValue={sunMoon.moonAlt.toFixed(1)}
                                 primaryUnit="°"
-                                statusLabel={`Azimuth ${sunMoon.moonAz.toFixed(1)}°`}
+                                statusLabel={t("moonPage.azimuth", { az: sunMoon.moonAz.toFixed(1) })}
                                 accentColour="#4ade80"
                             />
                             <BreezyDetailCard
-                                title={"Elongation"}
+                                title={t("moonPage.elongation")}
                                 icon={<ArrowRight />}
                                 decorativeVisual={<ElongationVisual elongation={sunMoon.elongation} />}
                                 primaryValue={sunMoon.elongation.toFixed(1)}
@@ -286,7 +288,7 @@ export default function MoonPage() {
                                 accentColour="#c084fc"
                             />
                             <BreezyDetailCard
-                                title={"Next New Moon"}
+                                title={t("moonPage.nextNewMoon")}
                                 icon={<Moon />}
                                 decorativeVisual={<CountdownCircle daysLeft={parseInt(countdown.split(' ')[0]) || 0} totalDays={29.53} />}
                                 primaryValue={countdown.split(' ')[0] || "0d"}
@@ -301,7 +303,7 @@ export default function MoonPage() {
 
                         {/* 30-day phase calendar */}
                         <BreezyFullCard
-                            title={"30-Day Phase Calendar"}
+                            title={t("moonPage.thirtyDayPhaseCalendar")}
                             icon={<Clock />}
                             className="lg:col-span-3"
                         >

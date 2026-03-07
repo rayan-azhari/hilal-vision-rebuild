@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Compass, MapPin } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import {
@@ -272,6 +273,7 @@ export default function HorizonPage() {
 
     const elevation = loc.elevation ?? 0;
     const dipDeg = (1.76 * Math.sqrt(elevation)) / 60; // arcmin → degrees
+    const { t } = useTranslation();
 
     useEffect(() => {
         // The core calculation happens purely locally now.
@@ -356,7 +358,7 @@ export default function HorizonPage() {
                     {data && (
                         <div className="glass p-6 rounded-3xl border border-foreground/10 shadow-xl flex-1 flex flex-col">
                             <div className="flex items-center justify-between mb-6 pb-4 border-b border-foreground/10">
-                                <span className="text-xs font-bold uppercase tracking-widest text-foreground/50">Computed Zone</span>
+                                <span className="text-xs font-bold uppercase tracking-widest text-foreground/50">{t("horizon.visibility")}</span>
                                 <span
                                     className="text-sm font-black px-3 py-1 rounded-xl shadow-sm"
                                     style={{
@@ -373,14 +375,14 @@ export default function HorizonPage() {
 
                             <div className="space-y-3 flex-1">
                                 {[
-                                    { label: "Moon Altitude", value: `${data.moonAlt.toFixed(2)}°` },
-                                    { label: "Moon Azimuth", value: `${data.moonAz.toFixed(1)}°` },
-                                    { label: "Sun Altitude", value: `${data.sunAlt.toFixed(2)}°` },
-                                    { label: "Arc of Vision", value: `${data.arcv.toFixed(2)}°` },
-                                    { label: "Elongation", value: `${data.elongation.toFixed(2)}°` },
-                                    { label: "Crescent Width", value: `${data.crescent.w.toFixed(3)}'` },
-                                    { label: "Yallop q-value", value: data.qValue.toFixed(4) },
-                                    { label: "Horizon Dip", value: dipDeg > 0.01 ? `${(dipDeg * 60).toFixed(1)}'` : "—" },
+                                    { label: t("horizon.moonAltitude"), value: `${data.moonAlt.toFixed(2)}°` },
+                                    { label: t("horizon.moonAzimuth"), value: `${data.moonAz.toFixed(1)}°` },
+                                    { label: t("horizon.sunAltitude"), value: `${data.sunAlt.toFixed(2)}°` },
+                                    { label: t("horizon.arcOfVision"), value: `${data.arcv.toFixed(2)}°` },
+                                    { label: t("horizon.elongation"), value: `${data.elongation.toFixed(2)}°` },
+                                    { label: t("horizon.crescentWidth"), value: `${data.crescent.w.toFixed(3)}'` },
+                                    { label: t("horizon.yallopQ"), value: data.qValue.toFixed(4) },
+                                    { label: t("horizon.horizonDip"), value: dipDeg > 0.01 ? `${(dipDeg * 60).toFixed(1)}'` : "—" },
                                 ].map(({ label, value }) => (
                                     <div key={label} className="flex justify-between items-center py-1.5 focus-within:bg-foreground/5 rounded-lg px-2 -mx-2 transition-colors">
                                         <span className="text-sm font-semibold text-foreground/60">{label}</span>
@@ -391,11 +393,11 @@ export default function HorizonPage() {
 
                             <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-foreground/10">
                                 <div className="bg-foreground/5 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mb-1">Sunset</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mb-1">{t("horizon.sunset")}</span>
                                     <span className="text-lg font-mono font-bold text-foreground">{formatTime(data.sunset)}</span>
                                 </div>
                                 <div className="bg-foreground/5 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mb-1">Moonset</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/50 mb-1">{t("horizon.moonset")}</span>
                                     <span className="text-lg font-mono font-bold text-foreground">{formatTime(data.moonset)}</span>
                                 </div>
                             </div>

@@ -6,6 +6,7 @@ import Map, { useMap } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { hijriToGregorian, gregorianToHijri, computeSunMoonAtSunset, HIJRI_MONTHS, MAJOR_CITIES, type VisibilityZone } from "@hilal/astronomy";
 import { useAppStore } from "@/store/useAppStore";
+import { useTranslation } from "react-i18next";
 
 const ZONE_COLORS: Record<VisibilityZone, string> = {
     A: "#4ade80",
@@ -218,6 +219,7 @@ export default function ArchivePage() {
     const [isLoadingIcop, setIsLoadingIcop] = useState(false);
     const icopCacheRef = useRef<IcopMonthData[] | null>(null);
 
+    const { t } = useTranslation();
     const years = Array.from({ length: 28 }, (_, i) => 1438 + i);
 
     // Default to current Hijri year and month on mount, and auto-load it
@@ -318,7 +320,7 @@ export default function ArchivePage() {
                                     {selectedYear} AH
                                 </div>
                                 <div className="text-xs text-foreground/50 uppercase tracking-widest font-bold mt-1">
-                                    Hijri Year
+                                    {t("archive.hijriYear")}
                                 </div>
                             </div>
                             <button
@@ -395,9 +397,9 @@ export default function ArchivePage() {
                     {!selectedMonth && (
                         <div className="glass p-8 rounded-3xl border border-foreground/10 text-center shadow-xl">
                             <div className="text-4xl mb-4 opacity-50">☾</div>
-                            <div className="text-base font-bold text-foreground mb-2">Select a Month</div>
+                            <div className="text-base font-bold text-foreground mb-2">{t("archive.selectMonth")}</div>
                             <div className="text-sm font-medium text-foreground/50">
-                                Click any month to view historical visibility data and global records.
+                                {t("archive.clickAnyMonth")}
                             </div>
                         </div>
                     )}
@@ -414,12 +416,12 @@ export default function ArchivePage() {
                     {monthDetail && !isLoadingDetail && (
                         <>
                             <div className="glass p-6 rounded-3xl border border-foreground/10 shadow-xl">
-                                <div className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-3">Month Details</div>
+                                <div className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-3">{t("archive.monthDetails")}</div>
                                 <div className="text-2xl font-display font-bold text-primary-400 mb-4">
                                     {HIJRI_MONTHS[monthDetail.hijriMonth - 1]?.en}
                                 </div>
                                 <div className="text-sm font-semibold text-foreground/70 mb-4">
-                                    New Moon:{" "}
+                                    {t("archive.newMoon")}:{" "}
                                     <span className="text-foreground">
                                         {monthDetail.newMoonDate.toLocaleDateString("en-GB", {
                                             weekday: "long",
@@ -441,7 +443,7 @@ export default function ArchivePage() {
                                         style={{ background: ZONE_COLORS[monthDetail.globalZone] }}
                                     />
                                     <span className="text-sm font-bold" style={{ color: ZONE_COLORS[monthDetail.globalZone] }}>
-                                        Global: Zone {monthDetail.globalZone}
+                                        {t("archive.global")}: Zone {monthDetail.globalZone}
                                     </span>
                                 </div>
 
@@ -453,10 +455,10 @@ export default function ArchivePage() {
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex flex-col">
                                             <div className="text-xs font-bold text-foreground/50 uppercase tracking-widest">
-                                                Actual Observations
+                                                {t("archive.actualObservations")}
                                             </div>
                                             <span className="text-sm font-semibold text-primary-500">
-                                                {icopData.length} records found
+                                                {t("archive.recordsCount", { count: icopData.length })}
                                             </span>
                                         </div>
                                         <button onClick={exportIcopToCSV} className="p-2 rounded-xl bg-foreground/5 hover:bg-foreground/10 transition-colors text-foreground/50 hover:text-foreground">
@@ -497,7 +499,7 @@ export default function ArchivePage() {
 
                             {/* Computed City Visibility */}
                             <div className="glass p-6 rounded-3xl border border-foreground/10 shadow-xl">
-                                <div className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">Computed Overview</div>
+                                <div className="text-xs font-bold text-foreground/50 uppercase tracking-widest mb-4">{t("archive.computedCityVisibility")}</div>
                                 <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                                     {monthDetail.cityResults.map(({ city, country, zone, q }) => (
                                         <div
